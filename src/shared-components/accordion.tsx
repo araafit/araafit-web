@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, type ReactElement } from "react";
 import { CN } from "../utils/class-merge";
 
 /*--------------------------------------*/
@@ -11,23 +11,27 @@ export type AccordionItemType = {
 };
 export type AccordionType = {
   items: AccordionItemType[];
-  caretIcon?: React.ReactElement;
   containerClassName?: string;
   itemClassName?: string;
   questionClassName?: string;
   answerClassName?: string;
   caretIconClassName?: string;
+  icon?: ReactElement;
+  openIcon?: ReactElement;
+  closeIcon?: ReactElement;
   clickedItem?(item: AccordionItemType): void;
 };
 
 export default function Accordion({
   items,
-  caretIcon,
+  icon,
   containerClassName,
   itemClassName,
   caretIconClassName,
   questionClassName,
   answerClassName,
+  openIcon,
+  closeIcon,
   clickedItem,
 }: AccordionType) {
   const [accordionItems, setAccordionItems] =
@@ -64,14 +68,18 @@ export default function Accordion({
             {item.question}
 
             {/* Caret icon */}
-            {caretIcon ? (
+            {openIcon && closeIcon ? (
+              accordionItems[idx].isClicked ? (
+                <div>{openIcon}</div>
+              ) : (
+                <div>{closeIcon}</div>
+              )
+            ) : icon ? (
               <div
-                className={`${caretIconClassName} ${
+                className={`${
                   accordionItems[idx].isClicked ? "rotate-180" : "rotate-0"
                 }`}
-              >
-                {caretIcon}
-              </div>
+              >{icon}</div>
             ) : (
               <span
                 className={`${CN(
