@@ -38,7 +38,7 @@ export default function Accordion({
     useState<AccordionItemType[]>(items);
 
   const defaultQuestionClass =
-    "faq-question block flex items-center justify-between gap-4 group";
+    "faq-question text-left flex items-center justify-between gap-4 group";
   const defaultAnswerClass =
     "faq-answer w-full text-neutral-950 font-normal transition-all";
 
@@ -61,7 +61,7 @@ export default function Accordion({
         <div key={idx} className={`faq-item !w-full ${itemClassName}`}>
           <button
             type="button"
-            className={`${CN(defaultQuestionClass, questionClassName)}`}
+            className={`${CN(`${defaultQuestionClass} ${accordionItems[idx].isClicked?"text-primary-500":"text-neutral-950"}`, questionClassName)}`}
             onClick={() => onClick(item, idx)}
           >
             {item.question}
