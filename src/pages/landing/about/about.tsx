@@ -1,4 +1,3 @@
-import React from "react";
 import LandingLayout from "../../../layouts/landing/landing-layout";
 import { ceoImage, customFitCTA } from "./images/images";
 import { companyOfferings, companyValues } from "./data";
