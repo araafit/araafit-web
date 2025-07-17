@@ -52,7 +52,6 @@ export default function Accordion({
     );
   };
 
-  console.log(accordionItems);
 
   return (
     <div
