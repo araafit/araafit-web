@@ -1,4 +1,3 @@
-import React from "react";
 import LandingLayout from "../../../layouts/landing/landing-layout";
 import ContactForm from "./contact-form";
 import locationMap from "./images/map-image.png";
