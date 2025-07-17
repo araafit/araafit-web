@@ -22,6 +22,8 @@ const araafitContact = [
  * @returns ReactElement
  */
 export default function Footer() {
+  const date = new Date();
+  
   return (
     <footer className="w-full h-auto bg-primary-950 py-[1.5rem] px-[3rem] lg:py-[3rem] lg:px-[7.5rem]">
       <div className="size-auto text-white">
@@ -102,7 +104,7 @@ export default function Footer() {
       </div>
 
       <p className="w-full text-white text-center mt-10">
-        &copy; 2025. All Right Reserved.
+        &copy; {date.getFullYear()} Araafit. All Rights Reserved.
       </p>
     </footer>
   );
