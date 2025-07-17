@@ -9,8 +9,10 @@ export default {
         "neutral-800": "#454545",
         "neutral-950": "#1C1C1C",
         "primary-50": "#F7F3EF",
-        "primary-200":"#D8C4B0",
+        "primary-200": "#D8C4B0",
+        "primary-300": "#C1A083",
         "primary-500": "#9A6C50",
+        "primary-800": "#5E3B35",
         "primary-950": "#2E1B1A",
         "warning-pending-300": "#FCBB4D",
         "warning-pending-500": "#F59E0B",
@@ -19,6 +21,9 @@ export default {
       fontFamily: {
         inter: ["inter", "sans-serif"],
         lora: ["lora", "serif"],
+      },
+      lineHeight: {
+        "araafit": "140%",
       },
     },
   },
