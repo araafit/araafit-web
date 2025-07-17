@@ -7,7 +7,7 @@ import {
   XLogoIcon,
 } from "@phosphor-icons/react";
 
-/* ------------------------------------------------- */
+/* ------------------------------------------------------------------------------- */
 
 /**
  * Contact page
@@ -19,7 +19,10 @@ export default function Contact() {
     <LandingLayout>
       <section className="flex flex-col items-start justify-center lg:flex-row gap-6 px-5 py-8 lg:px-28 lg:py-16">
         <div className="w-full lg:max-w-[27.8125rem] border border-gray-300 py-[1.5rem] px-4 rounded-md">
-          <h1 className="font-medium mb-9 text-neutral-950 text-[2rem]">Contact Us</h1>
+          <h1 className="font-medium mb-9 text-neutral-950 text-[2rem]">
+            Contact Us
+          </h1>
+
           <ContactForm />
         </div>
 
@@ -43,7 +46,7 @@ export default function Contact() {
 
           <div className="inline-block">
             <h4 className="font-medium text-[1.5rem] mb-[0.75rem]">
-              Contact Us
+              Follow Us:
             </h4>
 
             <div className="flex items-center justify-between gap-3 text-primary-500">
