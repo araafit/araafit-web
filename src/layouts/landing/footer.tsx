@@ -81,7 +81,7 @@ export default function Footer() {
             <div className="flex flex-col gap-2">
               {araafitLinks.map((item, idx) => (
                 <a key={idx} className="capitalize group flex cursor-pointer">
-                  <ArrowElbowDownRightIcon className="text-primary-950 mr-2 group-hover:text-primary-500 transition-all" />
+                  <ArrowElbowDownRightIcon className="hidden md:block text-primary-950 mr-2 group-hover:text-primary-500 transition-all" />
                   <span className="group-hover:pl-2 group-hover:text-primary-500 transition-all">
                     {item}
                   </span>
