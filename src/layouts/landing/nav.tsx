@@ -22,8 +22,6 @@ export default function Nav() {
     { name: "Contact us", link: "/contact" },
   ];
 
-  const mobileNavDropdown = () => {};
-
   return (
     <nav className="w-full h-auto flex items-center justify-between gap-2 py-[0.5rem] px-4 lg:px-[7.5rem] relative">
       <div className="flex items-center gap-6">
