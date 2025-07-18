@@ -14,7 +14,7 @@ body {
   h4,
   h5,
   h6 {
-    @apply font-lora
+    @apply font-lora;
   }
 
   div,
@@ -26,7 +26,7 @@ body {
   small,
   figure,
   a {
-    @apply font-inter
+    @apply font-inter;
   }
 }
 
