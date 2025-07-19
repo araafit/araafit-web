@@ -5,7 +5,7 @@ import {
   PlusIcon,
   MinusIcon,
 } from "@phosphor-icons/react";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import LandingLayout from "../../../layouts/landing/landing-layout";
 import Accordion, {
   type AccordionItemType,
