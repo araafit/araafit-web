@@ -2,24 +2,24 @@ import {
   CaretDownIcon,
   CaretRightIcon,
   CaretUpIcon,
-  PlusIcon,
   MinusIcon,
+  PlusIcon,
 } from "@phosphor-icons/react";
+import { useWindowSize } from "@react-hook/window-size";
 import { useState } from "react";
 import LandingLayout from "../../../layouts/landing/landing-layout";
 import Accordion, {
   type AccordionItemType,
 } from "../../../shared-components/accordion";
 import Button from "../../../shared-components/button";
-import { features, testimonials, FAQ } from "./data";
+import VideoPlayer from "./ video-player";
+import { FAQ, features, testimonials } from "./data";
 import {
   hookSectionImage1,
   hookSectionImage2,
   hookSectionImage3,
 } from "./images/images";
 import Testimonials from "./testimonials";
-import { useWindowSize } from "@react-hook/window-size";
-import VideoPlayer from "./ video-player";
 
 /* --------------------------------------------------------------------- */
 
@@ -29,10 +29,11 @@ const bgImage = {
 };
 
 /**
+ * Araafit home page
  *
- * @returns
+ * @returns ReactElement
  */
-export function Landing() {
+export function HomePage() {
   const [feature, setFeature] = useState<Record<string, any>>(features[0]);
   const [windowWidth, _] = useWindowSize();
 
