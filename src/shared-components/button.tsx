@@ -1,17 +1,17 @@
 import React from "react";
 import { CN } from "../utils/class-merge";
 
-/* ---------------------------- */
+/* ---------------------------------------------------------- */
 
-export type ButtonShape = {
+export type CustomProps = {
   text?: string;
   variant?: "solid" | "outline" | "clear";
   className?: string;
-  type?: "button" | "submit" | "reset";
   children?: React.ReactElement;
-  onClick?: (e: any) => void;
   props?: any;
 };
+
+type ButtonType = CustomProps & React.ButtonHTMLAttributes<HTMLButtonElement>;
 
 /**
  *
@@ -30,13 +30,14 @@ export default function Button({
   type = "button",
   onClick,
   ...props
-}: ButtonShape) {
-  const solide = "bg-primary-500 text-white rounded-[0.375rem]";
-  const outline = "border border-primary-200 text-primary-500 rounded-[0.375rem]";
+}: ButtonType) {
+  const solid = "bg-primary-500 text-white rounded-[0.375rem]";
+  const outline =
+    "border border-primary-200 text-primary-500 rounded-[0.375rem]";
   const clear = "text-primary-500 rounded-[0.375rem]";
 
   const buttonVariant =
-    variant === "solid" ? solide : variant === "outline" ? outline : clear;
+    variant === "solid" ? solid : variant === "outline" ? outline : clear;
   const defaultClassName = `h-12 py-3 px-5 ${buttonVariant}`;
 
   return (
