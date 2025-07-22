@@ -1,0 +1,34 @@
+@import url("./fonts.css");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+}
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-lora;
+  }
+
+  div,
+  p,
+  span,
+  b,
+  i,
+  strong,
+  small,
+  figure,
+  a {
+    @apply font-inter;
+  }
+}
+
+@layer components {
+}
