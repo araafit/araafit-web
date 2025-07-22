@@ -1,7 +1,6 @@
 import AuthLayout from "../../../layouts/auth/auth-layout";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import Button from "../../../shared-components/button";
-import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 /* ------------------------------------------------------ */
@@ -84,7 +83,10 @@ export default function Login() {
 
         <div className="flex flex-col items-center gap-6">
           <p className="self-start text-neutral-900">
-            Forgot Password? <Link to="/auth/reset" className="text-primary-500">Reset</Link>
+            Forgot Password?{" "}
+            <Link to="/auth/reset" className="text-primary-500">
+              Reset
+            </Link>
           </p>
 
           <Button
