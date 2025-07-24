@@ -1,7 +1,7 @@
 export type SpinnerShape = {
   size?: "sm" | "md" | "lg" | "xl";
-  primaryColor?: string;
-  secondaryColor?: string;
+  arcColor?: string;
+  circleColor?: string;
   speed?: "slow" | "normal" | "fast";
   className?: string;
 };
@@ -13,8 +13,8 @@ export type SpinnerShape = {
  */
 export default function Spinner({
   size = "md",
-  primaryColor = "#00A85A", // Brand color -- green
-  secondaryColor = "#FFFFFF", // Brand color -- white
+  arcColor = "white", // Brand color -- green
+  circleColor = "#FFFFFF", // Brand color -- white
   speed = "normal",
   className,
 }: SpinnerShape) {
@@ -50,7 +50,7 @@ export default function Spinner({
           cx="12"
           cy="12"
           r="10"
-          stroke={secondaryColor}
+          stroke={circleColor}
           strokeWidth="3"
           strokeOpacity="0.25"
         />
@@ -58,7 +58,7 @@ export default function Spinner({
         {/* Spinning arc - primary color */}
         <path
           d="M12 2C6.47715 2 2 6.47715 2 12"
-          stroke={primaryColor}
+          stroke={arcColor}
           strokeWidth="3"
           strokeLinecap="round"
         ></path>
