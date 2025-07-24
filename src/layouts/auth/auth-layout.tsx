@@ -24,14 +24,10 @@ export default function AuthLayout({
   googleAuthTrigger,
   children,
 }: AuthLayoutType) {
-
   return (
-    <section className="h-screen bg-[#F5F5F5] px-0 py-0 md:py-2 md:px-16">
-      <div
-        className="w-full h-screen bg-white flex items-center justify-center border rounded-md"
-        // title="Araafit login page"
-      >
-        <div className="w-full max-w-[27.8125rem] border border-neutral-100 rounded-sm flex flex-col items-center justify-center gap-9 py-6 px-4">
+    <section className="h-screen bg-[#F5F5F5] px-0 py-0 md:py-2 md:px-16 overflow-y-scroll">
+      <div className="w-full h-[809px] bg-white flex items-center justify-center border rounded-md">
+        <div className="w-full max-w-[27.8125rem] h-[42.5remh] border border-neutral-100 rounded-sm flex flex-col items-center justify-center gap-5 py-6 px-4 overflow-y-auto">
           <div className="flex flex-col items-center justify-center gap-3">
             <strong className="font-lora font-medium text-[32px] text-neutral-950">
               {title}
@@ -43,7 +39,7 @@ export default function AuthLayout({
             {googleAutBtnText && (
               <button
                 type="button"
-                className="w-full border-[1.5px] border-neutral-100 flex items-center justify-center gap-4 p-4 rounded-md"
+                className="w-full border-[1.5px] border-danger-500 flex items-center justify-center gap-4 p-4 rounded-md"
                 title="Google authentication button"
                 onClick={googleAuthTrigger}
               >
@@ -60,9 +56,9 @@ export default function AuthLayout({
           </div>
 
           {googleAutBtnText && (
-            <div className="w-full mb-6 relative">
+            <div className="w-full mb-4 relative">
               <hr className="border border-neutral-100" />
-              <div className="size-[40px] font-light text-[0.875rem] absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] bg-white flex items-center justify-center">
+              <div className="size-[30px] font-light text-[0.775rem] absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] bg-white flex items-center justify-center">
                 OR
               </div>
             </div>
