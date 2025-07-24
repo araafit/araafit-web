@@ -2,12 +2,7 @@
  * Landing page copy data
  */
 
-import {
-  featureSectionImage1,
-  hookSectionImage1,
-  hookSectionImage2,
-  hookSectionImage3,
-} from "./images/images";
+import { featureSectionImage1 } from "./images/images";
 import { type AccordionItemType } from "../../../shared-components/accordion";
 
 /* ---------------------------------------- */
