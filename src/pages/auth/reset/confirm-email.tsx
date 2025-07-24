@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 import Button from "../../../shared-components/button";
 import Modal from "../../../shared-components/modal";
 import { useSwitch } from "../../../hooks/switch";
-import { useNavigate } from "react-router-dom";
 import checkmark from "../checkmark.png";
 import Spinner from "../../../shared-components/spinner";
 
@@ -18,7 +17,6 @@ import Spinner from "../../../shared-components/spinner";
  */
 export default function ConfirmEmail() {
   const { toggleSwitch, switchValue: isOpen } = useSwitch(false);
-  const navigate = useNavigate();
   const [isLoading, setLoading] = useState(false);
 
   const {
@@ -88,28 +86,17 @@ export default function ConfirmEmail() {
           </p>
         </form>
 
-        <Modal
-          isOpen={isOpen}
-          // onClose={toggleSwitch}
-          containerClassName="w-[25rem]"
-        >
+        <Modal isOpen={isOpen} containerClassName="w-[25rem]">
           <div className="w-full max-w-[] flex flex-col items-center justify-center gap-3">
-            <img src={checkmark} alt="" className="w-[6.25rem] h-auto" />
+            <img src={checkmark} alt="" className="w-[5.25rem] h-auto" />
 
             <strong className="font-lora font-medium text-[2rem]">
-              Reset Password
+              Reset Link Sent
             </strong>
 
-            <p className="text-neutral-700 leading-araafit text-center">
-              You have successfully reset your password. Click below to login.
+            <p className="text-neutral-700 leading-araafit text-center font-light">
+              A reset link has been sent to the email
             </p>
-
-            <Button
-              text="Login"
-              variant="solid"
-              className="w-full"
-              onClick={() => navigate("/auth/login")}
-            />
           </div>
         </Modal>
       </>
