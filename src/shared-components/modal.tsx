@@ -5,7 +5,7 @@ import { CN } from "../utils/class-merge";
 
 type ModalShape = {
   isOpen: boolean;
-  onClose: () => void;
+  onClose?: () => void;
   containerClassName?: string;
   backgroundClassName?: string;
   children: React.ReactNode;
