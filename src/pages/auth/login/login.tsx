@@ -3,7 +3,6 @@ import { useForm, type SubmitHandler } from "react-hook-form";
 import Button from "../../../shared-components/button";
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { useSwitch } from "../../../hooks/switch";
 import Spinner from "../../../shared-components/spinner";
 
 /* ------------------------------------------------------ */
@@ -16,7 +15,6 @@ type FormValues = { email: string; password: string };
  * @returns ReactElement
  */
 export default function Login() {
-  const { toggleSwitch, switchValue: isOpen } = useSwitch(false);
   const [isLoading, setLoading] = useState(false);
   const googleAuth = () => console.log("Google auth");
 
@@ -32,7 +30,6 @@ export default function Login() {
 
     await new Promise((res) => setTimeout(res, 9000));
     setLoading(false);
-    toggleSwitch();
   };
 
   return (
