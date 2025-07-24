@@ -2,6 +2,9 @@ import AuthLayout from "../../../layouts/auth/auth-layout";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import Button from "../../../shared-components/button";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useSwitch } from "../../../hooks/switch";
+import Spinner from "../../../shared-components/spinner";
 
 /* ------------------------------------------------------ */
 
@@ -13,6 +16,8 @@ type FormValues = { email: string; password: string };
  * @returns ReactElement
  */
 export default function Login() {
+  const { toggleSwitch, switchValue: isOpen } = useSwitch(false);
+  const [isLoading, setLoading] = useState(false);
   const googleAuth = () => console.log("Google auth");
 
   const {
@@ -21,10 +26,13 @@ export default function Login() {
     formState: { errors, isValid },
   } = useForm<FormValues>({ mode: "all" });
 
-  const onSubmit: SubmitHandler<FormValues> = (data) => {
+  const onSubmit: SubmitHandler<FormValues> = async (data) => {
     console.log("form data", data);
+    setLoading(!isLoading);
 
-    console.log(data); // Send data
+    await new Promise((res) => setTimeout(res, 9000));
+    setLoading(false);
+    toggleSwitch();
   };
 
   return (
@@ -91,14 +99,18 @@ export default function Login() {
 
           <Button
             type="submit"
-            text="Login"
             variant="clear"
             className={`w-full max-w-[23.4375rem] ${
               !isValid
                 ? "bg-neutral-50 text-white"
                 : "bg-primary-500 text-white"
             }`}
-          />
+          >
+            <div className="w-full flex items-center justify-center">
+              <span>Login</span>
+              {isLoading && <Spinner size="sm" speed="fast" className="ml-1" />}
+            </div>
+          </Button>
 
           <p className="text-neutral-900">
             New User?{" "}
