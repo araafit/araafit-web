@@ -1,15 +1,13 @@
 import React, { useEffect } from "react";
-import { XIcon } from "@phosphor-icons/react";
+import { CN } from "../utils/class-merge";
 
 /* ------------------------------------------------------ */
 
 type ModalShape = {
   isOpen: boolean;
-  onClose: () => void;
-  title?: string | React.ReactElement;
-  className?: string;
-  modalBackgroundClassName?: string;
-  modalContainerClassName?: string;
+  onClose?: () => void;
+  containerClassName?: string;
+  backgroundClassName?: string;
   children: React.ReactNode;
 };
 
@@ -17,9 +15,8 @@ export default function Modal({
   isOpen,
   onClose,
   children,
-  title,
-  modalBackgroundClassName = "",
-  modalContainerClassName = "",
+  containerClassName,
+  backgroundClassName = "",
 }: ModalShape) {
   useEffect(() => {
     if (isOpen) {
@@ -33,31 +30,19 @@ export default function Modal({
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-[#000000c2] bg-opacity-50 ${modalBackgroundClassName}`}
+      className={`${CN(
+        "fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm",
+        backgroundClassName
+      )}`}
       onClick={onClose}
     >
       <div
-        className={`w-full sm:w-[500px] bg-white rounded-lg shadow-xl p-6 relative mx-4 ${modalContainerClassName}`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Close Button */}
-        <button
-          type="button"
-          onClick={onClose}
-          className="size-[24px] absolute top-4 right-4 text-[#3F2C2D] bg-[#F1F0F0] transition-colors rounded-full flex items-center justify-center cursor-pointer"
-          aria-label="Close modal"
-          title="Close modal"
-        >
-          <XIcon className="size-fit" />
-        </button>
-
-        {/* Optional Title */}
-        {typeof title === "string" ? (
-          <h2 className="text-xl font-semibold mb-4 text-gray-800">{title}</h2>
-        ) : (
-          title
+        className={CN(
+          "bg-white rounded-xl p-6 shadow-xl z-50",
+          containerClassName
         )}
-
+        onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
+      >
         {children}
       </div>
     </div>

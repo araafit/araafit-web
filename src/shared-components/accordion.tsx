@@ -1,4 +1,4 @@
-import React, { useState, type ReactElement } from "react";
+import { useState, type ReactElement } from "react";
 import { CN } from "../utils/class-merge";
 
 /*--------------------------------------*/

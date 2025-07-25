@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ListIcon, ArrowElbowDownRightIcon } from "@phosphor-icons/react";
 import Button from "../../shared-components/button";
+import { useNavigate } from "react-router-dom";
 
 /* ------------------------------------------------------------- */
 
@@ -13,6 +14,7 @@ import Button from "../../shared-components/button";
 export default function Nav() {
   const [showNav, setShowNav] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const pathname = location.pathname.toLowerCase();
 
@@ -62,7 +64,7 @@ export default function Nav() {
           text="Login"
           variant="outline"
           className="hidden md:block"
-          onClick={() => console.log("go to login")}
+          onClick={() => navigate("/auth/login")}
         />
 
         {/* Mobile screen nav menu trigger burger icon */}
