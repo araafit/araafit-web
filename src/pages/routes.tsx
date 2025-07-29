@@ -6,6 +6,13 @@ import Login from "./auth/login/login";
 import ConfirmEmail from "./auth/reset/confirm-email";
 import PasswordResetPage from "./auth/reset/password-reset-page";
 import Register from "./auth/register/register";
+import {
+  DashboardHomePage,
+  DashboardShopPage,
+  DashboardOrdersPage,
+  DashboardCartPage,
+  DashboardProfilePage,
+} from "./dashboard/import-entry";
 
 /* ---------------------------------------------------------------- */
 
@@ -41,6 +48,16 @@ const pagesRoutes = createBrowserRouter([
           { path: "reset-password", element: <PasswordResetPage /> },
         ],
       },
+    ],
+  },
+  {
+    path: "dashboard",
+    children: [
+      { path: "", element: <DashboardHomePage />, index: true },
+      { path: "shop", element: <DashboardShopPage /> },
+      { path: "orders", element: <DashboardOrdersPage /> },
+      { path: "cart", element: <DashboardCartPage /> },
+      { path: "profile", element: <DashboardProfilePage /> },
     ],
   },
 ]);
