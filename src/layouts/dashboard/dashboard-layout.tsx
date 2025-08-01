@@ -32,10 +32,11 @@ export default function DashboardLayout({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const waitASecond = async () =>  await setTimeout(() => setLoading(false), 1000);
+    const waitASecond = async () =>
+      await setTimeout(() => setLoading(false), 1000);
 
-    waitASecond()
-  },[loading])
+    waitASecond();
+  }, [loading]);
 
   return (
     <section className="h-screen bg-[#F5F5F5] flex items-start">
@@ -56,7 +57,7 @@ export default function DashboardLayout({
                   <Link
                     to={item.link}
                     key={idx}
-                    className="w-full flex flex-col gap-4 p-[0.5rem] text-neutral-900 hover:bg-primary-950 hover:text-white"
+                    className="w-full flex flex-col gap-4 p-[0.5rem] text-neutral-900 hover:bg-primary-900 hover:text-white"
                   >
                     <div
                       key={idx}
@@ -75,7 +76,7 @@ export default function DashboardLayout({
                 <Link
                   to={item.link}
                   key={idx}
-                  className="w-full flex flex-col gap-4 p-[0.5rem] text-neutral-900 hover:bg-primary-950 hover:text-white"
+                  className="w-full flex flex-col gap-4 p-[0.5rem] text-neutral-900 hover:bg-primary-900 hover:text-white"
                 >
                   <div className="w-full flex items-center text-base">
                     <span className="uppercase mr-3 size-[20px] text-[10px] border border-primary-50 p-1 rounded-full flex items-center justify-center">
@@ -89,14 +90,14 @@ export default function DashboardLayout({
             })}
           </div>
 
-          <div className="text-[0.875rem] flex items-center gap-[0.75rem] text-neutral-900 border-t-2 border-neutral-100 p-[0.5rem] hover:bg-primary-950 hover:text-white cursor-pointer">
+          <div className="text-[0.875rem] flex items-center gap-[0.75rem] text-neutral-900 border-t-2 border-neutral-100 p-[0.5rem] hover:bg-primary-900 hover:text-white cursor-pointer">
             <SignOutIcon />
             <span>Logout</span>
           </div>
         </div>
       </div>
 
-      <div className="grow">{loading?(<DashboardLoader />): children}</div>
+      <div className="grow">{loading ? <DashboardLoader /> : children}</div>
     </section>
   );
 }
