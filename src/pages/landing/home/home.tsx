@@ -41,8 +41,8 @@ export function HomePage() {
     <LandingLayout>
       <>
         <section className="w-full flex flex-col justify-center items-center px-5 py-8 lg:pt-20 lg:px-28 bg-primary-50">
-          <div className="flex flex-col justify-center items-center gap-5 mb-24">
-            <h1 className="max-w-[600px] font-lora font-semibold text-[2.5rem] text-center lg:text-5xl leading-araafit">
+          <div className="w-full max-w-[41.75rem] flex flex-col justify-center items-center gap-5 mb-24">
+            <h1 className="font-lora font-semibold text-[2.5rem] text-center lg:text-5xl leading-araafit">
               Take{" "}
               <span className="font-lora text-primary-500">
                 body measurement
@@ -51,24 +51,24 @@ export function HomePage() {
               no tape required.
             </h1>
 
-            <p className="max-w-[506px] leading-[140%] font-normal text-center lg:text-left">
+            <p className="max-w-[506px] leading-[140%] font-light text-center">
               Take a photo, and Araafit delivers your exact measurements and
               skin tone, making fabric selection and tailoring truly
               personalised.
             </p>
 
-            <div className="w-full flex flex-col md:flex-row gap-3">
+            <div className="w-full flex flex-col items-center justify-center md:flex-row gap-3">
               <Button
                 type="button"
                 text="Get measured"
                 variant="solid"
-                className="w-full"
+                className="w-full md:max-w-[9.375rem]"
               />
 
               <Button
                 type="button"
                 variant="clear"
-                className="w-full text-primary-500"
+                className="w-full md:max-w-[14.8125rem] text-primary-500"
               >
                 <div className="w-full flex items-center justify-center gap-2">
                   <span>Create an account</span>
@@ -109,6 +109,7 @@ export function HomePage() {
                   clickedItem={(item: AccordionItemType) => setFeature(item)}
                   openIcon={<CaretUpIcon size={20} />}
                   closeIcon={<CaretDownIcon size={20} />}
+                  shouldAnimate
                 />
 
                 <Button
@@ -140,7 +141,7 @@ export function HomePage() {
                 backgroundImage: `url(${hookSectionImage1})`,
                 ...bgImage,
                 backgroundPosition:
-                  windowWidth <= 430 ? "center" : "center -500px",
+                  windowWidth <= 430 ? "center" : "center -200px",
               }}
             >
               <div className="size-full bg-[#1C1C1CBF] absolute left-0 top-0 rounded-md" />
@@ -240,6 +241,7 @@ export function HomePage() {
                 answerClassName="font-light text-[1.125rem] text-neutral-500 leading-araafit"
                 openIcon={<MinusIcon size={20} className="text-[#676767]" />}
                 closeIcon={<PlusIcon size={20} className="text-[#676767]" />}
+                shouldAnimate
               />
             </div>
           </section>
@@ -252,7 +254,7 @@ export function HomePage() {
                 backgroundImage: `url(${hookSectionImage3})`,
                 ...bgImage,
                 backgroundPosition:
-                  windowWidth <= 430 ? "center" : "center -500px",
+                  windowWidth <= 430 ? "center" : "center -50px",
               }}
             >
               <div className="size-full bg-[#1C1C1CBF] absolute left-0 top-0 rounded-md" />
@@ -269,7 +271,7 @@ export function HomePage() {
                 <Button
                   type="button"
                   variant="solid"
-                  className="w-full bg-primary-950 max-w-[185px]"
+                  className="w-full max-w-[16.5rem] bg-primary-950"
                   text="Start your custom fit"
                 />
               </div>
