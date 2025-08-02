@@ -2,7 +2,7 @@
  * Landing page copy data
  */
 
-import { featureSectionImage1 } from "./images/images";
+import { featureSectionImage1, featureSectionImage2, featureSectionImage3 } from "./images/images";
 import { type AccordionItemType } from "../../../shared-components/accordion";
 
 /* ---------------------------------------- */
@@ -19,14 +19,14 @@ export const features: AccordionItemType[] = [
     question: "Personalised Dress Shop",
     answer:
       "Discover ready-made dresses perfectly matched to your body and skin-tone, making shopping easy and stylish and on Araafit's store.",
-    image: featureSectionImage1,
+    image: featureSectionImage2,
     isClicked: false,
   },
   {
     question: "Custom tailor store",
     answer:
       "Select from fabric that compliment your skin tone and design custom styles, tailored perfectly to your measurement and preferences.",
-    image: featureSectionImage1,
+    image: featureSectionImage3,
     isClicked: false,
   },
 ];
