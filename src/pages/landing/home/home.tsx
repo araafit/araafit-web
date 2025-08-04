@@ -128,6 +128,7 @@ export function HomePage() {
                     windowWidth > 430
                       ? "-30px 40px #C1A083"
                       : "-15px -15px #C1A083",
+                  objectPosition:"center -30px"
                 }}
               />
             </div>
