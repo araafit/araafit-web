@@ -9,6 +9,7 @@ export type AccordionItemType = {
   isClicked: boolean;
   [name: string]: any;
 };
+
 export type AccordionType = {
   items: AccordionItemType[];
   containerClassName?: string;
@@ -48,11 +49,9 @@ export default function Accordion({
     "faq-question text-left flex items-center justify-between gap-4 group";
   const defaultAnswerClass = `faq-answer w-full text-neutral-950 font-normal transition-all`;
 
-  /*${
-    shouldAnimate
-      ? "overflow-hidden transition-[max-height] duration-300 ease-in-out"
-      : ""
-  }*/
+  const animate = shouldAnimate
+    ? "overflow-hidden transition-all duration-700 ease-in-out"
+    : "";
 
   const onClick = (item: any, itemIdx: number) => {
     clickedItem?.(item);
@@ -104,7 +103,7 @@ export default function Accordion({
               ) : (
                 <span
                   className={`${CN(
-                    `text-lg ${isOpen ? "rotate-180" : "rotate-0"}`,
+                    `text-lg ${animate} ${isOpen ? "rotate-180" : "rotate-0"}`,
                     caretIconClassName
                   )}`}
                 >
@@ -116,17 +115,15 @@ export default function Accordion({
             {/* Answer content */}
             <div
               className={CN(
-                `${defaultAnswerClass } ${isOpen ? "block h-[30px]" : "h-0 hidden"} ${
-                  shouldAnimate
-                    ? "overflow-hidden transition-all duration-1000 ease-in-out"
+                `${defaultAnswerClass} ${isOpen ? "h-[100px]" : "h-0 "} ${
+                  animate
+                    ? "overflow-hidden transition-all duration-700 ease-in-out"
                     : ""
                 }`,
                 answerClassName
               )}
             >
-              <div className={shouldAnimate ? "px-1 py-2" : ""}>
-                {item.answer}
-              </div>
+              <div className={animate ? "px-1 py-2" : ""}>{item.answer}</div>
             </div>
           </div>
         );

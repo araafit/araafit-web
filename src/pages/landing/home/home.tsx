@@ -34,7 +34,7 @@ const bgImage = {
  * @returns ReactElement
  */
 export function HomePage() {
-  const [feature, setFeature] = useState<Record<string, any>>(features[0]);
+  const [feature, setFeature] = useState<Record<string, undefined | any>>(features[0]);
   const [windowWidth, _] = useWindowSize();
 
   return (
@@ -106,7 +106,7 @@ export function HomePage() {
                   itemClassName="flex flex-col gap-[1.5rem]"
                   questionClassName="font-lora font-semibold text-[1.5rem] capitalize"
                   answerClassName="font-light text-[1.125rem] leading-araafit"
-                  clickedItem={(item: AccordionItemType) => setFeature(item)}
+                  clickedItem={(item: AccordionItemType) => setTimeout(() => setFeature(item), 500)}
                   openIcon={<CaretUpIcon size={20} />}
                   closeIcon={<CaretDownIcon size={20} />}
                   shouldAnimate
@@ -122,7 +122,7 @@ export function HomePage() {
               <img
                 src={feature?.image}
                 alt=""
-                className="w-full lg:w-[25.72rem] h-[30.580rem] object-cover rounded-md"
+                className={`w-full lg:w-[25.72rem] h-[30.580rem] object-cover rounded-md opacity-0 transition-opacity duration-700 ${feature.image && 'opacity-100'}`}
                 style={{
                   boxShadow:
                     windowWidth > 430
