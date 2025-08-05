@@ -81,8 +81,8 @@ export default function Footer() {
             <div className="flex flex-col gap-2">
               {araafitLinks.map((item, idx) => (
                 <a key={idx} className="capitalize group flex cursor-pointer">
-                  <ArrowElbowDownRightIcon className="hidden md:block text-primary-950 mr-2 group-hover:text-primary-500 transition-all" />
-                  <span className="group-hover:pl-2 group-hover:text-primary-500 transition-all">
+                  <ArrowElbowDownRightIcon className="hidden md:block text-primary-950 mr-2 group-hover:text-primary-500 transition-all duration-700 ease-in-out" />
+                  <span className="group-hover:pl-2 group-hover:text-primary-500 transition-all duration-700 ease-in-out">
                     {item}
                   </span>
                 </a>
@@ -94,7 +94,7 @@ export default function Footer() {
             <h3 className="text-xl font-semibold text-white">Reach Us</h3>
             <div className="flex flex-col gap-2">
               {araafitContact.map((item, idx) => (
-                <a key={idx} className="underline">
+                <a key={idx} className="underline cursor-pointer">
                   {item}
                 </a>
               ))}

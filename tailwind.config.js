@@ -13,6 +13,7 @@ export default {
         "primary-300": "#C1A083",
         "primary-500": "#9A6C50",
         "primary-800": "#5E3B35",
+        "primary-900":"#523531",
         "primary-950": "#2E1B1A",
         "warning-pending-300": "#FCBB4D",
         "warning-pending-500": "#F59E0B",
