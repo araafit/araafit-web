@@ -9,7 +9,7 @@ import DashboardLayout from "../../layouts/dashboard/dashboard-layout";
 export function DashboardShopPage() {
   return (
     <DashboardLayout>
-      <div>Profile</div>
+      <div>Shop</div>
     </DashboardLayout>
   );
 }
