@@ -1,10 +1,11 @@
-import { ShoppingCartSimpleIcon } from "@phosphor-icons/react";
+import { CaretRightIcon, ShoppingCartSimpleIcon } from "@phosphor-icons/react";
 import { useOrdersStore, useShopStore } from "../../hooks/state-store";
 import DashboardLayout from "../../layouts/dashboard/dashboard-layout";
 import Button from "../../shared-components/button";
 import { formatPrice } from "../../utils/format-price";
 import shoppingBagIcon from "./images/bag.png";
 import TopBar from "./top-bar";
+import { Link } from "react-router-dom";
 
 /* ---------------------------------------------------- */
 
@@ -19,7 +20,7 @@ export function DashboardHomePage() {
   const orderIsEmpty = orderItems.length === 0;
 
   const title = (
-    <div className="font-lora">
+    <div className="font-lora text-[#979797]">
       Welcome, <span className="font-lora text-[#1C1C1C]">Eni</span>
     </div>
   );
@@ -55,16 +56,22 @@ export function DashboardHomePage() {
     </span>
   );
 
+  const BreadCrumb = () => (
+    <div className="font-inter font-light capitalize flex items-center">
+      <span className="text-primary-900">Araafit</span>
+      <CaretRightIcon className="text-[#979797]" />
+      <span className="text-[#979797]">Home</span>
+    </div>
+  );
+
   return (
     <DashboardLayout>
       <div className="h-screen">
-        <div className="flex flex-col gap-2 relative mb-4">
-          <TopBar title={title} breadCrumb="home" />
-
-          <div className="p-2">home</div>
+        <div className="flex flex-col gap-2 relative">
+          <TopBar title={title} breadCrumb={<BreadCrumb />} />
         </div>
 
-        <div className="w-full h-[95%] flex flex-col gap-4 p-4 overflow-y-scroll">
+        <div className="w-full h-[95%] flex flex-col gap-4 p-4 mt-20 overflow-y-scroll">
           <div className="w-full bg-white mt-5 rounded-sm p-4 flex flex-col gap-6">
             <div className="flex items-center justify-between">
               <h2 className="font-semibold text-[28px] capitalize">
@@ -89,15 +96,27 @@ export function DashboardHomePage() {
                       key={idx}
                       className="flex items-center justify-between border border-neutral-100 rounded-md py-2 px-4"
                     >
-                      <div className="flex gap-6">
+                      <div className="w-full flex gap-6">
                         <img
                           src={item.image}
                           alt=""
                           className="w-[14.125rem] h-[8.75rem] object-cover rounded-md"
                         />
 
-                        <div className="inline-flex flex-col gap-[9px]">
-                          {statusAlert(item.status.toLowerCase())}
+                        <div className="grow inline-flex flex-col gap-[9px]">
+                          <div className="w-full flex items-center justify-between">
+                            {statusAlert(item.status.toLowerCase())}
+                            <Link
+                              to={`/dashboard/orders/${item.orderId.replaceAll(
+                                " ",
+                                "-"
+                              )}`}
+                              className="underline text-[0.875rem] text-primary-500 cursor-pointer"
+                            >
+                              View details
+                            </Link>
+                          </div>
+
                           <span className="text-neutral-700">
                             Order ID: {item.orderId}
                           </span>
@@ -109,13 +128,6 @@ export function DashboardHomePage() {
                           </span>
                         </div>
                       </div>
-
-                      <span
-                        className="underline text-primary-500 cursor-pointer"
-                        onClick={() => console.log("View order details")}
-                      >
-                        View details
-                      </span>
                     </div>
                   ))}
                 </div>
