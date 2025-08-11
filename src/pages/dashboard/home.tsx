@@ -137,6 +137,7 @@ export function DashboardHomePage() {
 
           {/* Ready to wear dress */}
           <div className="w-full bg-white rounded-sm p-4 flex flex-col gap-6">
+            
             <div className="flex items-center justify-between">
               <h2 className="font-medium text-[28px] capitalize">
                 Ready to wear dresses
