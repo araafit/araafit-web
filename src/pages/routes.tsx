@@ -63,7 +63,13 @@ const pagesRoutes = createBrowserRouter([
           { path: ":orderId", element: <DashboardOrderDetailPage /> },
         ],
       },
-      { path: "cart", element: <DashboardCartPage /> },
+      {
+        path: "cart",
+        children: [
+          { path: "", element: <DashboardCartPage />, index: true },
+          { path: "checkout", element: <DashboardCartPage /> },
+        ],
+      },
       { path: "profile", element: <DashboardProfilePage /> },
     ],
   },
