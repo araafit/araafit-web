@@ -22,7 +22,7 @@ interface ShopState {
   recommendedFabrics: RecommendedFabric[];
   all: any[];
 }
-export const useShopStore = create<ShopState>((set) => ({
+export const useShopStore = create<ShopState>(() => ({
   readyToWearDresses: readyToWear || [],
   recommendedFabrics: recommendedFabrics || [],
   all: [],
