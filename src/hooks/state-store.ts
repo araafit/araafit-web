@@ -40,12 +40,19 @@ export const useOrdersStore = create<OrderState>((set) => ({
 }));
 
 // ------------------- Cart ---------------------
-interface CartState {
+export interface CartState {
   items: CartItem[];
   addItem: (item: CartItem) => void;
+  removeItem: (orderId: string | number) => void;
 }
 export const useCartStore = create<CartState>((set) => ({
   items: cartItems,
   addItem: (item: CartItem) =>
     set((state: any) => ({ items: [...state.items, item] })),
+  removeItem: (orderId: string | number) =>
+    set((state) => {
+      const newOrders = state.items.filter((item) => item.orderId !== orderId);
+
+      return { items: newOrders };
+    }),
 }));
