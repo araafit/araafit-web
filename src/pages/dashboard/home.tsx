@@ -7,7 +7,7 @@ import shoppingBagIcon from "./images/bag.png";
 import TopBar from "./top-bar";
 import { Link } from "react-router-dom";
 
-/* ---------------------------------------------------- */
+/* -------------------------------------------------------------------- */
 
 /**
  * Dashboard home page
@@ -25,7 +25,7 @@ export function DashboardHomePage() {
     </div>
   );
 
-  const emptyCart = (
+  const emptyOrder = (
     <div className="w-full max-w-[500px] flex flex-col items-center justify-center gap-2">
       <img src={shoppingBagIcon} alt="" className="size-[200px]" />
 
@@ -88,7 +88,7 @@ export function DashboardHomePage() {
               className="w-full h-auto flex items-center justify-center"
             >
               {orderIsEmpty ? (
-                emptyCart
+                emptyOrder
               ) : (
                 <div className="w-full flex flex-col gap-4">
                   {orderItems.slice(-2).map((item, idx) => (
@@ -137,7 +137,6 @@ export function DashboardHomePage() {
 
           {/* Ready to wear dress */}
           <div className="w-full bg-white rounded-sm p-4 flex flex-col gap-6">
-            
             <div className="flex items-center justify-between">
               <h2 className="font-medium text-[28px] capitalize">
                 Ready to wear dresses
