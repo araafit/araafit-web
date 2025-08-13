@@ -11,6 +11,7 @@ import DashboardLoader from "./loader";
 import Modal from "../../shared-components/modal";
 import { useSwitch } from "../../hooks/switch";
 import Button from "../../shared-components/button";
+import { useCartStore } from "../../hooks/state-store";
 
 /* ------------------------------------------------------ */
 
@@ -33,6 +34,7 @@ export default function DashboardLayout({
   children: React.ReactElement;
 }) {
   const { toggleSwitch, switchValue } = useSwitch(false);
+  const cartItems = useCartStore((state) => state.items);
 
   const [loading, setLoading] = useState(true);
 
@@ -59,6 +61,34 @@ export default function DashboardLayout({
             <div className="flex flex-col gap-4">
               {navMenu.map((item, idx) => {
                 if (item.name.toLowerCase() !== "profile") {
+                  if (item.name.toLowerCase() === "cart") {
+                    return (
+                      <Link
+                        to={item.link}
+                        key={idx}
+                        className="w-full flex flex-col gap-4 p-[0.5rem] text-neutral-900 hover:bg-primary-900 hover:text-white"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div
+                            key={idx}
+                            className="w-full flex items-center text-base"
+                          >
+                            {createElement(item.icon ? item.icon : "a", {
+                              className: "mr-3",
+                            })}
+                            <span className="capitalize text-sm">
+                              {item.name}
+                            </span>
+                          </div>
+
+                          <span className="w-[26px] h-[19px] py-[2px] px-[10px] bg-primary-50 text-[0.875rem] !text-[#1C1C1C] rounded-full flex items-center justify-center">
+                            {cartItems.length}
+                          </span>
+                        </div>
+                      </Link>
+                    );
+                  }
+
                   return (
                     <Link
                       to={item.link}
