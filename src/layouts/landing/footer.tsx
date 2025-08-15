@@ -13,7 +13,7 @@ const araafitContact = [
   "info@araafit.com",
   "araafit@gmail.com",
   "+234 805 7844 312",
-  "+234 805 7844 312",
+  "+234 805 7844 313",
 ];
 
 /**
@@ -94,7 +94,7 @@ export default function Footer() {
             <h3 className="text-xl font-semibold text-white">Reach Us</h3>
             <div className="flex flex-col gap-2">
               {araafitContact.map((item, idx) => (
-                <a key={idx} className="underline cursor-pointer">
+                <a key={idx} href={`tel:${item}`} className="underline cursor-pointer">
                   {item}
                 </a>
               ))}

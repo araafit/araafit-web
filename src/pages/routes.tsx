@@ -12,6 +12,7 @@ import {
   DashboardOrdersPage,
   DashboardCartPage,
   DashboardProfilePage,
+  DashboardOrderDetailPage,
 } from "./dashboard/import-entry";
 
 /* ---------------------------------------------------------------- */
@@ -55,8 +56,20 @@ const pagesRoutes = createBrowserRouter([
     children: [
       { path: "", element: <DashboardHomePage />, index: true },
       { path: "shop", element: <DashboardShopPage /> },
-      { path: "orders", element: <DashboardOrdersPage /> },
-      { path: "cart", element: <DashboardCartPage /> },
+      {
+        path: "orders",
+        children: [
+          { path: "", element: <DashboardOrdersPage />, index: true },
+          { path: ":orderId", element: <DashboardOrderDetailPage /> },
+        ],
+      },
+      {
+        path: "cart",
+        children: [
+          { path: "", element: <DashboardCartPage />, index: true },
+          { path: "checkout", element: <DashboardCartPage /> },
+        ],
+      },
       { path: "profile", element: <DashboardProfilePage /> },
     ],
   },

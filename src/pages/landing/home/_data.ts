@@ -50,6 +50,42 @@ export const testimonials = [
     comment:
       "I used to avoid online shopping because nothing ever fit right. But with this app, I feel seen. The tool is super easy, and I can even leave notes for the tailor!",
   },
+  {
+    name: "Agatha P.",
+    location: "Oya",
+    comment:
+      "I’ve always struggled to find dresses that fit just right—until now. After uploading my measurements and skin tone, every item I’ve ordered fits like a dream.",
+  },
+  {
+    name: "Sharon O.",
+    location: "Calabar",
+    comment:
+      "I love how the fabrics suggested always complement my skin tone, and the fit? Perfect every time. No more guesswork. I’ve recommended it to all my friends!",
+  },
+  {
+    name: "Toyin F.",
+    location: "Abuja",
+    comment:
+      "I used to avoid online shopping because nothing ever fit right. But with this app, I feel seen. The tool is super easy, and I can even leave notes for the tailor!",
+  },
+  {
+    name: "Anita M.",
+    location: "Lagos",
+    comment:
+      "I’ve always struggled to find dresses that fit just right—until now. After uploading my measurements and skin tone, every item I’ve ordered fits like a dream.",
+  },
+  {
+    name: "Aisha U.",
+    location: "Kano",
+    comment:
+      "I love how the fabrics suggested always complement my skin tone, and the fit? Perfect every time. No more guesswork. I’ve recommended it to all my friends!",
+  },
+  {
+    name: "Bosun M.",
+    location: "Kwara",
+    comment:
+      "I used to avoid online shopping because nothing ever fit right. But with this app, I feel seen. The tool is super easy, and I can even leave notes for the tailor!",
+  },
 ];
 
 export const FAQ: AccordionItemType[] = [
