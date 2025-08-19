@@ -9,15 +9,32 @@ import {
 
 /* ------------------------------------------------- */
 
-// ---------------------Cart items--------------------------------
-export type CartItem = {
+// --------------------- Cart items --------------------------------
+export interface CartItem {
   orderId: string;
   name: string;
   description: string;
   cost: number | string;
   image: string;
   count: number;
-};
+}
+
+export interface DeliveryInfo {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  city: string;
+  zipCode: string;
+  address: string;
+}
+
+export interface PaymentInfo {
+  cardholder: string;
+  cardNumber: string | number;
+  expiryDate: string;
+  CVV: string;
+}
 
 export const cartItems: CartItem[] = [
   {
@@ -48,3 +65,7 @@ export const cartItems: CartItem[] = [
     count: 3,
   },
 ];
+
+export const paymentInfo: PaymentInfo[] = [];
+
+export const deliveryInfo: DeliveryInfo[] = [];
