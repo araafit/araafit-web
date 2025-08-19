@@ -7,10 +7,10 @@ import { CN } from "../utils/class-merge";
 export interface TabShape {
   items: string[];
   defaultTab?: 0;
-  containerClass?: string;
+  tabContainerClassName?: string;
   tabListClassName?: string;
   tabItemClassName?: string;
-  activeClassName?: string;
+  activeTabClassName?: string;
   inactiveClassName?: string;
   containerClassName?: string;
   children?: React.ReactNode;
@@ -62,10 +62,10 @@ const TabItem = memo(
 const Tab = ({
   items = [],
   defaultTab = 0,
-  containerClassName = "bg-gray-50",
+  tabContainerClassName,
   tabListClassName = "border-b",
   tabItemClassName,
-  activeClassName,
+  activeTabClassName,
   inactiveClassName,
   onChange,
   children,
@@ -81,8 +81,13 @@ const Tab = ({
   );
 
   return (
-    <div className={CN("rounded-lg", containerClassName)}>
-      <div className={CN("flex space-x-1", tabListClassName)}>
+    <div className={CN("rounded-lg", tabContainerClassName)}>
+      <div
+        className={CN(
+          "flex items-center justify-center space-x-1",
+          tabListClassName
+        )}
+      >
         {items.map((item, index) => (
           <TabItem
             key={index}
@@ -90,7 +95,7 @@ const Tab = ({
             active={activeTab === index}
             onClick={() => handleTabClick(index, item)}
             tabItemClassName={tabItemClassName}
-            activeClassName={activeClassName}
+            activeClassName={activeTabClassName}
             inactiveClassName={inactiveClassName}
           />
         ))}
