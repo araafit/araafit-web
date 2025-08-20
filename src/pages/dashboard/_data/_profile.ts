@@ -1,4 +1,12 @@
 // --------------- Profile ---------------
+export interface CardData {
+  id: number | string;
+  cardType: "Mastercard" | "Visa" | "Other";
+  cardNumber: number | string;
+  expiry: string;
+  cvv?: number | string;
+}
+
 export interface MeasurementData {
   bust: string | number;
   waist: string | number;
