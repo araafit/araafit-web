@@ -1,6 +1,7 @@
 // ------------- Billing cards ---------------
 export interface BillingCard {
   id: number | string;
+  cardHolder?: string;
   cardType: "mastercard" | "visa" | "other";
   cardNumber: number | string;
   expiry: string;
