@@ -11,7 +11,9 @@ import {
   DashboardShopPage,
   DashboardOrdersPage,
   DashboardCartPage,
+  DashboardCartCheckout,
   DashboardProfilePage,
+  DashboardEditMeasurementPage,
   DashboardOrderDetailPage,
 } from "./dashboard/import-entry";
 
@@ -67,10 +69,16 @@ const pagesRoutes = createBrowserRouter([
         path: "cart",
         children: [
           { path: "", element: <DashboardCartPage />, index: true },
-          { path: "checkout", element: <DashboardCartPage /> },
+          { path: "checkout", element: <DashboardCartCheckout /> },
         ],
       },
-      { path: "profile", element: <DashboardProfilePage /> },
+      {
+        path: "profile",
+        children: [
+          { path: "", element: <DashboardProfilePage />, index: true },
+          { path: "get-measured", element: <DashboardEditMeasurementPage /> },
+        ],
+      },
     ],
   },
 ]);
