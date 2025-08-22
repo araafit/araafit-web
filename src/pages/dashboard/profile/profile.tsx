@@ -3,7 +3,7 @@ import DashboardLayout from "../../../layouts/dashboard/dashboard-layout";
 import Tab from "../../../shared-components/tab";
 import TopBar from "../top-bar";
 import Measurements from "./measurement/measurements";
-import MyCard from "./my-card";
+import BillingCards from "./card/card";
 import Notification from "./notification";
 import ProfileSettings from "./profile-settings/profile-settings";
 
@@ -39,7 +39,7 @@ export function DashboardProfilePage() {
           >
             <ProfileSettings />
             <Measurements />
-            <MyCard />
+            <BillingCards />
             <Notification />
           </Tab>
         </div>
