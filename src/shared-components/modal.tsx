@@ -11,6 +11,11 @@ type ModalShape = {
   children: React.ReactNode;
 };
 
+/**
+ * Modal component
+ * 
+ * @returns ReactElement
+ */
 export default function Modal({
   isOpen,
   onClose,
@@ -31,7 +36,7 @@ export default function Modal({
   return (
     <div
       className={`${CN(
-        "fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm",
+        "fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm top-0 left-0",
         backgroundClassName
       )}`}
       onClick={onClose}
