@@ -102,7 +102,9 @@ const Tab = ({
       </div>
 
       {children && (
-        <div className="p-4">{Children.toArray(children)[activeTab]}</div>
+        <div className="p-4 size-full">
+          {Children.toArray(children)[activeTab]}
+        </div>
       )}
     </div>
   );
