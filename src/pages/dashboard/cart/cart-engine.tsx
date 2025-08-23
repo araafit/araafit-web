@@ -7,6 +7,7 @@ import Modal from "../../../shared-components/modal";
 import { formatPrice } from "../../../utils/format-price";
 import showToast from "../../../utils/notification";
 import { type CartItem } from "../_data/_cart";
+import { useNavigate } from "react-router-dom";
 
 /* ------------------------------------------------------------------------------------------ */
 
@@ -14,12 +15,13 @@ interface CartEngine {
   cartData: CartItem[];
 }
 
-
 export default function CartEngine({ cartData }: CartEngine) {
-  const removeItem = useCartStore((state) => state.removeItem);
-
-  const { toggleSwitch: toggleModal, switchValue } = useSwitch();
   const [orderId, setOrderId] = useState<string | number>();
+  const navigate = useNavigate();
+  const removeItem = useCartStore((state) => state.removeItem);
+  const increaseItem = useCartStore((state) => state.increaseItemCount);
+  const decreaseItem = useCartStore((state) => state.decreaseItemCount);
+  const { toggleSwitch: toggleModal, switchValue } = useSwitch();
 
   // Initiate order to be removed and trigger modal
   const triggerModal = (orderId: number | string) => {
@@ -89,9 +91,15 @@ export default function CartEngine({ cartData }: CartEngine) {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="w-[102px] flex items-center justify-evenly rounded-md py-[7px] px-3 border gap-2 border-neutral-100">
-                    <MinusIcon className="cursor-pointer" />
+                    <MinusIcon
+                      className="cursor-pointer"
+                      onClick={() => decreaseItem(idx)}
+                    />
                     <span>{item.count}</span>
-                    <PlusIcon className="cursor-pointer" />
+                    <PlusIcon
+                      className="cursor-pointer"
+                      onClick={() => increaseItem(idx)}
+                    />
                   </div>
 
                   <TrashSimpleIcon
@@ -125,11 +133,11 @@ export default function CartEngine({ cartData }: CartEngine) {
           text="Checkout"
           variant="solid"
           className="w-full max-w-[375px]"
-          onClick={() => console.log("Checkout")}
+          onClick={() => navigate("/dashboard/cart/checkout")}
         />
       </div>
 
-      {/*  */}
+      {/* Deletion confirmation modal */}
       <Modal
         isOpen={switchValue}
         onClose={toggleModal}
