@@ -37,9 +37,9 @@ export function DashboardCartCheckout() {
 
         <div className="w-full h-[95%] flex flex-col gap-4 p-4 mt-20 overflow-y-scroll">
           <div className="w-full flex items-center justify-center">
-            <div className="w-full max-w-[43rem] flex items-center">
+            <div className="w-full max-w-[43rem] flex">
               <div
-                className="w-[344px] text-primary-500 cursor-pointer border-t-4 border-primary-500"
+                className="w-[344px] text-primary-500 cursor-pointer border-t-4 border-t-primary-500"
                 onClick={() => setCheckoutTab("delivery-detail")}
               >
                 <h4 className="text-primary-500">Your details</h4>
@@ -49,7 +49,11 @@ export function DashboardCartCheckout() {
               </div>
 
               <div
-                className="w-[344px] text-primary-500 cursor-pointer"
+                className={`w-[344px] text-primary-500 cursor-pointer border-t-4 ${
+                  checkoutTab !== "payment-detail"
+                    ? "border-t-primary-300"
+                    : "border-t-primary-500"
+                }"`}
                 onClick={() => setCheckoutTab("payment-detail")}
               >
                 <h4 className="text-primary-500">Payment information</h4>
