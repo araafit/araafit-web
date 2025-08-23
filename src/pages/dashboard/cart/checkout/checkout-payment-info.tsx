@@ -1,20 +1,17 @@
-import React from "react";
-import { useForm, type SubmitHandler } from "react-hook-form";
-import paymentWallet from "../payment-wallet.png";
-import Button from "../../../../shared-components/button";
-import { paymentInfo } from "../../_data/_cart";
+import { PlusIcon } from "@phosphor-icons/react";
+import React, { useRef } from "react";
+import { useCardState } from "../../../../hooks/state-store";
 import { useSwitch } from "../../../../hooks/switch";
+import Button from "../../../../shared-components/button";
 import Modal from "../../../../shared-components/modal";
 import Spinner from "../../../../shared-components/spinner";
+import BillingCardForm from "../../billing-card-form";
+import BillingCardList from "../../billing-card-list";
+import checkMark from "../../checkmark.png";
+import paymentWallet from "../payment-wallet.png";
+import { useNavigate } from "react-router-dom";
 
 /* ------------------------------------------------------------------------- */
-
-interface FormValues {
-  cardHolder: string;
-  cardNumber: string | number;
-  expiryDate: string;
-  CVV: string;
-}
 
 /**
  * Checkout payment information component
@@ -22,22 +19,41 @@ interface FormValues {
  * @returns ReactElement
  */
 export default function CheckoutPaymentInfo() {
+  const navigate = useNavigate();
+  const billingCards = useCardState((state) => state.cards);
   const { toggleSwitch, switchValue } = useSwitch();
-  const [isLoading, setLoading] = React.useState(false);
-  const noBillingInfo = paymentInfo.length === 0;
-
   const {
-    register,
-    handleSubmit,
-    formState: { errors, isValid },
-  } = useForm<FormValues>({ mode: "all" });
+    toggleSwitch: completedPaymentModalToggle,
+    switchValue: completedPaymentModalToggleValue,
+  } = useSwitch();
+  const [isLoading, setLoading] = React.useState(false);
+  const noBillingCards = billingCards.length === 0;
 
-  const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    console.log("form data", data);
-    setLoading(!isLoading);
+  const currentBillingCardCount = useRef(billingCards.length);
 
-    await new Promise((res) => setTimeout(res, 9000));
+  const checkBillingCardCount = () => {
+    if (billingCards.length > currentBillingCardCount.current) {
+      currentBillingCardCount.current = billingCards.length;
+      return true;
+    }
+
+    return false;
+  };
+
+  const newBillingCardAdded = checkBillingCardCount();
+
+  if (newBillingCardAdded) {
+    setTimeout(() => {
+      toggleSwitch();
+      completedPaymentModalToggle();
+    }, 500);
+  }
+
+  const paymentHandler = async () => {
+    setLoading(true);
+    await new Promise((res) => setTimeout(res, 500));
     setLoading(false);
+    completedPaymentModalToggle();
   };
 
   const noBilling = (
@@ -59,140 +75,81 @@ export default function CheckoutPaymentInfo() {
 
   return (
     <div className="w-full h-full bg-white mt-5 rounded-sm p-4 flex flex-col gap-6">
-      <h2 className="font-semibold text-[1.75rem] capitalize">
-        Payment Information
-      </h2>
+      <div className="flex items-center justify-between">
+        <h5 className="text-[28px] font-semibold">Payment Information</h5>
+
+        <Button
+          type="submit"
+          variant="clear"
+          className=""
+          onClick={toggleSwitch}
+        >
+          <div className="w-full flex items-center gap-2 text-neutral-900">
+            <PlusIcon size="20px" />
+            <span>Add new card</span>
+          </div>
+        </Button>
+      </div>
+
+      {!noBillingCards && <BillingCardList />}
 
       <div className="w-full h-full flex flex-col items-center justify-center">
-        <div className="w-full h-auto flex items-center justify-center mb-6">
-          {noBillingInfo ? noBilling : <div>{/* Showing billing */}</div>}
-        </div>
-
-        {!noBillingInfo && (
-          <div className="w-full flex items-center justify-center py-[2.5rem] px-[1.5rem] border-t border-[#E8E8E8] mt-1">
-            <Button
-              type="submit"
-              variant="solid"
-              className={`w-full max-w-[23.4375rem] disabled:bg-neutral-100 disabled:cursor-not-allowed`}
-              disabled={!isValid}
-            >
-              <div className="flex items-center justify-center gap-1">
-                <span>Pay ₦90,000.00</span>
-                {isLoading && <Spinner size="sm" speed="fast" />}
-              </div>
-            </Button>
+        {noBillingCards && (
+          <div className="w-full h-auto flex items-center justify-center mb-6">
+            {noBilling}
           </div>
         )}
       </div>
+
+      {!noBillingCards && (
+        <div className="w-full flex items-center justify-center py-[2.5rem] px-[1.5rem] border-t border-[#E8E8E8] mt-1">
+          <Button
+            type="submit"
+            variant="solid"
+            className={`w-full max-w-[23.4375rem] disabled:bg-neutral-100 disabled:cursor-not-allowed`}
+            // disabled={!isValid}
+            onClick={paymentHandler}
+          >
+            <div className="flex items-center justify-center gap-1">
+              <span>Pay ₦90,000.00</span>
+              {isLoading && <Spinner size="sm" speed="fast" />}
+            </div>
+          </Button>
+        </div>
+      )}
 
       <Modal
         isOpen={switchValue}
         onClose={toggleSwitch}
         containerClassName="w-full max-w-[26rem]"
       >
-        <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
-          <div className="w-full flex flex-col gap-4">
-            <div>
-              <legend className="font-lora text-[2rem] font-semibold">
-                Add a card
-              </legend>
-              <p className="font-light text-neutral-600">
-                Enter the information below to add a card.
-              </p>
-            </div>
+        <BillingCardForm />
+      </Modal>
 
-            <div className="flex flex-col gap-1">
-              <label htmlFor="cardHolder" className="font-light text-[#1C1C1C]">
-                Cardholder Name
-              </label>
+      {/* Completed payment modal */}
+      <Modal
+        isOpen={completedPaymentModalToggleValue}
+        onClose={completedPaymentModalToggle}
+        containerClassName="w-[25rem] flex flex-col items-center justify-center"
+      >
+        <img src={checkMark} alt="" className="size-[100px]" />
 
-              <input
-                type="text"
-                {...register("cardHolder", {
-                  required: "Card holder's name is required",
-                })}
-                id="cardHolder"
-                placeholder="John Doe"
-                className="p-4 border border-gray-300 outline-none rounded-[6px] text-[0.875rem] placeholder:text-[0.875rem]"
-              />
-            </div>
+        <div className="flex flex-col items-center gap-3">
+          <h2 className="font-semibold text-[2rem] text-neutral-950">
+            Payment Successful
+          </h2>
 
-            <div className="flex flex-col gap-1">
-              <label
-                htmlFor="card-number"
-                className="font-light text-[#1C1C1C]"
-              >
-                Card Number
-              </label>
+          <p className="font-light text-neutral-700 text-center leading-snug">
+            Your payment of [₦90,000.00] was successful.
+          </p>
 
-              <input
-                type="text"
-                {...register("cardNumber", {
-                  required: "Card number is required",
-                })}
-                id="card-number"
-                placeholder="xxxx xxxx xxxx xxxx"
-                className="p-4 border border-gray-300 outline-none rounded-[6px] text-[0.875rem] placeholder:text-[0.875rem]"
-              />
-            </div>
-
-            <div className="w-full grid grid-cols-2 gap-3">
-              <div className="flex flex-col gap-1">
-                <label
-                  htmlFor="expiryDate"
-                  className="font-light text-[#1C1C1C]"
-                >
-                  Expiry Date
-                </label>
-
-                <input
-                  type="date"
-                  {...register("expiryDate", {
-                    required: "Expiry date is required",
-                  })}
-                  placeholder="MM/YY"
-                  className="p-4 border border-gray-300 outline-none rounded-[6px] text-[0.875rem] placeholder:text-[0.875rem]"
-                />
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <label
-                  htmlFor="expiryDate"
-                  className="font-light text-[#1C1C1C]"
-                >
-                  CVV
-                </label>
-                <input
-                  type="text"
-                  {...register("CVV", {
-                    required: "CVV is required",
-                  })}
-                  placeholder="888"
-                  className="p-4 border border-gray-300 outline-none rounded-[6px] text-[0.875rem] placeholder:text-[0.875rem]"
-                />
-              </div>
-            </div>
-
-            <div className="w-full flex flex-col gap-1">
-              <div>
-                <input type="checkbox" name="" id="" className="mr-4" />
-                <span className="font-light">Save this for future use</span>
-              </div>
-
-              <Button
-                type="submit"
-                variant="solid"
-                className={`w-full disabled:bg-neutral-100 disabled:cursor-not-allowed`}
-                disabled={!isValid}
-              >
-                <div className="flex items-center justify-center gap-1">
-                  <span>Add card</span>
-                  {isLoading && <Spinner size="sm" speed="fast" />}
-                </div>
-              </Button>
-            </div>
-          </div>
-        </form>
+          <Button
+            text="Continue shopping"
+            variant="solid"
+            className="w-full bg-primary-500 text-white"
+            onClick={() => navigate("/dashboard/shop")}
+          />
+        </div>
       </Modal>
     </div>
   );
