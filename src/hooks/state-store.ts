@@ -108,6 +108,7 @@ export interface ProfileState {
   notification?: any[];
 }
 
+// @ts-ignore
 export const useProfileState = create<ProfileState>((set) => ({
   myProfile: [],
   measurement: measurementData,
