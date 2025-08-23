@@ -4,10 +4,10 @@ import { useCardState } from "../../../../hooks/state-store";
 import { useSwitch } from "../../../../hooks/switch";
 import Button from "../../../../shared-components/button";
 import Modal from "../../../../shared-components/modal";
-import CardList from "./card-list";
 import paymentWallet from "./payment-wallet.png";
-import checkMark from "./checkmark.png";
+import checkMark from "../../checkmark.png";
 import BillingCardForm from "../../billing-card-form";
+import BillingCardList from "../../billing-card-list";
 
 /* ------------------------------------------------------------------ */
 
@@ -72,7 +72,7 @@ export default function BillingCards() {
       </div>
 
       {/* Card list */}
-      <CardList />
+      <BillingCardList />
 
       {/* No card */}
       {billingCards.length === 0 && (
