@@ -9,8 +9,6 @@ import {
 } from "../pages/dashboard/_data/_home";
 import {
   cartItems,
-  paymentInfo,
-  deliveryInfo,
   type CartItem,
   type PaymentInfo,
   type DeliveryInfo,
@@ -57,10 +55,10 @@ export const useOrdersStore = create<OrderState>((set) => ({
 // ------------------- Cart ---------------------
 export interface CartState {
   items: CartItem[];
-  paymentInfo?: PaymentInfo[];
-  deliveryInfo?: DeliveryInfo[];
   addItem: (item: CartItem) => void;
   removeItem: (orderId: string | number) => void;
+  increaseItemCount: (orderIdx: number) => void;
+  decreaseItemCount: (orderIdx: number) => void;
 }
 
 export const useCartStore = create<CartState>((set) => ({
@@ -73,6 +71,30 @@ export const useCartStore = create<CartState>((set) => ({
       const newOrders = state.items.filter((item) => item.orderId !== orderId);
 
       return { items: newOrders };
+    });
+  },
+  increaseItemCount: (orderIdx: number) => {
+    return set((state) => {
+      const items = [...state.items];
+      let count = Number(items[orderIdx].count);
+      items[orderIdx].count = ++count;
+
+      return {
+        items,
+      };
+    });
+  },
+  decreaseItemCount: (orderIdx: number) => {
+    return set((state) => {
+      const items = [...state.items];
+      let count = Number(items[orderIdx].count);
+      items[orderIdx].count = --count;
+
+      if (items[orderIdx].count <= 0) items[orderIdx].count = 0;
+
+      return {
+        items,
+      };
     });
   },
 }));
@@ -96,26 +118,27 @@ export const useProfileState = create<ProfileState>((set) => ({
 // ----------- Card --------------------
 export interface CardState {
   cards: BillingCard[];
-  selectedCard: number;
-  addCard?: (card: BillingCard) => void;
-  removeCard?: (CardId: number) => void;
-  selectCard?: (cardId: number) => void;
+  selectedCardId?: number | string;
+  addCard: (card: BillingCard) => void;
+  removeCard: (CardId: number | string) => void;
+  selectCard: (cardId: number | string) => void;
 }
 
 export const useCardState = create<CardState>((set) => ({
   cards: billingCards,
-  selectedCard: 0,
+  selectedCardId: 0,
   addCard: (card: BillingCard) =>
     set((state) => {
       const cards = [...state.cards, card];
 
       return { cards };
     }),
-  removeCard: (cardId: number) =>
+  removeCard: (cardId: number | string) =>
     set((state) => {
       const cards = state.cards.filter((card) => card.id !== cardId);
 
       return { cards };
     }),
-  selectCard: (cardId: number) => set(() => ({ selectedCard: cardId })),
+  selectCard: (cardId: number | string) =>
+    set(() => ({ selectedCardId: cardId })),
 }));
