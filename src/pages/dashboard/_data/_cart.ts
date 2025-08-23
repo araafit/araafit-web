@@ -66,6 +66,5 @@ export const cartItems: CartItem[] = [
   },
 ];
 
-export const paymentInfo: PaymentInfo[] = [];
-
 export const deliveryInfo: DeliveryInfo[] = [];
+export const paymentInfo: PaymentInfo[] = [];
