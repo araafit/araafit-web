@@ -2,10 +2,10 @@ import { createBrowserRouter } from "react-router-dom";
 import { HomePage } from "./landing/home/home";
 import Contact from "./landing/contact/contact";
 import About from "./landing/about/about";
-import Login from "./auth/login/login";
-import ConfirmEmail from "./auth/reset/confirm-email";
-import PasswordResetPage from "./auth/reset/password-reset-page";
-import Register from "./auth/register/register";
+import Login from "./user-auth/login/login";
+import ConfirmEmail from "./user-auth/reset/confirm-email";
+import PasswordResetPage from "./user-auth/reset/password-reset-page";
+import Register from "./user-auth/register/register";
 import {
   DashboardHomePage,
   DashboardShopPage,
@@ -15,7 +15,7 @@ import {
   DashboardProfilePage,
   DashboardEditMeasurementPage,
   DashboardOrderDetailPage,
-} from "./dashboard/import-entry";
+} from "./user-dashboard/import-entry";
 
 /* ---------------------------------------------------------------- */
 
