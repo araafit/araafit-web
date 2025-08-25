@@ -1,4 +1,4 @@
-import DashboardLayout from "../../../../layouts/dashboard/dashboard-layout";
+import UserDashboardLayout from "../../../../layouts/user-dashboard/dashboard-layout";
 import Button from "../../../../shared-components/button";
 import { ArrowLeftIcon } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
@@ -33,7 +33,7 @@ export function DashboardEditMeasurementPage() {
   const navigate = useNavigate();
 
   return (
-    <DashboardLayout>
+    <UserDashboardLayout>
       <div className="h-screen bg-white py-5 px-8 rounded-md flex flex-col items-center justify-center gap-6 relative">
         <Button
           type="button"
@@ -95,6 +95,6 @@ export function DashboardEditMeasurementPage() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </UserDashboardLayout>
   );
 }

@@ -1,5 +1,5 @@
 import { CaretRightIcon } from "@phosphor-icons/react";
-import DashboardLayout from "../../../layouts/dashboard/dashboard-layout";
+import UserDashboardLayout from "../../../layouts/user-dashboard/dashboard-layout";
 import Tab from "../../../shared-components/tab";
 import TopBar from "../top-bar";
 import Measurements from "./measurement/measurements";
@@ -26,7 +26,7 @@ export function DashboardProfilePage() {
   );
 
   return (
-    <DashboardLayout>
+    <UserDashboardLayout>
       <div className="h-screen flex flex-col gap-2 relative">
         <TopBar title="Profile" breadCrumb={<BreadCrumb />} />
 
@@ -44,6 +44,6 @@ export function DashboardProfilePage() {
           </Tab>
         </div>
       </div>
-    </DashboardLayout>
+    </UserDashboardLayout>
   );
 }

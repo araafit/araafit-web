@@ -28,7 +28,7 @@ const navMenu = [
  *
  * @returns ReactElement
  */
-export default function DashboardLayout({
+export default function UserDashboardLayout({
   children,
 }: {
   children: React.ReactElement;

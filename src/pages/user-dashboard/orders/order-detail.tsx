@@ -5,7 +5,7 @@ import {
   PackageIcon,
 } from "@phosphor-icons/react";
 import { Link, useLocation } from "react-router-dom";
-import DashboardLayout from "../../../layouts/dashboard/dashboard-layout";
+import UserDashboardLayout from "../../../layouts/user-dashboard/dashboard-layout";
 import Button from "../../../shared-components/button";
 import { rtw2 } from "../images/image-entry";
 import TopBar from "../top-bar";
@@ -44,7 +44,7 @@ export function DashboardOrderDetailPage() {
   );
 
   return (
-    <DashboardLayout>
+    <UserDashboardLayout>
       <div className="h-screen overflow-y-hidden">
         <div className="flex flex-col gap-2 relative mb-4">
           <TopBar
@@ -155,6 +155,6 @@ export function DashboardOrderDetailPage() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </UserDashboardLayout>
   );
 }

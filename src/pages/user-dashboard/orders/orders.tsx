@@ -1,10 +1,10 @@
-import DashboardLayout from "../../../layouts/dashboard/dashboard-layout";
+import DashboardLayout from "../../../layouts/user-dashboard/dashboard-layout";
 import Button from "../../../shared-components/button";
 import TopBar from "../top-bar";
 import shoppingBagIcon from "../images/bag.png";
 import { useOrdersStore } from "../../../shared-hooks/state-store";
 import { formatPrice } from "../../../utils/format-price";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { CaretRightIcon } from "@phosphor-icons/react";
 
 /* --------------------------------------------------------------------------- */
@@ -16,7 +16,6 @@ import { CaretRightIcon } from "@phosphor-icons/react";
  */
 export function DashboardOrdersPage() {
   const { items: orderItems } = useOrdersStore();
-  const location = useLocation();
 
   const orderIsEmpty = orderItems.length === 0;
 

@@ -1,6 +1,6 @@
 import { CaretRightIcon } from "@phosphor-icons/react";
 import { useCartStore, useOrdersStore, useShopStore } from "../../shared-hooks/state-store";
-import DashboardLayout from "../../layouts/dashboard/dashboard-layout";
+import UserDashboardLayout from "../../layouts/user-dashboard/dashboard-layout";
 import Button from "../../shared-components/button";
 import { formatPrice } from "../../utils/format-price";
 import shoppingBagIcon from "./images/bag.png";
@@ -67,7 +67,7 @@ export function DashboardHomePage() {
   );
 
   return (
-    <DashboardLayout>
+    <UserDashboardLayout>
       <div className="h-screen">
         <div className="flex flex-col gap-2 relative">
           <TopBar title={title} breadCrumb={<BreadCrumb />} />
@@ -182,6 +182,6 @@ export function DashboardHomePage() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </UserDashboardLayout>
   );
 }

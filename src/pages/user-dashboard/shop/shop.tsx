@@ -1,5 +1,5 @@
 import { CaretRightIcon } from "@phosphor-icons/react";
-import DashboardLayout from "../../../layouts/dashboard/dashboard-layout";
+import DashboardLayout from "../../../layouts/user-dashboard/dashboard-layout";
 import TopBar from "../top-bar";
 import ShopTab from "./shop-tab";
 import { ShopProvider } from "./context/shop-context";

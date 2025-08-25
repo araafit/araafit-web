@@ -1,5 +1,5 @@
 import { useState } from "react";
-import DashboardLayout from "../../../../layouts/dashboard/dashboard-layout";
+import UserDashboardLayout from "../../../../layouts/user-dashboard/dashboard-layout";
 import TopBar from "../../top-bar";
 import { CaretRightIcon } from "@phosphor-icons/react";
 import { Link } from "react-router-dom";
@@ -31,7 +31,7 @@ export function DashboardCartCheckout() {
   );
 
   return (
-    <DashboardLayout>
+    <UserDashboardLayout>
       <div className="h-screen flex flex-col gap-2 relative">
         <TopBar title="Cart" breadCrumb={<BreadCrumb />} />
 
@@ -89,6 +89,6 @@ export function DashboardCartCheckout() {
           )}
         </div>
       </div>
-    </DashboardLayout>
+    </UserDashboardLayout>
   );
 }
