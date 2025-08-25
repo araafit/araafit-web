@@ -19,6 +19,9 @@ import {
 
 /* ---------------------------------------------------------------- */
 
+/**
+ * Pages route system
+ */
 const pagesRoutes = createBrowserRouter([
   {
     path: "/",
