@@ -1,4 +1,3 @@
-import React from "react";
 import { useShop } from "./context/shop-context";
 import Card from "../../../shared-components/card";
 import { useCartStore } from "../../../shared-hooks/state-store";
