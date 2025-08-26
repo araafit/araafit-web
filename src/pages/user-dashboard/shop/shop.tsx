@@ -4,8 +4,8 @@ import TopBar from "../top-bar";
 import ShopTab from "./shop-tab";
 import { ShopProvider } from "./context/shop-context";
 import AllItems from "./all-items";
-import DressesCatalogue from "./dresses/dresses-tab";
-import FabricsCatalogue from "./fabrics/fabrics-tab";
+import DressItems from "./dress-items";
+import FabricItems from "./fabric-items";
 
 /* --------------------------------------------------------------------------------- */
 
@@ -23,7 +23,6 @@ const BreadCrumb = () => (
  * @returns ReactElement
  */
 export function DashboardShopPage() {
-
   return (
     <DashboardLayout>
       <div className="h-screen flex flex-col gap-2 relative">
@@ -33,14 +32,14 @@ export function DashboardShopPage() {
           <div className="w-full h-[95%] flex flex-col gap-4 p-4 mt-20 overflow-y-scroll">
             <div className="size-full bg-white rounded-md">
               <ShopTab
-                items={["all", "dresses", "fabrics"]}
+                items={["All", "Dresses", "Fabrics"]}
                 tabContainerClassName="bg-transparent h-full"
-                tabListClassName=" text-[0.875rem] text-neutral-700 border border-neutral-100 p-[0.254rem] bg-transparent rounded-md"
+                tabListClassName=" text-[0.875rem] text-neutral-700 border border-neutral-100 p-[0.254rem] bg-white rounded-md"
                 activeTabClassName="bg-primary-900 text-white rounded-md"
               >
                 <AllItems />
-                <DressesCatalogue />
-                <FabricsCatalogue />
+                <DressItems />
+                <FabricItems />
               </ShopTab>
             </div>
           </div>

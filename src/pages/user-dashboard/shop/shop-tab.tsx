@@ -89,9 +89,9 @@ const ShopTab = ({
   ];
 
   return (
-    <div className={CN("rounded-lg", tabContainerClassName)}>
+    <div className={CN("rounded-md relative size-full overflow-y-scroll", tabContainerClassName)}>
       <div
-        className={CN("flex items-center justify-between", tabListClassName)}
+        className={CN("w-full flex items-center justify-between sticky top-0 left-0 z-10", tabListClassName)}
       >
         <div className="flex items-center space-x-1">
           {" "}
