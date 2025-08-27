@@ -9,6 +9,7 @@ import Register from "./user-auth/register/register";
 import {
   DashboardHomePage,
   DashboardShopPage,
+  DashboardShopDetailPage,
   DashboardOrdersPage,
   DashboardCartPage,
   DashboardCartCheckout,
@@ -60,7 +61,13 @@ const pagesRoutes = createBrowserRouter([
     path: "dashboard",
     children: [
       { path: "", element: <DashboardHomePage />, index: true },
-      { path: "shop", element: <DashboardShopPage /> },
+      {
+        path: "shop",
+        children: [
+          { path: "", element: <DashboardShopPage />, index: true },
+          { path: ":shopTab/:itemName", element: <DashboardShopDetailPage /> },
+        ],
+      },
       {
         path: "orders",
         children: [
