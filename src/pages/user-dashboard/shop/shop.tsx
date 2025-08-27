@@ -36,6 +36,7 @@ export function DashboardShopPage() {
                 tabContainerClassName="bg-transparent h-full"
                 tabListClassName=" text-[0.875rem] text-neutral-700 border border-neutral-100 p-[0.254rem] bg-white rounded-md"
                 activeTabClassName="bg-primary-900 text-white rounded-md"
+                // onChange={(item) => console.log(item)}
               >
                 <AllItems />
                 <DressItems />
