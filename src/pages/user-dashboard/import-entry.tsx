@@ -1,6 +1,7 @@
 export { DashboardHomePage } from "./home";
 export { DashboardShopPage } from "./shop/shop";
-export { DashboardShopDetailPage } from "./shop/shop-detail";
+export { DashboardShopDressDetailPage } from "./shop/dress-item-detail";
+export { DashboardShopFabricDetailPage } from "./shop/fabric-item-detail";
 export { DashboardOrdersPage } from "./orders/orders";
 export { DashboardOrderDetailPage } from "./orders/order-detail";
 export { DashboardCartPage } from "./cart/cart";
