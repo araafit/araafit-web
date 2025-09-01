@@ -8,8 +8,8 @@ export type SelectType = {
   options: { [name: string]: any }[];
   value?: string | number;
   onChange?: (arg: any) => void;
-  placeholder?: string;
-  fieldClassName?: string;
+  placeholder?: React.ReactNode;
+  selectClassName?: string;
   containerClassName?: string;
   optionsClassName?: string;
   optionClassName?: string;
@@ -30,7 +30,7 @@ export default function Select({
   value,
   onChange,
   placeholder = "Select an option",
-  fieldClassName,
+  selectClassName,
   containerClassName,
   optionsClassName,
   optionClassName,
@@ -42,10 +42,13 @@ export default function Select({
 }: SelectType) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [dropdownStyle, setDropdownStyle] = React.useState({});
+  const [selectValue, setSelectValue] = React.useState(value);
 
   const selectedOption = options.find((opt) => {
-    if (value) {
-      return opt.value.toString().toLowerCase() === String(value).toLowerCase();
+    if (selectValue) {
+      return (
+        opt.value.toString().toLowerCase() === String(selectValue).toLowerCase()
+      );
     }
 
     return undefined;
@@ -54,6 +57,7 @@ export default function Select({
   const handleSelect = (option: { [name: string]: any }) => {
     if (onChange) {
       onChange(option.value.toString());
+      setSelectValue(option.value.toString());
       setIsOpen(false);
     }
   };
@@ -145,17 +149,19 @@ export default function Select({
     <div className={CN(baseContainerStyles, containerClassName)}>
       <div
         onClick={() => !disabled && setIsOpen(!isOpen)}
-        className={`${baseSelectStyles}
-          ${getSelectStyles()}
-          ${fieldClassName}`}
+        className={CN(
+          `${baseSelectStyles}
+          ${getSelectStyles()}`,
+          selectClassName
+        )}
       >
-        <span
+        <div
           className={
             !selectedOption ? "text-gray-400" : `${selectedOptionClassName}`
           }
         >
           {selectedOption ? selectedOption.label : placeholder}
-        </span>
+        </div>
 
         {isOpen ? (
           <CaretUpIcon className={`w-4 h-4 text-gray-600 ${iconClassName}`} />
@@ -166,18 +172,22 @@ export default function Select({
 
       {isOpen && !disabled && (
         <div
-          className={`${baseOptionsStyles} ${optionsClassName} ${getDropdownWidth()}`}
+          className={CN(
+            `${baseOptionsStyles} ${getDropdownWidth()}`,
+            optionsClassName
+          )}
           style={dropdownStyle}
         >
           {options.map((option) => (
             <div
               key={option.value}
               onClick={() => handleSelect(option)}
-              className={`
-                ${baseOptionStyles}
-                ${optionClassName}
-                ${option.value === value ? "bg-gray-100" : ""}
-              `}
+              className={CN(
+                `${baseOptionStyles} ${
+                  option.value === value ? "bg-gray-100" : ""
+                }`,
+                optionClassName
+              )}
             >
               {option.label}
             </div>

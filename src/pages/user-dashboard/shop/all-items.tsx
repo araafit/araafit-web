@@ -15,7 +15,7 @@ export default function AllItems() {
           itemCost={item.cost}
           itemImage={item.image}
           addToCart={() => addToCart(item)}
-          link={`/dashboard/shop/all-items/${item.name
+          link={`/dashboard/shop/${item.category}/${item.name
             .toLocaleLowerCase()
             .replaceAll(" ", "-")}`}
         />
