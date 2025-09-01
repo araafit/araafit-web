@@ -1,4 +1,3 @@
-import React from "react";
 import UserDashboardLayout from "../../../layouts/user-dashboard/dashboard-layout";
 import TopBar from "../top-bar";
 import { CaretRightIcon } from "@phosphor-icons/react";
