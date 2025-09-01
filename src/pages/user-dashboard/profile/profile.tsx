@@ -1,0 +1,49 @@
+import { CaretRightIcon } from "@phosphor-icons/react";
+import UserDashboardLayout from "../../../layouts/user-dashboard/dashboard-layout";
+import Tab from "../../../shared-components/tab";
+import TopBar from "../top-bar";
+import Measurements from "./measurement/measurements";
+import BillingCards from "./billing-card/card";
+import Notification from "./notification";
+import ProfileSettings from "./profile-settings/profile-settings";
+
+/* --------------------------------------------------------------------- */
+
+/**
+ * Dashboard home page
+ *
+ * @returns ReactElement
+ */
+export function DashboardProfilePage() {
+  const tabItems = ["My Profile", "My Measurement", "My Card", "Notification"];
+
+  const BreadCrumb = () => (
+    <div className="font-inter font-light capitalize flex items-center">
+      <span className="text-primary-900">Araafit</span>
+      <CaretRightIcon className="text-[#979797]" />
+      <span className="text-[#979797]">Profile</span>
+    </div>
+  );
+
+  return (
+    <UserDashboardLayout>
+      <div className="h-screen flex flex-col gap-2 relative">
+        <TopBar title="Profile" breadCrumb={<BreadCrumb />} />
+
+        <div className="w-full h-[95%] flex flex-col gap-4 p-4 mt-20 overflow-y-scroll">
+          <Tab
+            items={tabItems}
+            tabContainerClassName="bg-transparent h-full"
+            tabListClassName="w-[30rem] text-[0.875rem] text-neutral-700 border border-neutral-100 p-[0.254rem] bg-transparent rounded-md"
+            activeTabClassName="bg-primary-900 text-white rounded-md"
+          >
+            <ProfileSettings />
+            <Measurements />
+            <BillingCards />
+            <Notification />
+          </Tab>
+        </div>
+      </div>
+    </UserDashboardLayout>
+  );
+}

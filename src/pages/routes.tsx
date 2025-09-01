@@ -2,21 +2,28 @@ import { createBrowserRouter } from "react-router-dom";
 import { HomePage } from "./landing/home/home";
 import Contact from "./landing/contact/contact";
 import About from "./landing/about/about";
-import Login from "./auth/login/login";
-import ConfirmEmail from "./auth/reset/confirm-email";
-import PasswordResetPage from "./auth/reset/password-reset-page";
-import Register from "./auth/register/register";
+import Login from "./user-auth/login/login";
+import ConfirmEmail from "./user-auth/reset/confirm-email";
+import PasswordResetPage from "./user-auth/reset/password-reset-page";
+import Register from "./user-auth/register/register";
 import {
   DashboardHomePage,
   DashboardShopPage,
+  DashboardShopFabricDetailPage,
+  DashboardShopDressDetailPage,
   DashboardOrdersPage,
   DashboardCartPage,
+  DashboardCartCheckout,
   DashboardProfilePage,
+  DashboardEditMeasurementPage,
   DashboardOrderDetailPage,
-} from "./dashboard/import-entry";
+} from "./user-dashboard/import-entry";
 
 /* ---------------------------------------------------------------- */
 
+/**
+ * Pages route system
+ */
 const pagesRoutes = createBrowserRouter([
   {
     path: "/",
@@ -55,7 +62,20 @@ const pagesRoutes = createBrowserRouter([
     path: "dashboard",
     children: [
       { path: "", element: <DashboardHomePage />, index: true },
-      { path: "shop", element: <DashboardShopPage /> },
+      {
+        path: "shop",
+        children: [
+          { path: "", element: <DashboardShopPage />, index: true },
+          {
+            path: "dress/:itemName",
+            element: <DashboardShopDressDetailPage />,
+          },
+          {
+            path: "fabric/:itemName",
+            element: <DashboardShopFabricDetailPage />,
+          },
+        ],
+      },
       {
         path: "orders",
         children: [
@@ -67,10 +87,16 @@ const pagesRoutes = createBrowserRouter([
         path: "cart",
         children: [
           { path: "", element: <DashboardCartPage />, index: true },
-          { path: "checkout", element: <DashboardCartPage /> },
+          { path: "checkout", element: <DashboardCartCheckout /> },
         ],
       },
-      { path: "profile", element: <DashboardProfilePage /> },
+      {
+        path: "profile",
+        children: [
+          { path: "", element: <DashboardProfilePage />, index: true },
+          { path: "get-measured", element: <DashboardEditMeasurementPage /> },
+        ],
+      },
     ],
   },
 ]);
