@@ -16,6 +16,12 @@ import {
   DashboardEditMeasurementPage,
   DashboardOrderDetailPage,
 } from "./user-dashboard/import-entry";
+import {
+  AdminDashboardOverview,
+  AdminDashboardRecentActivities,
+  AdminDashboardOrders,
+  AdminDashboardInventory,
+} from "./admin-dashboard/import-entry";
 
 /* ---------------------------------------------------------------- */
 
@@ -61,6 +67,48 @@ const pagesRoutes = createBrowserRouter([
     children: [
       { path: "", element: <DashboardHomePage />, index: true },
       { path: "shop", element: <DashboardShopPage /> },
+      {
+        path: "orders",
+        children: [
+          { path: "", element: <DashboardOrdersPage />, index: true },
+          { path: ":orderId", element: <DashboardOrderDetailPage /> },
+        ],
+      },
+      {
+        path: "cart",
+        children: [
+          { path: "", element: <DashboardCartPage />, index: true },
+          { path: "checkout", element: <DashboardCartCheckout /> },
+        ],
+      },
+      {
+        path: "profile",
+        children: [
+          { path: "", element: <DashboardProfilePage />, index: true },
+          { path: "get-measured", element: <DashboardEditMeasurementPage /> },
+        ],
+      },
+    ],
+  },
+  {
+    path: "admin-dashboard",
+    children: [
+      {
+        path: "overview",
+        element: <AdminDashboardOverview />,
+        children: [
+          {
+            path: "recent-activity",
+            element: <AdminDashboardRecentActivities />,
+          },
+        ],
+      },
+      {
+        path: "order-management",
+        element: <AdminDashboardOrders />,
+        index: true,
+      },
+      { path: "inventory", element: <AdminDashboardInventory /> },
       {
         path: "orders",
         children: [
