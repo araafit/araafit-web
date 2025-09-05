@@ -1,12 +1,10 @@
 import {
-  Position,
-  SmartCapture,
   Confirmation,
   MeasurementMethod,
-  CaptureProcessLoader,
+  Position,
+  SmartCapture,
 } from "./automated/import-entry";
-import { GetMeasuredProvider } from "./context/get-measured-context";
-import { useGetMeasured } from "./context/get-measured-context";
+import { GetMeasuredProvider, useGetMeasured } from "./context/get-measured-context";
 
 /* ----------------------------------------------------------------------- */
 

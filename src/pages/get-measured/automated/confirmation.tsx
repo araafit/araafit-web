@@ -1,7 +1,6 @@
 import { MeasurementStepperLines } from "../stepper-lines";
 import { useGetMeasured } from "../context/get-measured-context";
 import Button from "../../../shared-components/button";
-import capturedImage from "./captured-image.png";
 
 /* ------------------------------------------------------------------- */
 

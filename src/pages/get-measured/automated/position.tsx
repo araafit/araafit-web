@@ -9,7 +9,7 @@ import { useSwitch } from "../../../shared-hooks/switch";
 
 export function Position() {
   const { toggleSwitch: showLoader, switchValue: isOpen } = useSwitch();
-  const { currentStep, stepTo } = useGetMeasured();
+  const { currentStep } = useGetMeasured();
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
