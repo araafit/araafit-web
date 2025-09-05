@@ -1,8 +1,14 @@
 export function MeasurementStepperLines({ stepIndex }: { stepIndex: number }) {
-  const steps = ["method", "position", "smart capture", "confirmation"];
+  const steps = [
+    "method",
+    "position",
+    "loader",
+    "smart capture",
+    "confirmation",
+  ];
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="inline-flex items-center gap-1 self-center">
       {steps.map((step, idx) => (
         <div key={idx} className="flex flex-col gap-2">
           <div
@@ -12,7 +18,9 @@ export function MeasurementStepperLines({ stepIndex }: { stepIndex: number }) {
           />
 
           <span
-            className={`font-medium text-[14px] ${ stepIndex >= idx ? "text-primary-500" : "text-neutral-100"} capitalize`}
+            className={`font-medium text-[14px] ${
+              stepIndex >= idx ? "text-primary-500" : "text-neutral-100"
+            } capitalize`}
           >
             {step}
           </span>
