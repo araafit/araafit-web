@@ -33,7 +33,7 @@ export type FormValues = {
  *
  * @param step number
  *
- * @returns ReactElement |Null
+ * @returns ReactElement | Null
  */
 const StepContent = ({ step }: { step: number }) => {
   switch (step) {

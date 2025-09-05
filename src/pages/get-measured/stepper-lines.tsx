@@ -1,11 +1,5 @@
 export function MeasurementStepperLines({ stepIndex }: { stepIndex: number }) {
-  const steps = [
-    "method",
-    "position",
-    "loader",
-    "smart capture",
-    "confirmation",
-  ];
+  const steps = ["method", "position", "smart capture", "confirmation"];
 
   return (
     <div className="inline-flex items-center gap-1 self-center">
