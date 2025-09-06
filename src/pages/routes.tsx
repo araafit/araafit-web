@@ -6,6 +6,7 @@ import Login from "./user-auth/login/login";
 import ConfirmEmail from "./user-auth/reset/confirm-email";
 import PasswordResetPage from "./user-auth/reset/password-reset-page";
 import Register from "./user-auth/register/register";
+import MeasurementTest from "./measurement-test/measurement-test";
 import {
   DashboardHomePage,
   DashboardShopPage,
@@ -36,6 +37,10 @@ const pagesRoutes = createBrowserRouter([
   {
     path: "contact",
     element: <Contact />,
+  },
+  {
+    path: "measurement-test",
+    element: <MeasurementTest />,
   },
   {
     path: "auth",
