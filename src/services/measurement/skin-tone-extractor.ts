@@ -1,4 +1,4 @@
-import { Image } from "image-js";
+import { decode } from "image-js";
 import type { Landmark } from "./types";
 
 /**
@@ -23,6 +23,8 @@ function getSkinToneName(r: number, g: number, b: number): string {
   // Simple skin tone classification based on RGB values
   const hue = Math.atan2(Math.sqrt(3) * (g - b), 2 * r - g - b) * 180 / Math.PI;
   const saturation = 1 - 3 * Math.min(r, g, b) / (r + g + b);
+  console.log("Hue:", hue);
+  console.log("Saturation:", saturation);
   const lightness = (r + g + b) / (3 * 255);
 
   if (lightness < 0.2) return "Deep";
@@ -41,13 +43,13 @@ async function extractSkinTone(
   buffer: Buffer,
   bbox: { x: number; y: number; width: number; height: number }
 ): Promise<{ hex: string; rgb: { r: number; g: number; b: number }; name: string }> {
-  const image = await Image.load(buffer);
+  const image = await decode(buffer);
   const roi = image.crop(bbox); // crop to cheek area
 
   const pixels: number[][] = [];
   for (let y = 0; y < roi.height; y++) {
     for (let x = 0; x < roi.width; x++) {
-      const [r, g, b] = roi.getPixelXY(x, y);
+      const [r, g, b] = roi.getPixel(x, y);
 
       // filter shadows & highlights (skip very dark or very bright pixels)
       const brightness = (r + g + b) / 3;

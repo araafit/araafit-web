@@ -21,7 +21,6 @@ import {
   smoothMeasurement,
   calculatePixelToCmRatio,
   distPx,
-  lmToPx,
 } from "./utils";
 
 interface BodyWidthMeasurement {

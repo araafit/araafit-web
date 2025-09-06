@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Ruler, Info } from "@phosphor-icons/react";
 import Button from "../../../shared-components/button";
 import { useGetMeasured } from "../context/get-measured-context";

@@ -62,6 +62,7 @@ export class BodySegmentationService {
     config: MeasurementConfig,
     progressCallback?: ProgressCallback
   ): Promise<void> {
+    console.log("Performing initialization...", config);
     try {
       progressCallback?.(0.1, "Loading TensorFlow.js...");
 
@@ -328,6 +329,7 @@ export class BodySegmentationService {
   } {
     try {
       const { width: imgW, height: imgH } = mask;
+      console.log("Image dimensions:", imgW, imgH);
       
       // Calculate landmark-based positions
       const bustRatio = this._calculateBustPosition(landmarks, imgH);
@@ -354,6 +356,7 @@ export class BodySegmentationService {
    * Calculate bust measurement position based on shoulder landmarks
    */
   private _calculateBustPosition(landmarks: Landmark[], imgH: number): number {
+    console.log("Calculating bust position...", landmarks, imgH);
     const leftShoulder = landmarks[11]; // LEFT_SHOULDER
     const rightShoulder = landmarks[12]; // RIGHT_SHOULDER
     const leftHip = landmarks[23]; // LEFT_HIP
@@ -381,6 +384,7 @@ export class BodySegmentationService {
    * Calculate waist measurement position based on torso landmarks
    */
   private _calculateWaistPosition(landmarks: Landmark[], imgH: number): number {
+    console.log("Calculating waist position...", landmarks, imgH);
     const leftShoulder = landmarks[11]; // LEFT_SHOULDER
     const rightShoulder = landmarks[12]; // RIGHT_SHOULDER
     const leftHip = landmarks[23]; // LEFT_HIP
@@ -405,6 +409,7 @@ export class BodySegmentationService {
    * Calculate hip measurement position based on hip landmarks
    */
   private _calculateHipPosition(landmarks: Landmark[], imgH: number): number {
+    console.log("Calculating hip position...", landmarks, imgH);
     const leftHip = landmarks[23]; // LEFT_HIP
     const rightHip = landmarks[24]; // RIGHT_HIP
 
