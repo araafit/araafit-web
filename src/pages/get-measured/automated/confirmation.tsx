@@ -4,24 +4,58 @@ import Button from "../../../shared-components/button";
 import { measurementData } from "../../user-dashboard/_data/_profile";
 import { PencilSimpleIcon } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
-// import showToast from "../../../utils/notification";
-/* ------------------------------------------------------------------- */
+import { useEffect, useState } from "react";
+import showToast from "../../../utils/notification";
+import Spinner from "../../../shared-components/spinner";
+/* ---------------------------------------------------------------------------------- */
+
+const waterMarkStyle: React.CSSProperties = {
+  backgroundImage: `url(/araafit-watermark.png)`,
+  backgroundRepeat: "no-repeat",
+  backgroundSize: "cover",
+  backgroundPosition: "bottom",
+  objectFit: "fill",
+};
+
+const notificationStyle: React.CSSProperties = {
+  backgroundColor: "#F6FEF9",
+  border: "1px solid #16A34A",
+  color: "#16A34A",
+  fontSize: "14px",
+};
 
 export function Confirmation() {
+  const [isLoading, setLoading] = useState(false);
+  const [isSaved, setSaved] = useState(false);
   const { currentStep, stepTo } = useGetMeasured();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isSaved) {
+      showToast.success("Your measurements have been saved", {
+        position: "top-right",
+        style: notificationStyle,
+        icon: null,
+      });
+    }
+  }, [isSaved]);
 
   const retake = () => {
     stepTo(0);
     window.location.reload();
   };
 
-  const waterMarkStyle: React.CSSProperties = {
-    backgroundImage: `url(/araafit-watermark.png)`,
-    backgroundRepeat: "no-repeat",
-    backgroundSize: "cover",
-    backgroundPosition: "bottom",
-    objectFit: "fill",
+  const saveMeasurement = async () => {
+    console.log("Are you walking?");
+    setLoading(true);
+
+    await new Promise((resolve) =>
+      setTimeout(() => {
+        setSaved(true);
+        //@ts-ignore
+        resolve();
+      }, 500)
+    );
   };
 
   return (
@@ -122,20 +156,42 @@ export function Confirmation() {
         </div>
       </div>
 
-      <div className="flex items-center justify-end gap-6">
-        <Button
-          text="Share"
-          variant="outline"
-          className="w-[10rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed border-neutral-100 text-neutral-950"
-          onClick={retake}
-        />
+      {!isSaved ? (
+        <div className="flex items-center justify-end gap-6">
+          <Button
+            text="Share"
+            variant="outline"
+            className="w-[10rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed border-neutral-100 text-neutral-950"
+          />
 
-        <Button
-          text="Save"
-          variant="solid"
-          className="w-[10rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed"
-        />
-      </div>
+          <Button
+            variant="solid"
+            className="w-[10rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed"
+            onClick={saveMeasurement}
+          >
+            <div className="flex items-center justify-center gap-1">
+              <span>Save</span>
+              {isLoading && <Spinner size="sm" />}
+            </div>
+          </Button>
+        </div>
+      ) : (
+        <div className="flex items-center justify-end gap-6">
+          <Button
+            text="Continue as a guest"
+            variant="clear"
+            className="w-[15rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed border-neutral-100 text-primary-500"
+            onClick={retake}
+          />
+
+          <Button
+            text="Create a free account"
+            variant="solid"
+            className="w-[15rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed"
+            onClick={() => navigate("/auth/register")}
+          />
+        </div>
+      )}
     </div>
   );
 }
