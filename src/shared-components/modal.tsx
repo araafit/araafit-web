@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, memo } from "react";
 import { CN } from "../utils/class-merge";
 
 /* ------------------------------------------------------ */
@@ -13,16 +13,16 @@ type ModalShape = {
 
 /**
  * Modal component
- * 
+ *
  * @returns ReactElement
  */
-export default function Modal({
+const Modal: React.FC<ModalShape> = ({
   isOpen,
   onClose,
   children,
   containerClassName,
   backgroundClassName = "",
-}: ModalShape) {
+}) => {
   useEffect(() => {
     if (isOpen) {
       window.document.body.style.overflow = "hidden";
@@ -52,4 +52,6 @@ export default function Modal({
       </div>
     </div>
   );
-}
+};
+
+export default memo(Modal);

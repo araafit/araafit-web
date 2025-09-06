@@ -10,6 +10,10 @@ export function CaptureProcessLoader({ isOpen }: { isOpen: boolean }) {
 
   // Animate loader width until it reaches maxWidth
   useEffect(() => {
+    if (!isOpen) {
+      setLoadCount(0);
+    }
+    
     if (loadCount < maxWidth) {
       const interval = setInterval(() => {
         setLoadCount((prev) => {
@@ -24,7 +28,7 @@ export function CaptureProcessLoader({ isOpen }: { isOpen: boolean }) {
       stepTo(currentStep + 1);
       window.location.reload();
     }
-  }, [loadCount]);
+  }, [loadCount, isOpen]);
 
   return (
     <div
