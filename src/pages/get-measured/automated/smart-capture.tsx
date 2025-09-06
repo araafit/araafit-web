@@ -13,6 +13,11 @@ export function SmartCapture() {
     window.location.reload();
   };
 
+  const nextStep = () => {
+    stepTo(currentStep + 1);
+    window.location.reload();
+  };
+
   return (
     <div className="flex flex-col">
       <div className="w-full flex flex-col gap-5">
@@ -41,6 +46,7 @@ export function SmartCapture() {
           text="Continue"
           variant="solid"
           className="w-[10rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed"
+          onClick={nextStep}
         />
       </div>
     </div>
