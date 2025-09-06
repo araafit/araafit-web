@@ -18,6 +18,7 @@ import {
   DashboardEditMeasurementPage,
   DashboardOrderDetailPage,
 } from "./user-dashboard/import-entry";
+import GetMeasured from "./get-measured/get-measured";
 
 /* ---------------------------------------------------------------- */
 
@@ -36,6 +37,10 @@ const pagesRoutes = createBrowserRouter([
   {
     path: "contact",
     element: <Contact />,
+  },
+  {
+    path: "get-measured",
+    element: <GetMeasured />,
   },
   {
     path: "auth",
