@@ -7,6 +7,7 @@ import {
 } from "@phosphor-icons/react";
 import { useWindowSize } from "@react-hook/window-size";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import LandingLayout from "../../../layouts/landing/landing-layout";
 import Accordion, {
   type AccordionItemType,
@@ -34,10 +35,15 @@ const bgImage = {
  * @returns ReactElement
  */
 export function HomePage() {
-  const [feature, setFeature] = useState<Record<string, undefined | any>>(
+  const [feature, setFeature] = useState<AccordionItemType>(
     features[0]
   );
-  const [windowWidth, _] = useWindowSize();
+  const [windowWidth] = useWindowSize();
+  const navigate = useNavigate();
+
+  const handleGetMeasured = () => {
+    navigate("/get-measured");
+  };
 
   return (
     <LandingLayout>
@@ -65,6 +71,7 @@ export function HomePage() {
                 text="Get measured"
                 variant="solid"
                 className="w-full md:max-w-[9.375rem]"
+                onClick={handleGetMeasured}
               />
 
               <Button
@@ -280,6 +287,7 @@ export function HomePage() {
                   variant="solid"
                   className="w-full max-w-[16.5rem] bg-primary-950"
                   text="Start your custom fit"
+                  onClick={handleGetMeasured}
                 />
               </div>
             </div>

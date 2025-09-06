@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Measurement Service Module
  * Main entry point for the measurement extraction service
@@ -15,6 +14,9 @@ export { PoseDetectorService } from "./pose-detector";
 export { BodySegmentationService } from "./body-segmentation";
 export { MeasurementCalculatorService } from "./measurement-calculator";
 export { DressSizeCalculatorService } from "./dress-size-calculator";
+
+// Skin tone extraction
+export { extractSkinToneFromPhoto, rgbToHex, getSkinToneName } from "./skin-tone-extractor";
 
 // Types and interfaces
 export type {

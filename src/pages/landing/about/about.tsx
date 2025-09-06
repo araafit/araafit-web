@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import LandingLayout from "../../../layouts/landing/landing-layout";
 import { ceoImage, customFitCTA } from "./images/images";
 import { companyOfferings, companyValues } from "./data";
@@ -11,6 +12,12 @@ import Button from "../../../shared-components/button";
  * @returns ReactElement
  */
 export default function About() {
+  const navigate = useNavigate();
+  
+  const handleGetMeasured = () => {
+    navigate("/get-measured");
+  };
+
   const bgImage = {
     backgroundRepeat: "no-repeat",
     backgroundSize: "cover",
@@ -218,6 +225,7 @@ export default function About() {
                 variant="solid"
                 className="w-full bg-primary-950 max-w-[185px]"
                 text="Start your custom fit"
+                onClick={handleGetMeasured}
               />
             </div>
           </div>
