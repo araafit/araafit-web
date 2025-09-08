@@ -18,7 +18,12 @@ import {
   DashboardEditMeasurementPage,
   DashboardOrderDetailPage,
 } from "./user-dashboard/import-entry";
-import GetMeasured from "./get-measured/get-measured";
+import {
+  GetMeasured,
+  ManualMeasurement,
+  MeasurementSummary,
+} from "./get-measured/import-entry";
+// import Guest from "./guest-user/guest";
 
 /* ---------------------------------------------------------------- */
 
@@ -40,8 +45,26 @@ const pagesRoutes = createBrowserRouter([
   },
   {
     path: "get-measured",
-    element: <GetMeasured />,
+    children: [
+      {
+        path: "",
+        element: <GetMeasured />,
+        index: true,
+      },
+      {
+        path: "/get-measured/manual",
+        element: <ManualMeasurement />,
+      },
+      {
+        path: "/get-measured/summary",
+        element: <MeasurementSummary />,
+      },
+    ],
   },
+  // {
+  //   path: "shop",
+  //   element: <Guest />,
+  // },
   {
     path: "auth",
     children: [

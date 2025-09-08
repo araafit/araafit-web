@@ -3,6 +3,7 @@ export type SpinnerShape = {
   arcColor?: string;
   circleColor?: string;
   speed?: "slow" | "normal" | "fast";
+  isLoading?: boolean;
   className?: string;
 };
 
@@ -16,6 +17,7 @@ export default function Spinner({
   arcColor = "white", // Brand color -- green
   circleColor = "#FFFFFF", // Brand color -- white
   speed = "normal",
+  isLoading,
   className,
 }: SpinnerShape) {
   // Map size props to actual dimensions
@@ -36,6 +38,8 @@ export default function Spinner({
   // Get size and speed classes
   const sizeClass = sizeMap[size];
   const speedClass = speedMap[speed];
+
+  if (!isLoading) return null
 
   return (
     <div className={`inline-block ${sizeClass} ${className}`}>

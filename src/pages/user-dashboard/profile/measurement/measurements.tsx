@@ -2,7 +2,7 @@ import React from "react";
 import Button from "../../../../shared-components/button";
 import { PencilSimpleIcon } from "@phosphor-icons/react";
 import araafitWatermark from "./araafit-watermark.png";
-import { measurementData } from "../../_data/_profile";
+import { measurementInProfile } from "../../_data/_profile";
 import { useNavigate } from "react-router-dom";
 // import showToast from "../../../../utils/notification";
 /* -------------------------------------------------------------- */
@@ -53,37 +53,37 @@ export default function Measurements() {
             <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
               <span className="text-neutral-800 font-medium">Bust</span>
               <span className="font-semibold text-neutral-950">
-                {measurementData.bust}
+                {measurementInProfile.bust}
               </span>
             </div>
             <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
               <span className="text-neutral-800 font-medium">Waist</span>
               <span className="font-semibold text-neutral-950">
-                {measurementData.waist}
+                {measurementInProfile.waist}
               </span>
             </div>
             <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
               <span className="text-neutral-800 font-medium">Hip (inches)</span>
               <span className="font-semibold text-neutral-950">
-                {measurementData.hip}
+                {measurementInProfile.hip}
               </span>
             </div>
             <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
               <span className="text-neutral-800 font-medium">Height</span>
               <span className="font-semibold text-neutral-950">
-                {measurementData.height}
+                {measurementInProfile.height}
               </span>
             </div>
             <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
               <span className="text-neutral-800 font-medium">Dress size</span>
               <span className="font-semibold text-neutral-950">
-                {measurementData.dressSize}
+                {measurementInProfile.dressSize}
               </span>
             </div>
             <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
               <span className="text-neutral-800 font-medium">Skin Tone</span>
               <span className="font-semibold text-neutral-950">
-                {measurementData.skinTone}
+                {measurementInProfile.skinTone}
               </span>
             </div>
           </div>
