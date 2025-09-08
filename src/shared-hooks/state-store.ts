@@ -7,6 +7,7 @@ import {
   type ReadyToWear,
   type RecommendedFabric,
 } from "../pages/user-dashboard/_data/_home";
+import { type SelectedMeasurement } from "../pages/get-measured/_data/_manual-measurement";
 import {
   cartItems,
   type CartItem,
@@ -14,10 +15,13 @@ import {
   type DeliveryInfo,
 } from "../pages/user-dashboard/_data/_cart";
 import {
-  measurementData,
-  type MeasurementData,
+  measurementInProfile,
+  type MeasurementInProfile,
 } from "../pages/user-dashboard/_data/_profile";
-import { billingCards, type BillingCard } from "../pages/user-dashboard/_data/_card";
+import {
+  billingCards,
+  type BillingCard,
+} from "../pages/user-dashboard/_data/_card";
 
 /* --------------------------------------------------------------------------------------- */
 
@@ -25,6 +29,32 @@ import { billingCards, type BillingCard } from "../pages/user-dashboard/_data/_c
 export const useAuthStore = create((set) => ({
   user: null,
   login: (user: any) => set({ user }),
+}));
+
+// ------------------- Measurements ---------------------
+interface MeasurementState {
+  data: SelectedMeasurement;
+  updateMeasurement: (name: string, value: string | number) => void;
+}
+
+const measurementStoreState = {
+  bust: "36",
+  waist: "33/34",
+  hip: "44",
+  height: "5'3",
+  dressSize: "14",
+  skinTone: "#deb588",
+};
+
+export const useMeasurementsStore = create<MeasurementState>((set) => ({
+  data: measurementStoreState,
+  updateMeasurement: (name: string, value: string | number) =>
+    set((state) => ({
+      data: {
+        ...state.data,
+        [name]: value,
+      },
+    })),
 }));
 
 // ------------------- Shop ----------------------
@@ -103,7 +133,7 @@ export const useCartStore = create<CartState>((set) => ({
 
 export interface ProfileState {
   myProfile: any[];
-  measurement?: MeasurementData;
+  measurement?: MeasurementInProfile;
   card?: any[];
   notification?: any[];
 }
@@ -111,7 +141,7 @@ export interface ProfileState {
 // @ts-ignore
 export const useProfileState = create<ProfileState>((set) => ({
   myProfile: [],
-  measurement: measurementData,
+  measurement: measurementInProfile,
   card: [],
   notification: [],
 }));
