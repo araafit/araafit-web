@@ -7,7 +7,7 @@ export interface CardData {
   cvv?: number | string;
 }
 
-export interface MeasurementData {
+export interface MeasurementInProfile {
   bust: string | number;
   waist: string | number;
   hip: string | number;
@@ -16,7 +16,7 @@ export interface MeasurementData {
   skinTone: string | number;
 }
 
-export const measurementData: MeasurementData = {
+export const measurementInProfile: MeasurementInProfile = {
   bust: 40,
   waist: 40,
   hip: 38,
