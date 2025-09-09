@@ -1,6 +1,5 @@
-import { useShop } from "./context/shop-context";
 import Card from "../../../shared-components/card";
-import { useCartStore } from "../../../shared-hooks/state-store";
+import { useCartStore, useShopStore } from "../../../shared-hooks/state-store";
 /* ------------------------------------------------------------------ */
 
 /**
@@ -9,7 +8,7 @@ import { useCartStore } from "../../../shared-hooks/state-store";
  * @returns ReactElement
  */
 export default function FabricItems() {
-  const { fabricItems } = useShop();
+  const fabricItems = useShopStore((state) => state.fabrics);
   const addToCart = useCartStore((state) => state.addItem);
 
   return (

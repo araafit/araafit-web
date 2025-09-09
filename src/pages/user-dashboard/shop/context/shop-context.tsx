@@ -1,7 +1,15 @@
 import { useState, createContext, useContext } from "react";
 import type { Dispatch, SetStateAction } from "react";
-import { allItems as allItemsData, fabrics, dresses } from "../../_data/_shop";
-import type { AllItems, Dresses, Fabrics } from "../../_data/_shop";
+import {
+  allItems as allItemsData,
+  fabrics,
+  dresses,
+} from "../../../../_shared-data/_shop";
+import type {
+  AllItems,
+  Dresses,
+  Fabrics,
+} from "../../../../_shared-data/_shop";
 
 /* --------------------------------------------------------------------- */
 

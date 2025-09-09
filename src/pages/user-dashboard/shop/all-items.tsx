@@ -1,9 +1,9 @@
-import { useShop } from "./context/shop-context";
+import { useShopStore } from "../../../shared-hooks/state-store";
 import Card from "../../../shared-components/card";
 import { useCartStore } from "../../../shared-hooks/state-store";
 
 export default function AllItems() {
-  const { allItems } = useShop();
+  const allItems = useShopStore((state) => state.all);
   const addToCart = useCartStore((state) => state.addItem);
 
   return (
