@@ -1,19 +1,22 @@
 import { create } from "zustand";
 import {
   orderItems,
-  readyToWear,
-  recommendedFabrics,
   type OrderItem,
-  type ReadyToWear,
-  type RecommendedFabric,
 } from "../pages/user-dashboard/_data/_home";
+import {
+  allItems as allItemsData,
+  fabrics as fabricsData,
+  dresses as dressesData,
+} from "../_shared-data/_shop";
+import type { AllItems, Dresses, Fabrics } from "../_shared-data/_shop";
+
 import { type SelectedMeasurement } from "../pages/get-measured/_data/_manual-measurement";
 import {
   cartItems,
   type CartItem,
   type PaymentInfo,
   type DeliveryInfo,
-} from "../pages/user-dashboard/_data/_cart";
+} from "../_shared-data/_cart";
 import {
   measurementInProfile,
   type MeasurementInProfile,
@@ -59,14 +62,51 @@ export const useMeasurementsStore = create<MeasurementState>((set) => ({
 
 // ------------------- Shop ----------------------
 interface ShopState {
-  readyToWearDresses: ReadyToWear[];
-  recommendedFabrics: RecommendedFabric[];
-  all: any[];
+  dresses: Dresses[];
+  fabrics: Fabrics[];
+  all: AllItems[];
+  searchDresses: (query: string) => void;
+  searchFabrics: (query: string) => void;
+  searchAll: (query: string) => void;
 }
-export const useShopStore = create<ShopState>(() => ({
-  readyToWearDresses: readyToWear || [],
-  recommendedFabrics: recommendedFabrics || [],
-  all: [],
+
+export const useShopStore = create<ShopState>((set) => ({
+  dresses: dressesData || [],
+  fabrics: fabricsData || [],
+  all: allItemsData || [],
+  searchDresses: (query: string) => {
+    return set((state) => {
+      const filtered = state.dresses.filter((dress) =>
+        dress.name?.toLowerCase().includes(query.toLowerCase())
+      );
+      return {
+        ...state,
+        dresses: filtered.length > 0 ? filtered : dressesData,
+      };
+    });
+  },
+  searchFabrics: (query: string) => {
+    return set((state) => {
+      const filtered = state.fabrics.filter((fabric) =>
+        fabric.name?.toLowerCase().includes(query.toLowerCase())
+      );
+      return {
+        ...state,
+        fabrics: filtered.length > 0 ? filtered : fabricsData,
+      };
+    });
+  },
+  searchAll: (query: string) => {
+    return set((state) => {
+      const filtered = state.all.filter((item) =>
+        item.name?.toLowerCase().includes(query.toLowerCase())
+      );
+      return {
+        ...state,
+        all: filtered.length > 0 ? filtered : allItemsData,
+      };
+    });
+  },
 }));
 
 // ------------------- Orders ---------------------
