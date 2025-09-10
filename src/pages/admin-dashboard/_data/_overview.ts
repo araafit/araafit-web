@@ -52,6 +52,40 @@ export const OverviewCards2: OverviewFigures[] = [
     icon: ShoppingBagIcon,
   },
 ];
+export const OverviewCards3: OverviewFigures[] = [
+  {
+    title: "Total Customers",
+    figures: "3,000",
+    icon: UserIcon,
+  },
+  {
+    title: "New Customers",
+    figures: "30",
+    icon: DressIcon,
+  },
+  {
+    title: "Total Amount Spent",
+    figures: "1,500,000",
+    icon: ShoppingBagIcon,
+  },
+];
+export const OverviewCards4: OverviewFigures[] = [
+  {
+    title: "Amount Spent",
+    figures: "1,500,000",
+    icon: ShoppingBagIcon,
+  },
+  {
+    title: "Total Orders",
+    figures: "3,000",
+    icon: UserIcon,
+  },
+  {
+    title: "Total Requests",
+    figures: "30",
+    icon: DressIcon,
+  },
+];
 
 // ---------------------Order items--------------------------------
 export type OrderItem = {
@@ -303,6 +337,7 @@ export const orderItems: Order[] = [
 type CustomerActivity = {
   customerName: string;
   activity: string;
+  status: string;
   amountSpent: number;
   dateTime: string; // ISO string or readable format
 };
@@ -312,24 +347,29 @@ export const customerActivityArray: CustomerActivity[] = [
     activity: "Purchased subscription",
     amountSpent: 25000,
     dateTime: "15 May 2025 6:00 PM",
+    status: "Pending",
   },
   {
     customerName: "John Doe",
     activity: "Upgraded plan",
     amountSpent: 15000,
     dateTime: "16 May 2025 10:30 AM",
+    status: "Pending",
   },
   {
     customerName: "Sarah James",
     activity: "One-time purchase",
     amountSpent: 8000,
     dateTime: "17 May 2025 2:15 PM",
+    status: "Pending",
   },
+
   {
     customerName: "Michael Lee",
     activity: "Renewed subscription",
     amountSpent: 25000,
     dateTime: "18 May 2025 9:45 AM",
+    status: "Pending",
   },
 ];
 // ---------------------Order Statuses--------------------------------

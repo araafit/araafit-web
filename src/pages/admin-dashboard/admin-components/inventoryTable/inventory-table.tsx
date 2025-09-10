@@ -57,6 +57,16 @@ import * as XLSX from "xlsx";
 import { TrashIcon } from "lucide-react";
 import { inventoryItemSchema } from "./schema";
 import type { FilterFn } from "@tanstack/react-table";
+import { Link } from "react-router-dom";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../../../ui/dialog";
 
 type InventoryItem = z.infer<typeof inventoryItemSchema>;
 
@@ -176,24 +186,59 @@ const columns: ColumnDef<z.infer<typeof inventoryItemSchema>>[] = [
           onClick={() => console.log("View", row.original.orderId)}
           className="text-[#9A6C50] hover:underline flex items-center gap-1"
         >
-          <span>View</span>
+          <Link to={`/admin-dashboard/inventory/${row.original.orderId}`}>
+            View
+          </Link>
         </button>
-
         {/* Edit */}
-        <button
-          onClick={() => console.log("Edit", row.original.orderId)}
-          className=""
-        >
-          <PencilSimpleIcon size={20} />
-        </button>
-
+        <Link to={`/admin-dashboard/inventory/${row.original.orderId}/edit`}>
+          <button
+            onClick={() => console.log("Edit", row.original.orderId)}
+            className=""
+          >
+            <PencilSimpleIcon size={20} />
+          </button>
+        </Link>
         {/* Delete */}
-        <button
-          onClick={() => console.log("Delete", row.original.orderId)}
-          className="text-red-600 hover:text-red-800"
-        >
-          <TrashIcon size={20} />
-        </button>
+        <Dialog>
+          <DialogTrigger>
+            {" "}
+            <button
+              onClick={() => console.log("Delete", row.original.orderId)}
+              className="text-red-600 hover:text-red-800"
+            >
+              <TrashIcon size={20} />
+            </button>
+          </DialogTrigger>
+          <DialogContent className="max-w-[400px]">
+            <DialogHeader>
+              <DialogTitle className="mb-4">
+                Delete Araafit Cream & Orange Jumpsuit?
+              </DialogTitle>
+              <DialogDescription className="mb-4">
+                Are you sure you want to delete this item and all its
+                information? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-auto w-full gap-3">
+              {" "}
+              <DialogClose>
+                <Button
+                  type="button"
+                  text="Cancel"
+                  variant="clear"
+                  className="text-[#3D3D3D] border h-[37px] w-[170px] flex justify-center items-center text-sm border-[#E7E7E7] shadow-sm"
+                />{" "}
+              </DialogClose>
+              <Button
+                type="button"
+                text="Delete"
+                variant="solid"
+                className="text-white flex-1 bg-red-600  h-[37px] flex justify-center items-center text-sm shadow-sm"
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     ),
   },
@@ -213,7 +258,7 @@ export function DataTable({
     []
   );
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [globalFilter, setGlobalFilter] = React.useState(""); // search state
+  const [globalFilter, setGlobalFilter] = React.useState("");
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,
@@ -240,10 +285,10 @@ export function DataTable({
       rowSelection,
       columnFilters,
       pagination,
-      globalFilter, // enable global search
+      globalFilter,
     },
     filterFns: {
-      equalsIgnoreCase, // <- register here
+      equalsIgnoreCase,
     },
     getRowId: (row) => row.orderId.toString(),
     enableRowSelection: true,

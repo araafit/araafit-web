@@ -21,6 +21,14 @@ import {
   AdminDashboardRecentActivities,
   AdminDashboardOrders,
   AdminDashboardInventory,
+  AdminDashboardViewInventory,
+  AdminDashboardEditInventory,
+  AdminDashboardUploadInventory,
+  AdminDashboardCustomers,
+  AdminDashboardCustomersDetails,
+  AdminDashboardCustomersActivities,
+  AdminDashboardSettings,
+  AdminDashboardDiscounts,
 } from "./admin-dashboard/import-entry";
 
 /* ---------------------------------------------------------------- */
@@ -46,7 +54,12 @@ const pagesRoutes = createBrowserRouter([
     children: [
       {
         path: "login",
-        element: <Login />,
+        element: <Login userType="guest" />,
+        index: true,
+      },
+      {
+        path: "admin-login",
+        element: <Login userType="admin" />,
         index: true,
       },
       {
@@ -108,13 +121,49 @@ const pagesRoutes = createBrowserRouter([
         element: <AdminDashboardOrders />,
         index: true,
       },
-      { path: "inventory", element: <AdminDashboardInventory /> },
+      {
+        path: "inventory",
+        element: <AdminDashboardInventory />,
+      },
+      {
+        path: "inventory/:inventoryId",
+        element: <AdminDashboardViewInventory />,
+      },
+      {
+        path: "inventory/:inventoryId/edit",
+        element: <AdminDashboardEditInventory />,
+      },
+      {
+        path: "inventory/upload",
+        element: <AdminDashboardUploadInventory />,
+      },
       {
         path: "orders",
         children: [
           { path: "", element: <DashboardOrdersPage />, index: true },
           { path: ":orderId", element: <DashboardOrderDetailPage /> },
         ],
+      },
+      {
+        path: "customers",
+        element: <AdminDashboardCustomers />,
+      },
+      {
+        path: "customers/:customersId",
+        element: <AdminDashboardCustomersDetails />,
+      },
+
+      {
+        path: "customers/123/activities",
+        element: <AdminDashboardCustomersActivities />,
+      },
+      {
+        path: "settings",
+        element: <AdminDashboardSettings />,
+      },
+      {
+        path: "discounts",
+        element: <AdminDashboardDiscounts />,
       },
       {
         path: "cart",

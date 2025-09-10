@@ -8,13 +8,16 @@ import Spinner from "../../../shared-components/spinner";
 /* ------------------------------------------------------ */
 
 type FormValues = { email: string; password: string };
+type LoginProps = {
+  userType: "guest" | "admin";
+};
 
 /**
  * Araafit Login page
  *
  * @returns ReactElement
  */
-export default function Login() {
+export default function Login({ userType }: LoginProps) {
   const [isLoading, setLoading] = useState(false);
   const googleAuth = () => console.log("Google auth");
 
@@ -35,9 +38,17 @@ export default function Login() {
   return (
     <AuthLayout
       title="Login"
-      description="Log in to access your profile, saved styles, and past orders."
-      googleAutBtnText="Continue with Google"
-      googleAuthTrigger={googleAuth}
+      description={
+        userType === "guest"
+          ? "Log in to access your profile, saved styles, and past orders."
+          : "Admin login"
+      }
+      {...(userType === "guest"
+        ? {
+            googleAutBtnText: "Continue with Google",
+            googleAuthTrigger: googleAuth,
+          }
+        : {})}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="w-full">
         <div className="w-full flex flex-col gap-4 mb-6">

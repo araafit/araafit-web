@@ -29,13 +29,17 @@ const navMenu = [
     icon: ShoppingBagIcon,
   },
   { name: "Inventory", link: "/admin-dashboard/inventory", icon: DressIcon },
-  { name: "Discounts", link: "/dashboard/cart", icon: SealPercentIcon },
+  {
+    name: "Discounts",
+    link: "/admin-dashboard/discounts",
+    icon: SealPercentIcon,
+  },
   {
     name: "Customers",
-    link: "/dashboard/profile",
+    link: "/admin-dashboard/customers",
     icon: UserIcon,
   },
-  { name: "Settings", link: "/dashboard/profile", icon: GearIcon },
+  { name: "Settings", link: "/admin-dashboard/settings", icon: GearIcon },
 ];
 
 /**

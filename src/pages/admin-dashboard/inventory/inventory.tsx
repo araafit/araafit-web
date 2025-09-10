@@ -6,6 +6,8 @@ import NotificationBell from "../admin-components/top-bar/notification-bell";
 import Stockcount from "./stock-count";
 import { DataTable } from "../admin-components/inventoryTable/inventory-table";
 import { InventoryItems } from "../_data/_overview";
+import { Outlet } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export function AdminDashboardInventory() {
   const title = (
@@ -30,13 +32,14 @@ export function AdminDashboardInventory() {
             rightSide={
               <>
                 <NotificationBell />
-
-                <Button
-                  text="Add Inventory"
-                  icon={<PlusIcon className="size-[1.25rem] text-white" />}
-                  variant="solid"
-                  className="text-white shadow-sm"
-                />
+                <Link to={`/admin-dashboard/inventory/upload`}>
+                  <Button
+                    text="Add Inventory"
+                    icon={<PlusIcon className="size-[1.25rem] text-white" />}
+                    variant="solid"
+                    className="text-white shadow-sm"
+                  />
+                </Link>
               </>
             }
           />
@@ -48,7 +51,7 @@ export function AdminDashboardInventory() {
             Track and manage your inventory with ease.
           </span>
           {/* ----------- */}
-          <div className="bg-white w-full max-w-[1126px] mx-auto py-4 flex justify-center rounded-sm items-center">
+          <div className="bg-white w-full max-w-[1126px] mx-auto py-4 my-8 flex justify-center rounded-sm items-center">
             <div className="flex items-center gap-4">
               <div className="h-10 w-10 bg-[#E8E8E8] rounded flex items-center justify-center">
                 <DressIcon className="size-[1.25rem]" />
@@ -81,6 +84,7 @@ export function AdminDashboardInventory() {
           <div className="w-full  bg-white rounded-sm px-4 mt-6 py-6 flex flex-col gap-6">
             <DataTable data={InventoryItems} />
           </div>
+          <Outlet />
         </div>
       </div>
     </AdminDashboardLayout>
