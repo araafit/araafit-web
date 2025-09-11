@@ -23,7 +23,13 @@ import {
   ManualMeasurement,
   MeasurementSummary,
 } from "./get-measured/import-entry";
-// import Guest from "./guest-user/guest";
+import {
+  GuestShopPage,
+  GuestDressDetailPage,
+  GuestFabricDetailPage,
+} from "./guest/guest-shop/import-entry";
+import GuestCartPage from "./guest/cart/guest-cart";
+import GuestCartCheckout from "./guest/cart/guest-cart-checkout";
 
 /* ---------------------------------------------------------------- */
 
@@ -61,10 +67,38 @@ const pagesRoutes = createBrowserRouter([
       },
     ],
   },
-  // {
-  //   path: "shop",
-  //   element: <Guest />,
-  // },
+  {
+    path: "shop",
+    children: [
+      {
+        path:"",
+        element: <GuestShopPage />,
+        index: true
+      },
+      {
+        path: "dress/:itemName",
+        element: <GuestDressDetailPage />,
+      },
+      {
+        path: "fabric/:itemName",
+        element: <GuestFabricDetailPage />,
+      },
+    ],
+  },
+  {
+    path: "cart",
+    children: [
+      {
+        path: "",
+        element: <GuestCartPage />,
+        index: true,
+      },
+      {
+        path: "checkout",
+        element: <GuestCartCheckout />,
+      },
+    ],
+  },
   {
     path: "auth",
     children: [
