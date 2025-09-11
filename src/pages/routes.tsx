@@ -18,7 +18,18 @@ import {
   DashboardEditMeasurementPage,
   DashboardOrderDetailPage,
 } from "./user-dashboard/import-entry";
-import GetMeasured from "./get-measured/get-measured";
+import {
+  GetMeasured,
+  ManualMeasurement,
+  MeasurementSummary,
+} from "./get-measured/import-entry";
+import {
+  GuestShopPage,
+  GuestDressDetailPage,
+  GuestFabricDetailPage,
+} from "./guest/guest-shop/import-entry";
+import GuestCartPage from "./guest/cart/guest-cart";
+import GuestCartCheckout from "./guest/cart/guest-cart-checkout";
 
 /* ---------------------------------------------------------------- */
 
@@ -40,7 +51,53 @@ const pagesRoutes = createBrowserRouter([
   },
   {
     path: "get-measured",
-    element: <GetMeasured />,
+    children: [
+      {
+        path: "",
+        element: <GetMeasured />,
+        index: true,
+      },
+      {
+        path: "/get-measured/manual",
+        element: <ManualMeasurement />,
+      },
+      {
+        path: "/get-measured/summary",
+        element: <MeasurementSummary />,
+      },
+    ],
+  },
+  {
+    path: "shop",
+    children: [
+      {
+        path:"",
+        element: <GuestShopPage />,
+        index: true
+      },
+      {
+        path: "dress/:itemName",
+        element: <GuestDressDetailPage />,
+      },
+      {
+        path: "fabric/:itemName",
+        element: <GuestFabricDetailPage />,
+      },
+    ],
+  },
+  {
+    path: "cart",
+    children: [
+      {
+        path: "",
+        element: <GuestCartPage />,
+        index: true,
+      },
+      {
+        path: "checkout",
+        element: <GuestCartCheckout />,
+      },
+    ],
   },
   {
     path: "auth",

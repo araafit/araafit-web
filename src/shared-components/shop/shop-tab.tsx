@@ -1,9 +1,9 @@
-import React, {useRef, useEffect} from "react";
+import React, { useRef, useEffect } from "react";
 import { useState, useCallback, memo, Children } from "react";
-import { CN } from "../../../utils/class-merge";
-import Select from "../../../shared-components/select";
+import { CN } from "../../utils/class-merge";
+import Select from "../select";
 import { MagnifyingGlassIcon } from "@phosphor-icons/react";
-import { useShop } from "./context/shop-context";
+import { useShopStore } from "../../shared-hooks/state-store";
 
 /* ---------------------------------------------------------------------- */
 
@@ -73,37 +73,31 @@ const ShopTab = ({
   onChange,
   children,
 }: TabShape) => {
-  const {
-    allItems,
-    dressItems,
-    fabricItems,
-    setAllItem,
-    setFabricItems,
-    setDressItems,
-  } = useShop();
   const [activeTab, setActiveTab] = useState<number>(defaultTab);
+  const allItems = useShopStore((state) => state.all);
+  const dressItems = useShopStore((state) => state.dresses);
+  const fabricItems = useShopStore((state) => state.fabrics);
+
+  // Search through items
+  const searchAllItem = useShopStore((state) => state.searchAll);
+  const searchFabric = useShopStore((state) => state.searchFabrics);
+  const searchDresses = useShopStore((state) => state.searchDresses);
 
   const originalAllItems = useRef(allItems);
   const originalDressItems = useRef(dressItems);
   const originalFabricItems = useRef(fabricItems);
 
-  // useEffect(() => {
-  //   if (allItems.length > 0 && originalAllItems.current.length === 0) {
-  //     originalAllItems.current = [...allItems]
-  //   }
-  // })
-
   useEffect(() => {
     if (dressItems.length > 0 && originalDressItems.current.length === 0) {
-      originalAllItems.current = [...dressItems]
+      originalAllItems.current = [...dressItems];
     }
-  }, [dressItems])
+  }, [dressItems]);
 
   useEffect(() => {
     if (fabricItems.length > 0 && originalFabricItems.current.length === 0) {
-      originalAllItems.current = [...fabricItems]
+      originalAllItems.current = [...fabricItems];
     }
-  }, [fabricItems])
+  }, [fabricItems]);
 
   const handleTabClick = useCallback(
     (index: number, tabItem?: string) => {
@@ -113,59 +107,23 @@ const ShopTab = ({
     [onChange]
   );
 
-  const handleSearch = (value: string) => {
-    // All items
-    if (activeTab === 0) {
-      if (!value || value.trim() === "") {
-        setAllItem([...originalAllItems.current]);
-      }
-
-      const filteredItems = allItems.filter((item) =>
-        item.name.toLowerCase().includes(value.toLowerCase().trim())
-      );
-
-      setAllItem(filteredItems)
-
-      console.log(filteredItems);
-
+  // Search all, dresses and fabric items
+  const handleSearch = (searchInput: string) => {
+    if (!searchInput || searchInput.trim() === "") {
       return;
     }
 
-    // Dresses
     if (activeTab === 1) {
-      if (!value || value.trim() === "") {
-        return;
-      }
-
-      const filteredItems = dressItems.filter((item) =>
-        item.name.toLowerCase().includes(value.toLowerCase())
-      );
-
-      setDressItems(filteredItems);
-
+      searchDresses(searchInput);
       return;
     }
 
-    // Fabrics
     if (activeTab === 2) {
-      if (!value || value.trim() === "") {
-        return;
-      }
-
-      const filteredItems = fabricItems.filter((item) =>
-        item.name.toLowerCase().includes(value.toLowerCase())
-      );
-
-      setFabricItems(filteredItems);
-
+      searchFabric(searchInput);
       return;
     }
 
-    activeTab === 0
-      ? setAllItem(allItems)
-      : activeTab === 1
-      ? setDressItems(dressItems)
-      : setFabricItems(fabricItems);
+    searchAllItem(searchInput);
   };
 
   const options = [

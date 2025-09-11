@@ -31,7 +31,7 @@ const StepContent = () => {
  *
  * @returns ReactElement
  */
-export default function GetMeasuredLayout() {
+export function GetMeasured() {
   return (
     <section className="h-screen bg-[#F5F5F5] px-0 py-0 md:py-2 md:px-16 overflow-y-scroll relative">
       <div className="w-full h-[809px] bg-white flex justify-center border rounded-md p-14">
