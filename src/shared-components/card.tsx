@@ -2,7 +2,7 @@ import { memo } from "react";
 import { ShoppingCartSimpleIcon } from "@phosphor-icons/react";
 import { CN } from "../utils/class-merge";
 import { formatPrice } from "../utils/format-price";
-import { type CartItem } from "../pages/user-dashboard/_data/_cart";
+import { type CartItem } from "../_shared-data/_cart";
 import { Link } from "react-router-dom";
 
 /* --------------------------------------------------------------------------- */
