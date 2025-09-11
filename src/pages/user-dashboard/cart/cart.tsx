@@ -21,7 +21,7 @@ export function DashboardCartPage() {
     <div className="font-inter font-light capitalize flex items-center">
       <span className="text-primary-900">Araafit</span>
       <CaretRightIcon className="text-[#979797]" />
-      <span className="text-[#979797]">Caret</span>
+      <span className="text-[#979797]">Cart</span>
     </div>
   );
 

@@ -25,8 +25,12 @@ export default function AllItems({
           addToCart={() => addToCart(item)}
           link={
             userPage === "shop"
-              ? `/${userPage}/${item.category}/${item.name.toLowerCase().replace(" ","-")}`
-              : `/${userPage}/shop/${item.category}/${item.name.toLowerCase().replace(" ","-")}`
+              ? `/${userPage}/${item.category}/${item.name
+                  .toLowerCase()
+                  .replace(" ", "-")}`
+              : `/${userPage}/shop/${item.category}/${item.name
+                  .toLowerCase()
+                  .replace(" ", "-")}`
           }
         />
       ))}

@@ -1,5 +1,9 @@
 import { CaretRightIcon } from "@phosphor-icons/react";
-import { useCartStore, useOrdersStore, useShopStore } from "../../shared-hooks/state-store";
+import {
+  useCartStore,
+  useOrdersStore,
+  useShopStore,
+} from "../../shared-hooks/state-store";
 import UserDashboardLayout from "../../layouts/user-dashboard/dashboard-layout";
 import Button from "../../shared-components/button";
 import { formatPrice } from "../../utils/format-price";
@@ -17,8 +21,9 @@ import Card from "../../shared-components/card";
  */
 export function DashboardHomePage() {
   const { items: orderItems } = useOrdersStore();
-  const { readyToWearDresses, recommendedFabrics } = useShopStore();
-  const addToCart = useCartStore(state => state.addItem);
+  const { dresses: readyToWearDresses, fabrics: recommendedFabrics } =
+    useShopStore();
+  const addToCart = useCartStore((state) => state.addItem);
   const orderIsEmpty = orderItems.length === 0;
 
   const title = (
@@ -147,9 +152,9 @@ export function DashboardHomePage() {
             </div>
 
             <div className="grid grid-cols-3 gap-6">
-              {readyToWearDresses.map((item) => (
+              {readyToWearDresses.map((item, idx) => (
                 <Card
-                  key={item.orderId}
+                  key={idx}
                   itemName={item.name}
                   itemCost={item.cost}
                   itemImage={item.image}
@@ -169,9 +174,9 @@ export function DashboardHomePage() {
             </div>
 
             <div className="grid grid-cols-3 gap-6">
-              {recommendedFabrics.map((item) => (
+              {recommendedFabrics.map((item, idx) => (
                 <Card
-                  key={item.orderId}
+                  key={idx}
                   itemName={item.name}
                   itemCost={item.cost}
                   itemImage={item.image}
