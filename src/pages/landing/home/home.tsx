@@ -20,6 +20,7 @@ import {
   hookSectionImage3,
 } from "./images/images";
 import Testimonials from "./testimonials";
+import { useNavigate } from "react-router-dom";
 
 /* --------------------------------------------------------------------- */
 
@@ -38,6 +39,7 @@ export function HomePage() {
     features[0]
   );
   const [windowWidth, _] = useWindowSize();
+  const navigate = useNavigate();
 
   return (
     <LandingLayout>
@@ -65,12 +67,14 @@ export function HomePage() {
                 text="Get measured"
                 variant="solid"
                 className="w-full md:max-w-[9.375rem]"
+                onClick={() => navigate("/get-measured")}
               />
 
               <Button
                 type="button"
                 variant="clear"
                 className="w-full md:max-w-[14.8125rem] text-primary-500"
+                onClick={() => navigate("/auth/register")}
               >
                 <div className="w-full flex items-center justify-center gap-2">
                   <span>Create an account</span>

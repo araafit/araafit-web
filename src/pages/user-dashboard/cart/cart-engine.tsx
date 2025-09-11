@@ -104,7 +104,7 @@ export default function CartEngine({ cartData }: CartEngine) {
 
                   <TrashSimpleIcon
                     className="size-[20px] text-red-500 cursor-pointer"
-                    onClick={() => triggerModal(item.orderId)}
+                    onClick={() => item.orderId && triggerModal(item.orderId)}
                   />
                 </div>
               </div>

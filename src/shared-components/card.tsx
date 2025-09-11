@@ -3,6 +3,7 @@ import { ShoppingCartSimpleIcon } from "@phosphor-icons/react";
 import { CN } from "../utils/class-merge";
 import { formatPrice } from "../utils/format-price";
 import { type CartItem } from "../pages/user-dashboard/_data/_cart";
+import { Link } from "react-router-dom";
 
 /* --------------------------------------------------------------------------- */
 
@@ -11,6 +12,7 @@ interface Card {
   itemName: string;
   itemImage: string;
   itemCost: string | number;
+  link?: string;
   addToCart: (item: CartItem) => void;
 }
 
@@ -24,10 +26,11 @@ function Card({
   itemName,
   itemImage,
   itemCost,
+  link,
   addToCart,
 }: Card) {
   return (
-    <div className={CN("rounded-t-md bg-white", containerClass)}>
+    <div className={CN("rounded-t-md bg-white relative", containerClass)}>
       <img
         src={itemImage}
         alt={itemName}
@@ -48,6 +51,13 @@ function Card({
           />
         </div>
       </div>
+
+      {link && (
+        <Link
+          to={link}
+          className="absolute top-0 left-0 w-full h-[86%] bg-transparent"
+        />
+      )}
     </div>
   );
 }

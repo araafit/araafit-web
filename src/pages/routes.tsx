@@ -9,6 +9,8 @@ import Register from "./user-auth/register/register";
 import {
   DashboardHomePage,
   DashboardShopPage,
+  DashboardShopFabricDetailPage,
+  DashboardShopDressDetailPage,
   DashboardOrdersPage,
   DashboardCartPage,
   DashboardCartCheckout,
@@ -31,6 +33,7 @@ import {
   AdminDashboardDiscounts,
 } from "./admin-dashboard/import-entry";
 import AdminLogin from "./admin-auth/login/login";
+import GetMeasured from "./get-measured/get-measured";
 
 /* ---------------------------------------------------------------- */
 
@@ -49,6 +52,10 @@ const pagesRoutes = createBrowserRouter([
   {
     path: "contact",
     element: <Contact />,
+  },
+  {
+    path: "get-measured",
+    element: <GetMeasured />,
   },
   {
     path: "auth",
@@ -80,7 +87,20 @@ const pagesRoutes = createBrowserRouter([
     path: "dashboard",
     children: [
       { path: "", element: <DashboardHomePage />, index: true },
-      { path: "shop", element: <DashboardShopPage /> },
+      {
+        path: "shop",
+        children: [
+          { path: "", element: <DashboardShopPage />, index: true },
+          {
+            path: "dress/:itemName",
+            element: <DashboardShopDressDetailPage />,
+          },
+          {
+            path: "fabric/:itemName",
+            element: <DashboardShopFabricDetailPage />,
+          },
+        ],
+      },
       {
         path: "orders",
         children: [

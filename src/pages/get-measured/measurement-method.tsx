@@ -1,0 +1,163 @@
+import { useState } from "react";
+import { WarningIcon } from "@phosphor-icons/react";
+import { useGetMeasured } from "./context/get-measured-context";
+import { MeasurementStepperLines } from "./stepper-lines";
+import Button from "../../shared-components/button";
+import Modal from "../../shared-components/modal";
+import { useSwitch } from "../../shared-hooks/switch";
+import cameraImage from "./camera.png";
+import { useNavigate } from "react-router-dom";
+/* --------------------------------------------------------------------- */
+
+/**
+ *
+ * @returns ReactElement
+ */
+export function MeasurementMethod() {
+  const navigate = useNavigate();
+  const { toggleSwitch: onClose, switchValue: isOpen } = useSwitch(false);
+
+  const [method, setMethod] = useState<"manual" | "automated" | undefined>(
+    undefined
+  );
+  const { currentStep, stepTo } = useGetMeasured();
+
+  const Radio = ({ isClicked }: { isClicked: boolean }) => (
+    <div
+      className={`h-[1rem] w-[1rem] rounded-full border 
+       flex items-center justify-center ${
+         isClicked ? "border-primary-500" : "border-[#E8E8E8]"
+       }`}
+    >
+      {isClicked && (
+        <div className={`size-[6px] bg-primary-500 rounded-full`} />
+      )}
+    </div>
+  );
+
+  const continueHandler = () => {
+    if (method === "automated") {
+      onClose();
+    } else {
+      navigate("/get-measured/manual");
+    }
+  };
+
+  return (
+    <>
+      <div className="flex flex-col gap-[12rem]">
+        <div className="w-full flex flex-col gap-7">
+          <MeasurementStepperLines stepIndex={currentStep} />
+
+          <div className="w-[51rem] flex flex-col gap-6">
+            <div>
+              <h2 className="text-[2rem] text-[#1C1C1C] font-semibold mb-2">
+                Measurement Method
+              </h2>
+              <p className="text-neutral-500 font-inter">
+                How would you like to get measured?
+              </p>
+            </div>
+
+            <div
+              className={`flex items-start gap-2 bg-[#FFF8EB] rounded-md border border-[#B47409] py-2 px-4 ${
+                method === "automated" ? "visible" : "invisible"
+              }`}
+            >
+              <WarningIcon className="text-[#F59E0B]" />
+
+              <div className="w-full flex flex-col">
+                <div className="flex items-center gap-2 text-[#F59E0B]">
+                  <span>Instruction</span>
+                </div>
+
+                <p className="text-[#B47409] font-light">
+                  If your body has undergone augmentation, you might need to
+                  input measurements that were taken manually.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-8 ">
+              <div
+                className={`w-[19.625rem] rounded-md py-6 px-4 border ${
+                  method === "manual"
+                    ? "border-primary-500"
+                    : "border-neutral-100"
+                } flex flex-col gap-2 hover:border-primary-500 cursor-pointer`}
+                onClick={() => setMethod("manual")}
+              >
+                <Radio isClicked={method === "manual"} />
+                <h4 className="text-[18px] font-inter">
+                  Enter Measurements Manually
+                </h4>
+                <p className="text-neutral-500 text-base">
+                  Prefer to take control? Fill in your measurements manually to
+                  get a perfect fit tailored just for you.
+                </p>
+              </div>
+
+              <div
+                className={`w-[19.625rem] rounded-md py-6 px-4 border ${
+                  method === "automated"
+                    ? "border-primary-500"
+                    : "border-neutral-100"
+                } flex flex-col gap-2 hover:border-primary-500 cursor-pointer`}
+                onClick={() => setMethod("automated")}
+              >
+                <Radio isClicked={method === "automated"} />
+                <h4 className="text-[18px] font-inter">
+                  Get Measured with AraaFit
+                </h4>
+                <p className="text-neutral-500 text-base">
+                  Let AraaFit handle it for you! Using your camera, we’ll
+                  capture your body measurements quickly and securely.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <Button
+          text="Continue"
+          variant="solid"
+          disabled={!method}
+          className="w-[10rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed"
+          onClick={continueHandler}
+        />
+      </div>
+
+      <Modal onClose={onClose} isOpen={isOpen} containerClassName="w-[400px]">
+        <div className="flex flex-col items-center justify-center gap-3">
+          <img src={cameraImage} alt="" className="w-[9.375rem]" />
+
+          <div className="w-full flex flex-col gap-3">
+            <h4 className="text-[20px] font-semibold text-center">
+              Enable Camera Access
+            </h4>
+            <p className="w-[21rem] text-neutral-500 text-center">
+              To take accurate measurements, we need your permission to access
+              to the camera.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <Button
+              text="Cancel"
+              variant="outline"
+              className="w-[10rem] border-neutral-100 text-neutral-900"
+              onClick={onClose}
+            />
+
+            <Button
+              text="Allow"
+              variant="solid"
+              className="w-[10rem]"
+              onClick={() => stepTo(currentStep + 1)}
+            />
+          </div>
+        </div>
+      </Modal>
+    </>
+  );
+}

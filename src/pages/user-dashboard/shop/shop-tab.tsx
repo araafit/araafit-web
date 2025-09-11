@@ -1,8 +1,9 @@
-import React from "react";
+import React, {useRef, useEffect} from "react";
 import { useState, useCallback, memo, Children } from "react";
 import { CN } from "../../../utils/class-merge";
 import Select from "../../../shared-components/select";
 import { MagnifyingGlassIcon } from "@phosphor-icons/react";
+import { useShop } from "./context/shop-context";
 
 /* ---------------------------------------------------------------------- */
 
@@ -72,7 +73,37 @@ const ShopTab = ({
   onChange,
   children,
 }: TabShape) => {
+  const {
+    allItems,
+    dressItems,
+    fabricItems,
+    setAllItem,
+    setFabricItems,
+    setDressItems,
+  } = useShop();
   const [activeTab, setActiveTab] = useState<number>(defaultTab);
+
+  const originalAllItems = useRef(allItems);
+  const originalDressItems = useRef(dressItems);
+  const originalFabricItems = useRef(fabricItems);
+
+  // useEffect(() => {
+  //   if (allItems.length > 0 && originalAllItems.current.length === 0) {
+  //     originalAllItems.current = [...allItems]
+  //   }
+  // })
+
+  useEffect(() => {
+    if (dressItems.length > 0 && originalDressItems.current.length === 0) {
+      originalAllItems.current = [...dressItems]
+    }
+  }, [dressItems])
+
+  useEffect(() => {
+    if (fabricItems.length > 0 && originalFabricItems.current.length === 0) {
+      originalAllItems.current = [...fabricItems]
+    }
+  }, [fabricItems])
 
   const handleTabClick = useCallback(
     (index: number, tabItem?: string) => {
@@ -82,16 +113,78 @@ const ShopTab = ({
     [onChange]
   );
 
+  const handleSearch = (value: string) => {
+    // All items
+    if (activeTab === 0) {
+      if (!value || value.trim() === "") {
+        setAllItem([...originalAllItems.current]);
+      }
+
+      const filteredItems = allItems.filter((item) =>
+        item.name.toLowerCase().includes(value.toLowerCase().trim())
+      );
+
+      setAllItem(filteredItems)
+
+      console.log(filteredItems);
+
+      return;
+    }
+
+    // Dresses
+    if (activeTab === 1) {
+      if (!value || value.trim() === "") {
+        return;
+      }
+
+      const filteredItems = dressItems.filter((item) =>
+        item.name.toLowerCase().includes(value.toLowerCase())
+      );
+
+      setDressItems(filteredItems);
+
+      return;
+    }
+
+    // Fabrics
+    if (activeTab === 2) {
+      if (!value || value.trim() === "") {
+        return;
+      }
+
+      const filteredItems = fabricItems.filter((item) =>
+        item.name.toLowerCase().includes(value.toLowerCase())
+      );
+
+      setFabricItems(filteredItems);
+
+      return;
+    }
+
+    activeTab === 0
+      ? setAllItem(allItems)
+      : activeTab === 1
+      ? setDressItems(dressItems)
+      : setFabricItems(fabricItems);
+  };
+
   const options = [
-    { label: "label1", value: "value 1" },
-    { label: "label2", value: "value 2" },
-    [{ label: "label3", value: "value 3" }],
+    { label: "Measurement", value: "measurement" },
+    { label: "Skin tone", value: "skin tone" },
   ];
 
   return (
-    <div className={CN("rounded-lg", tabContainerClassName)}>
+    <div
+      className={CN(
+        "rounded-md relative size-full overflow-y-scroll",
+        tabContainerClassName
+      )}
+    >
       <div
-        className={CN("flex items-center justify-between", tabListClassName)}
+        className={CN(
+          "w-full flex items-center justify-between sticky top-0 left-0 z-10",
+          tabListClassName
+        )}
       >
         <div className="flex items-center space-x-1">
           {" "}
@@ -117,14 +210,20 @@ const ShopTab = ({
               id=""
               className="outline-none grow"
               placeholder="Search here"
+              onChange={(e) => handleSearch(e.target.value)}
             />
           </div>
 
-          <Select
-            options={options}
-            placeholder="Sort by: Measurement"
-            containerClassName="w-[12.5rem]"
-          />
+          <div className="grow flex items-center justify-between">
+            <span className="text-neutral-500">Sort by:</span>
+            <Select
+              options={options}
+              containerClassName="w-[8rem] ml-1"
+              selectClassName="border-none"
+              onChange={(item) => console.log(item)}
+              value="measurement"
+            />
+          </div>
         </div>
       </div>
 
