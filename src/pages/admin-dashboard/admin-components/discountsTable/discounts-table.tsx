@@ -92,8 +92,6 @@ declare module "@tanstack/react-table" {
 
 // --- SAMPLE DATA ---
 
-// eslint-disable-next-line react-refresh/only-export-components
-
 // --- COLUMNS ---
 const columns: ColumnDef<Discount>[] = [
   { accessorKey: "name", header: "Discount Name" },
