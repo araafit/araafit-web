@@ -50,10 +50,8 @@ function GuestPageLayout({ children }: { children: React.ReactElement }) {
         </div>
       </div>
 
-      <div className="size-full flex items-start justify-center">
-        <div className="w-full h-auto lg:w-[71.875rem] bg-white p-4 rounded-md relative">
+      <div className="size-full flex items-start justify-center overflow-scroll">
           {loading ? <Loader /> : children}
-        </div>
       </div>
     </main>
   );
