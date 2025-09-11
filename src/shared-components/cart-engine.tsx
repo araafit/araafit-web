@@ -1,21 +1,27 @@
-import { MinusIcon, PlusIcon, TrashSimpleIcon } from "@phosphor-icons/react";
-import { useState } from "react";
-import { useCartStore } from "../../../shared-hooks/state-store";
-import { useSwitch } from "../../../shared-hooks/switch";
-import Button from "../../../shared-components/button";
-import Modal from "../../../shared-components/modal";
-import { formatPrice } from "../../../utils/format-price";
-import showToast from "../../../utils/notification";
-import { type CartItem } from "../_data/_cart";
+import { memo, useState } from "react";
+import { type CartItem } from "../_shared-data/_cart";
 import { useNavigate } from "react-router-dom";
+import { useCartStore } from "../shared-hooks/state-store";
+import { useSwitch } from "../shared-hooks/switch";
+import showToast from "../utils/notification";
+import Button from "./button";
+import Modal from "./modal";
+import { MinusIcon, PlusIcon, TrashSimpleIcon } from "@phosphor-icons/react";
+import { formatPrice } from "../utils/format-price";
 
-/* ------------------------------------------------------------------------------------------ */
+/* ---------------------------------------------------------------------- */
 
 interface CartEngine {
   cartData: CartItem[];
+  checkoutLink: string;
 }
 
-export default function CartEngine({ cartData }: CartEngine) {
+/**
+ * CartEngine component for rendering the shopping cart items.
+ *
+ * @returns ReactElement
+ */
+function CartEngine({ cartData, checkoutLink }: CartEngine) {
   const [orderId, setOrderId] = useState<string | number>();
   const navigate = useNavigate();
   const removeItem = useCartStore((state) => state.removeItem);
@@ -133,7 +139,7 @@ export default function CartEngine({ cartData }: CartEngine) {
           text="Checkout"
           variant="solid"
           className="w-full max-w-[375px]"
-          onClick={() => navigate("/dashboard/cart/checkout")}
+          onClick={() => navigate(checkoutLink)}
         />
       </div>
 
@@ -169,3 +175,5 @@ export default function CartEngine({ cartData }: CartEngine) {
     </div>
   );
 }
+
+export default memo(CartEngine);

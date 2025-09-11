@@ -65,6 +65,7 @@ export function Position() {
                 playsInline
                 className="w-[19.1875rem] h-[25.75rem] rounded-lg border border-gray-300 bg-black"
                 style={{ objectFit: "cover" }}
+                ref={videoRef}
               />
             </div>
           </div>

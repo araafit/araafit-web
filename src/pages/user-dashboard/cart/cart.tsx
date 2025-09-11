@@ -4,7 +4,7 @@ import TopBar from "../top-bar";
 import Button from "../../../shared-components/button";
 import shoppingCart from "./shopping-cart.png";
 import { useCartStore } from "../../../shared-hooks/state-store";
-import CartEngine from "./cart-engine";
+import CartEngine from "../../../shared-components/cart-engine";
 
 /* -------------------------------------------------------------------- */
 
@@ -54,7 +54,7 @@ export function DashboardCartPage() {
               id="cart-container"
               className="w-full h-auto flex items-center justify-center"
             >
-              {cartIsEmpty ? emptyCart : <CartEngine cartData={cartItems} />}
+              {cartIsEmpty ? emptyCart : <CartEngine cartData={cartItems} checkoutLink="/dashboard/cart/checkout" />}
             </div>
           </div>
         </div>

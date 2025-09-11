@@ -5,8 +5,8 @@ import {
   recommendedRtw1,
   recommendedRtw2,
   recommendedRtw3,
-} from "../images/image-entry";
-/* ---------------------------------------------- */
+} from "../shared-images/image-entry";
+/* ------------------------------------------------- */
 interface Item {
   name: string;
   image: string;
