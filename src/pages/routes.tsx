@@ -19,6 +19,21 @@ import {
   DashboardOrderDetailPage,
 } from "./user-dashboard/import-entry";
 import {
+  AdminDashboardOverview,
+  AdminDashboardRecentActivities,
+  AdminDashboardOrders,
+  AdminDashboardInventory,
+  AdminDashboardViewInventory,
+  AdminDashboardEditInventory,
+  AdminDashboardUploadInventory,
+  AdminDashboardCustomers,
+  AdminDashboardCustomersDetails,
+  AdminDashboardCustomersActivities,
+  AdminDashboardSettings,
+  AdminDashboardDiscounts,
+} from "./admin-dashboard/import-entry";
+import AdminLogin from "./admin-auth/login/login";
+import {
   GetMeasured,
   ManualMeasurement,
   MeasurementSummary,
@@ -104,7 +119,12 @@ const pagesRoutes = createBrowserRouter([
     children: [
       {
         path: "login",
-        element: <Login />,
+        element: <Login userType="guest" />,
+        index: true,
+      },
+      {
+        path: "admin-login",
+        element: <AdminLogin userType="admin" />,
         index: true,
       },
       {
@@ -144,6 +164,83 @@ const pagesRoutes = createBrowserRouter([
           { path: "", element: <DashboardOrdersPage />, index: true },
           { path: ":orderId", element: <DashboardOrderDetailPage /> },
         ],
+      },
+      {
+        path: "cart",
+        children: [
+          { path: "", element: <DashboardCartPage />, index: true },
+          { path: "checkout", element: <DashboardCartCheckout /> },
+        ],
+      },
+      {
+        path: "profile",
+        children: [
+          { path: "", element: <DashboardProfilePage />, index: true },
+          { path: "get-measured", element: <DashboardEditMeasurementPage /> },
+        ],
+      },
+    ],
+  },
+  {
+    path: "admin-dashboard",
+    children: [
+      {
+        path: "overview",
+        element: <AdminDashboardOverview />,
+      },
+      {
+        path: "/admin-dashboard/overview/recent-activity",
+        element: <AdminDashboardRecentActivities />,
+        // index: true,
+      },
+      {
+        path: "order-management",
+        element: <AdminDashboardOrders />,
+        index: true,
+      },
+      {
+        path: "inventory",
+        element: <AdminDashboardInventory />,
+      },
+      {
+        path: "inventory/:inventoryId",
+        element: <AdminDashboardViewInventory />,
+      },
+      {
+        path: "inventory/:inventoryId/edit",
+        element: <AdminDashboardEditInventory />,
+      },
+      {
+        path: "inventory/upload",
+        element: <AdminDashboardUploadInventory />,
+      },
+      {
+        path: "orders",
+        children: [
+          { path: "", element: <DashboardOrdersPage />, index: true },
+          { path: ":orderId", element: <DashboardOrderDetailPage /> },
+        ],
+      },
+      {
+        path: "customers",
+        element: <AdminDashboardCustomers />,
+      },
+      {
+        path: "customers/:customersId",
+        element: <AdminDashboardCustomersDetails />,
+      },
+
+      {
+        path: "customers/123/activities",
+        element: <AdminDashboardCustomersActivities />,
+      },
+      {
+        path: "settings",
+        element: <AdminDashboardSettings />,
+      },
+      {
+        path: "discounts",
+        element: <AdminDashboardDiscounts />,
       },
       {
         path: "cart",

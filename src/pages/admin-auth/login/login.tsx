@@ -17,7 +17,7 @@ type LoginProps = {
  *
  * @returns ReactElement
  */
-export default function Login({ userType }: LoginProps) {
+export default function AdminLogin({ userType }: LoginProps) {
   const [isLoading, setLoading] = useState(false);
   const googleAuth = () => console.log("Google auth");
 
@@ -41,7 +41,7 @@ export default function Login({ userType }: LoginProps) {
       description={
         userType === "guest"
           ? "Log in to access your profile, saved styles, and past orders."
-          : "Admin login"
+          : "Log in to securely access the dashboard and manage user activity and orders."
       }
       {...(userType === "guest"
         ? {
@@ -119,13 +119,6 @@ export default function Login({ userType }: LoginProps) {
               {isLoading && <Spinner size="sm" speed="fast" className="ml-1" />}
             </div>
           </Button>
-
-          <p className="text-neutral-900">
-            New User?{" "}
-            <Link to="/auth/register" className="text-primary-500">
-              Create Account
-            </Link>
-          </p>
         </div>
       </form>
     </AuthLayout>
