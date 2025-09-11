@@ -68,6 +68,8 @@ import { orderStatuses } from "../../_data/_overview";
 import { CaretDownIcon } from "@phosphor-icons/react";
 import Button from "../../../../shared-components/button";
 import InfoSection from "./info-section";
+import { Dialog, DialogTrigger, DialogContent } from "../../../ui//dialog";
+import { RiderDialogContent } from "./rider-info";
 
 const columns: ColumnDef<z.infer<typeof schema>>[] = [
   {
@@ -309,15 +311,31 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
                 )}
 
                 {row.original.status === "Packaging" && (
-                  <Button
-                    type="button"
-                    text="Add Rider Info"
-                    icon={
-                      <PlusIcon className="size-[1.25rem] text-[#3D3D3D]" />
-                    }
-                    variant="outline"
-                    className="text-[#3D3D3D] border-[#E7E7E7] shadow-sm"
-                  />
+                  <>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button
+                          type="button"
+                          text="Add Rider Info"
+                          icon={
+                            <PlusIcon className="size-[1.25rem] text-[#3D3D3D]" />
+                          }
+                          variant="outline"
+                          className="text-[#3D3D3D] border-[#E7E7E7] shadow-sm"
+                        />
+                      </DialogTrigger>
+
+                      <DialogContent className="sm:max-w-[500px]">
+                        <RiderDialogContent />
+                      </DialogContent>
+                    </Dialog>
+                    <Button
+                      type="button"
+                      text="Save"
+                      variant="solid"
+                      className="w-full md:max-w-[9.375rem]"
+                    />
+                  </>
                 )}
 
                 {row.original.status === "Out for Delivery" && (

@@ -30,6 +30,7 @@ import {
   AdminDashboardSettings,
   AdminDashboardDiscounts,
 } from "./admin-dashboard/import-entry";
+import AdminLogin from "./admin-auth/login/login";
 
 /* ---------------------------------------------------------------- */
 
@@ -59,7 +60,7 @@ const pagesRoutes = createBrowserRouter([
       },
       {
         path: "admin-login",
-        element: <Login userType="admin" />,
+        element: <AdminLogin userType="admin" />,
         index: true,
       },
       {
@@ -109,12 +110,11 @@ const pagesRoutes = createBrowserRouter([
       {
         path: "overview",
         element: <AdminDashboardOverview />,
-        children: [
-          {
-            path: "recent-activity",
-            element: <AdminDashboardRecentActivities />,
-          },
-        ],
+      },
+      {
+        path: "/admin-dashboard/overview/recent-activity",
+        element: <AdminDashboardRecentActivities />,
+        // index: true,
       },
       {
         path: "order-management",
