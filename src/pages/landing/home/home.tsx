@@ -282,8 +282,8 @@ export function HomePage() {
                 <Button
                   type="button"
                   variant="solid"
-                  className="w-full max-w-[16.5rem] bg-primary-950"
-                  text="Start your custom fit"
+                  className="w-auto bg-primary-950"
+                  text="Start your custom fit journey"
                 />
               </div>
             </div>
