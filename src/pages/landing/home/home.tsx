@@ -78,6 +78,7 @@ export function HomePage() {
                 type="button"
                 variant="clear"
                 className="w-full md:max-w-[14.8125rem] text-primary-500"
+                onClick={() => navigate("/auth/register")}
               >
                 <div className="w-full flex items-center justify-center gap-2">
                   <span>Create an account</span>
@@ -285,8 +286,8 @@ export function HomePage() {
                 <Button
                   type="button"
                   variant="solid"
-                  className="w-full max-w-[16.5rem] bg-primary-950"
-                  text="Start your custom fit"
+                  className="w-auto bg-primary-950"
+                  text="Start your custom fit journey"
                   onClick={handleGetMeasured}
                 />
               </div>

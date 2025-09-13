@@ -1,5 +1,6 @@
 import React from "react";
 import { CN } from "../utils/class-merge";
+import type { ReactNode } from "react";
 
 /* ---------------------------------------------------------- */
 
@@ -8,7 +9,8 @@ export type CustomProps = {
   variant?: "solid" | "outline" | "clear";
   className?: string;
   children?: React.ReactElement;
-  props?: any;
+  icon?: ReactNode;
+  // props?: any;
 };
 
 type ButtonType = CustomProps & React.ButtonHTMLAttributes<HTMLButtonElement>;
@@ -24,6 +26,7 @@ type ButtonType = CustomProps & React.ButtonHTMLAttributes<HTMLButtonElement>;
  */
 export default function Button({
   text,
+  icon,
   variant,
   children,
   className,
@@ -38,7 +41,11 @@ export default function Button({
 
   const buttonVariant =
     variant === "solid" ? solid : variant === "outline" ? outline : clear;
-  const defaultClassName = `h-12 py-3 px-5 ${buttonVariant}`;
+  const defaultClassName = `
+    h-12 py-3 px-5
+    ${icon ? "inline-flex items-center gap-2" : ""}
+    ${buttonVariant}
+  `;
 
   return (
     <button
@@ -47,6 +54,7 @@ export default function Button({
       onClick={onClick}
       {...props}
     >
+      {icon && <span className="flex-shrink-0 ">{icon}</span>}
       {text ? <span>{text}</span> : children}
     </button>
   );

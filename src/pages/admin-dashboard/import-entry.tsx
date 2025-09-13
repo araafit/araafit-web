@@ -1,0 +1,12 @@
+export { AdminDashboardOverview } from "./overview/overview";
+export { AdminDashboardRecentActivities } from "./overview/recent-activities-overview";
+export { AdminDashboardOrders } from "./orders-management/home";
+export { AdminDashboardInventory } from "./inventory/inventory";
+export { AdminDashboardViewInventory } from "./inventory/view-inventory";
+export { AdminDashboardEditInventory } from "./inventory/edit-inventory";
+export { AdminDashboardUploadInventory } from "./inventory/add-inventory";
+export { AdminDashboardCustomers } from "./customers/customer";
+export { AdminDashboardCustomersDetails } from "./customers/customers-detail";
+export { AdminDashboardCustomersActivities } from "./customers/customers-recent-activites";
+export { AdminDashboardSettings } from "./settings/settings";
+export { AdminDashboardDiscounts } from "./discounts/discounts";

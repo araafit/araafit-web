@@ -31,12 +31,17 @@ export function MeasurementMethod() {
     </div>
   );
 
-  const continueHandler = () => {
+  const OpenModal = () => {
     if (method === "automated") {
       stepTo(currentStep + 1);
     } else {
       navigate("/get-measured/manual");
     }
+  };
+
+  const nextStep = () => {
+    stepTo(currentStep + 1);
+    window.location.reload();
   };
 
   return (
@@ -118,7 +123,7 @@ export function MeasurementMethod() {
           variant="solid"
           disabled={!method}
           className="w-[10rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed"
-          onClick={continueHandler}
+          onClick={OpenModal}
         />
     </div>
   );
