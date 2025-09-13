@@ -12,6 +12,7 @@ import {
   type MeasurementResult,
 } from "../../../services/measurement";
 import { extractSkinToneFromPhoto } from "../../../services/measurement/skin-tone-extractor";
+import SilhouetteVisualization from "./silhouette-visualization";
 
 /* ------------------------------------------------------------------- */
 
@@ -232,23 +233,21 @@ export function Confirmation() {
 
                 <div className="space-y-6">
                   <div className="flex justify-between items-center py-3 border-b border-neutral-100">
-                    <span className="text-lg text-neutral-700">Bust</span>
+                    <span className="text-lg text-neutral-700">Bust (inches)</span>
                     <span className="text-xl font-semibold text-[#1C1C1C]">
-                      {Math.round(measurements.measurements.bust)}
+                      {Math.round(measurements.measurements.bust / 2.54)}
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center py-3 border-b border-neutral-100">
-                    <span className="text-lg text-neutral-700">Waist</span>
+                    <span className="text-lg text-neutral-700">Waist (inches)</span>
                     <span className="text-xl font-semibold text-[#1C1C1C]">
-                      {Math.round(measurements.measurements.waist)}
+                      {Math.round(measurements.measurements.waist / 2.54)}
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center py-3 border-b border-neutral-100">
-                    <span className="text-lg text-neutral-700">
-                      Hip (inches)
-                    </span>
+                    <span className="text-lg text-neutral-700">Hip (inches)</span>
                     <span className="text-xl font-semibold text-[#1C1C1C]">
                       {Math.round(measurements.measurements.hip / 2.54)}
                     </span>
@@ -290,6 +289,19 @@ export function Confirmation() {
                     </div>
                   </div>
                 </div>
+              )}
+
+              {/* Silhouette Visualization (Debug) */}
+              {frontPhoto && sidePhoto && measurements?.debug && (
+                <SilhouetteVisualization
+                  frontPhoto={frontPhoto}
+                  sidePhoto={sidePhoto}
+                  frontMask={measurements.debug.frontMask}
+                  sideMask={measurements.debug.sideMask}
+                  frontLandmarks={measurements.debug.frontLandmarks}
+                  sideLandmarks={measurements.debug.sideLandmarks}
+                  heightInCm={measurements.metadata.heightInCm}
+                />
               )}
             </>
           )}

@@ -142,6 +142,8 @@ export class MeasurementService {
         heightInCm: input.heightInCm,
       });
 
+      console.log("Raw measurements:", rawMeasurements);
+
       // Step 5: Validate measurements
       const measurementsValid = this.measurementCalculator.validateMeasurements(rawMeasurements);
       if (!measurementsValid) {
@@ -175,6 +177,13 @@ export class MeasurementService {
           frontPhotoLandmarks: poseResults.frontPose.landmarks.length,
           sidePhotoLandmarks: poseResults.sidePose.landmarks.length,
           processingTimeMs: processingTime,
+          heightInCm: input.heightInCm,
+        },
+        debug: {
+          frontMask: frontSegmentation.mask,
+          sideMask: sideSegmentation.mask,
+          frontLandmarks: poseResults.frontPose.landmarks,
+          sideLandmarks: poseResults.sidePose.landmarks,
         },
       };
 

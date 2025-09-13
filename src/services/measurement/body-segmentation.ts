@@ -73,12 +73,11 @@ export class BodySegmentationService {
 
       // Create segmenter with optimal configuration
       this.segmenter = await bodySegmentation.createSegmenter(
-        bodySegmentation.SupportedModels.BodyPix,
+        bodySegmentation.SupportedModels.MediaPipeSelfieSegmentation,
         {
-          architecture: "ResNet50", // Better accuracy than MobileNetV1
-          outputStride: 16, // Balance between accuracy and performance
-          multiplier: 1.0, // Full model capacity
-          quantBytes: 4, // Higher precision
+          runtime: "mediapipe", 
+          modelType: "general", // "landscape" exists too, but general is good default
+          solutionPath: "https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation", 
         }
       );
 
@@ -155,8 +154,8 @@ export class BodySegmentationService {
       console.log("Starting body segmentation...");
       const segmentations = await this.segmenter.segmentPeople(processedImage, {
         multiSegmentation: false,
-        segmentBodyParts: false, // Disable body parts for better basic segmentation
-        segmentationThreshold: 0.1, // Use lower threshold during segmentation
+        segmentBodyParts: false, // First pass: person mask (fast)
+        segmentationThreshold: 0.9, // Use lower threshold during segmentation
       });
 
       const segmentationTime = performance.now() - startTime;
@@ -180,7 +179,7 @@ export class BodySegmentationService {
         { r: 255, g: 255, b: 255, a: 255 }, // foreground color (person)
         { r: 0, g: 0, b: 0, a: 0 }, // background color
         false, // drawContour - disable for cleaner mask
-        0.5 // foregroundThreshold - use higher threshold
+        0.9 // foregroundThreshold - use higher threshold
       );
 
       // Debug: Check a sample of mask pixels to verify it's working correctly
@@ -195,8 +194,51 @@ export class BodySegmentationService {
       }
       console.log("Sample mask pixels:", samplePixels);
 
+      // Optionally remove arms/hands using body-part segmentation
+      // This helps ensure torso-only width at bust/waist/hip is not inflated by arms
+      const finalMask = mask;
+      //try {
+      //  const partSegs = await this.segmenter.segmentPeople(processedImage, {
+      //    multiSegmentation: false,
+      //    segmentBodyParts: true,
+      //    segmentationThreshold: 0.1,
+      //  });
+      //  console.log("Part segments:", partSegs);
+      //  if (partSegs && partSegs.length > 0) {
+      //    const partSeg: any = partSegs[0] as any;
+      //    // Some implementations expose ImageData at partSeg.mask. If unavailable, skip.
+      //    const partMask: ImageData | undefined = (partSeg && (partSeg.mask as ImageData)) || undefined;
+      //    if (partMask) {
+      //      finalMask = this._removeArmsFromMask(mask, partMask);
+      //    } else {
+      //      // Fallback: try to create a part mask image via toColoredMask with transparent arms
+      //      try {
+      //        const ARMS_AND_HANDS = new Set<number>([12,13,14,15,16,17,18,19,20,21]);
+      //        const colored = await (bodySegmentation as any).toColoredMask(
+      //          [partSeg],
+      //          (maskValue: number) => {
+      //            // Transparent for arms/hands, opaque white for others
+      //            if (ARMS_AND_HANDS.has(maskValue)) return { r: 0, g: 0, b: 0, a: 0 };
+      //            return { r: 255, g: 255, b: 255, a: 255 };
+      //          },
+      //          { r: 0, g: 0, b: 0, a: 0 },
+      //          false,
+      //          0.5
+      //        );
+      //        if (colored) {
+      //          finalMask = this._combineMaskWithPartAlpha(mask, colored as ImageData);
+      //        }
+      //      } catch (e) {
+      //        console.warn("Body-part colored mask not available:", e);
+      //      }
+      //    }
+      //  }
+      //} catch (e) {
+      //  console.warn("Body-part segmentation pass failed (arms not removed):", e);
+      //}
+
       // Calculate confidence based on segmentation quality
-      const confidence = this._calculateSegmentationConfidence(mask);
+      const confidence = this._calculateSegmentationConfidence(finalMask);
 
       if (confidence < CONFIDENCE_THRESHOLDS.SEGMENTATION) {
         throw new MeasurementError(
@@ -207,7 +249,7 @@ export class BodySegmentationService {
       }
 
       return {
-        mask,
+        mask: finalMask,
         confidence,
         segmentationTime,
       };
@@ -226,10 +268,12 @@ export class BodySegmentationService {
 
   /**
    * Measure body width at specific height using segmentation mask with multi-line sampling
+   * Now excludes arm/hand regions using pose landmarks
    */
   measureBodyWidthAtHeight(
     mask: ImageData,
-    heightRatio: number // 0.0 = top, 1.0 = bottom
+    heightRatio: number, // 0.0 = top, 1.0 = bottom
+    landmarks?: Landmark[] // Optional landmarks to exclude arms
   ): BodyWidthMeasurement {
     const { width, height, data } = mask;
     const centerY = Math.floor(heightRatio * height);
@@ -240,6 +284,19 @@ export class BodySegmentationService {
     const endY = Math.min(height - 1, centerY + sampleRange);
 
     console.log(`Measuring body width at height ratio ${heightRatio}, center Y: ${centerY}, sampling Y: ${startY}-${endY}, image size: ${width}x${height}`);
+
+    // Calculate torso boundaries if landmarks are available
+    let torsoLeftBound = 0;
+    let torsoRightBound = width;
+    
+    if (landmarks && landmarks.length > 33) {
+      const { leftBound, rightBound } = this._calculateTorsoBounds(landmarks, width, height, heightRatio);
+      torsoLeftBound = leftBound;
+      torsoRightBound = rightBound;
+      console.log(`Using torso bounds: left=${torsoLeftBound}, right=${torsoRightBound} (excluding arms)`);
+    } else {
+        console.log("No landmarks available, using full width", landmarks, landmarks?.length);
+    }
 
     let totalLeftX = 0;
     let totalRightX = 0;
@@ -252,8 +309,11 @@ export class BodySegmentationService {
       let rightMostX = 0;
       let linePixelCount = 0;
 
-      // Scan the horizontal line
-      for (let x = 0; x < width; x++) {
+      // Scan the horizontal line, but only within torso bounds
+      const scanStartX = Math.max(0, torsoLeftBound);
+      const scanEndX = Math.min(width, torsoRightBound);
+      
+      for (let x = scanStartX; x < scanEndX; x++) {
         const pixelIndex = (y * width + x) * 4;
         const alpha = data[pixelIndex + 3];
 
@@ -338,9 +398,9 @@ export class BodySegmentationService {
 
       console.log(`Measurement positions - Bust: ${(bustRatio * 100).toFixed(1)}%, Waist: ${(waistRatio * 100).toFixed(1)}%, Hip: ${(hipRatio * 100).toFixed(1)}%`);
 
-      const bust = this.measureBodyWidthAtHeight(mask, bustRatio);
-      const waist = this.measureBodyWidthAtHeight(mask, waistRatio);
-      const hip = this.measureBodyWidthAtHeight(mask, hipRatio);
+      const bust = this.measureBodyWidthAtHeight(mask, bustRatio, landmarks);
+      const waist = this.measureBodyWidthAtHeight(mask, waistRatio, landmarks);
+      const hip = this.measureBodyWidthAtHeight(mask, hipRatio, landmarks);
 
       return { bust, waist, hip };
     } catch (error: any) {
@@ -471,6 +531,152 @@ export class BodySegmentationService {
 
     // Sub-optimal but acceptable range
     return Math.max(0.4, Math.min(0.8, bodyRatio * 1.5 + 0.2));
+  }
+
+  /**
+   * Remove arms/hands pixels from a person mask using a body-part mask
+   * personMask: binary person ImageData (alpha>0 = person)
+   * partMask: colored ImageData where red-channel encodes part ids
+   */
+  private _removeArmsFromMask(personMask: ImageData, partMask: ImageData): ImageData {
+    try {
+      const width = personMask.width;
+      const height = personMask.height;
+      const out = new ImageData(width, height);
+
+      // IDs commonly used by BodyPix for arms/hands (may vary by version)
+      const ARMS_AND_HANDS = new Set<number>([12,13,14,15,16,17,18,19,20,21]);
+
+      for (let i = 0; i < personMask.data.length; i += 4) {
+        const a = personMask.data[i + 3];
+        if (a === 0) {
+          // background
+          out.data[i] = 0; out.data[i+1] = 0; out.data[i+2] = 0; out.data[i+3] = 0;
+          continue;
+        }
+
+        // part id in red channel (0..n)
+        const partId = partMask.data[i];
+        if (ARMS_AND_HANDS.has(partId)) {
+          // remove arms/hands
+          out.data[i] = 0; out.data[i+1] = 0; out.data[i+2] = 0; out.data[i+3] = 0;
+        } else {
+          // keep
+          out.data[i] = 255; out.data[i+1] = 255; out.data[i+2] = 255; out.data[i+3] = 255;
+        }
+      }
+
+      return out;
+    } catch (e) {
+      console.warn("Failed to remove arms from mask, using original person mask:", e);
+      return personMask;
+    }
+  }
+
+  /**
+   * Combine person mask with a colored body-part mask (where non-arms are opaque)
+   */
+  private _combineMaskWithPartAlpha(personMask: ImageData, coloredPartMask: ImageData): ImageData {
+    const width = personMask.width;
+    const height = personMask.height;
+    const out = new ImageData(width, height);
+    for (let i = 0; i < personMask.data.length; i += 4) {
+      const personA = personMask.data[i + 3];
+      const partA = coloredPartMask.data[i + 3];
+      const a = personA > 0 && partA > 0 ? 255 : 0;
+      out.data[i] = a > 0 ? 255 : 0;
+      out.data[i + 1] = a > 0 ? 255 : 0;
+      out.data[i + 2] = a > 0 ? 255 : 0;
+      out.data[i + 3] = a;
+    }
+    return out;
+  }
+
+  /**
+   * Calculate torso boundaries to exclude arms from width measurements
+   * Uses pose landmarks to determine where arms are positioned
+   */
+  private _calculateTorsoBounds(
+    landmarks: Landmark[], 
+    imgW: number, 
+    _imgH: number, 
+    heightRatio: number
+  ): { leftBound: number; rightBound: number } {
+    // MediaPipe landmark indices
+    const LEFT_SHOULDER = 11;
+    const RIGHT_SHOULDER = 12;
+    const LEFT_ELBOW = 13;
+    const RIGHT_ELBOW = 14;
+    const LEFT_WRIST = 15;
+    const RIGHT_WRIST = 16;
+    const LEFT_HIP = 23;
+    const RIGHT_HIP = 24;
+
+    // Get key landmarks
+    const leftShoulder = landmarks[LEFT_SHOULDER];
+    const rightShoulder = landmarks[RIGHT_SHOULDER];
+    const leftElbow = landmarks[LEFT_ELBOW];
+    const rightElbow = landmarks[RIGHT_ELBOW];
+    const leftWrist = landmarks[LEFT_WRIST];
+    const rightWrist = landmarks[RIGHT_WRIST];
+    const leftHip = landmarks[LEFT_HIP];
+    const rightHip = landmarks[RIGHT_HIP];
+
+    // Default to full width if landmarks not available
+    let leftBound = 0;
+    let rightBound = imgW;
+
+    // Calculate torso bounds based on pose landmarks
+    if (leftShoulder && rightShoulder && leftHip && rightHip) {
+      // Get shoulder and hip positions
+      const leftShoulderX = leftShoulder.x * imgW;
+      const rightShoulderX = rightShoulder.x * imgW;
+      const leftHipX = leftHip.x * imgW;
+      const rightHipX = rightHip.x * imgW;
+
+      // Interpolate between shoulder and hip width based on height ratio
+      const shoulderY = (leftShoulder.y + rightShoulder.y) / 2;
+      const hipY = (leftHip.y + rightHip.y) / 2;
+      
+      // Calculate where we are relative to shoulder-hip line
+      let interpFactor = 0.5; // Default to middle
+      if (Math.abs(hipY - shoulderY) > 0.01) {
+        const currentY = heightRatio;
+        interpFactor = Math.max(0, Math.min(1, (currentY - shoulderY) / (hipY - shoulderY)));
+      }
+
+      // Interpolate left and right bounds
+      const interpolatedLeftX = leftShoulderX + (leftHipX - leftShoulderX) * interpFactor;
+      const interpolatedRightX = rightShoulderX + (rightHipX - rightShoulderX) * interpFactor;
+
+      // Add some margin to account for torso width, but exclude arms
+      const torsoMargin = Math.min(50, imgW * 0.1); // 10% of image width or 50px max
+      leftBound = Math.max(0, interpolatedLeftX - torsoMargin);
+      rightBound = Math.min(imgW, interpolatedRightX + torsoMargin);
+
+      // Additional check: if arms are visible and extended, use elbow/wrist to refine bounds
+      if (leftElbow && leftWrist && rightElbow && rightWrist) {
+        const leftElbowX = leftElbow.x * imgW;
+        const rightElbowX = rightElbow.x * imgW;
+        const leftWristX = leftWrist.x * imgW;
+        const rightWristX = rightWrist.x * imgW;
+
+        // If arms are extended horizontally, use elbow position as outer bound
+        const leftArmExtended = leftWristX < leftElbowX && leftElbowX < leftShoulderX;
+        const rightArmExtended = rightWristX > rightElbowX && rightElbowX > rightShoulderX;
+
+        if (leftArmExtended) {
+          leftBound = Math.max(leftBound, leftElbowX - 20); // Stay inside of elbow
+        }
+        if (rightArmExtended) {
+          rightBound = Math.min(rightBound, rightElbowX + 20); // Stay inside of elbow
+        }
+      }
+
+      console.log(`Torso bounds calculation: shoulders(${leftShoulderX.toFixed(1)}-${rightShoulderX.toFixed(1)}), hips(${leftHipX.toFixed(1)}-${rightHipX.toFixed(1)}), interpolated(${interpolatedLeftX.toFixed(1)}-${interpolatedRightX.toFixed(1)}), final bounds(${leftBound.toFixed(1)}-${rightBound.toFixed(1)})`);
+    }
+
+    return { leftBound: Math.round(leftBound), rightBound: Math.round(rightBound) };
   }
 
   /**

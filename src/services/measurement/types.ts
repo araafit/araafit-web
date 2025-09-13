@@ -56,6 +56,13 @@ export interface MeasurementResult {
     frontPhotoLandmarks: number;
     sidePhotoLandmarks: number;
     processingTimeMs: number;
+    heightInCm: number;
+  };
+  debug?: {
+    frontMask?: ImageData;
+    sideMask?: ImageData;
+    frontLandmarks?: Landmark[];
+    sideLandmarks?: Landmark[];
   };
 }
 
