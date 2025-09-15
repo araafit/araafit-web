@@ -452,31 +452,31 @@ export function DataTable({
               sensors={sensors}
               id={sortableId}
             >
-              <Table className=" ">
-                <TableHeader className="sticky top-0 z-10 h-11 border-b-0 bg-w">
-                  {table.getHeaderGroups().map((headerGroup) => (
-                    <TableRow
-                      key={headerGroup.id}
-                      className=" border-0 !border-b-0"
-                    >
-                      {headerGroup.headers.map((header) => {
-                        return (
-                          <TableHead key={header.id} colSpan={header.colSpan}>
-                            {header.isPlaceholder
-                              ? null
-                              : flexRender(
-                                  header.column.columnDef.header,
-                                  header.getContext()
-                                )}
-                          </TableHead>
-                        );
-                      })}
-                    </TableRow>
-                  ))}
-                </TableHeader>
-                <TableBody className="bg-muted">
-                  {table.getRowModel().rows?.length ? (
-                    table.getRowModel().rows.map((row, idx) => {
+              {table.getRowModel().rows?.length ? (
+                <Table className=" ">
+                  <TableHeader className="sticky top-0 z-10 h-11 border-b-0 bg-w">
+                    {table.getHeaderGroups().map((headerGroup) => (
+                      <TableRow
+                        key={headerGroup.id}
+                        className=" border-0 !border-b-0"
+                      >
+                        {headerGroup.headers.map((header) => {
+                          return (
+                            <TableHead key={header.id} colSpan={header.colSpan}>
+                              {header.isPlaceholder
+                                ? null
+                                : flexRender(
+                                    header.column.columnDef.header,
+                                    header.getContext()
+                                  )}
+                            </TableHead>
+                          );
+                        })}
+                      </TableRow>
+                    ))}
+                  </TableHeader>
+                  <TableBody className="bg-muted">
+                    {table.getRowModel().rows.map((row, idx) => {
                       const bgClass = row.getIsSelected()
                         ? "bg-muted/50"
                         : idx % 2 === 0
@@ -501,23 +501,18 @@ export function DataTable({
                           ))}
                         </TableRow>
                       );
-                    })
-                  ) : (
-                    <TableRow>
-                      <TableCell
-                        colSpan={columns.length}
-                        className="h-24 text-center"
-                      >
-                        <EmptyState
-                          image={cart}
-                          alt="Empty cart"
-                          message="No new orders just yet."
-                        />
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
+                    })}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div className="p-24">
+                  <EmptyState
+                    image={cart}
+                    alt="Empty cart"
+                    message="No new requests just yet."
+                  />
+                </div>
+              )}
             </DndContext>
           </div>
           {(table.getCanPreviousPage() || table.getCanNextPage()) && (

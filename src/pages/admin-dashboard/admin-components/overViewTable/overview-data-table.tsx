@@ -6,12 +6,34 @@ import {
   TableHeader,
   TableRow,
 } from "../../../ui/table";
-import { customerActivityArray } from "../../_data/_overview";
+import { useAdminRecentActivities } from "../../../../hooks/admin-dashboard.hooks";
+import { formatCurrency, formatDate } from "../../../../utils/admin-dashboard-utils";
+import Spinner from "../../../../shared-components/spinner";
 
 export function OverviewTable() {
+  const { data: recentActivities, isLoading, error } = useAdminRecentActivities();
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-32">
+        <Spinner size="lg" speed="fast" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-md p-4">
+        <p className="text-red-600">Failed to load recent activities. Please try again.</p>
+      </div>
+    );
+  }
+
+  const activities = recentActivities?.recentActivities || [];
+
   return (
     <div>
-      {customerActivityArray.length === 0 ? (
+      {activities.length === 0 ? (
         <span className="block text-center text-[#5D5D5D]">
           No recent activity yet.
         </span>
@@ -32,12 +54,15 @@ export function OverviewTable() {
                 <TableHead className=" text-[#3D3D3D] border-0 !border-b-0">
                   Date & Time
                 </TableHead>
+                <TableHead className=" text-[#3D3D3D] border-0 !border-b-0">
+                  Action
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {customerActivityArray.map((activity, idx) => (
+              {activities.map((activity, idx) => (
                 <TableRow
-                  key={idx}
+                  key={activity.id}
                   className={`border-0  h-20 text-sm font-inter text-[#4F4F4F] font-light  ${
                     idx % 2 === 0 ? "bg-[#F9FAFB]" : "bg-white"
                   }`}
@@ -45,13 +70,13 @@ export function OverviewTable() {
                   <TableCell className="pl-6">
                     {activity.customerName}
                   </TableCell>
-                  <TableCell>{activity.activity}</TableCell>
-                  <TableCell>{activity.amountSpent}</TableCell>
-                  <TableCell className="">{activity.dateTime}</TableCell>
+                  <TableCell>{activity.activityType}</TableCell>
+                  <TableCell>{formatCurrency(activity.amountSpent)}</TableCell>
+                  <TableCell className="">{formatDate(activity.dateTime)}</TableCell>
                   <TableCell className="tt">
                     <button
-                      // onClick={() => handleViewMore(activity)}
-                      className="text-[#9A6C50]"
+                      onClick={() => window.open(activity.detailsUrl, '_blank')}
+                      className="text-[#9A6C50] hover:text-[#7A5C40] transition-colors"
                     >
                       View Details
                     </button>

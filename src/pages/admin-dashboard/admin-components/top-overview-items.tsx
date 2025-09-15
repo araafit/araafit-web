@@ -1,4 +1,6 @@
+import { ArrowLeftIcon } from "@phosphor-icons/react";
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 interface OverviewCard {
   icon?: React.ElementType;
@@ -7,20 +9,31 @@ interface OverviewCard {
 }
 
 interface OverviewProps {
+  hasBackButton?: boolean;
   title?: string;
   subtitle?: string;
   cards?: OverviewCard[];
 }
 
 const Overview: React.FC<OverviewProps> = ({
+  hasBackButton = false,
   title = "Overview",
   subtitle,
   cards,
 }) => {
+  const navigate = useNavigate();
   return (
     <div className="w-full bg-white lg:h-60 mt-5 rounded-sm p-4 flex flex-col gap-6">
       <div>
-        <h2 className="font-semibold text-[28px] capitalize">{title}</h2>
+        <div className="flex items-center gap-3 mb-4">
+          {hasBackButton && (<button
+            onClick={() => navigate("/admin-dashboard/customers")}
+            className="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+          >
+            <ArrowLeftIcon size={20} className="text-gray-600" />
+          </button>)}
+          <h2 className="font-semibold text-[28px] text-[#1C1C1C]">{title}</h2>
+        </div>
 
         {subtitle && (
           <span className="capitalize text-neutral-400 cursor-pointer font-inter">

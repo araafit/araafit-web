@@ -1,4 +1,4 @@
-import { CaretRightIcon } from "@phosphor-icons/react";
+import { CaretRightIcon, Spinner } from "@phosphor-icons/react";
 import TopBar from "../admin-components/top-bar/top-bar";
 import AdminDashboardLayout from "../../../layouts/admin-dashboard/dashboard-layout";
 import { orderStatuses, OverviewCards2 } from "../_data/_overview";
@@ -16,8 +16,16 @@ import NotificationBell from "../admin-components/top-bar/notification-bell";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 import Orders from "./orders";
 import Requests from "./request";
+import { useAdminDashboardMetrics } from "../../../hooks/admin-dashboard.hooks";
+import { convertMetricsToOverviewCards } from "../../../utils/admin-dashboard-utils";
 
 export function AdminDashboardOrders() {
+  const {
+    data: metrics,
+    isLoading: metricsLoading,
+    error: metricsError,
+  } = useAdminDashboardMetrics();
+
   const title = (
     <div className="font-lora text-[#1C1C1C]">Order Management</div>
   );
@@ -46,7 +54,22 @@ export function AdminDashboardOrders() {
         </div>
 
         <div className="w-full  flex flex-col gap-4 p-4 mt-20 overflow-y-scroll px-10">
-          <Overview title="Overview" cards={OverviewCards2} />
+          {metricsLoading ? (
+            <div className="flex justify-center items-center h-32">
+              <Spinner size="lg" speed="fast" />
+            </div>
+          ) : metricsError ? (
+            <div className="bg-red-50 border border-red-200 rounded-md p-4">
+              <p className="text-red-600">
+                Failed to load dashboard metrics. Please try again.
+              </p>
+            </div>
+          ) : metrics ? (
+            <Overview
+              title="Overview"
+              cards={convertMetricsToOverviewCards(metrics)}
+            />
+          ) : null}
 
           {/* */}
           <div>
@@ -61,7 +84,7 @@ export function AdminDashboardOrders() {
 
           {/* -------- */}
           <Tabs defaultValue="orders" className="w-full">
-            <section className="flex items-center justify-between mb-5">
+            <section className="flex items-center justify-between mb-0">
               <TabsList className="w-fit border border-[#E7E7E7] rounded-lg h-11">
                 <TabsTrigger value="orders">Orders</TabsTrigger>
                 <TabsTrigger value="past-performance">Requests</TabsTrigger>

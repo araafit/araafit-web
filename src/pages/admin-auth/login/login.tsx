@@ -1,9 +1,11 @@
 import AuthLayout from "../../../layouts/auth/auth-layout";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import Button from "../../../shared-components/button";
-import { Link } from "react-router-dom";
-import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import Spinner from "../../../shared-components/spinner";
+import { useAdminLogin } from "../../../hooks/admin-auth.hooks";
+import { useAuth } from "../../../hooks/use-auth";
 
 /* ------------------------------------------------------ */
 
@@ -18,7 +20,10 @@ type LoginProps = {
  * @returns ReactElement
  */
 export default function AdminLogin({ userType }: LoginProps) {
-  const [isLoading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { isAuthenticated, isAdminUser, isLoading: authLoading } = useAuth();
+  const adminLoginMutation = useAdminLogin();
+  
   const googleAuth = () => console.log("Google auth");
 
   const {
@@ -27,12 +32,21 @@ export default function AdminLogin({ userType }: LoginProps) {
     formState: { errors, isValid },
   } = useForm<FormValues>({ mode: "all" });
 
-  const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    console.log("form data", data);
-    setLoading(!isLoading);
+  // Redirect if already authenticated as admin
+  useEffect(() => {
+    if (isAuthenticated && isAdminUser && !authLoading) {
+      navigate("/admin-dashboard/overview");
+    }
+  }, [isAuthenticated, isAdminUser, authLoading, navigate]);
 
-    await new Promise((res) => setTimeout(res, 9000));
-    setLoading(false);
+  const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    try {
+      await adminLoginMutation.mutateAsync(data);
+      // Navigation will be handled by the useEffect above
+    } catch (error) {
+      // Error handling is done in the mutation hook
+      console.error("Admin login failed:", error);
+    }
   };
 
   return (
@@ -80,12 +94,6 @@ export default function AdminLogin({ userType }: LoginProps) {
                   value: 6,
                   message: "Password must be at least 6 characters long",
                 },
-                pattern: {
-                  value:
-                    /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/,
-                  message:
-                    "Password must include letters, numbers, and special characters",
-                },
               })}
               type="password"
               className="p-4 border border-gray-300 rounded-[6px] focus:outline-none"
@@ -100,7 +108,7 @@ export default function AdminLogin({ userType }: LoginProps) {
         <div className="flex flex-col items-center gap-6">
           <p className="self-start text-neutral-900">
             Forgot Password?{" "}
-            <Link to="/auth/reset" className="text-primary-500">
+            <Link to="/admin-auth/reset" className="text-primary-500">
               Reset
             </Link>
           </p>
@@ -108,15 +116,16 @@ export default function AdminLogin({ userType }: LoginProps) {
           <Button
             type="submit"
             variant="clear"
+            disabled={!isValid || adminLoginMutation.isPending}
             className={`w-full max-w-[23.4375rem] ${
-              !isValid
+              !isValid || adminLoginMutation.isPending
                 ? "bg-neutral-50 text-white"
                 : "bg-primary-500 text-white"
             }`}
           >
             <div className="w-full flex items-center justify-center">
               <span>Login</span>
-              {isLoading && <Spinner size="sm" speed="fast" className="ml-1" />}
+              {adminLoginMutation.isPending && <Spinner size="sm" speed="fast" className="ml-1" />}
             </div>
           </Button>
         </div>

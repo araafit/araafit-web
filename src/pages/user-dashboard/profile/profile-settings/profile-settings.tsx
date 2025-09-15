@@ -2,6 +2,7 @@ import { TrashSimpleIcon } from "@phosphor-icons/react";
 import Button from "../../../../shared-components/button";
 import ChangePassword from "./change-password";
 import ProfileInfo from "./profile-info";
+import { useDeleteMe } from "../../../../hooks/users.hooks";
 
 
 /* ----------------------------------------------------------------------- */
@@ -12,6 +13,7 @@ import ProfileInfo from "./profile-info";
  *
  */
 export default function ProfileSettings() {
+  const deleteMe = useDeleteMe();
   return (
     <div className="w-full flex flex-col gap-6">
       <ProfileInfo />
@@ -31,7 +33,8 @@ export default function ProfileSettings() {
 
         <Button
           className="text-red-500"
-          onClick={() => console.log("Delete account")}
+          onClick={() => deleteMe.mutate()}
+          disabled={deleteMe.isPending}
         >
           <div className="w-full flex items-center gap-2">
             <TrashSimpleIcon />

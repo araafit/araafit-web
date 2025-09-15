@@ -1,42 +1,64 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import {
   TrashSimpleIcon,
   PencilSimpleIcon,
   CreditCardIcon,
 } from "@phosphor-icons/react";
 import Button from "../../shared-components/button";
-import { useCardState } from "../../shared-hooks/state-store";
+import { useCards, useRemoveCard } from "../../hooks/cards.hooks";
 import mastercardLogo from "./mastercard-logo.svg";
 import visaLogo from "./visa-logo.svg";
 import Modal from "../../shared-components/modal";
 import { useSwitch } from "../../shared-hooks/switch";
+import Spinner from "../../shared-components/spinner";
 
 /* ------------------------------------------------------------------ */
 
 export default function BillingCardList() {
   const cardStyle = "w-[40px] h-[25px]";
 
-  const cardIdToBeRemoved = useRef<number | string>(0);
+  const [cardIdToBeRemoved, setCardIdToBeRemoved] = useState<string>("");
+  const [selectedCardId, setSelectedCardId] = useState<string>("");
 
   const { toggleSwitch: toggleDeleteModal, switchValue: deleteModalIsOpen } =
     useSwitch(false);
 
-  const cards = useCardState((state) => state.cards);
-  const selectedCardId = useCardState((state) => state.selectedCardId);
-  const selectCard = useCardState((state) => state.selectCard);
-  const removeCardFromState = useCardState((state) => state.removeCard);
+  const { data: cards = [], isLoading, isError } = useCards();
+  const removeCardMutation = useRemoveCard();
 
-  const setCardIdToBeRemoved = (cardId: number | string) => {
+  const initiateCardRemoval = (cardId: string) => {
+    setCardIdToBeRemoved(cardId);
     toggleDeleteModal();
-
-    if (cardIdToBeRemoved.current) cardIdToBeRemoved.current = cardId;
   };
 
-  const removeCardHandler = () => {
-    setTimeout(() => toggleDeleteModal(), 500);
-
-    removeCardFromState(cardIdToBeRemoved.current);
+  const removeCardHandler = async () => {
+    if (cardIdToBeRemoved) {
+      await removeCardMutation.mutateAsync(cardIdToBeRemoved);
+      toggleDeleteModal();
+      setCardIdToBeRemoved("");
+    }
   };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="w-full flex items-center justify-center py-8">
+        <div className="flex flex-col items-center gap-2">
+          <Spinner size="lg" />
+          <p className="text-gray-600">Loading cards...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (isError) {
+    return (
+      <div className="w-full flex items-center justify-center py-8">
+        <p className="text-red-600">Error loading cards</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -49,7 +71,7 @@ export default function BillingCardList() {
             <div className="flex items-center flex-grow">
               <div
                 className="size-4 rounded-full border-2 border-primary-500 flex items-center justify-center cursor-pointer"
-                onClick={() => selectCard(card.id)}
+                onClick={() => setSelectedCardId(card.id)}
               >
                 {selectedCardId === card.id && (
                   <div className="size-[6px] rounded-full bg-primary-500" />
@@ -66,10 +88,13 @@ export default function BillingCardList() {
                 )}
                 <div className="ml-4">
                   <div className="text-sm font-normal text-neutral-900">
-                    xxxx xxxx xxxx {card.cardNumber}
+                    {card.maskedNumber}
                   </div>
                   <div className="text-sm text-neutral-500">
                     Expires {card.expiry}
+                  </div>
+                  <div className="text-xs text-neutral-400">
+                    {card.cardholderName}
                   </div>
                 </div>
               </div>
@@ -87,7 +112,7 @@ export default function BillingCardList() {
               <Button
                 type="button"
                 aria-label="Delete card"
-                onClick={() => setCardIdToBeRemoved(card.id)}
+                onClick={() => initiateCardRemoval(card.id)}
                 className="size-[40px]"
               >
                 {<TrashSimpleIcon size="20px" className="text-red-500" />}
@@ -120,11 +145,19 @@ export default function BillingCardList() {
           />
 
           <Button
-            text="Remove"
+            text={removeCardMutation.isPending ? "Removing..." : "Remove"}
             variant="solid"
             className="w-full bg-red-500 text-white"
+            disabled={removeCardMutation.isPending}
             onClick={removeCardHandler}
-          />
+          >
+            {removeCardMutation.isPending && (
+              <div className="flex items-center gap-2">
+                <Spinner size="sm" />
+                Removing...
+              </div>
+            )}
+          </Button>
         </div>
       </Modal>
     </>

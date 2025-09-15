@@ -1,46 +1,103 @@
-import { rtw2 } from "../../shared-images/image-entry";
 import { MinusIcon, PlusIcon } from "@phosphor-icons/react";
+import { useParams } from "react-router-dom";
+import { useState } from "react";
+import { useProduct } from "../../hooks/user-dashboard.hooks";
+import { useAddToCart } from "../../hooks/cart.hooks";
+import { useInstantCheckout } from "../../hooks/orders.hooks";
 import Button from "../button";
+import Spinner from "../spinner";
+import { formatPrice } from "../../utils/format-price";
 
 /* -------------------------------------------------------- */
 
 export function DressDetail() {
-  const measurement = [6, 8, 10, 12, 14, 16, 18, 20];
+  const { itemName } = useParams<{ itemName: string }>();
+  const productId = itemName || "";
+  
+  const { data: product, isLoading, isError, error } = useProduct(productId);
+  const addToCartMutation = useAddToCart();
+  const instantCheckoutMutation = useInstantCheckout();
+  
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [quantity, setQuantity] = useState(1);
+  
+  const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
+
+  const handleAddToCart = () => {
+    if (!product || !selectedSize) return;
+    
+    addToCartMutation.mutate({
+      productId: product.id,
+      quantity,
+      size: selectedSize,
+    });
+  };
+
+  const handlePayNow = () => {
+    if (!product || !selectedSize) return;
+    
+    instantCheckoutMutation.mutate({
+      productId: product.id,
+      quantity,
+      size: selectedSize,
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="flex flex-col items-center gap-4">
+          <Spinner size="lg" />
+          <p className="text-gray-600">Loading dress details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError || !product) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <p className="text-red-600 mb-2">Error loading dress</p>
+          <p className="text-gray-600">{error?.message || "Dress not found"}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="w-[72rem] flex flex-col gap-4 p-4">
+    <div className="w-full max-w-[72rem] flex flex-col gap-4">
       <div className="h-auto bg-white rounded-md p-4 flex flex-col gap-6">
         <div className="flex flex-col gap-5">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="relative size-[35.4375rem] bg-blue-100 rounded-md">
+          <div className="flex flex-col lg:flex-row items-start justify-between gap-6">
+            <div className="relative w-full lg:w-1/2 aspect-square max-w-[35.4375rem] bg-gray-100 rounded-md">
               <img
-                src={rtw2}
-                alt=""
-                className="size-full rounded-md object-cover"
+                src={product.images?.[0]?.url || "/placeholder-image.jpg"}
+                alt={product.name}
+                className="w-full h-full rounded-md object-cover"
               />
               <div className="absolute left-3 top-40 flex flex-col gap-[1rem]">
-                {[1, 2, 3].map((idx) => (
+                {product.images?.slice(1, 4).map((image, idx) => (
                   <img
                     key={idx}
-                    src={rtw2}
-                    alt=""
-                    className="w-[101px] h-[67px] rounded-md object-cover border border-white cursor-pointer"
+                    src={image.url}
+                    alt={`${product.name} view ${idx + 2}`}
+                    className="w-[101px] h-[67px] rounded-md object-cover border border-white cursor-pointer hover:border-primary-500 transition-colors"
                   />
                 ))}
               </div>
             </div>
 
-            <div className="size-[35.4375rem] grow rounded-md flex flex-col gap-4">
+            <div className="w-full lg:w-1/2 flex flex-col gap-4">
               <div className="flex flex-col gap-3">
                 <h3 className="text-neutral-700 font-semibold text-[1.5rem]">
-                  Araafit All Blue Jumpsuit
+                  {product.name}
                 </h3>
                 <p className="text-neutral-700 font-light">
-                  This all blue jumpsuit is perfect for making a statement,
-                  brunches, events, or nights out.
+                  {product.description}
                 </p>
                 <span className="font-semibold text-neutral-900">
-                  ₦80,000.00
+                  ₦{formatPrice(product.price)}
                 </span>
               </div>
               <div className="border-b border-gray-100 pb-3">
@@ -61,12 +118,17 @@ export function DressDetail() {
                 </div>
 
                 <div className="w-full flex items-center justify-between">
-                  {measurement.map((item, idx) => (
+                  {sizes.map((size) => (
                     <div
-                      key={idx}
-                      className="w-[3.625rem] h-[2.75rem] p-2 text-[14px] border border-[#E8E8E8] rounded-md flex items-center justify-center cursor-pointer"
+                      key={size}
+                      onClick={() => setSelectedSize(size)}
+                      className={`w-[3.625rem] h-[2.75rem] p-2 text-[14px] border rounded-md flex items-center justify-center cursor-pointer transition-colors ${
+                        selectedSize === size
+                          ? "border-primary-500 bg-primary-50 text-primary-700"
+                          : "border-[#E8E8E8] hover:border-gray-300"
+                      }`}
                     >
-                      {item}
+                      {size}
                     </div>
                   ))}
                 </div>
@@ -76,9 +138,15 @@ export function DressDetail() {
                 <span className="text-[14px]">Quality</span>
 
                 <div className="w-[121px] flex items-center justify-between gap-2 border border-neutral-100 py-[10px] px-[12px] rounded-md">
-                  <MinusIcon className="cursor-pointer" />
-                  <span>{1}</span>
-                  <PlusIcon className="cursor-pointer" />
+                  <MinusIcon 
+                    className="cursor-pointer hover:text-primary-500" 
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  />
+                  <span>{quantity}</span>
+                  <PlusIcon 
+                    className="cursor-pointer hover:text-primary-500" 
+                    onClick={() => setQuantity(quantity + 1)}
+                  />
                 </div>
               </div>
             </div>
@@ -89,9 +157,31 @@ export function DressDetail() {
               text="Add to Cart"
               variant="outline"
               className="w-[23.4375rem] border border-neutral-500 text-neutral-900"
-            />
+              disabled={!selectedSize || addToCartMutation.isPending}
+              onClick={handleAddToCart}
+            >
+              {addToCartMutation.isPending && (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
+                  Adding...
+                </div>
+              )}
+            </Button>
 
-            <Button text="Pay Now" variant="solid" className="w-[23.4375rem]" />
+            <Button 
+              text={instantCheckoutMutation.isPending ? "Processing..." : "Pay Now"}
+              variant="solid" 
+              className="w-[23.4375rem]"
+              disabled={!selectedSize || addToCartMutation.isPending || instantCheckoutMutation.isPending}
+              onClick={handlePayNow}
+            >
+              {instantCheckoutMutation.isPending && (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Processing...
+                </div>
+              )}
+            </Button>
           </div>
         </div>
       </div>

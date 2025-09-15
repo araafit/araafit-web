@@ -1,13 +1,14 @@
 import { memo, useState } from "react";
-import { type CartItem } from "../_shared-data/_cart";
 import { useNavigate } from "react-router-dom";
-import { useCartStore } from "../shared-hooks/state-store";
 import { useSwitch } from "../shared-hooks/switch";
 import showToast from "../utils/notification";
 import Button from "./button";
 import Modal from "./modal";
 import { MinusIcon, PlusIcon, TrashSimpleIcon } from "@phosphor-icons/react";
 import { formatPrice } from "../utils/format-price";
+import { useUpdateQuantity, useRemoveFromCart } from "../hooks/cart.hooks";
+import type { CartItem } from "../services/cart.service";
+import Spinner from "./spinner";
 
 /* ---------------------------------------------------------------------- */
 
@@ -22,41 +23,45 @@ interface CartEngine {
  * @returns ReactElement
  */
 function CartEngine({ cartData, checkoutLink }: CartEngine) {
-  const [orderId, setOrderId] = useState<string | number>();
+  const [itemToRemove, setItemToRemove] = useState<string | null>(null);
   const navigate = useNavigate();
-  const removeItem = useCartStore((state) => state.removeItem);
-  const increaseItem = useCartStore((state) => state.increaseItemCount);
-  const decreaseItem = useCartStore((state) => state.decreaseItemCount);
+  const updateQuantityMutation = useUpdateQuantity();
+  const removeFromCartMutation = useRemoveFromCart();
   const { toggleSwitch: toggleModal, switchValue } = useSwitch();
 
-  // Initiate order to be removed and trigger modal
-  const triggerModal = (orderId: number | string) => {
-    setOrderId(orderId);
-
+  // Initiate item to be removed and trigger modal
+  const triggerModal = (itemId: string) => {
+    setItemToRemove(itemId);
     setTimeout(() => {
       toggleModal();
     }, 200);
   };
 
-  // Remove order, close modal and notify user
-  const removeOrder = () => {
-    if (orderId) {
-      removeItem(orderId);
+  // Handle quantity updates
+  const handleQuantityChange = (itemId: string, newQuantity: number) => {
+    if (newQuantity <= 0) {
+      // If quantity is 0 or less, trigger removal modal
+      setItemToRemove(itemId);
+      toggleModal();
+      return;
+    }
+    
+    updateQuantityMutation.mutate({
+      itemId,
+      request: {
+        quantity: newQuantity,
+      },
+    });
+  };
 
+  // Remove item, close modal and notify user
+  const removeItem = () => {
+    if (itemToRemove) {
+      removeFromCartMutation.mutate(itemToRemove);
       setTimeout(() => {
         toggleModal();
+        setItemToRemove(null);
       }, 200);
-
-      showToast.success("(1) One item has be removed from your cart", {
-        duration: 4000,
-        position: "top-center",
-        style: {
-          backgroundColor: "#F6FEF9",
-          border: "1px solid #16A34A",
-          color: "#16A34A",
-          fontSize: "14px",
-        },
-      });
     }
   };
 
@@ -71,7 +76,7 @@ function CartEngine({ cartData, checkoutLink }: CartEngine) {
             <div className="flex gap-6">
               <input
                 type="checkbox"
-                name={`order_` + item.orderId}
+                name={`order_` + item.id}
                 id=""
                 placeholder=""
                 title=""
@@ -79,38 +84,41 @@ function CartEngine({ cartData, checkoutLink }: CartEngine) {
               />
 
               <img
-                src={item.image}
+                src={item.product.images?.[0]?.url || "/placeholder-image.jpg"}
                 alt=""
                 className="w-full max-w-[14.124rem] rounded-md object-cover"
               />
               <div className="h-full flex flex-col gap-6">
                 <div className="flex flex-col gap-[12px]">
                   <h4 className="font-inter font-medium text-[18px]">
-                    {item.name}
+                    {item.product.name}
                   </h4>
                   <p className="font-light text-neutral-600">
-                    {item.description}
+                    {item.product.description}
                   </p>
                   <span className="font-semibold">
-                    &#8358;{formatPrice(Number(item.cost))}
+                    &#8358;{formatPrice(Number(item.product.price))}
                   </span>
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="w-[102px] flex items-center justify-evenly rounded-md py-[7px] px-3 border gap-2 border-neutral-100">
                     <MinusIcon
-                      className="cursor-pointer"
-                      onClick={() => decreaseItem(idx)}
+                      className={`cursor-pointer ${updateQuantityMutation.isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      onClick={() => !updateQuantityMutation.isPending && handleQuantityChange(item.id, item.quantity - 1)}
                     />
-                    <span>{item.count}</span>
+                    <span className="flex items-center gap-1">
+                      {item.quantity}
+                      {updateQuantityMutation.isPending && <Spinner size="sm" />}
+                    </span>
                     <PlusIcon
-                      className="cursor-pointer"
-                      onClick={() => increaseItem(idx)}
+                      className={`cursor-pointer ${updateQuantityMutation.isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      onClick={() => !updateQuantityMutation.isPending && handleQuantityChange(item.id, item.quantity + 1)}
                     />
                   </div>
 
                   <TrashSimpleIcon
-                    className="size-[20px] text-red-500 cursor-pointer"
-                    onClick={() => item.orderId && triggerModal(item.orderId)}
+                    className={`size-[20px] text-red-500 cursor-pointer ${removeFromCartMutation.isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    onClick={() => !removeFromCartMutation.isPending && triggerModal(item.id)}
                   />
                 </div>
               </div>
@@ -168,7 +176,7 @@ function CartEngine({ cartData, checkoutLink }: CartEngine) {
             text="Yes"
             variant="clear"
             className="w-full text-neutral-900 shadow-sm"
-            onClick={removeOrder}
+            onClick={removeItem}
           />
         </div>
       </Modal>

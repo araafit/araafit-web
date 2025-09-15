@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { WarningIcon } from "@phosphor-icons/react";
+import { IconArrowLeft } from "@tabler/icons-react";
 import { useGetMeasured } from "./context/get-measured-context";
 import { MeasurementStepperLines } from "./stepper-lines";
 import Button from "../../shared-components/button";
@@ -17,6 +18,11 @@ export function MeasurementMethod() {
     undefined
   );
   const { currentStep, stepTo } = useGetMeasured();
+
+  const handleBack = () => {
+    // Navigate back to the previous page or route
+    navigate(-1);
+  };
 
   const Radio = ({ isClicked }: { isClicked: boolean }) => (
     <div
@@ -39,13 +45,18 @@ export function MeasurementMethod() {
     }
   };
 
-  const nextStep = () => {
-    stepTo(currentStep + 1);
-    window.location.reload();
-  };
 
   return (
-    <div className="flex flex-col gap-[12rem]">
+    <div className="flex flex-col gap-[12rem] relative">
+        {/* Back Button */}
+        <button
+          onClick={handleBack}
+          className="absolute top-0 left-0 w-10 h-10 bg-white border border-gray-200 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors duration-200 shadow-sm z-10"
+          aria-label="Go back"
+        >
+          <IconArrowLeft size={16} className="text-gray-600" />
+        </button>
+
         <div className="w-full flex flex-col gap-7">
           <MeasurementStepperLines stepIndex={currentStep} />
 

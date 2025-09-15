@@ -1,21 +1,51 @@
 import { ArrowLeftIcon, CaretRightIcon } from "@phosphor-icons/react";
 import TopBar from "../admin-components/top-bar/top-bar";
 import AdminDashboardLayout from "../../../layouts/admin-dashboard/dashboard-layout";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Button from "../../../shared-components/button";
 import { ExportIcon } from "@phosphor-icons/react";
 import { CustomerActivitiesTable } from "../admin-components/customersTable/customer-recent-activities-table";
+import { useCustomer } from "../../../hooks/admin-customers.hooks";
+import { getCustomerStatusClasses } from "../../../utils/admin-customers-utils";
+import Spinner from "../../../shared-components/spinner";
 
 export function AdminDashboardCustomersActivities() {
   const navigate = useNavigate();
+  const { customersId } = useParams<{ customersId: string }>();
+  const { data: customer, isLoading, error } = useCustomer(customersId || "");
+
+  if (isLoading) {
+    return (
+      <AdminDashboardLayout>
+        <div className="h-screen flex items-center justify-center">
+          <Spinner size="lg" speed="fast" />
+        </div>
+      </AdminDashboardLayout>
+    );
+  }
+
+  if (error || !customer) {
+    return (
+      <AdminDashboardLayout>
+        <div className="h-screen flex items-center justify-center">
+          <div className="bg-red-50 border border-red-200 rounded-md p-6">
+            <p className="text-red-600">Failed to load customer details</p>
+          </div>
+        </div>
+      </AdminDashboardLayout>
+    );
+  }
+
+  const statusClasses = getCustomerStatusClasses(customer.status);
+  const customerName = `${customer.firstName} ${customer.lastName}`;
 
   const title = (
     <div className="font-lora flex items-center gap-2 text-[#1C1C1C]">
-      Toluwani Bakare{" "}
+      {customerName}{" "}
       <div
-        className={`px-2 py-1 text-xs rounded-full h-[22px] text-center bg-[#F0FDF5] text-[#16A34A]`}
+        className={`px-2 py-1 text-xs rounded-full h-[22px] text-center ${statusClasses.bgColor} ${statusClasses.textColor}`}
       >
-        Active
+        {customer.status}
       </div>
     </div>
   );
@@ -26,7 +56,7 @@ export function AdminDashboardCustomersActivities() {
       <CaretRightIcon className="text-primary-900" />
       <span className="text-primary-900"> Customers</span>
       <CaretRightIcon className="text-[#979797]" />
-      <span className="text-[#979797]">Toluwani Bakare</span>
+      <span className="text-[#979797]">{customerName}</span>
     </div>
   );
 

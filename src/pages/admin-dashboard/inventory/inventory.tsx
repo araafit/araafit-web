@@ -5,11 +5,16 @@ import Button from "../../../shared-components/button";
 import NotificationBell from "../admin-components/top-bar/notification-bell";
 import Stockcount from "./stock-count";
 import { DataTable } from "../admin-components/inventoryTable/inventory-table";
-import { InventoryItems } from "../_data/_overview";
+import { useProductMetrics, useProducts } from "../../../hooks/admin-inventory.hooks";
+import { convertApiProductsToInventoryFormat } from "../../../utils/admin-inventory-utils";
 import { Outlet } from "react-router-dom";
 import { Link } from "react-router-dom";
+import Spinner from "../../../shared-components/spinner";
 
 export function AdminDashboardInventory() {
+  const { data: metrics, isLoading: metricsLoading, error: metricsError } = useProductMetrics();
+  const { data: products, isLoading: productsLoading, error: productsError } = useProducts();
+
   const title = (
     <div className="font-lora font-medium text-[#1C1C1C]">Inventory</div>
   );
@@ -52,37 +57,59 @@ export function AdminDashboardInventory() {
           </span>
           {/* ----------- */}
           <div className="bg-white w-full max-w-[1126px] mx-auto py-4 my-8 flex justify-center rounded-sm items-center">
-            <div className="flex items-center gap-4">
-              <div className="h-10 w-10 bg-[#E8E8E8] rounded flex items-center justify-center">
-                <DressIcon className="size-[1.25rem]" />
+            {metricsLoading ? (
+              <div className="flex justify-center items-center h-20">
+                <Spinner size="lg" speed="fast" />
               </div>
-              <section className="flex items-center">
-                <div className="w-32">
-                  <h6 className="font-light font-inter text-[#979797]">
-                    Total Inventory
-                  </h6>
-                  <span className="font-medium text-xl">600</span>
+            ) : metricsError ? (
+              <div className="bg-red-50 border border-red-200 rounded-md p-4">
+                <p className="text-red-600">Failed to load inventory metrics</p>
+              </div>
+            ) : metrics ? (
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 bg-[#E8E8E8] rounded flex items-center justify-center">
+                  <DressIcon className="size-[1.25rem]" />
                 </div>
-                <div className="w-32">
-                  <h6 className="font-light font-inter text-[#979797]">
-                    Dresses
-                  </h6>
-                  <span className="font-medium text-xl">600</span>
-                </div>
-                <div className="w-32">
-                  <h6 className="font-light font-inter text-[#979797]">
-                    Fabrics
-                  </h6>
-                  <span className="font-medium text-xl">600</span>
-                </div>
-              </section>
-              <Stockcount />
-            </div>
+                <section className="flex items-center">
+                  <div className="w-32">
+                    <h6 className="font-light font-inter text-[#979797]">
+                      Total Inventory
+                    </h6>
+                    <span className="font-medium text-xl">{metrics.totalInventory}</span>
+                  </div>
+                  <div className="w-32">
+                    <h6 className="font-light font-inter text-[#979797]">
+                      Dresses
+                    </h6>
+                    <span className="font-medium text-xl">{metrics.totalDresses}</span>
+                  </div>
+                  <div className="w-32">
+                    <h6 className="font-light font-inter text-[#979797]">
+                      Fabrics
+                    </h6>
+                    <span className="font-medium text-xl">{metrics.totalFabrics}</span>
+                  </div>
+                </section>
+                <Stockcount />
+              </div>
+            ) : null}
           </div>
 
           {/* ------------------- */}
           <div className="w-full  bg-white rounded-sm px-4 mt-6 py-6 flex flex-col gap-6">
-            <DataTable data={InventoryItems} />
+            {productsLoading ? (
+              <div className="flex justify-center items-center h-32">
+                <Spinner size="lg" speed="fast" />
+              </div>
+            ) : productsError ? (
+              <div className="bg-red-50 border border-red-200 rounded-md p-4">
+                <p className="text-red-600">Failed to load products. Please try again.</p>
+              </div>
+            ) : products ? (
+              <DataTable data={convertApiProductsToInventoryFormat(products)} />
+            ) : (
+              <DataTable data={[]} />
+            )}
           </div>
           <Outlet />
         </div>

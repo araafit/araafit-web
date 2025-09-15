@@ -6,12 +6,14 @@ import {
   ShoppingCartSimpleIcon,
   SignOutIcon,
 } from "@phosphor-icons/react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, NavLink } from "react-router-dom";
 import DashboardLoader from "./loader";
 import Modal from "../../shared-components/modal";
 import { useSwitch } from "../../shared-hooks/switch";
 import Button from "../../shared-components/button";
-import { useCartStore } from "../../shared-hooks/state-store";
+import { useCart } from "../../hooks/cart.hooks";
+import { useLogout } from "../../hooks/auth.hooks";
+import Spinner from "../../shared-components/spinner";
 
 /* ------------------------------------------------------ */
 
@@ -34,9 +36,23 @@ export default function UserDashboardLayout({
   children: React.ReactElement;
 }) {
   const { toggleSwitch, switchValue } = useSwitch(false);
-  const cartItems = useCartStore((state) => state.items);
+  const { data: cart } = useCart();
+  const navigate = useNavigate();
+  const logoutMutation = useLogout();
 
   const [loading, setLoading] = useState(true);
+
+  // Handle logout success
+  useEffect(() => {
+    if (logoutMutation.isSuccess) {
+      toggleSwitch(); // Close modal
+      navigate("/auth/login"); // Redirect to login
+    }
+  }, [logoutMutation.isSuccess]);
+
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
 
   useEffect(() => {
     const waitASecond = async () =>
@@ -63,16 +79,20 @@ export default function UserDashboardLayout({
                 if (item.name.toLowerCase() !== "profile") {
                   if (item.name.toLowerCase() === "cart") {
                     return (
-                      <Link
+                      <NavLink
                         to={item.link}
                         key={idx}
-                        className="w-full flex flex-col gap-4 p-[0.5rem] text-neutral-900 hover:bg-primary-900 hover:text-white"
+                        end={item.name.toLowerCase() === "home"}
+                        className={({ isActive }) =>
+                          `w-full flex flex-col gap-4 p-[0.5rem] transition-colors ${
+                            isActive
+                              ? "bg-primary-900 text-white"
+                              : "text-neutral-900 hover:bg-primary-900 hover:text-white"
+                          }`
+                        }
                       >
                         <div className="flex items-center justify-between">
-                          <div
-                            key={idx}
-                            className="w-full flex items-center text-base"
-                          >
+                          <div className="w-full flex items-center text-base">
                             {createElement(item.icon ? item.icon : "a", {
                               className: "mr-3",
                             })}
@@ -82,37 +102,48 @@ export default function UserDashboardLayout({
                           </div>
 
                           <span className="w-[26px] h-[19px] py-[2px] px-[10px] bg-primary-50 text-[0.875rem] !text-[#1C1C1C] rounded-full flex items-center justify-center">
-                            {cartItems.length}
+                            {cart?.items?.reduce((sum, item) => sum + item.quantity, 0) ?? 0}
                           </span>
                         </div>
-                      </Link>
+                      </NavLink>
                     );
                   }
 
                   return (
-                    <Link
+                    <NavLink
                       to={item.link}
                       key={idx}
-                      className="w-full flex flex-col gap-4 p-[0.5rem] text-neutral-900 hover:bg-primary-900 hover:text-white"
+                      end={item.name.toLowerCase() === "home"}
+                      className={({ isActive }) =>
+                        `w-full flex flex-col gap-4 p-[0.5rem] transition-colors ${
+                          isActive
+                            ? "bg-primary-900 text-white"
+                            : "text-neutral-900 hover:bg-primary-900 hover:text-white"
+                        }`
+                      }
                     >
-                      <div
-                        key={idx}
-                        className="w-full flex items-center text-base"
-                      >
+                      <div className="w-full flex items-center text-base">
                         {createElement(item.icon ? item.icon : "a", {
                           className: "mr-3",
                         })}
                         <span className="capitalize text-sm">{item.name}</span>
                       </div>
-                    </Link>
+                    </NavLink>
                   );
                 }
 
                 return (
-                  <Link
+                  <NavLink
                     to={item.link}
                     key={idx}
-                    className="w-full flex flex-col gap-4 p-[0.5rem] text-neutral-900 hover:bg-primary-900 hover:text-white"
+                    end={item.name.toLowerCase() === "home"}
+                    className={({ isActive }) =>
+                      `w-full flex flex-col gap-4 p-[0.5rem] transition-colors ${
+                        isActive
+                          ? "bg-primary-900 text-white"
+                          : "text-neutral-900 hover:bg-primary-900 hover:text-white"
+                      }`
+                    }
                   >
                     <div className="w-full flex items-center text-base">
                       <span className="uppercase mr-3 size-[20px] text-[10px] border border-primary-50 p-1 rounded-full flex items-center justify-center">
@@ -121,7 +152,7 @@ export default function UserDashboardLayout({
 
                       <span className="capitalize text-sm">{item.name}</span>
                     </div>
-                  </Link>
+                  </NavLink>
                 );
               })}
             </div>
@@ -155,13 +186,21 @@ export default function UserDashboardLayout({
             text="Cancel"
             variant="clear"
             className="w-full text-neutral-900 shadow-sm"
+            onClick={toggleSwitch}
           />
 
           <Button
             text="Logout"
             variant="clear"
+            disabled={logoutMutation.isPending}
             className="w-full bg-red-600 text-white"
-          />
+            onClick={handleLogout}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <span>Logout</span>
+              {logoutMutation.isPending && <Spinner size="sm" speed="fast" />}
+            </div>
+          </Button>
         </div>
       </Modal>
     </section>

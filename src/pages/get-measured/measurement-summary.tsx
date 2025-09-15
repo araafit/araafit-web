@@ -5,6 +5,8 @@ import Spinner from "../../shared-components/spinner";
 import { useMeasurementsStore } from "../../shared-hooks/state-store";
 import Button from "../../shared-components/button";
 import { PencilSimpleIcon } from "@phosphor-icons/react";
+import { useCreateGuestUser } from "../../hooks/auth.hooks";
+import { useAuth } from "../../hooks/use-auth";
 
 /* -------------------------------------------------------------------------- */
 
@@ -25,11 +27,50 @@ const waterMarkStyle: React.CSSProperties = {
 
 export function MeasurementSummary() {
   const navigate = useNavigate();
-  const [savedState, _] = useState({
+  const [savedState, setSavedState] = useState({
     isLoading: false,
     isSaved: false,
   });
   const selectedMeasurements = useMeasurementsStore((state) => state.data);
+  const { isAuthenticated } = useAuth();
+  const createGuestUserMutation = useCreateGuestUser();
+
+  // Function to create guest user with measurements
+  const handleContinueAsGuest = async () => {
+    setSavedState({ isLoading: true, isSaved: false });
+    
+    try {
+      await createGuestUserMutation.mutateAsync({
+        bust: selectedMeasurements.bust || 36,
+        waist: selectedMeasurements.waist || 28,
+        hips: selectedMeasurements.hip || 38,
+        height: selectedMeasurements.height || 165,
+        dressSize: selectedMeasurements.dressSize || 10,
+        skinTone: "medium", // You might want to get this from the measurements store
+      });
+      
+      setSavedState({ isLoading: false, isSaved: true });
+      
+      // Navigate to shop after successful guest user creation
+      setTimeout(() => {
+        navigate("/shop");
+      }, 1500);
+    } catch (error) {
+      console.error("Failed to create guest user:", error);
+      setSavedState({ isLoading: false, isSaved: false });
+    }
+  };
+
+  // Function to save measurements for authenticated users
+  const handleSaveMeasurements = async () => {
+    setSavedState({ isLoading: true, isSaved: false });
+    
+    // Here you would typically save measurements to the user's profile
+    // For now, we'll just simulate a save operation
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    setSavedState({ isLoading: false, isSaved: true });
+  };
 
   useEffect(() => {
     if (savedState.isSaved) {
@@ -144,28 +185,29 @@ export function MeasurementSummary() {
               <Button
                 variant="solid"
                 className="w-[10rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed"
-                // onClick={saveMeasurement}
+                onClick={isAuthenticated ? handleSaveMeasurements : handleContinueAsGuest}
+                disabled={savedState.isLoading || createGuestUserMutation.isPending}
               >
                 <div className="flex items-center justify-center gap-1">
-                  <span>Save</span>
-                  <Spinner size="sm" isLoading={savedState.isLoading} />
+                  <span>{isAuthenticated ? "Save" : "Continue"}</span>
+                  <Spinner size="sm" isLoading={savedState.isLoading || createGuestUserMutation.isPending} />
                 </div>
               </Button>
             </div>
           ) : (
             <div className="flex items-center justify-end gap-6">
               <Button
-                text="Continue as a guest"
+                text="Continue shopping"
                 variant="clear"
                 className="w-[15rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed border-neutral-100 text-primary-500"
-                // onClick={retake}
+                onClick={() => navigate("/shop")}
               />
 
               <Button
-                text="Create a free account"
+                text={isAuthenticated ? "Go to Dashboard" : "Create a free account"}
                 variant="solid"
                 className="w-[15rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed"
-                onClick={() => navigate("/auth/register")}
+                onClick={() => navigate(isAuthenticated ? "/dashboard" : "/auth/register")}
               />
             </div>
           )}

@@ -19,23 +19,60 @@ import {
 } from "../../ui/select";
 import { Input } from "../../ui/input";
 import Button from "../../../shared-components/button";
-
-const sizes = {
-  bust: [34, 35, 36, 37, 38, 40],
-  waist: [28, 29, 30, 31, 32],
-  hips: [36, 37, 38, 39, 40],
-  "dress size": [6, 8, 10, 12, 14],
-};
+import { useSizeChart, useCreateSizeChart, useUpdateSizeChart } from "../../../hooks/admin-settings.hooks";
+import type { SizeType } from "../../../services/admin-settings.service";
+import Spinner from "../../../shared-components/spinner";
 
 export default function SizeTabs() {
-  const [chartType, setChartType] = useState("");
-  const [oldValue, setOldValue] = useState("");
+  const [chartType, setChartType] = useState<SizeType | "">("");
+  const [editItemId, setEditItemId] = useState("");
   const [newValue, setNewValue] = useState("");
-  const [AddchartType, setAddChartType] = useState("");
-  const [AddnewValue, setAddNewValue] = useState("");
+  const [addChartType, setAddChartType] = useState<SizeType | "">("");
+  const [addNewValue, setAddNewValue] = useState("");
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  const handleAdd = () => {
-    console.log("Adding:", { chartType, newValue });
+  // API hooks
+  const { data: sizeChart, isLoading, error } = useSizeChart();
+  const createSizeChartMutation = useCreateSizeChart();
+  const updateSizeChartMutation = useUpdateSizeChart();
+
+  const handleAdd = async () => {
+    if (!addChartType || !addNewValue) return;
+
+    try {
+      await createSizeChartMutation.mutateAsync({
+        type: addChartType,
+        value: Number(addNewValue),
+      });
+      setAddChartType("");
+      setAddNewValue("");
+      setIsAddDialogOpen(false);
+    } catch (error) {
+      // Error handled in hook
+    }
+  };
+
+  const handleEdit = async () => {
+    if (!editItemId || !newValue) return;
+
+    try {
+      await updateSizeChartMutation.mutateAsync({
+        id: editItemId,
+        request: { value: Number(newValue) },
+      });
+      setEditItemId("");
+      setNewValue("");
+      setIsEditDialogOpen(false);
+    } catch (error) {
+      // Error handled in hook
+    }
+  };
+
+  const openEditDialog = (id: string, currentValue: number) => {
+    setEditItemId(id);
+    setNewValue(currentValue.toString());
+    setIsEditDialogOpen(true);
   };
   return (
     <>
@@ -43,9 +80,9 @@ export default function SizeTabs() {
         {/* Header */}
         <div className="flex justify-between">
           <h2 className="font-semibold text-[28px] capitalize">
-            Manage Orders & Requests
+            Size Chart Management
           </h2>
-          <Dialog>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <div className="flex gap-1 items-center cursor-pointer">
                 <PlusIcon className="text-[#9A6C50]" />
@@ -69,8 +106,8 @@ export default function SizeTabs() {
                 <div className="space-y-1">
                   <label className="text-sm text-[#676767]">Chart Type</label>
                   <Select
-                    onValueChange={setAddChartType}
-                    defaultValue={AddchartType}
+                    onValueChange={(value) => setAddChartType(value as SizeType)}
+                    value={addChartType}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select type" />
@@ -79,7 +116,7 @@ export default function SizeTabs() {
                       <SelectItem value="bust">Bust</SelectItem>
                       <SelectItem value="waist">Waist</SelectItem>
                       <SelectItem value="hips">Hips</SelectItem>
-                      <SelectItem value="dress">Dress Size</SelectItem>
+                      <SelectItem value="dressSize">Dress Size</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -89,7 +126,7 @@ export default function SizeTabs() {
                   <label className="text-sm text-[#676767]">New Value</label>
                   <Input
                     type="number"
-                    value={AddnewValue}
+                    value={addNewValue}
                     onChange={(e) => setAddNewValue(e.target.value)}
                     placeholder="Enter new value"
                   />
@@ -106,11 +143,11 @@ export default function SizeTabs() {
                   />
                 </DialogClose>
                 <Button
-                  text="Add"
+                  text={createSizeChartMutation.isPending ? "Adding..." : "Add"}
                   type="submit"
                   variant="solid"
                   className="bg-[#9A6C50] text-white flex-1"
-                  disabled={!AddchartType || !AddnewValue}
+                  disabled={!addChartType || !addNewValue || createSizeChartMutation.isPending}
                   onClick={handleAdd}
                 />
               </DialogFooter>
@@ -120,121 +157,93 @@ export default function SizeTabs() {
 
         {/* Divider */}
         <div className="w-full h-[1px] my-4 bg-[#F0F2F5]" />
-        <div className="space-y-6 max-w-[530px] mx-auto">
-          {Object.entries(sizes).map(([label, values]) => (
+        
+        {isLoading ? (
+          <div className="flex justify-center items-center py-12">
+            <Spinner size="lg" speed="fast" />
+          </div>
+        ) : error ? (
+          <div className="bg-red-50 border border-red-200 rounded-md p-6">
+            <p className="text-red-600">Failed to load size chart</p>
+          </div>
+        ) : (
+          <div className="space-y-6 max-w-[530px] mx-auto">
+            {sizeChart && Object.entries(sizeChart).map(([label, values]) => (
             <div key={label}>
               {/* Label */}
               <div className="flex justify-between items-center ">
                 <span className="capitalize text-[#676767] text-sm">
-                  {label}
+                  {label === 'dressSize' ? 'Dress Size' : label}
                 </span>
 
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <button className="ml-auto p-2 text-sm flex gap-2  text-[#4F4F4F] hover:text-[#7B523F]">
-                      <PencilSimpleIcon size={20} />
-                      Edit
-                    </button>
-                  </DialogTrigger>
-
-                  <DialogContent className="sm:max-w-[425px] bg-white rounded-xl shadow-lg">
-                    <DialogHeader>
-                      <DialogTitle className="text-[#1C1C1C] text-lg font-inter">
-                        Edit Size Chart
-                      </DialogTitle>
-                      <DialogDescription className="text-[#4F4F4F] font-inter mt-3">
-                        Edit the size label and measurement to update your
-                        chart.
-                      </DialogDescription>
-                    </DialogHeader>
-
-                    <div className="space-y-4 py-4">
-                      {/* Dropdown for chart type */}
-                      <div className="space-y-1">
-                        <label className="text-sm text-[#676767]">
-                          Chart Type
-                        </label>
-                        <Select
-                          onValueChange={setChartType}
-                          defaultValue={chartType}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="bust">Bust</SelectItem>
-                            <SelectItem value="waist">Waist</SelectItem>
-                            <SelectItem value="hips">Hips</SelectItem>
-                            <SelectItem value="dress size">
-                              Dress Size
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* Old Value */}
-                      <div className="space-y-1">
-                        <label className="text-sm text-[#676767]">
-                          Old Value
-                        </label>
-                        <Input
-                          type="number"
-                          value={oldValue}
-                          onChange={(e) => setOldValue(e.target.value)}
-                          placeholder="Enter old value"
-                        />
-                      </div>
-
-                      {/* New Value */}
-                      <div className="space-y-1">
-                        <label className="text-sm text-[#676767]">
-                          New Value
-                        </label>
-                        <Input
-                          type="number"
-                          value={newValue}
-                          onChange={(e) => setNewValue(e.target.value)}
-                          placeholder="Enter new value"
-                        />
-                      </div>
-                    </div>
-
-                    <DialogFooter className="flex">
-                      <DialogClose asChild className="flex-1">
-                        <Button
-                          text="Cancel"
-                          className="border border-[#E7E7E7] text-[#3D3D3D]"
-                          type="submit"
-                          variant="outline"
-                        />
-                      </DialogClose>
-                      <Button
-                        text=" Update"
-                        type="submit"
-                        variant="solid"
-                        className="text-white flex-1"
-                        // onClick={handleUpdate}
-                        disabled={!chartType || !oldValue || !newValue}
-                      />
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
               </div>
 
               {/* Sizes */}
               <div className="flex gap-2 flex-wrap mt-2">
-                {values.map((v) => (
+                {values.map((item) => (
                   <div
-                    key={v}
-                    className="w-16 h-10 flex items-center justify-center border border-[#D0D5DD] rounded-md text-sm text-[#1C1C1C] bg-white"
+                    key={item.id}
+                    className="relative group w-16 h-10 flex items-center justify-center border border-[#D0D5DD] rounded-md text-sm text-[#1C1C1C] bg-white hover:bg-gray-50 cursor-pointer"
+                    onClick={() => openEditDialog(item.id, item.value)}
                   >
-                    {v}
+                    {item.value}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-gray-900 bg-opacity-75 rounded-md transition-opacity">
+                      <PencilSimpleIcon size={12} className="text-white" />
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
           ))}
-        </div>
+          </div>
+        )}
+        
+        {/* Edit Dialog - Outside the loop */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="sm:max-w-[425px] bg-white rounded-xl shadow-lg">
+            <DialogHeader>
+              <DialogTitle className="text-[#1C1C1C] text-lg font-inter">
+                Edit Size Value
+              </DialogTitle>
+              <DialogDescription className="text-[#4F4F4F] font-inter mt-3">
+                Update the size value.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-4">
+              {/* New Value */}
+              <div className="space-y-1">
+                <label className="text-sm text-[#676767]">
+                  New Value
+                </label>
+                <Input
+                  type="number"
+                  value={newValue}
+                  onChange={(e) => setNewValue(e.target.value)}
+                  placeholder="Enter new value"
+                />
+              </div>
+            </div>
+
+            <DialogFooter className="flex">
+              <DialogClose asChild className="flex-1">
+                <Button
+                  text="Cancel"
+                  className="border border-[#E7E7E7] text-[#3D3D3D]"
+                  variant="outline"
+                />
+              </DialogClose>
+              <Button
+                text={updateSizeChartMutation.isPending ? "Updating..." : "Update"}
+                type="submit"
+                variant="solid"
+                className="text-white flex-1 bg-[#9A6C50]"
+                onClick={handleEdit}
+                disabled={!newValue || updateSizeChartMutation.isPending}
+              />
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </>
   );

@@ -2,27 +2,30 @@ import UserDashboardLayout from "../../../../layouts/user-dashboard/dashboard-la
 import Button from "../../../../shared-components/button";
 import { ArrowLeftIcon } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useMeasurements, useSizeChart, useUpdateMeasurements } from "../../../../hooks/measurements.hooks";
 
 /* ------------------------------------------------------------------------------------------------- */
 
-const measurements = {
-  bust: [30, 36, 38, 40, 42, 44, 46, 48],
-  wait: [26, 28, 30, 32, "33/34", "35/36", "37/38", 40],
-  hip: [36, 38, 40, 42, 44, 46, 48, 50],
-  height: ["4'10", "5'1", "5'3", "5'4", "5'5", "5'7", "5'9", "6'0"],
-  dressSize: [6, 8, 10, 12, 14, 16, 18, 20],
-  skinTone: ["#33251c", "#55322e", "#8c5a47", "#b0522d", "#c4976c", "#deb588"],
-};
-
-const measurementNames = [
-  "bust",
-  "wait",
-  "hip (inches)",
-  "height",
-  "dress size",
-  "skin tone",
+const skinToneOptions = [
+  { name: "deep", color: "#33251c" },
+  { name: "dark", color: "#55322e" },
+  { name: "medium", color: "#8c5a47" },
+  { name: "tan", color: "#b0522d" },
+  { name: "light", color: "#c4976c" },
+  { name: "fair", color: "#deb588" },
 ];
-const measurementValues = Object.values(measurements);
+
+const heightOptions = [
+  { value: 58, label: "4'10\"" },
+  { value: 61, label: "5'1\"" },
+  { value: 63, label: "5'3\"" },
+  { value: 64, label: "5'4\"" },
+  { value: 65, label: "5'5\"" },
+  { value: 67, label: "5'7\"" },
+  { value: 69, label: "5'9\"" },
+  { value: 72, label: "6'0\"" },
+];
 
 /**
  * Edit measurements
@@ -31,6 +34,60 @@ const measurementValues = Object.values(measurements);
  */
 export function DashboardEditMeasurementPage() {
   const navigate = useNavigate();
+  const { data: currentMeasurements, isLoading: measurementsLoading } = useMeasurements();
+  const { data: sizeChart, isLoading: sizeChartLoading } = useSizeChart();
+  const updateMeasurements = useUpdateMeasurements();
+
+  const [selectedValues, setSelectedValues] = useState({
+    bust: 0,
+    waist: 0,
+    hips: 0,
+    height: 0,
+    dressSize: 0,
+    skinTone: "",
+  });
+
+  // Prefill current measurements
+  useEffect(() => {
+    if (currentMeasurements) {
+      setSelectedValues({
+        bust: currentMeasurements.measurements.bust,
+        waist: currentMeasurements.measurements.waist,
+        hips: currentMeasurements.measurements.hips,
+        height: currentMeasurements.measurements.height,
+        dressSize: currentMeasurements.measurements.dressSize,
+        skinTone: currentMeasurements.measurements.skinTone,
+      });
+    }
+  }, [currentMeasurements]);
+
+  const handleValueSelect = (type: keyof typeof selectedValues, value: number | string) => {
+    setSelectedValues(prev => ({
+      ...prev,
+      [type]: value,
+    }));
+  };
+
+  const handleUpdate = () => {
+    updateMeasurements.mutate(selectedValues, {
+      onSuccess: () => {
+        navigate("/dashboard/profile");
+      },
+    });
+  };
+
+  if (measurementsLoading || sizeChartLoading) {
+    return (
+      <UserDashboardLayout>
+        <div className="h-screen bg-white py-5 px-8 rounded-md flex flex-col items-center justify-center gap-6">
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
+            <span className="ml-2">Loading measurements...</span>
+          </div>
+        </div>
+      </UserDashboardLayout>
+    );
+  }
 
   return (
     <UserDashboardLayout>
@@ -53,44 +110,124 @@ export function DashboardEditMeasurementPage() {
           </div>
 
           <div className="w-full flex flex-col gap-4">
-            {measurementNames.map((name, idx) => (
-              <div key={idx} className="w-full flex flex-col gap-3">
-                <span className="font-medium capitalize text-[#1C1C1C]">
-                  {name}:
-                </span>
-
-                <div
-                  key={idx}
-                  className="flex items-center justify-between gap-4"
-                >
-                  {idx === 5
-                    ? measurementValues[idx].map((tone, idx) => (
-                        <Button
-                          key={idx}
-                          style={{ backgroundColor: String(tone) }}
-                          id={`skin-tone-${idx}`}
-                          className="w-[58px] h-[44px] rounded-md border hover:border-neutral-700 focus:border-neutral-700 cursor-pointer"
-                          onClick={() => console.log(tone)}
-                        />
-                      ))
-                    : measurementValues[idx].map((item, idx) => (
-                        <Button
-                          key={idx}
-                          type="button"
-                          text={String(item)}
-                          variant="outline"
-                          className="w-[58px] h-[44px] text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-neutral-700 focus:border-neutral-700"
-                          onClick={() => console.log(item)}
-                        />
-                      ))}
-                </div>
+            {/* Bust */}
+            <div className="w-full flex flex-col gap-3">
+              <span className="font-medium capitalize text-[#1C1C1C]">Bust:</span>
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                {sizeChart?.bust?.map((item) => (
+                  <Button
+                    key={item.id}
+                    type="button"
+                    text={String(item.value)}
+                    variant="outline"
+                    className={`w-[58px] h-[44px] text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-neutral-700 focus:border-neutral-700 ${
+                      selectedValues.bust === item.value ? "border-neutral-700 bg-neutral-100" : ""
+                    }`}
+                    onClick={() => handleValueSelect("bust", item.value)}
+                  />
+                ))}
               </div>
-            ))}
+            </div>
+
+            {/* Waist */}
+            <div className="w-full flex flex-col gap-3">
+              <span className="font-medium capitalize text-[#1C1C1C]">Waist:</span>
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                {sizeChart?.waist?.map((item) => (
+                  <Button
+                    key={item.id}
+                    type="button"
+                    text={String(item.value)}
+                    variant="outline"
+                    className={`w-[58px] h-[44px] text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-neutral-700 focus:border-neutral-700 ${
+                      selectedValues.waist === item.value ? "border-neutral-700 bg-neutral-100" : ""
+                    }`}
+                    onClick={() => handleValueSelect("waist", item.value)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Hips */}
+            <div className="w-full flex flex-col gap-3">
+              <span className="font-medium capitalize text-[#1C1C1C]">Hips:</span>
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                {sizeChart?.hips?.map((item) => (
+                  <Button
+                    key={item.id}
+                    type="button"
+                    text={String(item.value)}
+                    variant="outline"
+                    className={`w-[58px] h-[44px] text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-neutral-700 focus:border-neutral-700 ${
+                      selectedValues.hips === item.value ? "border-neutral-700 bg-neutral-100" : ""
+                    }`}
+                    onClick={() => handleValueSelect("hips", item.value)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Height */}
+            <div className="w-full flex flex-col gap-3">
+              <span className="font-medium capitalize text-[#1C1C1C]">Height:</span>
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                {heightOptions?.map((option) => (
+                  <Button
+                    key={option.value}
+                    type="button"
+                    text={option.label}
+                    variant="outline"
+                    className={`w-[58px] h-[44px] text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-neutral-700 focus:border-neutral-700 ${
+                      selectedValues.height === option.value ? "border-neutral-700 bg-neutral-100" : ""
+                    }`}
+                    onClick={() => handleValueSelect("height", option.value)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Dress Size */}
+            <div className="w-full flex flex-col gap-3">
+              <span className="font-medium capitalize text-[#1C1C1C]">Dress Size:</span>
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                {sizeChart?.dressSize?.map((item) => (
+                  <Button
+                    key={item.id}
+                    type="button"
+                    text={String(item.value)}
+                    variant="outline"
+                    className={`w-[58px] h-[44px] text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-neutral-700 focus:border-neutral-700 ${
+                      selectedValues.dressSize === item.value ? "border-neutral-700 bg-neutral-100" : ""
+                    }`}
+                    onClick={() => handleValueSelect("dressSize", item.value)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Skin Tone */}
+            <div className="w-full flex flex-col gap-3">
+              <span className="font-medium capitalize text-[#1C1C1C]">Skin Tone:</span>
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                {skinToneOptions?.map((tone) => (
+                  <Button
+                    key={tone.name}
+                    style={{ backgroundColor: tone.color }}
+                    className={`w-[58px] h-[44px] rounded-md border hover:border-neutral-700 focus:border-neutral-700 cursor-pointer ${
+                      selectedValues.skinTone === tone.name ? "border-neutral-700 ring-2 ring-neutral-700" : "border-gray-300"
+                    }`}
+                    onClick={() => handleValueSelect("skinTone", tone.name)}
+                  />
+                ))}
+              </div>
+            </div>
 
             <Button
               text="Update"
               className="w-[175px] self-end mt-2"
               variant="solid"
+              onClick={handleUpdate}
+              disabled={updateMeasurements.isPending}
             />
           </div>
         </div>

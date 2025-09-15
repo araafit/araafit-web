@@ -1,15 +1,17 @@
 import { PlusIcon } from "@phosphor-icons/react";
-import React, { useRef } from "react";
+import { useRef } from "react";
 import { useCardState } from "../../../../shared-hooks/state-store";
 import { useSwitch } from "../../../../shared-hooks/switch";
 import Button from "../../../../shared-components/button";
 import Modal from "../../../../shared-components/modal";
 import Spinner from "../../../../shared-components/spinner";
-import BillingCardForm from "../../billing-card-form";
+import BillingCardForm, { type CheckoutInfo } from "../../billing-card-form";
 import BillingCardList from "../../billing-card-list";
 import checkMark from "../../checkmark.png";
 import paymentWallet from "../payment-wallet.png";
 import { useNavigate } from "react-router-dom";
+import { useCheckout } from "../../../../hooks/orders.hooks";
+import { useCart } from "../../../../hooks/cart.hooks";
 
 /* ------------------------------------------------------------------------- */
 
@@ -26,7 +28,8 @@ export default function CheckoutPaymentInfo() {
     toggleSwitch: completedPaymentModalToggle,
     switchValue: completedPaymentModalToggleValue,
   } = useSwitch();
-  const [isLoading, setLoading] = React.useState(false);
+  const checkoutMutation = useCheckout();
+  const { data: cart } = useCart();
   const noBillingCards = billingCards.length === 0;
 
   const currentBillingCardCount = useRef(billingCards.length);
@@ -49,11 +52,14 @@ export default function CheckoutPaymentInfo() {
     }, 500);
   }
 
+  // Create checkout info for new card payments
+  const checkoutInfo: CheckoutInfo | undefined = {
+    callbackUrl: `${window.location.origin}/dashboard/cart/checkout/success`,
+  };
+
   const paymentHandler = async () => {
-    setLoading(true);
-    await new Promise((res) => setTimeout(res, 500));
-    setLoading(false);
-    completedPaymentModalToggle();
+    // Use the real checkout API instead of fake timeout
+    checkoutMutation.mutate();
   };
 
   const noBilling = (
@@ -107,12 +113,12 @@ export default function CheckoutPaymentInfo() {
             type="submit"
             variant="solid"
             className={`w-full max-w-[23.4375rem] disabled:bg-neutral-100 disabled:cursor-not-allowed`}
-            // disabled={!isValid}
+            disabled={checkoutMutation.isPending}
             onClick={paymentHandler}
           >
             <div className="flex items-center justify-center gap-1">
-              <span>Pay ₦90,000.00</span>
-              {isLoading && <Spinner size="sm" speed="fast" />}
+              <span>{checkoutMutation.isPending ? "Processing..." : "Pay Now"}</span>
+              {checkoutMutation.isPending && <Spinner size="sm" speed="fast" />}
             </div>
           </Button>
         </div>
@@ -123,7 +129,9 @@ export default function CheckoutPaymentInfo() {
         onClose={toggleSwitch}
         containerClassName="w-full max-w-[26rem]"
       >
-        <BillingCardForm />
+        <BillingCardForm 
+          checkoutInfo={checkoutInfo}
+        />
       </Modal>
 
       {/* Completed payment modal */}
@@ -140,7 +148,7 @@ export default function CheckoutPaymentInfo() {
           </h2>
 
           <p className="font-light text-neutral-700 text-center leading-snug">
-            Your payment of [₦90,000.00] was successful.
+            Your payment of ₦{cart?.total.toLocaleString() || '0.00'} was successful.
           </p>
 
           <Button

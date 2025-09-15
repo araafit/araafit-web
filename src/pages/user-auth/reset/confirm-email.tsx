@@ -7,6 +7,7 @@ import Modal from "../../../shared-components/modal";
 import { useSwitch } from "../../../shared-hooks/switch";
 import checkmark from "../checkmark.png";
 import Spinner from "../../../shared-components/spinner";
+import { useForgotPassword } from "../../../hooks/auth.hooks";
 
 /* ------------------------------------------------------------- */
 
@@ -17,7 +18,7 @@ import Spinner from "../../../shared-components/spinner";
  */
 export default function ConfirmEmail() {
   const { toggleSwitch, switchValue: isOpen } = useSwitch(false);
-  const [isLoading, setLoading] = useState(false);
+  const forgotPasswordMutation = useForgotPassword();
 
   const {
     register,
@@ -26,12 +27,12 @@ export default function ConfirmEmail() {
   } = useForm<{ email: string }>({ mode: "all" });
 
   const onSubmit: SubmitHandler<{ email: string }> = async (data) => {
-    console.log("form data", data);
-    setLoading(!isLoading);
-
-    await new Promise((res) => setTimeout(res, 1500));
-    setLoading(false);
-    toggleSwitch();
+    try {
+      await forgotPasswordMutation.mutateAsync(data);
+      toggleSwitch();
+    } catch (error) {
+      console.error("Forgot password failed:", error);
+    }
   };
 
   return (
@@ -66,15 +67,16 @@ export default function ConfirmEmail() {
           <Button
             type="submit"
             variant="clear"
+            disabled={!isValid || forgotPasswordMutation.isPending}
             className={`w-full mb-6 ${
-              !isValid
+              !isValid || forgotPasswordMutation.isPending
                 ? "bg-neutral-50 text-white"
                 : "bg-primary-500 text-white"
             }`}
           >
             <div className="w-full flex items-center justify-center">
               <span>Get reset link</span>
-              {isLoading && <Spinner size="sm" speed="fast" className="ml-1" />}
+              {forgotPasswordMutation.isPending && <Spinner size="sm" speed="fast" className="ml-1" />}
             </div>
           </Button>
 

@@ -69,8 +69,10 @@ import Button from "../../../../shared-components/button";
 import InfoSection from "./info-section";
 import { Dialog, DialogTrigger, DialogContent } from "../../../ui//dialog";
 import { RiderDialogContent } from "./rider-info";
+import { useUpdateOrderStatus } from "../../../../hooks/admin-orders.hooks";
+import { formatOrderDate } from "../../../../utils/admin-orders-utils";
 
-const columns: ColumnDef<z.infer<typeof schema>>[] = [
+const createColumns = (updateOrderStatusMutation: ReturnType<typeof useUpdateOrderStatus>): ColumnDef<z.infer<typeof schema>>[] => [
   {
     id: "select",
     cell: ({ row }) => (
@@ -129,7 +131,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
         Date Ordered <CaretUpDownIcon />
       </div>
     ),
-    cell: () => <div className="">15 May 2025 6:00 PM</div>,
+    cell: ({ row }) => <div className="">{formatOrderDate(row.original.createdAt || "")}</div>,
   },
   {
     accessorKey: "status",
@@ -203,6 +205,12 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
                       <DropdownMenuItem
                         className={`${status.bgColor} ${status.textColor} px-2 cursor-pointer text-xs py-1 w-auto block rounded-full`}
                         key={status.status}
+                        onClick={() => {
+                          updateOrderStatusMutation.mutate({
+                            orderId: row.original.orderId,
+                            data: { status: status.status.toLowerCase() }
+                          });
+                        }}
                       >
                         {status.status}
                       </DropdownMenuItem>
@@ -321,7 +329,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
                       </DialogTrigger>
 
                       <DialogContent className="sm:max-w-[500px]">
-                        <RiderDialogContent />
+                        <RiderDialogContent orderId={row.original.orderId} />
                       </DialogContent>
                     </Dialog>
                     <Button
@@ -346,7 +354,15 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
                       </DialogTrigger>
 
                       <DialogContent className="sm:max-w-[500px]">
-                        <RiderDialogContent />
+                        <RiderDialogContent 
+                          orderId={row.original.orderId} 
+                          isEdit={true}
+                          existingRider={row.original.riderInformation ? {
+                            name: row.original.riderInformation.name,
+                            phone: row.original.riderInformation.phone,
+                            deliveryDate: row.original.deliveryDate || "",
+                          } : undefined}
+                        />
                       </DialogContent>
                     </Dialog>
                     <Button
@@ -379,6 +395,8 @@ export function DataTable({
 }: {
   data: z.infer<typeof schema>[];
 }) {
+  const updateOrderStatusMutation = useUpdateOrderStatus();
+  const columns = createColumns(updateOrderStatusMutation);
   const [data, setData] = React.useState(() => initialData);
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -455,31 +473,31 @@ export function DataTable({
               sensors={sensors}
               id={sortableId}
             >
-              <Table className=" ">
-                <TableHeader className="sticky top-0 z-10 h-11 border-b-0 bg-w">
-                  {table.getHeaderGroups().map((headerGroup) => (
-                    <TableRow
-                      key={headerGroup.id}
-                      className=" border-0 !border-b-0"
-                    >
-                      {headerGroup.headers.map((header) => {
-                        return (
-                          <TableHead key={header.id} colSpan={header.colSpan}>
-                            {header.isPlaceholder
-                              ? null
-                              : flexRender(
-                                  header.column.columnDef.header,
-                                  header.getContext()
-                                )}
-                          </TableHead>
-                        );
-                      })}
-                    </TableRow>
-                  ))}
-                </TableHeader>
-                <TableBody className="bg-muted">
-                  {table.getRowModel().rows?.length ? (
-                    table.getRowModel().rows.map((row, idx) => {
+              {table.getRowModel().rows?.length ? (
+                <Table className=" ">
+                  <TableHeader className="sticky top-0 z-10 h-11 border-b-0 bg-w">
+                    {table.getHeaderGroups().map((headerGroup) => (
+                      <TableRow
+                        key={headerGroup.id}
+                        className=" border-0 !border-b-0"
+                      >
+                        {headerGroup.headers.map((header) => {
+                          return (
+                            <TableHead key={header.id} colSpan={header.colSpan}>
+                              {header.isPlaceholder
+                                ? null
+                                : flexRender(
+                                    header.column.columnDef.header,
+                                    header.getContext()
+                                  )}
+                            </TableHead>
+                          );
+                        })}
+                      </TableRow>
+                    ))}
+                  </TableHeader>
+                  <TableBody className="bg-muted">
+                    {table.getRowModel().rows.map((row, idx) => {
                       const bgClass = row.getIsSelected()
                         ? "bg-muted/50"
                         : idx % 2 === 0
@@ -504,23 +522,18 @@ export function DataTable({
                           ))}
                         </TableRow>
                       );
-                    })
-                  ) : (
-                    <TableRow>
-                      <TableCell
-                        colSpan={columns.length}
-                        className="h-24 text-center"
-                      >
-                        <EmptyState
-                          image={cart}
-                          alt="Empty cart"
-                          message="No new orders just yet."
-                        />
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
+                    })}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div className="p-24">
+                  <EmptyState
+                    image={cart}
+                    alt="Empty cart"
+                    message="No new orders just yet."
+                  />
+                </div>
+              )}
             </DndContext>
           </div>
           {(table.getCanPreviousPage() || table.getCanNextPage()) && (

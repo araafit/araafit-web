@@ -49,7 +49,7 @@ export function HomePage() {
     <LandingLayout>
       <>
         <section className="w-full flex flex-col justify-center items-center px-5 py-8 lg:pt-20 lg:px-28 bg-primary-50">
-          <div className="w-full max-w-[41.75rem] flex flex-col justify-center items-center gap-5 mb-24">
+          <div className="w-full max-w-[41.75rem] flex flex-col justify-center items-center gap-5 mb-11">
             <h1 className="font-lora font-semibold text-[2.5rem] text-center lg:text-5xl leading-araafit">
               Take{" "}
               <span className="font-lora text-primary-500">
@@ -81,7 +81,7 @@ export function HomePage() {
                 onClick={() => navigate("/auth/register")}
               >
                 <div className="w-full flex items-center justify-center gap-2">
-                  <span>Create an account</span>
+                  <span>Create a free account</span>
                   <CaretRightIcon size={20} className="text-primary-500" />
                 </div>
               </Button>

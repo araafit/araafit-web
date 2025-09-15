@@ -6,7 +6,9 @@ import GuestPageLayout from "../../../layouts/guest/guest-page-layout";
 export function GuestDressDetailPage() {
   return (
     <GuestPageLayout>
-      <DressDetail />
+      <div className="w-full flex justify-center p-4">
+        <DressDetail />
+      </div>
     </GuestPageLayout>
   );
 }

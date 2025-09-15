@@ -13,12 +13,27 @@ import {
 } from "../../../services/measurement";
 import { extractSkinToneFromPhoto } from "../../../services/measurement/skin-tone-extractor";
 import SilhouetteVisualization from "./silhouette-visualization";
+import { useCreateMeasurements } from "../../../hooks/measurements.hooks";
+import { useCreateGuestUser } from "../../../hooks/auth.hooks";
+import { useAuthStore } from "../../../stores/auth-store";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import type { Landmark } from "../../../services/measurement/types";
+import {
+  pixelHeightFromMask,
+  pixelHeightFromLandmarks,
+} from "../../../services/measurement/utils";
 
 /* ------------------------------------------------------------------- */
 
 export function Confirmation() {
   const { currentStep, stepTo, frontPhoto, sidePhoto, height, resetProgress } =
     useGetMeasured();
+  const navigate = useNavigate();
+  const { isAuthenticated, isGuest } = useAuthStore();
+  const createMeasurements = useCreateMeasurements();
+  const createGuestUser = useCreateGuestUser();
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [measurements, setMeasurements] = useState<MeasurementResult | null>(
     null
@@ -30,6 +45,446 @@ export function Confirmation() {
     rgb: { r: number; g: number; b: number };
     name: string;
   } | null>(null);
+
+  // New accurate measurements from visualization method
+  const [accurateMeasurements, setAccurateMeasurements] = useState<{
+    bust: { width: number; depth: number; circumference: number };
+    waist: { width: number; depth: number; circumference: number };
+    hip: { width: number; depth: number; circumference: number };
+    pixelToCmRatio: number;
+  } | null>(null);
+
+  const ALPHA_THRESHOLD = 128;
+
+  /**
+   * Calculate circumference from width and depth measurements
+   * Uses ellipse approximation: Ramanujan's formula
+   */
+  const calculateCircumference = (width: number, depth: number): number => {
+    const a = width / 2;
+    const b = depth / 2;
+
+    // Ramanujan's approximation for ellipse perimeter
+    const h = Math.pow((a - b) / (a + b), 2);
+    const circumference =
+      Math.PI * (a + b) * (1 + (3 * h) / (10 + Math.sqrt(4 - 3 * h)));
+
+    return circumference;
+  };
+
+  /**
+   * For every row (y) compute leftmost and rightmost body pixel (or -1 if none).
+   */
+  const getRowBoundsFromMask = (mask: ImageData) => {
+    const { width, height, data } = mask;
+    const leftBounds = new Array<number>(height).fill(-1);
+    const rightBounds = new Array<number>(height).fill(-1);
+    for (let y = 0; y < height; y++) {
+      let left = -1;
+      let right = -1;
+      const rowStart = y * width * 4;
+      for (let x = 0; x < width; x++) {
+        const alpha = data[rowStart + x * 4 + 3];
+        if (alpha > ALPHA_THRESHOLD) {
+          if (left === -1) left = x;
+          right = x;
+        }
+      }
+      leftBounds[y] = left;
+      rightBounds[y] = right;
+    }
+
+    return { leftBounds, rightBounds };
+  };
+
+  /**
+   * Compute bust/waist/hip Y rows (pixel indices) and their left/right bounds.
+   * Uses silhouette rows and landmarks to center the torso and ignore arms.
+   */
+  const computeMeasurementRows = (
+    mask: ImageData,
+    _landmarks: Landmark[],
+    imgW: number,
+    imgH: number
+  ) => {
+    // fallback if landmarks missing
+    if (!_landmarks || _landmarks.length === 0) {
+      const fallbackBust = Math.floor(imgH * 0.3);
+      const fallbackWaist = Math.floor(imgH * 0.55);
+      const fallbackHip = Math.floor(imgH * 0.78);
+      return {
+        bust: { y: fallbackBust, left: 0, right: imgW },
+        waist: { y: fallbackWaist, left: 0, right: imgW },
+        hip: { y: fallbackHip, left: 0, right: imgW },
+      };
+    }
+
+    const { leftBounds, rightBounds } = getRowBoundsFromMask(mask);
+
+    // landmark-derived pixels
+    const ls = _landmarks[11],
+      rs = _landmarks[12],
+      lh = _landmarks[23],
+      rh = _landmarks[24];
+    const shoulderY = Math.round(
+      (((ls?.y ?? 0.2) + (rs?.y ?? 0.2)) / 2) * imgH
+    );
+    const hipY = Math.round((((lh?.y ?? 0.7) + (rh?.y ?? 0.7)) / 2) * imgH);
+
+    // compute left/right at shoulder & hip rows (fallback to landmark x if row bounds unavailable)
+    const L_shoulder =
+      leftBounds[shoulderY] > -1
+        ? leftBounds[shoulderY]
+        : Math.round((((ls?.x ?? 0.35) + (rs?.x ?? 0.65)) / 2) * imgW) - 20;
+    const R_shoulder =
+      rightBounds[shoulderY] > -1
+        ? rightBounds[shoulderY]
+        : Math.round((((ls?.x ?? 0.35) + (rs?.x ?? 0.65)) / 2) * imgW) + 20;
+    const L_hip =
+      leftBounds[hipY] > -1
+        ? leftBounds[hipY]
+        : Math.round((((lh?.x ?? 0.4) + (rh?.x ?? 0.6)) / 2) * imgW) - 20;
+    const R_hip =
+      rightBounds[hipY] > -1
+        ? rightBounds[hipY]
+        : Math.round((((lh?.x ?? 0.4) + (rh?.x ?? 0.6)) / 2) * imgW) + 20;
+
+    const shoulderWidth = Math.max(1, R_shoulder - L_shoulder);
+    const hipWidth = Math.max(1, R_hip - L_hip);
+
+    // torso center x estimate (avg of shoulder/hip centers)
+    const centerX = Math.round(
+      ((L_shoulder + R_shoulder) / 2 + (L_hip + R_hip) / 2) / 2
+    );
+
+    // estimate torso half width and clamp
+    const torsoHalfEstimate = Math.max(
+      Math.min(imgW * 0.35, Math.max(shoulderWidth, hipWidth) * 0.5), // tighter band
+      Math.max(imgW * 0.06, 20)
+    );
+
+    // helper to compute "inner" torso width on a row limited to torsoHalfEstimate around centerX
+    const innerWidthAtRow = (y: number) => {
+      if (y < 0 || y >= imgH) return 0;
+      const L = leftBounds[y];
+      const R = rightBounds[y];
+      if (L === -1 || R === -1) return 0;
+      const L_in = Math.max(L, Math.round(centerX - torsoHalfEstimate));
+      const R_in = Math.min(R, Math.round(centerX + torsoHalfEstimate));
+      return Math.max(0, R_in - L_in + 1);
+    };
+
+    // --- find bust: widest inner width in a band below shoulders (avoid very top rows) ---
+    const bustStart = Math.max(0, shoulderY);
+    const bustEnd = Math.min(
+      imgH - 1,
+      shoulderY + Math.max(3, Math.round((hipY - shoulderY) * 0.35))
+    );
+    let bustY = bustStart;
+    let bestBustWidth = -1;
+    for (let y = bustStart; y <= bustEnd; y++) {
+      const w = innerWidthAtRow(y);
+      if (w > bestBustWidth) {
+        bestBustWidth = w;
+        bustY = y;
+      }
+    }
+
+    // --- compute waist: midpoint between bust and hip, 10% closer to bust ---
+    const midpoint = (bustY + hipY) / 2;
+    const offsetTowardBust = (hipY - bustY) * 0.1; // 10% of the bust-hip distance
+    const waistY = Math.round(midpoint + offsetTowardBust); // Shift 10% toward bust
+
+    // --- find hip: widest inner width in band near hip ---
+    const hipStart = Math.max(
+      waistY,
+      hipY - Math.max(3, Math.round((hipY - shoulderY) * 0.15))
+    );
+    const hipEnd = Math.min(
+      imgH - 1,
+      hipY + Math.max(2, Math.round((imgH - hipY) * 0.08))
+    );
+    let foundHipY = hipStart;
+    let bestHipWidth = -1;
+    for (let y = hipStart; y <= hipEnd; y++) {
+      const w = innerWidthAtRow(y);
+      if (w > bestHipWidth) {
+        bestHipWidth = w;
+        foundHipY = y;
+      }
+    }
+
+    // compute left/right bounds for those chosen rows using the center-limited logic
+    const buildBounds = (y: number) => {
+      const L =
+        leftBounds[y] > -1
+          ? leftBounds[y]
+          : Math.round(centerX - torsoHalfEstimate);
+      const R =
+        rightBounds[y] > -1
+          ? rightBounds[y]
+          : Math.round(centerX + torsoHalfEstimate);
+      const left = Math.max(
+        0,
+        Math.round(Math.max(L, centerX - torsoHalfEstimate))
+      );
+      const right = Math.min(
+        imgW,
+        Math.round(Math.min(R, centerX + torsoHalfEstimate))
+      );
+      return { y, left, right };
+    };
+
+    return {
+      bust: buildBounds(bustY),
+      waist: buildBounds(waistY),
+      hip: buildBounds(foundHipY),
+    };
+  };
+
+  /**
+   * Compute measurement rows using provided Y positions (for consistency between views)
+   */
+  const computeMeasurementRowsWithYPositions = (
+    mask: ImageData,
+    _landmarks: Landmark[],
+    imgW: number,
+    imgH: number,
+    referencePositions: {
+      bust: { y: number };
+      waist: { y: number };
+      hip: { y: number };
+    }
+  ) => {
+    const { leftBounds, rightBounds } = getRowBoundsFromMask(mask);
+
+    // Use the Y positions from the reference (front view)
+    const bustY = referencePositions.bust.y;
+    const waistY = referencePositions.waist.y;
+    const hipY = referencePositions.hip.y;
+
+    // Helper to get left/right bounds at a specific Y position
+    const getBoundsAtY = (y: number) => {
+      const clampedY = Math.max(0, Math.min(imgH - 1, Math.round(y)));
+      const left = leftBounds[clampedY] > -1 ? leftBounds[clampedY] : 0;
+      const right = rightBounds[clampedY] > -1 ? rightBounds[clampedY] : imgW;
+      return { y: clampedY, left, right };
+    };
+
+    return {
+      bust: getBoundsAtY(bustY),
+      waist: getBoundsAtY(waistY),
+      hip: getBoundsAtY(hipY),
+    };
+  };
+
+  /**
+   * Get inner torso bounds at a specific Y level, excluding arms/hands
+   * Looks for gaps in the mask to identify the main torso area
+   */
+  const getInnerTorsoBounds = (
+    mask: ImageData,
+    y: number,
+    landmarks: Landmark[]
+  ) => {
+    const { leftBounds, rightBounds } = getRowBoundsFromMask(mask);
+    const clampedY = Math.max(0, Math.min(mask.height - 1, Math.round(y)));
+
+    if (leftBounds[clampedY] === -1 || rightBounds[clampedY] === -1) {
+      return null; // No body detected at this row
+    }
+
+    // Get the full row bounds
+    const fullLeft = leftBounds[clampedY];
+    const fullRight = rightBounds[clampedY];
+
+    // Use shoulder landmarks to estimate torso center and reasonable width
+    const shoulderLeft = landmarks[11];
+    const shoulderRight = landmarks[12];
+
+    if (!shoulderLeft || !shoulderRight) {
+      return { left: fullLeft, right: fullRight }; // Fallback to full bounds
+    }
+
+    // Calculate torso center from shoulders
+    const torsoCenter = ((shoulderLeft.x + shoulderRight.x) / 2) * mask.width;
+    const shoulderWidth =
+      Math.abs(shoulderRight.x - shoulderLeft.x) * mask.width;
+
+    // Estimate reasonable torso half-width (shoulder width + some expansion for body)
+    const maxTorsoHalfWidth = shoulderWidth * 0.8; // 80% of shoulder width as max torso radius
+
+    // Scan inward from the edges to find the inner torso bounds
+    const rowStart = clampedY * mask.width * 4;
+
+    // Find leftmost torso edge (scan from center outward to left)
+    let innerLeft = Math.round(torsoCenter);
+    for (let x = Math.round(torsoCenter); x >= fullLeft; x--) {
+      const pixelIndex = rowStart + x * 4;
+      if (mask.data[pixelIndex + 3] > ALPHA_THRESHOLD) {
+        innerLeft = x;
+      } else {
+        break; // Hit a gap, stop here
+      }
+
+      // Don't go beyond reasonable torso width
+      if (torsoCenter - x > maxTorsoHalfWidth) break;
+    }
+
+    // Find rightmost torso edge (scan from center outward to right)
+    let innerRight = Math.round(torsoCenter);
+    for (let x = Math.round(torsoCenter); x <= fullRight; x++) {
+      const pixelIndex = rowStart + x * 4;
+      if (mask.data[pixelIndex + 3] > ALPHA_THRESHOLD) {
+        innerRight = x;
+      } else {
+        break; // Hit a gap, stop here
+      }
+
+      // Don't go beyond reasonable torso width
+      if (x - torsoCenter > maxTorsoHalfWidth) break;
+    }
+
+    return { left: innerLeft, right: innerRight };
+  };
+  /**
+   * Calculate accurate measurements using the visualization method
+   */
+  const calculateAccurateMeasurements = useCallback(
+    (result: MeasurementResult) => {
+      if (
+        !result.debug?.frontMask ||
+        !result.debug?.sideMask ||
+        !result.debug?.frontLandmarks ||
+        !result.debug?.sideLandmarks
+      ) {
+        return null;
+      }
+
+      try {
+        const frontMask = result.debug.frontMask;
+        const sideMask = result.debug.sideMask;
+        const frontLandmarks = result.debug.frontLandmarks;
+        const sideLandmarks = result.debug.sideLandmarks;
+        const heightInCm = result.metadata.heightInCm;
+
+        // Calculate pixel-to-cm ratio
+        let pixelHeight = pixelHeightFromMask(
+          frontMask.data,
+          frontMask.width,
+          frontMask.height
+        );
+        if (!pixelHeight) {
+          pixelHeight = pixelHeightFromLandmarks(
+            frontLandmarks,
+            frontMask.width,
+            frontMask.height
+          );
+        }
+
+        if (!pixelHeight || pixelHeight <= 0) {
+          console.error(
+            "Unable to determine pixel height for accurate measurements"
+          );
+          return null;
+        }
+
+        const pixelToCmRatio = heightInCm / pixelHeight;
+
+        // Get measurements using the same logic as visualization
+        const frontMeasurements = computeMeasurementRows(
+          frontMask,
+          frontLandmarks,
+          frontMask.width,
+          frontMask.height
+        );
+        // Side view: mask-based but using front landmarks Y positions for consistency
+        const sideMeasurements = computeMeasurementRowsWithYPositions(
+          sideMask,
+          sideLandmarks,
+          sideMask.width,
+          sideMask.height,
+          frontMeasurements // Use front Y positions
+        );
+
+        // Calculate widths and depths in pixels, then convert to cm
+        const shoulderLeft = frontLandmarks[11];
+        const shoulderRight = frontLandmarks[12];
+        const bustWidthFromShoulders =
+          shoulderLeft && shoulderRight
+            ? Math.abs(shoulderRight.x - shoulderLeft.x) *
+              frontMask.width *
+              pixelToCmRatio
+            : (frontMeasurements.bust.right - frontMeasurements.bust.left) *
+              pixelToCmRatio;
+
+        const bustWidth = bustWidthFromShoulders;
+        const bustDepth =
+          (sideMeasurements.bust.right - sideMeasurements.bust.left) *
+          pixelToCmRatio;
+
+        // For waist and hip: use inner torso bounds (excluding arms) for front view
+        const frontWaistInner = getInnerTorsoBounds(
+          frontMask,
+          frontMeasurements.waist.y,
+          frontLandmarks
+        );
+        const frontHipInner = getInnerTorsoBounds(
+          frontMask,
+          frontMeasurements.hip.y,
+          frontLandmarks
+        );
+
+        const waistWidth = frontWaistInner
+          ? (frontWaistInner.right - frontWaistInner.left) * pixelToCmRatio
+          : (frontMeasurements.waist.right - frontMeasurements.waist.left) *
+            pixelToCmRatio;
+        const waistDepth =
+          (sideMeasurements.waist.right - sideMeasurements.waist.left) *
+          pixelToCmRatio;
+
+        const hipWidth = frontHipInner
+          ? (frontHipInner.right - frontHipInner.left) * pixelToCmRatio
+          : (frontMeasurements.hip.right - frontMeasurements.hip.left) *
+            pixelToCmRatio;
+        const hipDepth =
+          (sideMeasurements.hip.right - sideMeasurements.hip.left) *
+          pixelToCmRatio;
+
+        // Calculate circumferences using ellipse approximation
+        const bustCircumference = calculateCircumference(bustWidth, bustDepth);
+        const waistCircumference = calculateCircumference(
+          waistWidth,
+          waistDepth
+        );
+        const hipCircumference = calculateCircumference(hipWidth, hipDepth);
+
+        return {
+          bust: {
+            width: bustWidth,
+            depth: bustDepth,
+            circumference: bustCircumference,
+          },
+          waist: {
+            width: waistWidth,
+            depth: waistDepth,
+            circumference: waistCircumference,
+          },
+          hip: {
+            width: hipWidth,
+            depth: hipDepth,
+            circumference: hipCircumference,
+          },
+          pixelToCmRatio,
+        };
+      } catch (error) {
+        console.error("Error calculating accurate measurements:", error);
+        return null;
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
+    []
+  );
 
   const processMeasurements = useCallback(async () => {
     if (!frontPhoto || !sidePhoto || !height) return;
@@ -61,18 +516,33 @@ export function Confirmation() {
 
       setMeasurements(result);
 
+      // Calculate accurate measurements using visualization method
+      setProgress({
+        progress: 0.85,
+        stage: "Calculating accurate measurements...",
+      });
+      const accurate = calculateAccurateMeasurements(result);
+      if (accurate) {
+        setAccurateMeasurements(accurate);
+      }
+
       // Extract skin tone from front photo
       setProgress({ progress: 0.9, stage: "Analyzing skin tone..." });
       try {
-        const extractedSkinTone = await extractSkinToneFromPhoto(frontPhoto);
+        const extractedSkinTone = await extractSkinToneFromPhoto(
+          frontPhoto,
+          result.debug?.frontLandmarks,
+          result.debug?.frontMask?.width,
+          result.debug?.frontMask?.height
+        );
         setSkinTone(extractedSkinTone);
       } catch (skinToneError) {
         console.warn("Skin tone extraction failed:", skinToneError);
         // Use fallback skin tone
         setSkinTone({
-          hex: "#D4A574",
-          rgb: { r: 212, g: 165, b: 116 },
-          name: "Medium",
+          hex: "#8c5a47",
+          rgb: { r: 140, g: 90, b: 71 },
+          name: "medium",
         });
       }
 
@@ -87,7 +557,7 @@ export function Confirmation() {
     } finally {
       setIsProcessing(false);
     }
-  }, [frontPhoto, sidePhoto, height]);
+  }, [frontPhoto, sidePhoto, height, calculateAccurateMeasurements]);
 
   useEffect(() => {
     if (frontPhoto && sidePhoto && height && !measurements && !isProcessing) {
@@ -200,6 +670,9 @@ export function Confirmation() {
     );
   }
 
+  console.log("measurements", measurements);
+  console.log("accurateMeasurements", accurateMeasurements);
+
   return (
     <div className="flex flex-col">
       <div className="w-full flex flex-col gap-5">
@@ -232,25 +705,79 @@ export function Confirmation() {
                 </div>
 
                 <div className="space-y-6">
+                  {/* Show accurate measurements if available, with comparison */}
+                  {/*{accurateMeasurements && (
+                    <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <h4 className="font-medium text-green-800 mb-2">
+                        ✨ Enhanced Accurate Measurements
+                      </h4>
+                      <p className="text-sm text-green-700">
+                        Using advanced silhouette analysis for improved accuracy
+                      </p>
+                    </div>
+                  )}*/}
+
                   <div className="flex justify-between items-center py-3 border-b border-neutral-100">
-                    <span className="text-lg text-neutral-700">Bust (inches)</span>
-                    <span className="text-xl font-semibold text-[#1C1C1C]">
-                      {Math.round(measurements.measurements.bust / 2.54)}
+                    <span className="text-lg text-neutral-700">
+                      Bust (inches)
                     </span>
+                    <div className="text-right">
+                      <span className="text-xl font-semibold text-[#1C1C1C]">
+                        {accurateMeasurements
+                          ? Math.round(
+                              accurateMeasurements.bust.circumference / 2.54
+                            )
+                          : Math.round(measurements.measurements.bust / 2.54)}
+                      </span>
+                      {/*{accurateMeasurements && (
+                        <div className="text-sm text-green-600">
+                          Enhanced (was{" "}
+                          {Math.round(measurements.measurements.bust / 2.54)})
+                        </div>
+                      )}*/}
+                    </div>
                   </div>
 
                   <div className="flex justify-between items-center py-3 border-b border-neutral-100">
-                    <span className="text-lg text-neutral-700">Waist (inches)</span>
-                    <span className="text-xl font-semibold text-[#1C1C1C]">
-                      {Math.round(measurements.measurements.waist / 2.54)}
+                    <span className="text-lg text-neutral-700">
+                      Waist (inches)
                     </span>
+                    <div className="text-right">
+                      <span className="text-xl font-semibold text-[#1C1C1C]">
+                        {accurateMeasurements
+                          ? Math.round(
+                              accurateMeasurements.waist.circumference / 2.54
+                            )
+                          : Math.round(measurements.measurements.waist / 2.54)}
+                      </span>
+                      {/*{accurateMeasurements && (
+                        <div className="text-sm text-green-600">
+                          Enhanced (was{" "}
+                          {Math.round(measurements.measurements.waist / 2.54)})
+                        </div>
+                      )}*/}
+                    </div>
                   </div>
 
                   <div className="flex justify-between items-center py-3 border-b border-neutral-100">
-                    <span className="text-lg text-neutral-700">Hip (inches)</span>
-                    <span className="text-xl font-semibold text-[#1C1C1C]">
-                      {Math.round(measurements.measurements.hip / 2.54)}
+                    <span className="text-lg text-neutral-700">
+                      Hip (inches)
                     </span>
+                    <div className="text-right">
+                      <span className="text-xl font-semibold text-[#1C1C1C]">
+                        {accurateMeasurements
+                          ? Math.round(
+                              accurateMeasurements.hip.circumference / 2.54
+                            )
+                          : Math.round(measurements.measurements.hip / 2.54)}
+                      </span>
+                      {/*{accurateMeasurements && (
+                        <div className="text-sm text-green-600">
+                          Enhanced (was{" "}
+                          {Math.round(measurements.measurements.hip / 2.54)})
+                        </div>
+                      )}*/}
+                    </div>
                   </div>
 
                   <div className="flex justify-between items-center py-3 border-b border-neutral-100">
@@ -292,7 +819,7 @@ export function Confirmation() {
               )}
 
               {/* Silhouette Visualization (Debug) */}
-              {frontPhoto && sidePhoto && measurements?.debug && (
+              {/*{frontPhoto && sidePhoto && measurements?.debug && (
                 <SilhouetteVisualization
                   frontPhoto={frontPhoto}
                   sidePhoto={sidePhoto}
@@ -302,7 +829,7 @@ export function Confirmation() {
                   sideLandmarks={measurements.debug.sideLandmarks}
                   heightInCm={measurements.metadata.heightInCm}
                 />
-              )}
+              )}*/}
             </>
           )}
         </div>
@@ -310,33 +837,173 @@ export function Confirmation() {
 
       {/* Action Buttons */}
       <div className="flex items-center justify-center gap-4 mt-12">
-        
-        <Button
-          text="Try Again"
-          variant="solid"
-          className="w-[10rem] self-end"
-          onClick={handleRestart}
-        />
+        {!isAuthenticated ? (
+          // Not authenticated: Show guest/signup options
+          <>
+            <Button
+              text="Try Again"
+              variant="solid"
+              className="w-[10rem] self-end"
+              onClick={handleRestart}
+            />
+            <button
+              className="text-[#A67C5A] hover:text-[#8B6A4D] font-medium underline transition-colors disabled:opacity-50"
+              disabled={createGuestUser.isPending}
+              onClick={() => {
+                // Create guest user with measurements then navigate to shop
+                if (!measurements && !accurateMeasurements) {
+                  toast.error("No measurements available");
+                  return;
+                }
 
-        <Button
-          text="Share"
-          variant="outline"
-          className="w-[10rem] border-neutral-300 text-neutral-700 hover:border-neutral-400"
-          onClick={() => {
-            // Share functionality
-            console.log("Sharing measurements");
-          }}
-        />
+                let bust, waist, hips, dressSize;
 
-        <Button
-          text="Save"
-          variant="solid"
-          className="w-[10rem] bg-[#A67C5A] hover:bg-[#8B6A4D] text-white"
-          onClick={() => {
-            // Save functionality
-            console.log("Saving measurements:", measurements);
-          }}
-        />
+                if (accurateMeasurements) {
+                  // Use accurate measurements from visualization method (convert to inches)
+                  bust = Math.round(
+                    accurateMeasurements.bust.circumference / 2.54
+                  );
+                  waist = Math.round(
+                    accurateMeasurements.waist.circumference / 2.54
+                  );
+                  hips = Math.round(
+                    accurateMeasurements.hip.circumference / 2.54
+                  );
+                  dressSize = Number(measurements?.dressSize?.us) || 12;
+                } else if (measurements) {
+                  // Fall back to original measurements (convert to inches)
+                  bust = Math.round(measurements.measurements.bust / 2.54);
+                  waist = Math.round(measurements.measurements.waist / 2.54);
+                  hips = Math.round(measurements.measurements.hip / 2.54);
+                  dressSize = Number(measurements.dressSize.us);
+                } else {
+                  toast.error("No measurements available");
+                  return;
+                }
+
+                if (!height) {
+                  toast.error("Height information missing");
+                  return;
+                }
+
+                const guestUserData = {
+                  bust,
+                  waist,
+                  hips,
+                  height: Math.round(height * 0.393701), // Convert cm to inches
+                  dressSize,
+                  skinTone: skinTone?.name?.toLowerCase() || "medium",
+                };
+
+                createGuestUser.mutate(guestUserData, {
+                  onSuccess: () => {
+                    toast.success("Welcome! Continue shopping as a guest.");
+                    navigate("/shop"); // This will show the guest shop page
+                  },
+                });
+              }}
+            >
+              {createGuestUser.isPending
+                ? "Creating account..."
+                : "Continue as guest user"}
+            </button>
+
+            <Button
+              text="Create a free account"
+              variant="solid"
+              className="bg-[#A67C5A] hover:bg-[#8B6A4D] text-white px-6 py-3"
+              onClick={() => {
+                navigate("/auth/register");
+              }}
+            />
+          </>
+        ) : (
+          // Authenticated: Show normal action buttons
+          <>
+            <Button
+              text="Try Again"
+              variant="solid"
+              className="w-[10rem] self-end"
+              onClick={handleRestart}
+            />
+
+            <Button
+              text="Share"
+              variant="outline"
+              className="w-[10rem] border-neutral-300 text-neutral-700 hover:border-neutral-400"
+              onClick={() => {
+                // Share functionality
+                console.log("Sharing measurements");
+              }}
+            />
+
+            <Button
+              text={createMeasurements.isPending ? "Saving..." : "Save"}
+              variant="solid"
+              disabled={createMeasurements.isPending}
+              className="w-[10rem] bg-[#A67C5A] hover:bg-[#8B6A4D] text-white disabled:bg-gray-400"
+              onClick={() => {
+                // Use accurate measurements if available, otherwise fall back to original
+                const measurementsToSave = accurateMeasurements || measurements;
+
+                if (!measurementsToSave || !measurements || !height) {
+                  toast.error("No measurements available to save");
+                  return;
+                }
+
+                let bust, waist, hips, dressSize;
+
+                if (accurateMeasurements) {
+                  // Use accurate measurements from visualization method (in cm)
+                  bust = Math.round(
+                    accurateMeasurements.bust.circumference / 2.54
+                  ); // Convert to inches
+                  waist = Math.round(
+                    accurateMeasurements.waist.circumference / 2.54
+                  );
+                  hips = Math.round(
+                    accurateMeasurements.hip.circumference / 2.54
+                  );
+                  dressSize = Number(measurements.dressSize?.us) || 12; // Use original dress size calculation
+                } else {
+                  // Fall back to original measurements (already in inches)
+                  bust = Math.round(measurements.measurements.bust / 2.54);
+                  waist = Math.round(measurements.measurements.waist / 2.54);
+                  hips = Math.round(measurements.measurements.hip / 2.54);
+                  dressSize = Number(measurements.dressSize.us);
+                }
+
+                const measurementData = {
+                  bust,
+                  waist,
+                  hips,
+                  height: Math.round(height * 0.393701), // Convert cm to inches
+                  dressSize,
+                  skinTone: skinTone?.name?.toLowerCase() || "medium",
+                };
+
+                console.log("Saving accurate measurements:", {
+                  original: measurements?.measurements,
+                  accurate: accurateMeasurements,
+                  apiData: measurementData,
+                });
+
+                createMeasurements.mutate(measurementData, {
+                  onSuccess: () => {
+                    if (isGuest) {
+                      toast.success(
+                        "Measurements saved! Continue shopping as guest."
+                      );
+                      navigate("/shop");
+                    } else {
+                      navigate("/dashboard/profile");
+                    }
+                  },
+                });
+              }}
+            />
+          </>
+        )}
       </div>
     </div>
   );

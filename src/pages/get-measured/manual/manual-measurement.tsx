@@ -1,34 +1,33 @@
 import { ArrowLeftIcon } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import Button from "../../../shared-components/button";
-import {
-  measurementsData,
-  type SelectedMeasurementName,
-} from "../_data/_manual-measurement";
-import { useMeasurementsStore } from "../../../shared-hooks/state-store";
-import showToast from "../../../utils/notification";
+import { useSizeChart, useCreateMeasurements, useMeasurements } from "../../../hooks/measurements.hooks";
+import { useAuthStore } from "../../../stores/auth-store";
 import Spinner from "../../../shared-components/spinner";
 import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 
 /* ------------------------------------------------------------- */
 
-const measurementNames = [
-  "bust",
-  "wait",
-  "hip (inches)",
-  "height",
-  "dress size",
-  "skin tone",
+const skinToneOptions = [
+  { name: "deep", color: "#33251c" },
+  { name: "dark", color: "#55322e" },
+  { name: "medium", color: "#8c5a47" },
+  { name: "tan", color: "#b0522d" },
+  { name: "light", color: "#c4976c" },
+  { name: "fair", color: "#deb588" },
 ];
 
-const measurementValues = Object.values(measurementsData);
-
-const notificationStyle: React.CSSProperties = {
-  backgroundColor: "#F6FEF9",
-  border: "1px solid #16A34A",
-  color: "#16A34A",
-  fontSize: "14px",
-};
+const heightOptions = [
+  { value: 58, label: "4'10\"" },
+  { value: 61, label: "5'1\"" },
+  { value: 63, label: "5'3\"" },
+  { value: 64, label: "5'4\"" },
+  { value: 65, label: "5'5\"" },
+  { value: 67, label: "5'7\"" },
+  { value: 69, label: "5'9\"" },
+  { value: 72, label: "6'0\"" },
+];
 
 const waterMarkStyle: React.CSSProperties = {
   backgroundImage: `url(/araafit-watermark.png)`,
@@ -45,47 +44,82 @@ const waterMarkStyle: React.CSSProperties = {
  */
 export function ManualMeasurement() {
   const navigate = useNavigate();
+  const { isAuthenticated, isGuest } = useAuthStore();
   
-  const selectedMeasurements = useMeasurementsStore((state) => state.data);
-  const selectHandler = useMeasurementsStore(
-    (state) => state.updateMeasurement
-  );
+  // API hooks
+  const { data: sizeChart, isLoading: sizeChartLoading } = useSizeChart();
+  const { data: existingMeasurements } = useMeasurements();
+  const createMeasurements = useCreateMeasurements();
 
-  const [savedState, setSavedState] = useState({
-    isLoading: false,
-    isSaved: false,
+  // Local state for selected measurements
+  const [selectedValues, setSelectedValues] = useState({
+    bust: 0,
+    waist: 0,
+    hips: 0,
+    height: 0,
+    dressSize: 0,
+    skinTone: "",
   });
 
-  const selectedMeasurementsObjKeys = Object.keys(
-    selectedMeasurements
-  ) as SelectedMeasurementName[];
-
-  const measurementNotSelected = Object.values(selectedMeasurements).some(
-    (value) => value.toString().trim() === ""
-  );
-
+  // Prefill existing measurements if available
   useEffect(() => {
-    if (savedState.isSaved) {
-      showToast.success("Your measurements have been saved.", {
-        position: "top-right",
-        style: notificationStyle,
-        icon: null,
+    if (existingMeasurements?.measurements) {
+      setSelectedValues({
+        bust: existingMeasurements.measurements.bust,
+        waist: existingMeasurements.measurements.waist,
+        hips: existingMeasurements.measurements.hips,
+        height: existingMeasurements.measurements.height,
+        dressSize: existingMeasurements.measurements.dressSize,
+        skinTone: existingMeasurements.measurements.skinTone,
       });
     }
-  }, [savedState.isSaved]);
+  }, [existingMeasurements]);
+
+  const handleValueSelect = (type: keyof typeof selectedValues, value: number | string) => {
+    setSelectedValues(prev => ({
+      ...prev,
+      [type]: value,
+    }));
+  };
+
+  // Check if all measurements are selected
+  const measurementNotSelected = Object.values(selectedValues).some(
+    (value) => value === 0 || value === ""
+  );
 
   const saveData = async () => {
-    setSavedState((state) => ({ ...state, isLoading: true }));
-    await new Promise((resolve) =>
-      setTimeout(() => {
-        console.log("Saving data:", selectedMeasurements);
-        setSavedState((state) => ({ ...state, isSaved: true }));
-        //@ts-ignore
-        resolve();
-      }, 500)
-    );
-    setSavedState((state) => ({ ...state, isLoading: false }));
+    if (!isAuthenticated) {
+      toast.error("Please log in to save measurements");
+      navigate("/auth/login");
+      return;
+    }
+
+    createMeasurements.mutate(selectedValues, {
+      onSuccess: () => {
+        if (isGuest) {
+          // For guests, stay on the measurement page or redirect to continue guest flow
+          toast.success("Measurements saved! Continue shopping as guest.");
+          navigate("/shop");
+        } else {
+          // For authenticated users, redirect to dashboard
+          navigate("/dashboard/profile");
+        }
+      },
+    });
   };
+
+  if (sizeChartLoading) {
+    return (
+      <section className="h-screen bg-[#F5F5F5] px-0 py-0 md:py-2 md:px-16 overflow-y-scroll relative">
+        <div className="w-full h-[809px] bg-white flex justify-center items-center border rounded-md p-14">
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
+            <span className="ml-2">Loading measurement options...</span>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="h-screen bg-[#F5F5F5] px-0 py-0 md:py-2 md:px-16 overflow-y-scroll relative">
@@ -108,74 +142,129 @@ export function ManualMeasurement() {
           </div>
 
           <div className="w-full flex flex-col gap-4">
-            {measurementNames.map((name, nameIdx) => (
-              <div key={nameIdx} className="w-full flex flex-col gap-3">
-                <span className="font-medium capitalize text-[#1C1C1C]">
-                  {name}:
-                </span>
-
-                <div className="flex items-center justify-between gap-4">
-                  {nameIdx === 5
-                    ? measurementValues[nameIdx].map(
-                        (tone: string | number, idx: number) => (
-                          <Button
-                            key={idx}
-                            style={{ backgroundColor: String(tone) }}
-                            id={`skin-tone-${idx}`}
-                            className={`w-[58px] h-[44px] rounded-md border-2 border-transparent hover:border-neutral-300 cursor-pointer ${
-                              selectedMeasurements["skinTone"] === tone
-                                ? "ring !ring-primary-900 border-[#E8E8E8]"
-                                : ""
-                            }`}
-                            onClick={() =>
-                              selectHandler(
-                                selectedMeasurementsObjKeys[nameIdx],
-                                tone
-                              )
-                            }
-                          />
-                        )
-                      )
-                    : measurementValues[nameIdx].map(
-                        (item: string | number, idx: number) => (
-                          <Button
-                            key={idx}
-                            type="button"
-                            text={String(item)}
-                            variant="outline"
-                            className={`w-[58px] h-[44px] text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-primary-500 ${
-                              selectedMeasurements[
-                                selectedMeasurementsObjKeys[nameIdx]
-                              ] === item
-                                ? "!border-primary-500 bg-primary-50"
-                                : ""
-                            }`}
-                            onClick={() =>
-                              selectHandler(
-                                selectedMeasurementsObjKeys[nameIdx],
-                                item
-                              )
-                            }
-                          />
-                        )
-                      )}
-                </div>
+            {/* Bust */}
+            <div className="w-full flex flex-col gap-3">
+              <span className="font-medium capitalize text-[#1C1C1C]">Bust:</span>
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                {sizeChart?.bust?.map((item) => (
+                  <Button
+                    key={item.id}
+                    type="button"
+                    text={String(item.value)}
+                    variant="outline"
+                    className={`w-[58px] h-[44px] text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-neutral-700 focus:border-neutral-700 ${
+                      selectedValues.bust === item.value ? "border-neutral-700 bg-neutral-100" : ""
+                    }`}
+                    onClick={() => handleValueSelect("bust", item.value)}
+                  />
+                ))}
               </div>
-            ))}
+            </div>
+
+            {/* Waist */}
+            <div className="w-full flex flex-col gap-3">
+              <span className="font-medium capitalize text-[#1C1C1C]">Waist:</span>
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                {sizeChart?.waist?.map((item) => (
+                  <Button
+                    key={item.id}
+                    type="button"
+                    text={String(item.value)}
+                    variant="outline"
+                    className={`w-[58px] h-[44px] text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-neutral-700 focus:border-neutral-700 ${
+                      selectedValues.waist === item.value ? "border-neutral-700 bg-neutral-100" : ""
+                    }`}
+                    onClick={() => handleValueSelect("waist", item.value)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Hips */}
+            <div className="w-full flex flex-col gap-3">
+              <span className="font-medium capitalize text-[#1C1C1C]">Hips:</span>
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                {sizeChart?.hips?.map((item) => (
+                  <Button
+                    key={item.id}
+                    type="button"
+                    text={String(item.value)}
+                    variant="outline"
+                    className={`w-[58px] h-[44px] text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-neutral-700 focus:border-neutral-700 ${
+                      selectedValues.hips === item.value ? "border-neutral-700 bg-neutral-100" : ""
+                    }`}
+                    onClick={() => handleValueSelect("hips", item.value)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Height */}
+            <div className="w-full flex flex-col gap-3">
+              <span className="font-medium capitalize text-[#1C1C1C]">Height:</span>
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                {heightOptions.map((option) => (
+                  <Button
+                    key={option.value}
+                    type="button"
+                    text={option.label}
+                    variant="outline"
+                    className={`w-[58px] h-[44px] text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-neutral-700 focus:border-neutral-700 ${
+                      selectedValues.height === option.value ? "border-neutral-700 bg-neutral-100" : ""
+                    }`}
+                    onClick={() => handleValueSelect("height", option.value)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Dress Size */}
+            <div className="w-full flex flex-col gap-3">
+              <span className="font-medium capitalize text-[#1C1C1C]">Dress Size:</span>
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                {sizeChart?.dressSize?.map((item) => (
+                  <Button
+                    key={item.id}
+                    type="button"
+                    text={String(item.value)}
+                    variant="outline"
+                    className={`w-[58px] h-[44px] text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-neutral-700 focus:border-neutral-700 ${
+                      selectedValues.dressSize === item.value ? "border-neutral-700 bg-neutral-100" : ""
+                    }`}
+                    onClick={() => handleValueSelect("dressSize", item.value)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Skin Tone */}
+            <div className="w-full flex flex-col gap-3">
+              <span className="font-medium capitalize text-[#1C1C1C]">Skin Tone:</span>
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                {skinToneOptions.map((tone) => (
+                  <Button
+                    key={tone.name}
+                    style={{ backgroundColor: tone.color }}
+                    className={`w-[58px] h-[44px] rounded-md border hover:border-neutral-700 focus:border-neutral-700 cursor-pointer ${
+                      selectedValues.skinTone === tone.name ? "border-neutral-700 ring-2 ring-neutral-700" : "border-gray-300"
+                    }`}
+                    onClick={() => handleValueSelect("skinTone", tone.name)}
+                  />
+                ))}
+              </div>
+            </div>
 
             <Button
               variant="solid"
               onClick={saveData}
-              disabled={measurementNotSelected}
+              disabled={measurementNotSelected || createMeasurements.isPending}
               className="w-[175px] self-end mt-2 disabled:bg-neutral-50 disabled:cursor-not-allowed"
             >
               <div className="flex items-center justify-center gap-1">
                 <span>Save</span>
-                <Spinner
-                  isLoading={savedState.isLoading}
-                  size="sm"
-                  speed="fast"
-                />
+                {createMeasurements.isPending && (
+                  <Spinner size="sm" speed="fast" />
+                )}
               </div>
             </Button>
           </div>

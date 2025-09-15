@@ -6,6 +6,9 @@ import Button from "../../../shared-components/button";
 import NotificationBell from "../admin-components/top-bar/notification-bell";
 import { CreateDiscountDrawer } from "./new-discounts";
 import { useState } from "react";
+import { useDiscounts } from "../../../hooks/admin-discounts.hooks";
+import { convertApiDiscountsToTable } from "../../../utils/admin-discounts-utils";
+import Spinner from "../../../shared-components/spinner";
 export type Discount = {
   id: string;
   name: string;
@@ -40,7 +43,7 @@ export const discountData: Discount[] = [
     status: "Inactive",
   },
 ];
-const totalDiscounts = discountData.length;
+// const totalDiscounts = discountData.length;
 
 export function AdminDashboardDiscounts() {
   const title = <div className="font-lora text-[#1C1C1C]">Discounts</div>;
@@ -53,6 +56,9 @@ export function AdminDashboardDiscounts() {
     </div>
   );
   const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false);
+  const { data, isLoading, error } = useDiscounts();
+  const tableData = data ? convertApiDiscountsToTable(data) : [];
+  const totalDiscounts = data?.length ?? 0;
 
   return (
     <AdminDashboardLayout>
@@ -83,7 +89,17 @@ export function AdminDashboardDiscounts() {
                 <span className="font-lora">{totalDiscounts}</span>
               </h2>
             </div>
-            <DiscountTable data={discountData} />
+            {isLoading ? (
+              <div className="flex justify-center items-center py-12 bg-white rounded-b-md">
+                <Spinner size="lg" speed="fast" />
+              </div>
+            ) : error ? (
+              <div className="bg-red-50 border border-red-200 rounded-md p-6">
+                <p className="text-red-600">Failed to load discounts</p>
+              </div>
+            ) : (
+              <DiscountTable data={tableData} />
+            )}
           </section>
         </div>
         <CreateDiscountDrawer
