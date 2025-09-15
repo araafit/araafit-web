@@ -10,6 +10,7 @@ import {
 } from "../../ui/dialog";
 import { TableButton } from "../../ui/button";
 import { DotsThreeVerticalIcon } from "@phosphor-icons/react";
+import { useBlockCustomer, useUnblockCustomer, useDeleteCustomer } from "../../../hooks/admin-customers.hooks";
 
 function CustomerActions({
   customerId,
@@ -21,15 +22,47 @@ function CustomerActions({
   const navigate = useNavigate();
   const [isBlockDialogOpen, setIsBlockDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [blockReason, setBlockReason] = useState("");
+  const [deleteReason, setDeleteReason] = useState("");
 
-  const handleBlockToggle = () => {
-    console.log(isBlocked ? "Unblocking..." : "Blocking...");
-    setIsBlockDialogOpen(false);
+  const blockMutation = useBlockCustomer();
+  const unblockMutation = useUnblockCustomer();
+  const deleteMutation = useDeleteCustomer();
+
+  const handleBlockToggle = async () => {
+    try {
+      if (isBlocked) {
+        await unblockMutation.mutateAsync(customerId);
+      } else {
+        if (!blockReason.trim()) {
+          return;
+        }
+        await blockMutation.mutateAsync({
+          id: customerId,
+          request: { reason: blockReason },
+        });
+      }
+      setIsBlockDialogOpen(false);
+      setBlockReason("");
+    } catch (error) {
+      // Error handled in hook
+    }
   };
 
-  const handleDelete = () => {
-    console.log("Deleting account...");
-    setIsDeleteDialogOpen(false);
+  const handleDelete = async () => {
+    try {
+      if (!deleteReason.trim()) {
+        return;
+      }
+      await deleteMutation.mutateAsync({
+        id: customerId,
+        request: { reason: deleteReason },
+      });
+      setIsDeleteDialogOpen(false);
+      setDeleteReason("");
+    } catch (error) {
+      // Error handled in hook
+    }
   };
 
   return (
@@ -74,19 +107,46 @@ function CustomerActions({
               {isBlocked ? "Unblock Customer" : "Block Customer"}
             </DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-gray-600">
-            Are you sure you want to {isBlocked ? "unblock" : "block"} this
-            customer?
-          </p>
+          {isBlocked ? (
+            <p className="text-sm text-gray-600">
+              Are you sure you want to unblock this customer?
+            </p>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600">
+                Are you sure you want to block this customer?
+              </p>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Reason for blocking
+                </label>
+                <textarea
+                  value={blockReason}
+                  onChange={(e) => setBlockReason(e.target.value)}
+                  placeholder="Enter reason for blocking this customer..."
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                  rows={3}
+                />
+              </div>
+            </div>
+          )}
           <DialogFooter>
             <TableButton
               variant="outline"
-              onClick={() => setIsBlockDialogOpen(false)}
+              onClick={() => {
+                setIsBlockDialogOpen(false);
+                setBlockReason("");
+              }}
             >
               Cancel
             </TableButton>
-            <TableButton onClick={handleBlockToggle}>
-              {isBlocked ? "Unblock" : "Block"}
+            <TableButton 
+              onClick={handleBlockToggle}
+              disabled={(!isBlocked && !blockReason.trim()) || blockMutation.isPending || unblockMutation.isPending}
+            >
+              {blockMutation.isPending || unblockMutation.isPending 
+                ? "Processing..." 
+                : isBlocked ? "Unblock" : "Block"}
             </TableButton>
           </DialogFooter>
         </DialogContent>
@@ -98,19 +158,40 @@ function CustomerActions({
           <DialogHeader>
             <DialogTitle className="text-red-500">Delete Account</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-gray-600">
-            This action cannot be undone. Do you really want to delete this
-            customer’s account?
-          </p>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">
+              This action cannot be undone. Do you really want to delete this
+              customer's account?
+            </p>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Reason for deletion
+              </label>
+              <textarea
+                value={deleteReason}
+                onChange={(e) => setDeleteReason(e.target.value)}
+                placeholder="Enter reason for deleting this customer..."
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                rows={3}
+              />
+            </div>
+          </div>
           <DialogFooter>
             <TableButton
               variant="outline"
-              onClick={() => setIsDeleteDialogOpen(false)}
+              onClick={() => {
+                setIsDeleteDialogOpen(false);
+                setDeleteReason("");
+              }}
             >
               Cancel
             </TableButton>
-            <TableButton variant="destructive" onClick={handleDelete}>
-              Delete
+            <TableButton 
+              variant="destructive" 
+              onClick={handleDelete}
+              disabled={!deleteReason.trim() || deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Delete"}
             </TableButton>
           </DialogFooter>
         </DialogContent>

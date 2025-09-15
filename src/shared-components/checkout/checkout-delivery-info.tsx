@@ -21,7 +21,7 @@ interface FormValues {
  *
  * @returns ReactElement
  */
-export default function CheckoutDeliveryInfo() {
+export default function CheckoutDeliveryInfo({ onContinue }: { onContinue: () => void }) {
   const [isLoading, setLoading] = React.useState(false);
 
   const {
@@ -31,13 +31,16 @@ export default function CheckoutDeliveryInfo() {
   } = useForm<FormValues>({ mode: "onTouched" });
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    setLoading(!isLoading);
+    setLoading(true);
 
-    await new Promise((res) => setTimeout(res, 5000));
+    // Simulate form processing (you might want to save delivery info to state/API)
+    await new Promise((res) => setTimeout(res, 1000));
+    
     setLoading(false);
+    console.log("Delivery information:", data);
+    
     // Switch to payment info tab
-
-    console.log(data);
+    onContinue();
   };
 
   return (

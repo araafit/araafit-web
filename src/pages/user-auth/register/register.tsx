@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AuthLayout from "../../../layouts/auth/auth-layout";
 import {
   CreateAccount,
@@ -7,14 +7,19 @@ import {
   SetPassword,
 } from "./steps/import-entry";
 import { useForm, FormProvider } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { formSteps } from "./form-steps-data";
 import Modal from "../../../shared-components/modal";
 import { useSwitch } from "../../../shared-hooks/switch";
 import checkmark from "../checkmark.png";
 import Spinner from "../../../shared-components/spinner";
 import Button from "../../../shared-components/button";
-// import { useNavigate } from "react-router-dom";
+import { 
+  useVerifyEmail, 
+  useVerifyOtp, 
+  useRegister 
+} from "../../../hooks/auth.hooks";
+import { useAuth } from "../../../hooks/use-auth";
 /* ------------------------------------------------------------------------- */
 
 export type FormValues = {
@@ -58,9 +63,15 @@ const StepContent = ({ step }: { step: number }) => {
 export default function Register() {
   const [currentStep, setCurrentStep] = useState(0);
   const { toggleSwitch, switchValue: isOpen } = useSwitch(false);
-  const [isLoading, setLoading] = useState(false);
-
-  // const navigate = useNavigate();
+  const [emailVerified, setEmailVerified] = useState(false);
+  
+  const navigate = useNavigate();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  
+  // Auth mutations
+  const verifyEmailMutation = useVerifyEmail();
+  const verifyOtpMutation = useVerifyOtp();
+  const registerMutation = useRegister();
 
   const methods = useForm<FormValues>({
     mode: "onTouched",
@@ -69,29 +80,88 @@ export default function Register() {
     },
   });
 
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated && !authLoading) {
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, authLoading, navigate]);
+
   const currentFormStep = formSteps.findIndex((_, idx) => idx === currentStep);
 
   const onNext = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
 
-    const valid = await methods.trigger();
-
-    if (valid) {
-      if (currentStep < formSteps.length - 1) {
-        setCurrentStep((prev) => prev + 1);
-      } else {
+    if (currentStep === 0) {
+      // Step 1: Verify email
+      const emailValid = await methods.trigger("email");
+      if (emailValid) {
+        const email = methods.getValues("email");
+        try {
+          await verifyEmailMutation.mutateAsync({ email });
+          setCurrentStep(1);
+        } catch (error) {
+          console.error("Email verification failed:", error);
+        }
+      }
+    } else if (currentStep === 1) {
+      // Step 2: Verify OTP
+      const otpValid = await methods.trigger("verificationCode");
+      if (otpValid) {
+        const email = methods.getValues("email");
+        const otpArray = methods.getValues("verificationCode");
+        const otp = otpArray.join("");
+        
+        try {
+          await verifyOtpMutation.mutateAsync({ email, otp });
+          setEmailVerified(true);
+          setCurrentStep(2);
+        } catch (error) {
+          console.error("OTP verification failed:", error);
+        }
+      }
+    } else if (currentStep === 2) {
+      // Step 3: Personal details (KYC)
+      const detailsValid = await methods.trigger(["firstName", "lastName", "dateOfBirth", "deliveryAddress"]);
+      if (detailsValid) {
+        setCurrentStep(3);
+      }
+    } else {
+      // Step 4: Final registration
+      const passwordValid = await methods.trigger(["password", "confirmPassword"]);
+      if (passwordValid) {
         methods.handleSubmit(onSubmit)();
       }
     }
   };
 
   const onSubmit = async (data: FormValues) => {
-    console.log("form data", data);
-    setLoading(!isLoading);
+    if (!emailVerified) {
+      console.error("Email not verified");
+      return;
+    }
 
-    await new Promise((res) => setTimeout(res, 1500));
-    setLoading(false);
-    toggleSwitch();
+    try {
+      // For now, we'll use dummy measurement data since this is user registration
+      // In a real app, you'd collect measurements separately or have defaults
+      await registerMutation.mutateAsync({
+        email: data.email,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        dateOfBirth: data.dateOfBirth,
+        deliveryAddress: data.deliveryAddress,
+        password: data.password,
+        measurement: {
+          bust: 36, // Default values - should be collected elsewhere
+          waist: 28,
+          hips: 38,
+          skinTone: "medium",
+        },
+      });
+      toggleSwitch();
+    } catch (error) {
+      console.error("Registration failed:", error);
+    }
   };
 
   return (
@@ -110,19 +180,34 @@ export default function Register() {
               type="submit"
               onClick={onNext}
               className={`w-full text-white px-5 py-3 rounded-md ${
-                !methods.formState.isValid ? "bg-neutral-50" : "bg-primary-500"
+                !methods.formState.isValid || 
+                verifyEmailMutation.isPending || 
+                verifyOtpMutation.isPending || 
+                registerMutation.isPending
+                  ? "bg-neutral-50" 
+                  : "bg-primary-500"
               } capitalize`}
-              disabled={methods.formState.isValid ? false : true}
+              disabled={
+                !methods.formState.isValid || 
+                verifyEmailMutation.isPending || 
+                verifyOtpMutation.isPending || 
+                registerMutation.isPending
+              }
             >
               {currentStep === formSteps.length - 1 ? (
                 <div className="flex items-center justify-center">
                   <span>Submit</span>
-                  {isLoading && (
+                  {registerMutation.isPending && (
                     <Spinner size="sm" speed="fast" className="ml-1" />
                   )}
                 </div>
               ) : (
-                "Continue"
+                <div className="flex items-center justify-center">
+                  <span>Continue</span>
+                  {(verifyEmailMutation.isPending || verifyOtpMutation.isPending) && (
+                    <Spinner size="sm" speed="fast" className="ml-1" />
+                  )}
+                </div>
               )}
             </button>
 
@@ -147,7 +232,7 @@ export default function Register() {
                 text="Go to dashboard"
                 variant="solid"
                 className="w-full"
-                onClick={() => console.log("Should navigate to dashboard")}
+                onClick={() => navigate("/dashboard")}
               />
             </div>
           </Modal>

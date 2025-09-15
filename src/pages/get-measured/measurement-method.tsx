@@ -1,11 +1,9 @@
 import { useState } from "react";
 import { WarningIcon } from "@phosphor-icons/react";
+import { IconArrowLeft } from "@tabler/icons-react";
 import { useGetMeasured } from "./context/get-measured-context";
 import { MeasurementStepperLines } from "./stepper-lines";
 import Button from "../../shared-components/button";
-import Modal from "../../shared-components/modal";
-import { useSwitch } from "../../shared-hooks/switch";
-import cameraImage from "./camera.png";
 import { useNavigate } from "react-router-dom";
 /* --------------------------------------------------------------------- */
 
@@ -15,12 +13,16 @@ import { useNavigate } from "react-router-dom";
  */
 export function MeasurementMethod() {
   const navigate = useNavigate();
-  const { toggleSwitch: onClose, switchValue: isOpen } = useSwitch(false);
 
   const [method, setMethod] = useState<"manual" | "automated" | undefined>(
     undefined
   );
   const { currentStep, stepTo } = useGetMeasured();
+
+  const handleBack = () => {
+    // Navigate back to the previous page or route
+    navigate(-1);
+  };
 
   const Radio = ({ isClicked }: { isClicked: boolean }) => (
     <div
@@ -37,20 +39,24 @@ export function MeasurementMethod() {
 
   const OpenModal = () => {
     if (method === "automated") {
-      onClose();
+      stepTo(currentStep + 1);
     } else {
       navigate("/get-measured/manual");
     }
   };
 
-  const nextStep = () => {
-    stepTo(currentStep + 1);
-    window.location.reload();
-  };
 
   return (
-    <>
-      <div className="flex flex-col gap-[12rem]">
+    <div className="flex flex-col gap-[12rem] relative">
+        {/* Back Button */}
+        <button
+          onClick={handleBack}
+          className="absolute top-0 left-0 w-10 h-10 bg-white border border-gray-200 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors duration-200 shadow-sm z-10"
+          aria-label="Go back"
+        >
+          <IconArrowLeft size={16} className="text-gray-600" />
+        </button>
+
         <div className="w-full flex flex-col gap-7">
           <MeasurementStepperLines stepIndex={currentStep} />
 
@@ -130,39 +136,6 @@ export function MeasurementMethod() {
           className="w-[10rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed"
           onClick={OpenModal}
         />
-      </div>
-
-      <Modal onClose={onClose} isOpen={isOpen} containerClassName="w-[400px]">
-        <div className="flex flex-col items-center justify-center gap-3">
-          <img src={cameraImage} alt="" className="w-[9.375rem]" />
-
-          <div className="w-full flex flex-col gap-3">
-            <h4 className="text-[20px] font-semibold text-center">
-              Enable Camera Access
-            </h4>
-            <p className="w-[21rem] text-neutral-500 text-center">
-              To take accurate measurements, we need your permission to access
-              to the camera.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <Button
-              text="Cancel"
-              variant="outline"
-              className="w-[10rem] border-neutral-100 text-neutral-900"
-              onClick={onClose}
-            />
-
-            <Button
-              text="Allow"
-              variant="solid"
-              className="w-[10rem]"
-              onClick={nextStep}
-            />
-          </div>
-        </div>
-      </Modal>
-    </>
+    </div>
   );
 }

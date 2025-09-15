@@ -81,10 +81,10 @@ const Tab = ({
   );
 
   return (
-    <div className={CN("rounded-lg", tabContainerClassName)}>
+    <div className={CN("rounded-lg flex flex-col h-full", tabContainerClassName)}>
       <div
         className={CN(
-          "flex items-center justify-center space-x-1",
+          "flex items-center justify-center space-x-1 flex-shrink-0",
           tabListClassName
         )}
       >
@@ -102,7 +102,7 @@ const Tab = ({
       </div>
 
       {children && (
-        <div className="p-4 size-full">
+        <div className="p-4 w-full flex-1 overflow-y-auto">
           {Children.toArray(children)[activeTab]}
         </div>
       )}

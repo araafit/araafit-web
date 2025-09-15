@@ -7,6 +7,7 @@ import {
 } from "@phosphor-icons/react";
 import { useWindowSize } from "@react-hook/window-size";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import LandingLayout from "../../../layouts/landing/landing-layout";
 import Accordion, {
   type AccordionItemType,
@@ -20,7 +21,6 @@ import {
   hookSectionImage3,
 } from "./images/images";
 import Testimonials from "./testimonials";
-import { useNavigate } from "react-router-dom";
 
 /* --------------------------------------------------------------------- */
 
@@ -35,17 +35,21 @@ const bgImage = {
  * @returns ReactElement
  */
 export function HomePage() {
-  const [feature, setFeature] = useState<Record<string, undefined | any>>(
+  const [feature, setFeature] = useState<AccordionItemType>(
     features[0]
   );
-  const [windowWidth, _] = useWindowSize();
+  const [windowWidth] = useWindowSize();
   const navigate = useNavigate();
+
+  const handleGetMeasured = () => {
+    navigate("/get-measured");
+  };
 
   return (
     <LandingLayout>
       <>
         <section className="w-full flex flex-col justify-center items-center px-5 py-8 lg:pt-20 lg:px-28 bg-primary-50">
-          <div className="w-full max-w-[41.75rem] flex flex-col justify-center items-center gap-5 mb-24">
+          <div className="w-full max-w-[41.75rem] flex flex-col justify-center items-center gap-5 mb-11">
             <h1 className="font-lora font-semibold text-[2.5rem] text-center lg:text-5xl leading-araafit">
               Take{" "}
               <span className="font-lora text-primary-500">
@@ -67,7 +71,7 @@ export function HomePage() {
                 text="Get measured"
                 variant="solid"
                 className="w-full md:max-w-[9.375rem]"
-                onClick={() => navigate("/get-measured")}
+                onClick={handleGetMeasured}
               />
 
               <Button
@@ -77,7 +81,7 @@ export function HomePage() {
                 onClick={() => navigate("/auth/register")}
               >
                 <div className="w-full flex items-center justify-center gap-2">
-                  <span>Create an account</span>
+                  <span>Create a free account</span>
                   <CaretRightIcon size={20} className="text-primary-500" />
                 </div>
               </Button>
@@ -124,6 +128,7 @@ export function HomePage() {
                   type="button"
                   text="Take your measurement"
                   variant="solid"
+                  onClick={handleGetMeasured}
                 />
               </div>
 
@@ -171,6 +176,7 @@ export function HomePage() {
                   type="button"
                   variant="solid"
                   className="w-full max-w-[145px]"
+                  onClick={() => navigate("/shop")}
                 >
                   <div className="flex items-center gap-2">
                     <span>Shop now</span>
@@ -223,6 +229,7 @@ export function HomePage() {
                   type="button"
                   variant="solid"
                   className="w-full max-w-[185px]"
+                  onClick={() => navigate("/shop")}
                 >
                   <div className="flex items-center gap-2">
                     <span>Explore fabric</span>
@@ -284,6 +291,7 @@ export function HomePage() {
                   variant="solid"
                   className="w-auto bg-primary-950"
                   text="Start your custom fit journey"
+                  onClick={handleGetMeasured}
                 />
               </div>
             </div>

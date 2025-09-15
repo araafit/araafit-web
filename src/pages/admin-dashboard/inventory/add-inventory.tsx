@@ -10,7 +10,9 @@ import AdminDashboardLayout from "../../../layouts/admin-dashboard/dashboard-lay
 import Button from "../../../shared-components/button";
 import NotificationBell from "../admin-components/top-bar/notification-bell";
 import { useState } from "react";
-import axios from "axios";
+import { useForm, type SubmitHandler } from "react-hook-form";
+import { useCreateProduct } from "../../../hooks/admin-inventory.hooks";
+import { useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,58 +22,110 @@ import {
 import { TableButton } from "../../ui/button";
 import { Switch } from "../../ui/switch";
 import { CaretDownIcon } from "@phosphor-icons/react";
+import {
+  Select,
+  SelectLabel,
+  SelectGroup,
+  SelectContent,
+  SelectTrigger,
+  SelectValue,
+  SelectItem,
+} from "../../ui/select";
 // import { Link } from "react-router-dom";
 // import { useParams } from "react-router-dom";
 
 const skinTone = ["Porcelin", "Ivory", "Sand", "Espresso", "Chestnut", "Honey"];
+//const categories = ["dress", "fabric"];
+//const discountTypes = ["percentage", "fixed"];
+
+interface ProductFormData {
+  name: string;
+  category: "dress" | "fabric";
+  description: string;
+  materialType: string;
+  dressSize: string;
+  weight: number;
+  thickness: string;
+  quantityInStock: number;
+  price: number;
+  discountType: "percentage" | "fixed";
+  discountValue: number;
+  discountStart: string;
+  discountEnd: string;
+}
 
 export function AdminDashboardUploadInventory() {
-  //   const { inventoryId } = useParams();
-  const [contributorPhotos, setContributorPhotos] = useState<string[]>([]);
-  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const navigate = useNavigate();
+  const createProductMutation = useCreateProduct();
+  const [contributorPhotos, setContributorPhotos] = useState<File[]>([]);
+  const [isUploadingImage] = useState(false);
   const [discountsEnabled, setDiscountsEnabled] = useState(false);
+  const [selectedTone, setSelectedTone] = useState<string[]>([]);
+
+  const {
+    register,
+    handleSubmit,
+    //watch,
+    formState: { errors },
+  } = useForm<ProductFormData>({
+    mode: "all",
+    defaultValues: {
+      category: "dress",
+      discountType: "percentage",
+    },
+  });
+
+  console.log(errors);
+
+  //const watchCategory = watch("category");
 
   const handlePhotosChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
 
     const files = Array.from(e.target.files);
-    setIsUploadingImage(true);
-
-    try {
-      const uploadedUrls: string[] = [];
-
-      for (const file of files) {
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("upload_preset", "oyzsznex"); // your Cloudinary preset
-
-        const cloudinaryUrl = `https://api.cloudinary.com/v1_1/dbnkyv0ht/upload`;
-        const response = await axios.post(cloudinaryUrl, formData);
-
-        uploadedUrls.push(response.data.secure_url);
-      }
-
-      setContributorPhotos((prev) => [...prev, ...uploadedUrls]);
-    } catch (error) {
-      console.error("Error uploading images:", error);
-    } finally {
-      setIsUploadingImage(false);
-    }
+    setContributorPhotos((prev) => [...prev, ...files]);
   };
 
   const handleDeleteImage = (index: number) => {
     setContributorPhotos((prev) => prev.filter((_, i) => i !== index));
   };
-  const [selectedTone, setSelectedTone] = useState<string[]>([]);
 
-  const toggleTone = (size: string) => {
+  const toggleTone = (tone: string) => {
     setSelectedTone((prev) =>
-      prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]
+      prev.includes(tone) ? prev.filter((s) => s !== tone) : [...prev, tone]
     );
   };
 
-  const removeTone = (size: string) => {
-    setSelectedTone((prev) => prev.filter((s) => s !== size));
+  const removeTone = (tone: string) => {
+    setSelectedTone((prev) => prev.filter((s) => s !== tone));
+  };
+
+  const onSubmit: SubmitHandler<ProductFormData> = async (data) => {
+    console.log("submitting..", data);
+    try {
+      await createProductMutation.mutateAsync({
+        files: contributorPhotos,
+        name: data.name,
+        category: data.category,
+        description: data.description,
+        materialType: data.materialType,
+        dressSize: data.dressSize,
+        weight: data.weight,
+        thickness: data.thickness,
+        quantityInStock: data.quantityInStock,
+        price: data.price,
+        discountType: discountsEnabled ? data.discountType : undefined,
+        discountValue: discountsEnabled ? data.discountValue : undefined,
+        discountStart: discountsEnabled ? data.discountStart : undefined,
+        discountEnd: discountsEnabled ? data.discountEnd : undefined,
+        skinToneRecommendation: selectedTone,
+      });
+
+      // Navigate back to inventory on success
+      navigate("/admin-dashboard/inventory");
+    } catch (error) {
+      console.error("Failed to create product:", error);
+    }
   };
   const title = (
     <div className="font-lora font-medium text-[#1C1C1C]">Inventory</div>
@@ -98,9 +152,11 @@ export function AdminDashboardUploadInventory() {
                 <NotificationBell />
 
                 <Button
-                  text="Add"
+                  text={createProductMutation.isPending ? "Adding..." : "Add"}
                   icon={<PlusIcon className="size-[1.25rem] text-white" />}
                   variant="solid"
+                  disabled={createProductMutation.isPending}
+                  onClick={handleSubmit(onSubmit)}
                   className="text-white shadow-sm"
                 />
               </>
@@ -158,6 +214,9 @@ export function AdminDashboardUploadInventory() {
                       text="Browse Files"
                       variant="solid"
                       className="text-white shadow-sm w-44"
+                      onClick={() =>
+                        document.getElementById("file-upload")?.click()
+                      }
                     />
                   </label>
                 )}
@@ -172,7 +231,7 @@ export function AdminDashboardUploadInventory() {
                       className="w-[142px] h-[108px] relative overflow-hidden"
                     >
                       <img
-                        src={photo}
+                        src={URL.createObjectURL(photo)}
                         alt={`Image ${idx + 1}`}
                         className="w-full h-full object-cover rounded-[6px] "
                       />
@@ -202,40 +261,41 @@ export function AdminDashboardUploadInventory() {
                       Product Name
                     </label>
                     <input
+                      {...register("name", {
+                        required: "Product name is required",
+                        minLength: {
+                          value: 2,
+                          message: "Name must be at least 2 characters",
+                        },
+                      })}
                       type="text"
                       className="h-14 w-full border border-[#D0D5DD] pl-2 rounded-lg outline-none focus:outline-none"
                     />
+                    {errors.name && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.name.message}
+                      </p>
+                    )}
                   </div>
                   <div className="flex-1">
-                    <DropdownMenu>
+                    <Select {...register("category")}>
                       <label
                         htmlFor="name"
                         className="block text-[#4F4F4F] font-light text-sm"
                       >
                         Category
                       </label>
-                      <DropdownMenuTrigger asChild>
-                        <TableButton
-                          variant="outline"
-                          size="sm"
-                          className="w-full h-14 border border-[#D0D5DD] text-[#676767] text-sm bg-white flex items-center justify-between px-3"
-                        >
-                          <span className="font-light">Dress</span>
-                          <CaretDownIcon className="text-[#676767]" size={20} />
-                        </TableButton>
-                      </DropdownMenuTrigger>
-
-                      <DropdownMenuContent className="w-52 h-full flex flex-col items-start gap-3 p-3">
-                        {/* {orderStatuses.map((status) => (
-                      <DropdownMenuItem
-                        className={`${status.bgColor} ${status.textColor} px-2 cursor-pointer text-xs py-1   w-auto  block  rounded-full`}
-                        key={status.status}
-                      >
-                        {status.status}
-                      </DropdownMenuItem>
-                    ))} */}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                      <SelectTrigger className="w-full h-14 border border-[#D0D5DD] text-[#676767] text-sm bg-white flex items-center justify-between px-3">
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Categories</SelectLabel>
+                          <SelectItem value="fabric">Fabric</SelectItem>
+                          <SelectItem value="dress">Dress</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
                 <div className="w-full mt-4">
@@ -247,6 +307,8 @@ export function AdminDashboardUploadInventory() {
                   </label>
                   <input
                     type="text"
+                    {...register("description")}
+                    placeholder="Enter product description"
                     className="h-14 w-full font-light border border-[#D0D5DD] pl-2 rounded-lg outline-none focus:outline-none"
                   />
                 </div>
@@ -263,40 +325,34 @@ export function AdminDashboardUploadInventory() {
                       Material Type
                     </label>
                     <input
+                      {...register("materialType")}
                       type="text"
+                      placeholder="Enter material type"
                       className="h-14 w-full border border-[#D0D5DD] pl-2 rounded-lg outline-none focus:outline-none"
                     />
                   </div>
                   <div className="flex-1">
-                    <DropdownMenu>
+                    <Select>
                       <label
                         htmlFor="name"
                         className="block text-[#4F4F4F] font-light text-sm"
                       >
                         General Dress Size
                       </label>
-                      <DropdownMenuTrigger asChild>
-                        <TableButton
-                          variant="outline"
-                          size="sm"
-                          className="w-full h-14 border border-[#D0D5DD] text-[#676767] text-sm bg-white flex items-center justify-between px-3"
-                        >
-                          <span className="font-light">14</span>
-                          <CaretDownIcon className="text-[#676767]" size={20} />
-                        </TableButton>
-                      </DropdownMenuTrigger>
-
-                      <DropdownMenuContent className="w-52 h-full flex flex-col items-start gap-3 p-3">
-                        {/* {orderStatuses.map((status) => (
-                      <DropdownMenuItem
-                        className={`${status.bgColor} ${status.textColor} px-2 cursor-pointer text-xs py-1   w-auto  block  rounded-full`}
-                        key={status.status}
-                      >
-                        {status.status}
-                      </DropdownMenuItem>
-                    ))} */}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                      <SelectTrigger className="w-full h-14 border border-[#D0D5DD] text-[#676767] text-sm bg-white flex items-center justify-between px-3">
+                        <SelectValue placeholder="Select a dress size" />
+                      </SelectTrigger>
+                      <SelectContent {...register("dressSize")}>
+                        <SelectGroup>
+                          <SelectLabel>Dress Sizes</SelectLabel>
+                          {[6, 8, 10, 12, 14, 16, 18, 20].map((size) => (
+                            <SelectItem key={size} value={size.toString()}>
+                              {size}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
                 <div className="flex gap-4 items-center mt-4">
@@ -308,7 +364,8 @@ export function AdminDashboardUploadInventory() {
                       Weight (gsm)
                     </label>
                     <input
-                      type="text"
+                      type="number"
+                      {...register("weight")}
                       className="h-14 w-full font-light border border-[#D0D5DD] pl-2 rounded-lg outline-none focus:outline-none"
                     />
                   </div>
@@ -320,7 +377,8 @@ export function AdminDashboardUploadInventory() {
                       Thickness (mm)
                     </label>
                     <input
-                      type="text"
+                      type="number"
+                      {...register("thickness")}
                       className="h-14 w-full font-light border border-[#D0D5DD] pl-2 rounded-lg outline-none focus:outline-none"
                     />
                   </div>
@@ -408,7 +466,8 @@ export function AdminDashboardUploadInventory() {
                       Quantity Available
                     </label>
                     <input
-                      type="text"
+                      type="number"
+                      {...register("quantityInStock")}
                       className="h-14 w-full font-light border border-[#D0D5DD] pl-2 rounded-lg outline-none focus:outline-none"
                     />
                   </div>
@@ -420,7 +479,8 @@ export function AdminDashboardUploadInventory() {
                       Price (₦)
                     </label>
                     <input
-                      type="text"
+                      type="number"
+                      {...register("price")}
                       className="h-14 w-full font-light border border-[#D0D5DD] pl-2 rounded-lg outline-none focus:outline-none"
                     />
                   </div>
@@ -447,34 +507,23 @@ export function AdminDashboardUploadInventory() {
 
                 <div className="flex gap-4 items-center mt-4">
                   <div className="w-[303px]">
-                    <DropdownMenu>
+                    <Select disabled={!discountsEnabled}>
                       <label
-                        className={`block text-sm font-light mb-1 ${
-                          discountsEnabled ? "text-[#4F4F4F]" : "text-gray-400"
-                        }`}
+                        htmlFor="name"
+                        className="block text-[#4F4F4F] font-light text-sm"
                       >
                         Discount Type
                       </label>
-                      <DropdownMenuTrigger asChild disabled={!discountsEnabled}>
-                        <TableButton
-                          variant="outline"
-                          size="sm"
-                          className={`w-full h-14 border text-sm flex items-center justify-between px-3
-                  ${
-                    discountsEnabled
-                      ? "border-[#D0D5DD] text-[#676767] bg-white"
-                      : "border-gray-200 text-gray-400 bg-white"
-                  }
-                `}
-                        >
-                          <span className="font-light">Select type</span>
-                          <CaretDownIcon size={20} />
-                        </TableButton>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-52 flex flex-col items-start gap-3 p-3">
-                        {/* Dropdown items here */}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                      <SelectTrigger className="w-full h-14 border border-[#D0D5DD] text-[#676767] text-sm bg-white flex items-center justify-between px-3">
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent {...register("discountType")}>
+                        <SelectGroup>
+                          <SelectItem value="percentage">Percentage</SelectItem>
+                          <SelectItem value="fixed">Fixed Amount</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="flex-1">
@@ -543,14 +592,14 @@ export function AdminDashboardUploadInventory() {
                   </div>
                 </div>
               </div>
-              <div className="w-full flex justify-end">
+              {/*<div className="w-full flex justify-end">
                 <Button
                   text="Add"
                   icon={<PlusIcon className="size-[1.25rem] text-white" />}
                   variant="solid"
                   className="text-white self-end shadow-sm mt-12 relative right-0"
                 />
-              </div>
+              </div>*/}
             </div>
           </section>
         </div>

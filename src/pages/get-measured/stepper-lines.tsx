@@ -1,5 +1,9 @@
 export function MeasurementStepperLines({ stepIndex }: { stepIndex: number }) {
-  const steps = ["method", "position", "smart capture", "confirmation"];
+  // Determine if we're using photo upload (which replaces position step)
+  const usePhotoUpload = true; // This should match the flag in get-measured.tsx
+  const steps = usePhotoUpload 
+    ? ["method", "upload photos", "enter height", "confirmation"]
+    : ["method", "position", "smart capture", "confirmation"];
 
   return (
     <div className="inline-flex items-center gap-1 self-center">

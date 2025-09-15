@@ -38,7 +38,7 @@ function GuestPageLayout({ children }: { children: React.ReactElement }) {
           </div>
 
           <div className="flex items-center gap-4">
-            <Button text="Login" variant="outline" />
+            <Button text="Login" variant="outline" onClick={() => navigate("/auth/login")} />
 
             <Button variant="solid" onClick={() => navigate("/auth/register")}>
               <div className="flex items-center gap-1">

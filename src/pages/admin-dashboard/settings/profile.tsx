@@ -1,15 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Button from "../../../shared-components/button";
 import { PencilSimpleIcon, EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
 import AvatarBadge from "../customers/customers-avatar";
+import { useAdminProfile, useUpdateAdminProfile, useUpdateAdminPassword } from "../../../hooks/admin-settings.hooks";
+import { toast } from "react-hot-toast";
+import Spinner from "../../../shared-components/spinner";
 
 export default function ManageOrdersRequests() {
   // Profile Info State
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: "Ada",
-    lastName: "Lovelace",
-    email: "ada.lovelace@example.com",
+    firstName: "",
+    lastName: "",
+    email: "",
   });
 
   // Password State
@@ -26,11 +29,29 @@ export default function ManageOrdersRequests() {
     confirm: false,
   });
 
+  // API hooks
+  const { data: adminProfile, isLoading: profileLoading, error: profileError } = useAdminProfile();
+  const updateProfileMutation = useUpdateAdminProfile();
+  const updatePasswordMutation = useUpdateAdminPassword();
+
+  // Prefill form data when profile is loaded
+  useEffect(() => {
+    if (adminProfile) {
+      setFormData({
+        firstName: adminProfile.firstName,
+        lastName: adminProfile.lastName,
+        email: adminProfile.email,
+      });
+    }
+  }, [adminProfile]);
+
   // Helpers
   const allFieldsFilled =
     formValues.currentPassword &&
     formValues.newPassword &&
     formValues.confirmPassword;
+
+  const passwordsMatch = formValues.newPassword === formValues.confirmPassword;
 
   // Handlers
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,9 +61,7 @@ export default function ManageOrdersRequests() {
 
   const handleSave = async () => {
     try {
-      console.log("Saving profile data:", formData);
-      // await api.updateProfile(formData);
-
+      await updateProfileMutation.mutateAsync(formData);
       setIsEditing(false);
     } catch (err) {
       console.error("Error saving profile:", err);
@@ -62,9 +81,16 @@ export default function ManageOrdersRequests() {
     e.preventDefault();
     if (!allFieldsFilled) return;
 
+    if (!passwordsMatch) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
     try {
-      console.log("Submitting password change:", formValues);
-      // await api.updatePassword(formValues);
+      await updatePasswordMutation.mutateAsync({
+        currentPassword: formValues.currentPassword,
+        newPassword: formValues.newPassword,
+      });
 
       // Reset after success
       setFormValues({
@@ -77,13 +103,33 @@ export default function ManageOrdersRequests() {
     }
   };
 
+  // Show loading state while fetching profile
+  if (profileLoading) {
+    return (
+      <div className="bg-white w-full px-4 py-6 flex justify-center items-center min-h-[400px]">
+        <Spinner size="lg" speed="fast" />
+      </div>
+    );
+  }
+
+  // Show error state if profile fetch failed
+  if (profileError) {
+    return (
+      <div className="bg-white w-full px-4 py-6">
+        <div className="bg-red-50 border border-red-200 rounded-md p-6">
+          <p className="text-red-600">Failed to load admin profile. Please try again.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="bg-white w-full px-4 py-6">
         {/* Header */}
         <div className="flex justify-between">
           <h2 className="font-semibold text-[28px] capitalize">
-            Manage Orders & Requests
+            Manage Profile
           </h2>
 
           <div
@@ -177,7 +223,7 @@ export default function ManageOrdersRequests() {
             {/* Save button */}
             <div className="pt-4">
               <Button
-                text="Save"
+                text={updateProfileMutation.isPending ? "Saving..." : "Save"}
                 type="submit"
                 variant={isEditing ? "solid" : "outline"}
                 className={`w-full h-14 ${
@@ -185,7 +231,7 @@ export default function ManageOrdersRequests() {
                     ? ""
                     : "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
                 }`}
-                disabled={!isEditing}
+                disabled={!isEditing || updateProfileMutation.isPending}
               />
             </div>
           </form>
@@ -277,7 +323,11 @@ export default function ManageOrdersRequests() {
                     id="confirmPassword"
                     value={formValues.confirmPassword}
                     onChange={handlePasswordChange}
-                    className="mt-1 block w-full h-14 px-3 pr-10 border text-sm text-[#1C1C1C] border-[#D0D5DD] rounded-lg outline-none"
+                    className={`mt-1 block w-full h-14 px-3 pr-10 border text-sm text-[#1C1C1C] rounded-lg outline-none ${
+                      formValues.confirmPassword && !passwordsMatch
+                        ? "border-red-500"
+                        : "border-[#D0D5DD]"
+                    }`}
                   />
                   <button
                     type="button"
@@ -291,20 +341,23 @@ export default function ManageOrdersRequests() {
                     )}
                   </button>
                 </div>
+                {formValues.confirmPassword && !passwordsMatch && (
+                  <p className="mt-1 text-sm text-red-500">Passwords do not match</p>
+                )}
               </div>
 
               {/* Save Button */}
               <div className="pt-4">
                 <Button
-                  text="Save"
+                  text={updatePasswordMutation.isPending ? "Updating..." : "Save"}
                   type="submit"
-                  variant={allFieldsFilled ? "solid" : "outline"}
+                  variant={allFieldsFilled && passwordsMatch ? "solid" : "outline"}
                   className={`w-full h-14 ${
-                    allFieldsFilled
+                    allFieldsFilled && passwordsMatch
                       ? ""
                       : "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
                   }`}
-                  disabled={!allFieldsFilled}
+                  disabled={!allFieldsFilled || !passwordsMatch || updatePasswordMutation.isPending}
                 />
               </div>
             </form>

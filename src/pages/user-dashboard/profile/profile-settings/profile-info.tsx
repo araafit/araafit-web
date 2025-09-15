@@ -1,8 +1,10 @@
-import { memo, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import Button from "../../../../shared-components/button";
 import { PencilSimpleIcon } from "@phosphor-icons/react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { rtw1 } from "../../images/image-entry";
+import { useUser } from "../../../../stores/auth-store";
+import { useUpdateProfile } from "../../../../hooks/users.hooks";
 
 /* --------------------------------------------------------------------------- */
 
@@ -21,17 +23,60 @@ interface FormValues {
  * @returns ReactElement
  */
 function ProfileInfo() {
-  //@ts-ignore
-  const [imageUpload, setImageUpload] = useState(rtw1);
+  const [imageUpload] = useState(rtw1);
+  const user = useUser();
+  const updateProfile = useUpdateProfile();
 
   const {
     register,
     formState: { errors, isValid },
+    setValue,
     handleSubmit,
-  } = useForm<FormValues>();
+    watch,
+  } = useForm<FormValues>({
+    mode: "onChange",
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      phoneNumber: "",
+      city: "",
+      zipCode: "",
+      address: "",
+    },
+  });
 
-  const onSubmit: SubmitHandler<FormValues> = (data: any) => {
-    console.log(data);
+  const formData = watch();
+  console.log("Form state:", { formData, isValid, errors });
+
+  useEffect(() => {
+    if (user) {
+      // Prefill with user info
+      const values: FormValues = {
+        firstName: user.firstName ?? "",
+        lastName: user.lastName ?? "",
+        email: user.email ?? "",
+        phoneNumber: user.phoneNumber ?? "",
+        city: user.city ?? "",
+        zipCode: user.zipCode ?? "",
+        address: user.deliveryAddress ?? "",
+      };
+      Object.entries(values).forEach(([key, value]) => {
+        setValue(key as keyof FormValues, value, { shouldValidate: true });
+      });
+    }
+  }, [user, setValue]);
+
+  const onSubmit: SubmitHandler<FormValues> = (data) => {
+    console.log("Form submitted with data:", data);
+    updateProfile.mutate({
+      firstName: data.firstName,
+      lastName: data.lastName,
+      phoneNumber: data.phoneNumber,
+      deliveryAddress: data.address,
+      city: data.city,
+      zipCode: data.zipCode,
+    });
   };
 
   return (
@@ -136,14 +181,9 @@ function ProfileInfo() {
             <input
               id="email"
               type="email"
-              className="w-full p-4 border border-gray-300 outline-none rounded-[6px]"
-              {...register("email", {
-                required: "Email is required",
-                pattern: {
-                  value: /^\S+@\S+\.\S+$/,
-                  message: "Enter a valid email",
-                },
-              })}
+              className="w-full p-4 border border-gray-300 outline-none rounded-[6px] bg-gray-50"
+              {...register("email")}
+              readOnly
             />
 
             {errors.email && (
@@ -160,7 +200,7 @@ function ProfileInfo() {
               type="tel"
               className="w-full p-4 border border-gray-300 outline-none rounded-[6px]"
               {...register("phoneNumber", {
-                required: "Phone Number",
+                required: "Phone number is required",
               })}
             />
 
@@ -234,10 +274,11 @@ function ProfileInfo() {
         </div>
 
         <Button
+          type="submit"
           text="Save"
           className="w-[222px] disabled:bg-neutral-100 text-neutral-300 disabled:cursor-not-allowed"
           variant="solid"
-          disabled={!isValid}
+          disabled={!isValid || updateProfile.isPending}
         />
       </form>
     </div>

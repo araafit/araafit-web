@@ -1,21 +1,26 @@
 import { useForm, type SubmitHandler } from "react-hook-form";
-// import { CalendarDotsIcon } from "@phosphor-icons/react";
 import Spinner from "../../shared-components/spinner";
 import Button from "../../shared-components/button";
-import { useCardState } from "../../shared-hooks/state-store";
+import { useTokenizeCard } from "../../hooks/cards.hooks";
+import { useCheckoutWithCard } from "../../hooks/orders.hooks";
 
 /* ------------------------------------------------------------- */
 
-export interface BillingCard {
-  id: number | string;
-  cardHolder?: string;
-  cardType: "mastercard" | "visa" | "other";
-  cardNumber: number | string;
+interface FormValues {
+  cardHolder: string;
+  cardNumber: string;
   expiry: string;
-  cvv: number | string;
+  cvv: string;
+  email: string;
 }
 
-export interface BillingCardForm {}
+export interface CheckoutInfo {
+  callbackUrl: string;
+}
+
+export interface BillingCardFormProps {
+  checkoutInfo?: CheckoutInfo;
+}
 
 /**
  *
@@ -23,14 +28,15 @@ export interface BillingCardForm {}
  *
  * @returns ReactElement
  */
-export default function BillingCardForm() {
-  const addCard = useCardState((state) => state.addCard);
+export default function BillingCardForm({ checkoutInfo }: BillingCardFormProps) {
+  const tokenizeCardMutation = useTokenizeCard();
+  const checkoutWithCardMutation = useCheckoutWithCard();
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting, isValid },
+    formState: { errors, isValid },
     watch,
-  } = useForm<BillingCard>({
+  } = useForm<FormValues & { saveCard?: boolean }>({
     mode: "onChange",
   });
   const cardNumber = watch("cardNumber");
@@ -61,24 +67,41 @@ export default function BillingCardForm() {
     return value;
   };
 
-  // @ts-ignore
-  const getCardType = (cardNumber: string) => {
-    const cleanCardNumber = cardNumber.replace(/\s/g, "");
-    if (cleanCardNumber.startsWith("4")) return "visa";
-    if (cleanCardNumber.startsWith("5")) return "mastercard";
-    if (cleanCardNumber.startsWith("3")) return "amex";
-    return "card";
+
+  const submitHandler: SubmitHandler<FormValues & { saveCard?: boolean }> = async (data) => {
+    try {
+      if (checkoutInfo) {
+        // Use checkout with card endpoint for payment + optional card saving
+        const checkoutData = {
+          cardholderName: data.cardHolder,
+          cardNumber: data.cardNumber,
+          expiryDate: data.expiry,
+          cvv: data.cvv,
+          saveCard: data.saveCard || false,
+          callbackUrl: checkoutInfo.callbackUrl,
+        };
+        
+        await checkoutWithCardMutation.mutateAsync(checkoutData);
+        // No need to call onSuccess here since we're redirecting to payment
+      } else {
+        // Use regular tokenize flow for just adding card
+        const tokenizeData = {
+          cardholderName: data.cardHolder,
+          cardNumber: data.cardNumber,
+          expiryDate: data.expiry,
+          cvv: data.cvv,
+          email: data.email,
+        };
+        const tokenizeResult = await tokenizeCardMutation.mutateAsync(tokenizeData);
+        window.location.href = tokenizeResult.authorizationUrl;
+      }
+    } catch (error) {
+      console.error("Card operation failed:", error);
+    }
   };
 
-  const submitHandler: SubmitHandler<BillingCard> = async (data) => {
-    const cardId = Date.now();
-
-    await new Promise((res) => setTimeout(res, 500));
-    addCard({ ...data, id: cardId });
-  };
 
   return (
-    // @ts-ignore
     <form className="w-full" onSubmit={handleSubmit(submitHandler)}>
       <div className="w-full flex flex-col gap-4">
         <div>
@@ -131,15 +154,15 @@ export default function BillingCardForm() {
             {...register("cardNumber", {
               required: "Card number is required",
               validate: {
-                validLength: (value: any) => {
-                  const cleanValue = value.replace(/\s/g, "");
+                validLength: (value: string | number) => {
+                  const cleanValue = String(value).replace(/\s/g, "");
                   return (
                     (cleanValue.length >= 13 && cleanValue.length <= 19) ||
                     "Card number must be 13-19 digits"
                   );
                 },
-                validFormat: (value: any) => {
-                  const cleanValue = value.replace(/\s/g, "");
+                validFormat: (value: string | number) => {
+                  const cleanValue = String(value).replace(/\s/g, "");
                   return (
                     /^\d+$/.test(cleanValue) ||
                     "Card number can only contain digits"
@@ -230,21 +253,58 @@ export default function BillingCardForm() {
           </div>
         </div>
 
+        {/* Email */}
+        <div className="flex flex-col gap-1">
+          <label htmlFor="email" className="font-light text-[#1C1C1C]">
+            Email Address
+          </label>
+
+          <input
+            type="email"
+            {...register("email", {
+              required: "Email is required",
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: "Invalid email address",
+              },
+            })}
+            id="email"
+            placeholder="john.doe@example.com"
+            className="p-4 border border-gray-300 outline-none rounded-[6px] text-[0.875rem] placeholder:text-[0.875rem]"
+          />
+          {errors.email && (
+            <small className="mt-1 text-sm text-red-400">
+              {errors.email.message}
+            </small>
+          )}
+        </div>
+
         <div className="w-full flex flex-col gap-1">
           <div>
-            <input type="checkbox" name="" id="" className="mr-4" />
-            <span className="font-light">Save this for future use</span>
+            <input 
+              type="checkbox" 
+              {...register("saveCard")}
+              id="saveCard" 
+              className="mr-4" 
+            />
+            <label htmlFor="saveCard" className="font-light">Save this for future use</label>
           </div>
 
           <Button
             type="submit"
             variant="solid"
             className={`w-full disabled:bg-neutral-100 disabled:cursor-not-allowed`}
-            disabled={!isValid}
+            disabled={!isValid || tokenizeCardMutation.isPending || checkoutWithCardMutation.isPending}
           >
             <div className="flex items-center justify-center gap-1">
-              <span>Add card</span>
-              {isSubmitting && <Spinner size="sm" speed="fast" />}
+              <span>
+                {(tokenizeCardMutation.isPending || checkoutWithCardMutation.isPending) 
+                  ? "Processing..." 
+                  : checkoutInfo ? "Pay Now" : "Add card"}
+              </span>
+              {(tokenizeCardMutation.isPending || checkoutWithCardMutation.isPending) && (
+                <Spinner size="sm" speed="fast" />
+              )}
             </div>
           </Button>
         </div>

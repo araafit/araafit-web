@@ -2,12 +2,13 @@ import AuthLayout from "../../../layouts/auth/auth-layout";
 import { useForm, useWatch, type SubmitHandler } from "react-hook-form";
 import Button from "../../../shared-components/button";
 import { EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Modal from "../../../shared-components/modal";
 import { useSwitch } from "../../../shared-hooks/switch";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import checkmark from "../checkmark.png";
 import Spinner from "../../../shared-components/spinner";
+import { useResetPassword } from "../../../hooks/auth.hooks";
 
 /* ------------------------------------------------------------------------------ */
 
@@ -21,7 +22,10 @@ export default function PasswordResetPage() {
 
   const { toggleSwitch, switchValue: isOpen } = useSwitch(false);
   const navigate = useNavigate();
-  const [isLoading, setLoading] = useState(false);
+  const [searchParams] = useSearchParams();
+  const [resetToken, setResetToken] = useState<string | null>(null);
+  
+  const resetPasswordMutation = useResetPassword();
 
   const {
     register,
@@ -30,6 +34,17 @@ export default function PasswordResetPage() {
     formState: { errors, isValid },
   } = useForm<FormValues>({ mode: "all" });
   const password = useWatch({ control, name: "newPassword" });
+
+  // Extract reset token from URL params
+  useEffect(() => {
+    const token = searchParams.get("token");
+    if (token) {
+      setResetToken(token);
+    } else {
+      // If no token, redirect to forgot password page
+      navigate("/auth/reset/confirm-email");
+    }
+  }, [searchParams, navigate]);
 
   const [showPassword, setShowPassword] = useState({
     newPassword: false,
@@ -45,12 +60,20 @@ export default function PasswordResetPage() {
     }));
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    console.log("form data", data);
-    setLoading(!isLoading);
+    if (!resetToken) {
+      console.error("No reset token available");
+      return;
+    }
 
-    await new Promise((res) => setTimeout(res, 1500));
-    setLoading(false);
-    toggleSwitch();
+    try {
+      await resetPasswordMutation.mutateAsync({
+        token: resetToken,
+        newPassword: data.newPassword,
+      });
+      toggleSwitch();
+    } catch (error) {
+      console.error("Password reset failed:", error);
+    }
   };
 
   return (
@@ -140,15 +163,16 @@ export default function PasswordResetPage() {
           <Button
             type="submit"
             variant="clear"
+            disabled={!isValid || !resetToken || resetPasswordMutation.isPending}
             className={`w-full ${
-              !isValid
+              !isValid || !resetToken || resetPasswordMutation.isPending
                 ? "bg-neutral-50 text-white"
                 : "bg-primary-500 text-white"
             }`}
           >
             <div className="w-full flex items-center justify-center">
               <span>Reset password</span>
-              {isLoading && <Spinner size="sm" speed="fast" className="ml-1" />}
+              {resetPasswordMutation.isPending && <Spinner size="sm" speed="fast" className="ml-1" />}
             </div>
           </Button>
         </form>

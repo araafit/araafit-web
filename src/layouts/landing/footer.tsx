@@ -4,10 +4,16 @@ import {
   XLogoIcon,
   ArrowElbowDownRightIcon,
 } from "@phosphor-icons/react";
+import { Link } from "react-router-dom";
 
 /* --------------------------------------*/
 
-const araafitLinks = ["home", "about us", "privacy policy", "terms of us"];
+const araafitLinks = [
+  { name: "home", path: "/" },
+  { name: "about us", path: "/about" },
+  { name: "privacy policy", path: "/privacy" },
+  { name: "terms of us", path: "/terms" }
+];
 
 const araafitContact = [
   "info@araafit.com",
@@ -80,12 +86,12 @@ export default function Footer() {
             <h3 className="text-xl font-semibold text-white">Quick Links</h3>
             <div className="flex flex-col gap-2">
               {araafitLinks.map((item, idx) => (
-                <a key={idx} className="capitalize group flex cursor-pointer">
+                <Link key={idx} to={item.path} className="capitalize group flex cursor-pointer">
                   <ArrowElbowDownRightIcon className="hidden md:block text-primary-950 mr-2 group-hover:text-primary-500 transition-all duration-700 ease-in-out" />
                   <span className="group-hover:pl-2 group-hover:text-primary-500 transition-all duration-700 ease-in-out">
-                    {item}
+                    {item.name}
                   </span>
-                </a>
+                </Link>
               ))}
             </div>
           </div>

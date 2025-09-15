@@ -1,9 +1,5 @@
 import { CaretRightIcon } from "@phosphor-icons/react";
-import {
-  useCartStore,
-  useOrdersStore,
-  useShopStore,
-} from "../../shared-hooks/state-store";
+import { useCartStore } from "../../shared-hooks/state-store";
 import UserDashboardLayout from "../../layouts/user-dashboard/dashboard-layout";
 import Button from "../../shared-components/button";
 import { formatPrice } from "../../utils/format-price";
@@ -11,6 +7,10 @@ import shoppingBagIcon from "./images/bag.png";
 import TopBar from "./top-bar";
 import { Link } from "react-router-dom";
 import Card from "../../shared-components/card";
+import { useDashboardData } from "../../hooks/user-dashboard.hooks";
+import Spinner from "../../shared-components/spinner";
+import type { Order } from "../../services/orders.service";
+import type { Product } from "../../services/products.service";
 
 /* -------------------------------------------------------------------- */
 
@@ -20,11 +20,15 @@ import Card from "../../shared-components/card";
  * @returns ReactElement
  */
 export function DashboardHomePage() {
-  const { items: orderItems } = useOrdersStore();
-  const { dresses: readyToWearDresses, fabrics: recommendedFabrics } =
-    useShopStore();
+  const { orders, dresses, fabrics, isLoading, isError, error } = useDashboardData();
   const addToCart = useCartStore((state) => state.addItem);
+  
+  const orderItems = orders.data || [];
+  const readyToWearDresses = dresses.data || [];
+  const recommendedFabrics = fabrics.data || [];
   const orderIsEmpty = orderItems.length === 0;
+
+  console.log(orders, orderItems, readyToWearDresses, recommendedFabrics);
 
   const title = (
     <div className="font-lora text-[#979797]">
@@ -37,15 +41,17 @@ export function DashboardHomePage() {
       <img src={shoppingBagIcon} alt="" className="size-[200px]" />
 
       <p className="font-light text-center text-neutral-500">
-        You haven’t placed any orders yet. Browse through our curated collection
+        You haven't placed any orders yet. Browse through our curated collection
         based on your unique measurements and style.
       </p>
 
-      <Button
-        text="Browse shop"
-        variant="solid"
-        className="w-full max-w-[175px]"
-      />
+      <Link to="/dashboard/shop">
+        <Button
+          text="Browse shop"
+          variant="solid"
+          className="w-full max-w-[175px]"
+        />
+      </Link>
     </div>
   );
 
@@ -54,14 +60,46 @@ export function DashboardHomePage() {
       className={`size-fit py-[2px] px-2 text-xs rounded-2xl ${
         status === "sewing"
           ? "bg-[#F0FAFF] text-[#0EA5E9]"
+          : status === "packaging"
+          ? "bg-[#FFF7ED] text-[#EA580C]"
           : status === "out for delivery"
           ? "bg-[#EFF4FF] text-[#3B76F6]"
-          : ""
+          : "bg-gray-100 text-gray-600"
       }`}
     >
       {status}
     </span>
   );
+
+  // Helper function to get order display data
+  const getOrderDisplayData = (order: Order) => {
+    if (order.type === "product_order" && order.items && order.items.length > 0) {
+      const firstItem = order.items[0];
+      return {
+        name: firstItem.product.name,
+        image: firstItem.product.images?.[0]?.url || shoppingBagIcon,
+      };
+    } else if (order.type === "sewing_request" && order.fabric) {
+      return {
+        name: `${order.fabric.name} (${order.yardEstimate} yards)`,
+        image: shoppingBagIcon, // Default image for fabric orders
+      };
+    }
+    return {
+      name: "Order",
+      image: shoppingBagIcon,
+    };
+  };
+
+  // Helper function to convert Product to CartItem
+  const productToCartItem = (product: Product) => ({
+    orderId: `cart-${product.id}`,
+    name: product.name,
+    description: product.description,
+    cost: product.price,
+    image: product.images?.[0]?.url || shoppingBagIcon,
+    count: 1,
+  });
 
   const BreadCrumb = () => (
     <div className="font-inter font-light capitalize flex items-center">
@@ -70,6 +108,39 @@ export function DashboardHomePage() {
       <span className="text-[#979797]">Home</span>
     </div>
   );
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <UserDashboardLayout>
+        <div className="h-screen flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <Spinner size="lg" />
+            <p className="text-gray-600">Loading dashboard...</p>
+          </div>
+        </div>
+      </UserDashboardLayout>
+    );
+  }
+
+  // Show error state
+  if (isError) {
+    return (
+      <UserDashboardLayout>
+        <div className="h-screen flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <p className="text-red-600">Error loading dashboard data</p>
+            <p className="text-gray-600">{error?.message || "Please try again later"}</p>
+            <Button
+              text="Retry"
+              variant="solid"
+              onClick={() => window.location.reload()}
+            />
+          </div>
+        </div>
+      </UserDashboardLayout>
+    );
+  }
 
   return (
     <UserDashboardLayout>
@@ -85,9 +156,11 @@ export function DashboardHomePage() {
                 Ongoing Orders
               </h2>
 
-              <span className="capitalize text-neutral-400 cursor-pointer">
-                See all
-              </span>
+              <Link to="/dashboard/orders">
+                <span className="capitalize text-neutral-400 cursor-pointer hover:text-primary-500 transition-colors">
+                  See all
+                </span>
+              </Link>
             </div>
 
             <div
@@ -98,45 +171,45 @@ export function DashboardHomePage() {
                 emptyOrder
               ) : (
                 <div className="w-full flex flex-col gap-4">
-                  {orderItems.slice(-2).map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between border border-neutral-100 rounded-md py-2 px-4"
-                    >
-                      <div className="w-full flex gap-6">
-                        <img
-                          src={item.image}
-                          alt=""
-                          className="w-[14.125rem] h-[8.75rem] object-cover rounded-md"
-                        />
+                  {orderItems.slice(-2).map((order) => {
+                    const displayData = getOrderDisplayData(order);
+                    return (
+                      <div
+                        key={order.id}
+                        className="flex items-center justify-between border border-neutral-100 rounded-md py-2 px-4"
+                      >
+                        <div className="w-full flex gap-6">
+                          <img
+                            src={displayData.image}
+                            alt={displayData.name}
+                            className="w-[14.125rem] h-[8.75rem] object-cover rounded-md"
+                          />
 
-                        <div className="grow inline-flex flex-col gap-[9px]">
-                          <div className="w-full flex items-center justify-between">
-                            {statusAlert(item.status.toLowerCase())}
-                            <Link
-                              to={`/dashboard/orders/${item.orderId.replaceAll(
-                                " ",
-                                "-"
-                              )}`}
-                              className="underline text-[0.875rem] text-primary-500 cursor-pointer"
-                            >
-                              View details
-                            </Link>
+                          <div className="grow inline-flex flex-col gap-[9px]">
+                            <div className="w-full flex items-center justify-between">
+                              {statusAlert(order.status.toLowerCase())}
+                              <Link
+                                to={`/dashboard/orders/${order.id}`}
+                                className="underline text-[0.875rem] text-primary-500 cursor-pointer"
+                              >
+                                View details
+                              </Link>
+                            </div>
+
+                            <span className="text-neutral-700">
+                              Order ID: {order.id}
+                            </span>
+                            <span className="font-medium text-neutral-900">
+                              {displayData.name}
+                            </span>
+                            <span className="text-neutral-900 font-semibold">
+                              &#8358;{formatPrice(order.totalAmount)}
+                            </span>
                           </div>
-
-                          <span className="text-neutral-700">
-                            Order ID: {item.orderId}
-                          </span>
-                          <span className="font-medium text-neutral-900">
-                            {item.name}
-                          </span>
-                          <span className="text-neutral-900 font-semibold">
-                            &#8358;{formatPrice(Number(item.cost))}
-                          </span>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -148,17 +221,22 @@ export function DashboardHomePage() {
               <h2 className="font-medium text-[28px] capitalize">
                 Ready to wear dresses
               </h2>
-              <span className="capitalize text-neutral-400">See all</span>
+              <Link to="/dashboard/shop">
+                <span className="capitalize text-neutral-400 cursor-pointer hover:text-primary-500 transition-colors">
+                  See all
+                </span>
+              </Link>
             </div>
 
             <div className="grid grid-cols-3 gap-6">
-              {readyToWearDresses.map((item, idx) => (
+              {readyToWearDresses.map((product) => (
                 <Card
-                  key={idx}
-                  itemName={item.name}
-                  itemCost={item.cost}
-                  itemImage={item.image}
-                  addToCart={() => addToCart(item)}
+                  key={product.id}
+                  itemName={product.name}
+                  itemCost={product.price}
+                  itemImage={product.images?.[0]?.url || shoppingBagIcon}
+                  link={`/dashboard/shop/dress/${product.id}`}
+                  addToCart={() => addToCart(productToCartItem(product))}
                 />
               ))}
             </div>
@@ -170,17 +248,22 @@ export function DashboardHomePage() {
               <h2 className="font-semibold text-[28px] capitalize">
                 Recommended Fabrics
               </h2>
-              <span className="capitalize text-neutral-400">See all</span>
+              <Link to="/dashboard/shop">
+                <span className="capitalize text-neutral-400 cursor-pointer hover:text-primary-500 transition-colors">
+                  See all
+                </span>
+              </Link>
             </div>
 
             <div className="grid grid-cols-3 gap-6">
-              {recommendedFabrics.map((item, idx) => (
+              {recommendedFabrics.map((product) => (
                 <Card
-                  key={idx}
-                  itemName={item.name}
-                  itemCost={item.cost}
-                  itemImage={item.image}
-                  addToCart={() => addToCart(item)}
+                  key={product.id}
+                  itemName={product.name}
+                  itemCost={product.price}
+                  itemImage={product.images?.[0]?.url || shoppingBagIcon}
+                  link={`/dashboard/shop/fabric/${product.id}`}
+                  addToCart={() => addToCart(productToCartItem(product))}
                 />
               ))}
             </div>

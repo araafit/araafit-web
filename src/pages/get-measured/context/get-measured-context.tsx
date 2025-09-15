@@ -6,6 +6,12 @@ import { useLocalStorage } from "../../../shared-hooks/loca-storage";
 interface GetMeasuredContext {
   currentStep: number;
   stepTo: (to: number | undefined) => void;
+  frontPhoto: File | null;
+  sidePhoto: File | null;
+  height: number | null;
+  setPhotos: (front: File, side: File) => void;
+  setHeight: (height: number) => void;
+  resetProgress: () => void;
 }
 
 const GetMeasuredContext = createContext<GetMeasuredContext | null>(null);
@@ -19,12 +25,16 @@ export const GetMeasuredProvider = ({
     "get-measured-steps",
     0
   );
+  console.log("storedStep", storedStep);
   const [currentStep, setCurrentStep] = useState(storedStep as number);
+  const [frontPhoto, setFrontPhoto] = useState<File | null>(null);
+  const [sidePhoto, setSidePhoto] = useState<File | null>(null);
+  const [height, setHeightState] = useState<number | null>(null);
 
   // Move to next step and save state in browser
   const stepTo = (to?: number) => {
     if (to && (to <= 2 || to === 0)) {
-      setCurrentStep(storedStep);
+      setCurrentStep(to);
       setStoredStep(to);
       return;
     }
@@ -33,7 +43,33 @@ export const GetMeasuredProvider = ({
     setCurrentStep(storedStep + 1);
   };
 
-  const value = { currentStep, stepTo };
+  const setPhotos = (front: File, side: File) => {
+    setFrontPhoto(front);
+    setSidePhoto(side);
+  };
+
+  const setHeight = (newHeight: number) => {
+    setHeightState(newHeight);
+  };
+
+  const resetProgress = () => {
+    setCurrentStep(0);
+    setStoredStep(0);
+    setFrontPhoto(null);
+    setSidePhoto(null);
+    setHeightState(null);
+  };
+
+  const value = { 
+    currentStep, 
+    stepTo, 
+    frontPhoto, 
+    sidePhoto, 
+    height,
+    setPhotos, 
+    setHeight,
+    resetProgress
+  };
 
   return (
     <GetMeasuredContext.Provider value={value}>

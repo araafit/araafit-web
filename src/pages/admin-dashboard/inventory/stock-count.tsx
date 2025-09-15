@@ -1,10 +1,27 @@
-export default function StockBar() {
-  const stockData = [
-    { color: "#00BA00", label: "In Stock", value: 600 },
-    { color: "#F3BF02", label: "In Stock", value: 100 },
-    { color: "#FF0005", label: "In Stock", value: 50 },
-  ];
+import { useProductMetrics } from "../../../hooks/admin-inventory.hooks";
+import { calculateStockDistribution } from "../../../utils/admin-inventory-utils";
+import Spinner from "../../../shared-components/spinner";
 
+export default function StockBar() {
+  const { data: metrics, isLoading, error } = useProductMetrics();
+
+  if (isLoading) {
+    return (
+      <section className="flex items-center justify-center h-16">
+        <Spinner size="sm" speed="fast" />
+      </section>
+    );
+  }
+
+  if (error || !metrics) {
+    return (
+      <section className="flex items-center justify-center h-16">
+        <span className="text-red-500 text-sm">Failed to load stock data</span>
+      </section>
+    );
+  }
+
+  const stockData = calculateStockDistribution(metrics);
   const total = stockData.reduce((sum, item) => sum + item.value, 0);
 
   return (

@@ -32,7 +32,9 @@ export function DashboardShopFabricDetailPage() {
       <div className="h-screen flex flex-col gap-2 relative">
         <TopBar title="Shop" breadCrumb={<BreadCrumb />} />
 
-        <FabricDetail />
+        <div className="w-full h-[95%] flex justify-center p-4 mt-20 overflow-y-scroll">
+          <FabricDetail />
+        </div>
       </div>
     </UserDashboardLayout>
   );

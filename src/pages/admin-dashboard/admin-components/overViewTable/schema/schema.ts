@@ -41,6 +41,10 @@ export const schema = z.object({
     .optional(),
 
   additionalInfo: z.string().optional(),
+
+  // Add API timestamp fields
+  createdAt: z.string().optional(),
+  deliveryDate: z.string().optional(),
 });
 
 export type Schema = z.infer<typeof schema>;

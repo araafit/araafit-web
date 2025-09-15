@@ -33,30 +33,6 @@ import {
   TableRow,
 } from "../../../ui/table";
 import {
-  Drawer,
-  DrawerTrigger,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerClose,
-} from "../../../ui/drawer";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-  TooltipProvider,
-} from "../../../ui/tooltip";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../../ui/select";
-import {
-  PencilSimpleIcon,
-  ArrowLeftIcon,
-  QuestionIcon,
   TrashSimpleIcon,
 } from "@phosphor-icons/react";
 import Button from "../../../../shared-components/button";
@@ -72,6 +48,8 @@ import {
   DialogTitle,
 } from "../../../ui/dialog";
 import DiscountStatusToggle from "./toggle-status";
+import { EditDiscountDrawer } from "./edit-discount-drawer";
+import { useDeleteDiscount, useUpdateDiscount } from "../../../../hooks/admin-discounts.hooks";
 
 // --- SCHEMA / TYPE ---
 export type Discount = {
@@ -93,7 +71,10 @@ declare module "@tanstack/react-table" {
 // --- SAMPLE DATA ---
 
 // --- COLUMNS ---
-const columns: ColumnDef<Discount>[] = [
+const createColumns = (
+  deleteDiscount: ReturnType<typeof useDeleteDiscount>,
+  updateDiscount: ReturnType<typeof useUpdateDiscount>
+): ColumnDef<Discount>[] => [
   { accessorKey: "name", header: "Discount Name" },
   { accessorKey: "type", header: "Type" },
   { accessorKey: "value", header: "Value" },
@@ -146,153 +127,10 @@ const columns: ColumnDef<Discount>[] = [
     cell: ({ row }) => (
       <div className="flex items-center justify-center gap-3 ml-auto">
         {/* Edit Drawer */}
-        <Drawer>
-          <DrawerTrigger>
-            <PencilSimpleIcon
-              className="text-gray-600 cursor-pointer"
-              size={18}
-            />
-          </DrawerTrigger>
-          <DrawerContent className="w-[500px] flex flex-col h-[52.75rem]">
-            <DrawerHeader className="flex items-center gap-2">
-              <DrawerClose>
-                <div className="border h-10 w-10 rounded cursor-pointer border-[#E8E8E8] flex items-center justify-center">
-                  <ArrowLeftIcon />
-                </div>
-              </DrawerClose>
-              <DrawerTitle className="font-inter flex items-center gap-2 text-[#494949] font-medium">
-                Edit Discount:{" "}
-                <TooltipProvider delayDuration={0}>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <QuestionIcon
-                        className="text-gray-600  cursor-pointer"
-                        size={18}
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-[330px]">
-                      <p>
-                        Create a New Discount. Make changes to your discount
-                        details. Update the name, value, eligibility, or active
-                        dates anytime.
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </DrawerTitle>
-            </DrawerHeader>
-
-            {/* Form Section */}
-            <div className="p-6 flex-1 overflow-y-auto pb-36 space-y-6">
-              {/* Discount Name */}
-              <div className="space-y-2">
-                <label className="font-inter font-light text-[16px] text-[#1C1C1C]">
-                  Discount Name
-                </label>
-                <input
-                  type="text"
-                  defaultValue={row.original.name}
-                  className="w-full border border-[#D0D5DD] px-3 py-2 rounded-lg text-sm"
-                />
-              </div>
-
-              {/* Discount Type */}
-              <div className="space-y-2">
-                <label className="font-inter font-light text-[16px] text-[#1C1C1C]">
-                  Discount Type
-                </label>
-                <Select defaultValue={row.original.type}>
-                  <SelectTrigger className="w-full h-12 border border-[#D0D5DD] rounded-lg px-3 text-sm">
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="percentage">Percentage</SelectItem>
-                    <SelectItem value="fixed">Fixed Amount</SelectItem>
-                    <SelectItem value="bogo">Buy One Get One</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Discount Value */}
-              <div className="space-y-2">
-                <label className="font-inter font-light text-[16px] text-[#1C1C1C]">
-                  Discount Value
-                </label>
-                <input
-                  type="number"
-                  defaultValue={row.original.value}
-                  className="w-full border border-[#D0D5DD] px-3 py-2 rounded-lg text-sm"
-                />
-              </div>
-
-              {/* Eligible Applicant */}
-              <div className="space-y-2">
-                <label className="font-inter font-light text-[16px] text-[#1C1C1C]">
-                  Eligible Applicant
-                </label>
-                <Select defaultValue={row.original.eligible}>
-                  <SelectTrigger className="w-full h-12 border border-[#D0D5DD] rounded-lg px-3 text-sm">
-                    <SelectValue placeholder="Select eligibility" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Customers</SelectItem>
-                    <SelectItem value="guest">Guest Customers</SelectItem>
-                    <SelectItem value="first-time">
-                      First-time Buyers
-                    </SelectItem>
-                    <SelectItem value="loyal">Loyal Customers</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Usage Limit */}
-              <div className="space-y-2">
-                <label className="font-inter font-light text-[16px] text-[#1C1C1C]">
-                  Usage Limit
-                </label>
-                <input
-                  type="number"
-                  //   defaultValue={row.original.usageLimit}
-                  className="w-full border border-[#D0D5DD] px-3 py-2 rounded-lg text-sm"
-                />
-              </div>
-
-              {/* Start & End Date */}
-              <div className="flex gap-4">
-                <div className="flex-1 space-y-2">
-                  <label className="font-inter font-light text-[16px] text-[#1C1C1C]">
-                    Start Date
-                  </label>
-                  <input
-                    type="date"
-                    defaultValue={row.original.startDate}
-                    className="w-full border border-[#D0D5DD] px-3 py-2 rounded-lg text-sm"
-                  />
-                </div>
-                <div className="flex-1 space-y-2">
-                  <label className="font-inter font-light text-[16px] text-[#1C1C1C]">
-                    End Date
-                  </label>
-                  <input
-                    type="date"
-                    defaultValue={row.original.endDate}
-                    className="w-full border border-[#D0D5DD] px-3 py-2 rounded-lg text-sm"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="border-t border-[#E8E8E8] bg-white p-4 h-20 flex justify-center items-center sticky bottom-0">
-              <Button
-                text="Save"
-                type="button"
-                variant="solid"
-                className="w-full md:max-w-[9.375rem]"
-              />
-            </div>
-          </DrawerContent>
-        </Drawer>
+        <EditDiscountDrawer
+          discount={row.original}
+          updateDiscount={updateDiscount}
+        />
 
         {/* Delete */}
         <Dialog>
@@ -321,16 +159,16 @@ const columns: ColumnDef<Discount>[] = [
                   className="border border-[#E7E7E7] text-[#3D3D3D]"
                 />
               </DialogClose>
-              <Button
-                text="Delete"
-                type="submit"
-                variant="solid"
-                //  onClick={() => {
-                //   onDelete();
-                // }}
-                className={` text-white flex-1  bg-[#DC2626]
-              }`}
-              />
+              <DialogClose asChild>
+                <Button
+                  text={deleteDiscount.isPending ? "Deleting..." : "Delete"}
+                  type="button"
+                  variant="solid"
+                  onClick={() => deleteDiscount.mutate(row.original.id)}
+                  className={` text-white flex-1  bg-[#DC2626]
+                }`}
+                />
+              </DialogClose>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -353,6 +191,8 @@ export function DiscountTable({ data: initialData }: { data: Discount[] }) {
     pageIndex: 0,
     pageSize: 10,
   });
+  const deleteDiscount = useDeleteDiscount();
+  const updateDiscount = useUpdateDiscount();
 
   const sortableId = React.useId();
   const sensors = useSensors(
@@ -368,7 +208,7 @@ export function DiscountTable({ data: initialData }: { data: Discount[] }) {
 
   const table = useReactTable({
     data,
-    columns,
+    columns: createColumns(deleteDiscount, updateDiscount),
     state: {
       sorting,
       columnVisibility,
@@ -453,7 +293,7 @@ export function DiscountTable({ data: initialData }: { data: Discount[] }) {
                 ) : (
                   <TableRow>
                     <TableCell
-                      colSpan={columns.length}
+                      colSpan={table.getAllColumns().length}
                       className="h-24 text-center"
                     >
                       <div className="bg-white w-full px-4  py-6">

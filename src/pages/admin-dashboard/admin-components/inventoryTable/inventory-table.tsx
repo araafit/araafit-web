@@ -67,6 +67,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../../../ui/dialog";
+import { useDeleteProduct } from "../../../../hooks/admin-inventory.hooks";
 
 type InventoryItem = z.infer<typeof inventoryItemSchema>;
 
@@ -81,7 +82,7 @@ const equalsIgnoreCase: FilterFn<InventoryItem> = (
 };
 
 // -------------------- Columns --------------------
-const columns: ColumnDef<z.infer<typeof inventoryItemSchema>>[] = [
+const createColumns = (deleteProductMutation: ReturnType<typeof useDeleteProduct>): ColumnDef<z.infer<typeof inventoryItemSchema>>[] => [
   {
     accessorKey: "generalInformation.name",
     header: "Product Name / Image",
@@ -201,11 +202,10 @@ const columns: ColumnDef<z.infer<typeof inventoryItemSchema>>[] = [
         </Link>
         {/* Delete */}
         <Dialog>
-          <DialogTrigger>
-            {" "}
+          <DialogTrigger asChild>
             <button
-              onClick={() => console.log("Delete", row.original.orderId)}
               className="text-red-600 hover:text-red-800"
+              onClick={(e) => e.stopPropagation()}
             >
               <TrashIcon size={20} />
             </button>
@@ -213,7 +213,7 @@ const columns: ColumnDef<z.infer<typeof inventoryItemSchema>>[] = [
           <DialogContent className="max-w-[400px]">
             <DialogHeader>
               <DialogTitle className="mb-4">
-                Delete Araafit Cream & Orange Jumpsuit?
+                Delete {row.original.generalInformation?.name || "Product"}?
               </DialogTitle>
               <DialogDescription className="mb-4">
                 Are you sure you want to delete this item and all its
@@ -230,12 +230,19 @@ const columns: ColumnDef<z.infer<typeof inventoryItemSchema>>[] = [
                   className="text-[#3D3D3D] border h-[37px] w-[170px] flex justify-center items-center text-sm border-[#E7E7E7] shadow-sm"
                 />{" "}
               </DialogClose>
-              <Button
-                type="button"
-                text="Delete"
-                variant="solid"
-                className="text-white flex-1 bg-red-600  h-[37px] flex justify-center items-center text-sm shadow-sm"
-              />
+              <DialogClose asChild>
+                <Button
+                  type="button"
+                  text={deleteProductMutation.isPending ? "Deleting..." : "Delete"}
+                  variant="solid"
+                  disabled={deleteProductMutation.isPending}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteProductMutation.mutate(row.original.orderId);
+                  }}
+                  className="text-white flex-1 bg-red-600  h-[37px] flex justify-center items-center text-sm shadow-sm"
+                />
+              </DialogClose>
             </div>
           </DialogContent>
         </Dialog>
@@ -250,6 +257,8 @@ export function DataTable({
 }: {
   data: z.infer<typeof inventoryItemSchema>[];
 }) {
+  const deleteProductMutation = useDeleteProduct();
+  const columns = createColumns(deleteProductMutation);
   const [data, setData] = React.useState(() => initialData);
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =

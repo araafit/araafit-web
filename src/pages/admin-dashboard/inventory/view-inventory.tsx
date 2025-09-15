@@ -1,7 +1,6 @@
 import {
   CaretRightIcon,
   CloudArrowUpIcon,
-  TrashSimpleIcon,
   XIcon,
 } from "@phosphor-icons/react";
 import TopBar from "../admin-components/top-bar/top-bar";
@@ -9,7 +8,9 @@ import AdminDashboardLayout from "../../../layouts/admin-dashboard/dashboard-lay
 import Button from "../../../shared-components/button";
 import NotificationBell from "../admin-components/top-bar/notification-bell";
 import { useState } from "react";
-import axios from "axios";
+import { useProduct } from "../../../hooks/admin-inventory.hooks";
+import { useParams, useNavigate } from "react-router-dom";
+import Spinner from "../../../shared-components/spinner";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,42 +25,45 @@ import { CaretDownIcon } from "@phosphor-icons/react";
 const skinTone = ["Porcelin", "Ivory", "Sand", "Espresso", "Chestnut", "Honey"];
 
 export function AdminDashboardViewInventory() {
-  //   const { inventoryId } = useParams();
-  const [contributorPhotos, setContributorPhotos] = useState<string[]>([]);
-  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const { inventoryId } = useParams<{ inventoryId: string }>();
+  const navigate = useNavigate();
+  const { data: product, isLoading: isLoadingProduct, error: productError } = useProduct(inventoryId || "");
+  
+  //const [, setContributorPhotos] = useState<string[]>([]);
+  //const [, setIsUploadingImage] = useState(false);
   const [discountsEnabled, setDiscountsEnabled] = useState(false);
 
-  const handlePhotosChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
+  //const handlePhotosChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  //  if (!e.target.files) return;
 
-    const files = Array.from(e.target.files);
-    setIsUploadingImage(true);
+  //  const files = Array.from(e.target.files);
+  //  setIsUploadingImage(true);
 
-    try {
-      const uploadedUrls: string[] = [];
+  //  try {
+  //    const uploadedUrls: string[] = [];
 
-      for (const file of files) {
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("upload_preset", "oyzsznex"); // your Cloudinary preset
+  //    for (const file of files) {
+  //      const formData = new FormData();
+  //      formData.append("file", file);
+  //      formData.append("upload_preset", "oyzsznex"); // your Cloudinary preset
 
-        const cloudinaryUrl = `https://api.cloudinary.com/v1_1/dbnkyv0ht/upload`;
-        const response = await axios.post(cloudinaryUrl, formData);
+  //      const cloudinaryUrl = `https://api.cloudinary.com/v1_1/dbnkyv0ht/upload`;
+  //      const response = await axios.post(cloudinaryUrl, formData);
 
-        uploadedUrls.push(response.data.secure_url);
-      }
+  //      uploadedUrls.push(response.data.secure_url);
+  //    }
 
-      setContributorPhotos((prev) => [...prev, ...uploadedUrls]);
-    } catch (error) {
-      console.error("Error uploading images:", error);
-    } finally {
-      setIsUploadingImage(false);
-    }
-  };
+  //    setContributorPhotos((prev) => [...prev, ...uploadedUrls]);
+  //  } catch (error) {
+  //    console.error("Error uploading images:", error);
+  //  } finally {
+  //    setIsUploadingImage(false);
+  //  }
+  //};
 
-  const handleDeleteImage = (index: number) => {
-    setContributorPhotos((prev) => prev.filter((_, i) => i !== index));
-  };
+  //const handleDeleteImage = (index: number) => {
+  //  setContributorPhotos((prev) => prev.filter((_, i) => i !== index));
+  //};
   const [selectedTone, setSelectedTone] = useState<string[]>([]);
 
   const toggleTone = (size: string) => {
@@ -81,9 +85,40 @@ export function AdminDashboardViewInventory() {
       <CaretRightIcon className="text-primary-900" />
       <span className="text-primary-900">Inventory</span>
       <CaretRightIcon className="text-[#979797]" />
-      <span className="text-[#979797]">Dress</span>
+      <span className="text-[#979797]">{product?.category || "Product"}</span>
     </div>
   );
+
+  if (isLoadingProduct) {
+    return (
+      <AdminDashboardLayout>
+        <div className="h-screen flex items-center justify-center">
+          <div className="text-center">
+            <Spinner size="lg" speed="fast" />
+            <p className="mt-4 text-gray-600">Loading product...</p>
+          </div>
+        </div>
+      </AdminDashboardLayout>
+    );
+  }
+
+  if (productError || !product) {
+    return (
+      <AdminDashboardLayout>
+        <div className="h-screen flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-red-600 mb-4">Failed to load product</p>
+            <Button
+              text="Go Back"
+              variant="solid"
+              onClick={() => navigate("/admin-dashboard/inventory")}
+            />
+          </div>
+        </div>
+      </AdminDashboardLayout>
+    );
+  }
+
   return (
     <AdminDashboardLayout>
       <div className="h-screen">
@@ -98,6 +133,7 @@ export function AdminDashboardViewInventory() {
                 <Button
                   text="Edit"
                   variant="solid"
+                  onClick={() => navigate(`/admin-dashboard/inventory/${inventoryId}/edit`)}
                   className="text-white shadow-sm w-44"
                 />
               </>
@@ -106,82 +142,52 @@ export function AdminDashboardViewInventory() {
         </div>
         <div className="w-full  flex flex-col  p-4 mt-20 overflow-y-scroll px-10">
           <div>
-            <h2 className="font-semibold text-[28px]">View Dress</h2>
+            <h2 className="font-semibold text-[28px]">View {product.category === "dress" ? "Dress" : "Fabric"}</h2>
             <span className="capitalize text-[#5D5D5D] font-light cursor-pointer text-sm font-inter">
-              View, edit, and update your stunning dress here.
+              View, edit, and update your stunning {product.category} here.
             </span>
           </div>
           <section className="flex justify-between gap-10 mt-8">
             {" "}
             <div className="w-full max-w-[448px] relative">
-              {/* Upload Box */}
-              <div className="h-[298px] w-full px-6 flex flex-row justify-center items-center border border-dashed border-[#D0D5DD] rounded-[12px] bg-white">
-                <input
-                  type="file"
-                  accept="image/png, image/jpg, image/jpeg"
-                  multiple
-                  onChange={handlePhotosChange}
-                  id="file-upload"
-                  style={{ display: "none" }}
-                />
-                {isUploadingImage ? (
-                  <div className="flex items-center gap-2 text-[#9A6C50] font-medium">
-                    <span className="relative flex h-5 w-5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#9A6C50] opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-5 w-5 bg-[#9A6C50]"></span>
-                    </span>
-                    Uploading...
+              {/* Product Images */}
+              {product.images && product.images.length > 0 ? (
+                <div className="space-y-4">
+                  {/* Main Image */}
+                  <div className="h-[298px] w-full rounded-[12px] overflow-hidden bg-gray-100">
+                    <img
+                      src={product.images[0].url}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
-                ) : (
-                  <label
-                    htmlFor="file-upload"
-                    className="text-base font-sans mb-2 text-center w-full cursor-pointer "
-                  >
-                    <div className="h-12 w-12 bg-[#F0F2F5] rounded-full flex items-center justify-center mx-auto">
+                  
+                  {/* Additional Images */}
+                  {product.images.length > 1 && (
+                    <div className="flex gap-4 flex-wrap">
+                      {product.images.slice(1).map((image, idx) => (
+                        <div
+                          key={image.id || idx}
+                          className="w-[142px] h-[108px] relative overflow-hidden"
+                        >
+                          <img
+                            src={image.url}
+                            alt={`${product.name} ${idx + 2}`}
+                            className="w-full h-full object-cover rounded-[6px]"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="h-[298px] w-full px-6 flex flex-row justify-center items-center border border-dashed border-[#D0D5DD] rounded-[12px] bg-white">
+                  <div className="text-center">
+                    <div className="h-12 w-12 bg-[#F0F2F5] rounded-full flex items-center justify-center mx-auto mb-4">
                       <CloudArrowUpIcon className="text-[#475367]" size={32} />
                     </div>
-                    <span className="text-[#9A6C50]">Click to upload</span> or
-                    drag and drop
-                    <span className="block mt-2 text-[#888888] font-light text-sm">
-                      PNG, JPG (max. 800x400px)
-                    </span>
-                    {/* DividerWithText */}
-                    <div className="flex items-center w-full my-7 gap-2">
-                      <div className="flex-grow border-t border-[#F0F2F5]"></div>
-                      <span className="text-[#5D5D5D]">OR</span>
-                      <div className="flex-grow border-t border-[#F0F2F5]"></div>
-                    </div>
-                    <Button
-                      text="Browse Files"
-                      variant="solid"
-                      className="text-white shadow-sm w-44"
-                    />
-                  </label>
-                )}
-              </div>
-
-              {/* Previews */}
-              {contributorPhotos.length > 0 && (
-                <div className="flex gap-4 flex-wrap mt-4">
-                  {contributorPhotos.map((photo, idx) => (
-                    <div
-                      key={idx}
-                      className="w-[142px] h-[108px] relative overflow-hidden"
-                    >
-                      <img
-                        src={photo}
-                        alt={`Image ${idx + 1}`}
-                        className="w-full h-full object-cover rounded-[6px] "
-                      />
-                      {/* Trash Icon */}
-                      <button
-                        onClick={() => handleDeleteImage(idx)}
-                        className="absolute bottom-2 right-2 rounded-full p-1 "
-                      >
-                        <TrashSimpleIcon className="text-red-500" size={24} />
-                      </button>
-                    </div>
-                  ))}
+                    <span className="text-[#9A9A9A] font-light">No images available</span>
+                  </div>
                 </div>
               )}
             </div>
@@ -200,7 +206,9 @@ export function AdminDashboardViewInventory() {
                     </label>
                     <input
                       type="text"
-                      className="h-14 w-full border border-[#D0D5DD] pl-2 rounded-lg outline-none focus:outline-none"
+                      value={product.name}
+                      readOnly
+                      className="h-14 w-full border border-[#D0D5DD] pl-2 rounded-lg outline-none focus:outline-none bg-gray-50"
                     />
                   </div>
                   <div className="flex-1">

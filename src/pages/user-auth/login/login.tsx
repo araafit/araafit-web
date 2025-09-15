@@ -1,9 +1,11 @@
 import AuthLayout from "../../../layouts/auth/auth-layout";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import Button from "../../../shared-components/button";
-import { Link } from "react-router-dom";
-import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import Spinner from "../../../shared-components/spinner";
+import { useLogin } from "../../../hooks/auth.hooks";
+import { useAuth } from "../../../hooks/use-auth";
 
 /* ------------------------------------------------------ */
 
@@ -18,7 +20,10 @@ type LoginProps = {
  * @returns ReactElement
  */
 export default function Login({ userType }: LoginProps) {
-  const [isLoading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const loginMutation = useLogin();
+  
   const googleAuth = () => console.log("Google auth");
 
   const {
@@ -27,12 +32,25 @@ export default function Login({ userType }: LoginProps) {
     formState: { errors, isValid },
   } = useForm<FormValues>({ mode: "all" });
 
-  const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    console.log("form data", data);
-    setLoading(!isLoading);
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated && !authLoading) {
+      if (userType === "admin") {
+        navigate("/admin-dashboard/overview");
+      } else {
+        navigate("/dashboard");
+      }
+    }
+  }, [isAuthenticated, authLoading, navigate, userType]);
 
-    await new Promise((res) => setTimeout(res, 9000));
-    setLoading(false);
+  const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    try {
+      await loginMutation.mutateAsync(data);
+      // Navigation will be handled by the useEffect above
+    } catch (error) {
+      // Error handling is done in the mutation hook
+      console.error("Login failed:", error);
+    }
   };
 
   return (
@@ -108,15 +126,16 @@ export default function Login({ userType }: LoginProps) {
           <Button
             type="submit"
             variant="clear"
+            disabled={!isValid || loginMutation.isPending}
             className={`w-full max-w-[23.4375rem] ${
-              !isValid
+              !isValid || loginMutation.isPending
                 ? "bg-neutral-50 text-white"
                 : "bg-primary-500 text-white"
             }`}
           >
             <div className="w-full flex items-center justify-center">
               <span>Login</span>
-              {isLoading && <Spinner size="sm" speed="fast" className="ml-1" />}
+              {loginMutation.isPending && <Spinner size="sm" speed="fast" className="ml-1" />}
             </div>
           </Button>
 

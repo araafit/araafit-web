@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useState } from "react";
 
 import {
   Tooltip,
@@ -22,6 +23,9 @@ import {
   DrawerTitle,
   DrawerClose,
 } from "../../ui/drawer";
+import { useCreateDiscount } from "../../../hooks/admin-discounts.hooks";
+import type { DiscountEligibility, DiscountType } from "../../../services/admin-discounts.service";
+import { toast } from "react-hot-toast";
 
 interface CreateDiscountDrawerProps {
   open: boolean;
@@ -32,6 +36,65 @@ export const CreateDiscountDrawer: React.FC<CreateDiscountDrawerProps> = ({
   open,
   onOpenChange,
 }) => {
+  const createMutation = useCreateDiscount();
+  const [name, setName] = useState("");
+  const [type, setType] = useState<DiscountType | "">("");
+  const [value, setValue] = useState<string>("");
+  const [eligibility, setEligibility] = useState<string>("");
+  const [usageLimit, setUsageLimit] = useState<string>("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  const mapEligibilityToApi = (v: string): DiscountEligibility | null => {
+    switch (v) {
+      case "all":
+        return "all_customers";
+      case "guest":
+        return "guest_customers";
+      case "first-time":
+        return "first_time_buyers";
+      default:
+        return null;
+    }
+  };
+
+  const handleCreate = async () => {
+    if (!name.trim()) return toast.error("Name is required");
+    if (type !== "percentage" && type !== "fixed") {
+      return toast.error("Select a valid type");
+    }
+    const valNum = Number(value);
+    if (Number.isNaN(valNum) || valNum <= 0) {
+      return toast.error("Enter a valid value");
+    }
+    const usageNum = Number(usageLimit || 0);
+    const apiEligibility = mapEligibilityToApi(eligibility);
+    if (!apiEligibility) return toast.error("Select eligibility");
+    if (!startDate || !endDate) return toast.error("Select start and end dates");
+
+    try {
+      await createMutation.mutateAsync({
+        name,
+        type,
+        value: valNum,
+        eligibility: apiEligibility,
+        usageLimit: usageNum,
+        startDate: new Date(startDate).toISOString(),
+        endDate: new Date(endDate).toISOString(),
+      });
+      onOpenChange(false);
+      // reset
+      setName("");
+      setType("");
+      setValue("");
+      setEligibility("");
+      setUsageLimit("");
+      setStartDate("");
+      setEndDate("");
+    } catch (e) {
+      // toast handled in hook
+    }
+  };
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="w-[500px] flex flex-col h-[52.75rem]">
@@ -69,6 +132,8 @@ export const CreateDiscountDrawer: React.FC<CreateDiscountDrawerProps> = ({
             <input
               type="text"
               placeholder="Enter discount name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="w-full border border-[#D0D5DD] px-3 py-2 rounded-lg text-sm"
             />
           </div>
@@ -78,14 +143,13 @@ export const CreateDiscountDrawer: React.FC<CreateDiscountDrawerProps> = ({
             <label className="font-inter font-light text-[16px] text-[#1C1C1C]">
               Discount Type
             </label>
-            <Select>
+            <Select value={type} onValueChange={(v) => setType(v as DiscountType)}>
               <SelectTrigger className="w-full h-12 border border-[#D0D5DD] rounded-lg px-3 text-sm">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="percentage">Percentage</SelectItem>
                 <SelectItem value="fixed">Fixed Amount</SelectItem>
-                <SelectItem value="bogo">Buy One Get One</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -98,6 +162,8 @@ export const CreateDiscountDrawer: React.FC<CreateDiscountDrawerProps> = ({
             <input
               type="number"
               placeholder="e.g. 20"
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
               className="w-full border border-[#D0D5DD] px-3 py-2 rounded-lg text-sm"
             />
           </div>
@@ -107,7 +173,7 @@ export const CreateDiscountDrawer: React.FC<CreateDiscountDrawerProps> = ({
             <label className="font-inter font-light text-[16px] text-[#1C1C1C]">
               Eligible Applicant
             </label>
-            <Select>
+            <Select value={eligibility} onValueChange={setEligibility}>
               <SelectTrigger className="w-full h-12 border border-[#D0D5DD] rounded-lg px-3 text-sm">
                 <SelectValue placeholder="Select criteria" />
               </SelectTrigger>
@@ -128,6 +194,8 @@ export const CreateDiscountDrawer: React.FC<CreateDiscountDrawerProps> = ({
             <input
               type="number"
               placeholder="e.g. 100"
+              value={usageLimit}
+              onChange={(e) => setUsageLimit(e.target.value)}
               className="w-full border border-[#D0D5DD] px-3 py-2 rounded-lg text-sm"
             />
           </div>
@@ -140,6 +208,8 @@ export const CreateDiscountDrawer: React.FC<CreateDiscountDrawerProps> = ({
               </label>
               <input
                 type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
                 className="w-full border border-[#D0D5DD] px-3 py-2 rounded-lg text-sm"
               />
             </div>
@@ -149,6 +219,8 @@ export const CreateDiscountDrawer: React.FC<CreateDiscountDrawerProps> = ({
               </label>
               <input
                 type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
                 className="w-full border border-[#D0D5DD] px-3 py-2 rounded-lg text-sm"
               />
             </div>
@@ -158,9 +230,10 @@ export const CreateDiscountDrawer: React.FC<CreateDiscountDrawerProps> = ({
         {/* Footer */}
         <div className="border-t border-[#E8E8E8] bg-white p-4 h-20 flex justify-center items-center sticky bottom-0">
           <Button
-            text="Create"
+            text={createMutation.isPending ? "Creating..." : "Create"}
             type="button"
             variant="solid"
+            onClick={handleCreate}
             className="w-full md:max-w-[9.375rem]"
           />
         </div>

@@ -2,6 +2,7 @@ import React from "react";
 import Button from "../../../../shared-components/button";
 import { EyeIcon, EyeClosedIcon } from "@phosphor-icons/react";
 import { useForm, type SubmitHandler } from "react-hook-form";
+import { useUpdatePassword } from "../../../../hooks/users.hooks";
 
 /* ------------------------------------------------------------------------------------------ */
 
@@ -29,9 +30,13 @@ export default function ChangePassword() {
     formState: { errors, isValid },
     handleSubmit,
   } = useForm<ChangePassword>();
+  const updatePassword = useUpdatePassword();
 
   const onSubmit: SubmitHandler<ChangePassword> = (data: any) => {
-    console.log(data);
+    updatePassword.mutate({
+      currentPassword: String(data.currentPassword),
+      newPassword: String(data.newPassword),
+    });
   };
 
   const revealPassword = (name: string) => {
@@ -61,7 +66,7 @@ export default function ChangePassword() {
             type="submit"
             text="Update Password"
             variant="solid"
-            disabled={!isValid}
+            disabled={!isValid || updatePassword.isPending}
             className="disabled:bg-neutral-100 disabled:text-neutral-50 disabled:cursor-not-allowed"
           />
         </div>

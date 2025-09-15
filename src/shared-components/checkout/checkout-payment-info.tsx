@@ -1,5 +1,5 @@
 import { PlusIcon } from "@phosphor-icons/react";
-import React, { useRef } from "react";
+import { useRef } from "react";
 import { useCardState } from "../../shared-hooks/state-store";
 import { useSwitch } from "../../shared-hooks/switch";
 import Button from "../button";
@@ -10,6 +10,7 @@ import BillingCardList from "../../pages/user-dashboard/billing-card-list";
 import { checkMark } from "../../shared-images/image-entry";
 import { paymentWallet } from "../../shared-images/image-entry";
 import { useNavigate } from "react-router-dom";
+import { useCheckout } from "../../hooks/orders.hooks";
 
 /* ------------------------------------------------------------------------- */
 
@@ -30,7 +31,7 @@ export default function CheckoutPaymentInfo({
     toggleSwitch: completedPaymentModalToggle,
     switchValue: completedPaymentModalToggleValue,
   } = useSwitch();
-  const [isLoading, setLoading] = React.useState(false);
+  const checkoutMutation = useCheckout();
   const noBillingCards = billingCards.length === 0;
 
   const currentBillingCardCount = useRef(billingCards.length);
@@ -54,10 +55,8 @@ export default function CheckoutPaymentInfo({
   }
 
   const paymentHandler = async () => {
-    setLoading(true);
-    await new Promise((res) => setTimeout(res, 500));
-    setLoading(false);
-    completedPaymentModalToggle();
+    // Use the real checkout API instead of fake timeout
+    checkoutMutation.mutate();
   };
 
   const noBilling = (
@@ -111,12 +110,12 @@ export default function CheckoutPaymentInfo({
             type="submit"
             variant="solid"
             className={`w-full max-w-[23.4375rem] disabled:bg-neutral-100 disabled:cursor-not-allowed`}
-            // disabled={!isValid}
+            disabled={checkoutMutation.isPending}
             onClick={paymentHandler}
           >
             <div className="flex items-center justify-center gap-1">
-              <span>Pay ₦90,000.00</span>
-              {isLoading && <Spinner size="sm" speed="fast" />}
+              <span>{checkoutMutation.isPending ? "Processing..." : "Pay Now"}</span>
+              {checkoutMutation.isPending && <Spinner size="sm" speed="fast" />}
             </div>
           </Button>
         </div>

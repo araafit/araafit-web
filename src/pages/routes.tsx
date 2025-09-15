@@ -33,6 +33,8 @@ import {
   AdminDashboardDiscounts,
 } from "./admin-dashboard/import-entry";
 import AdminLogin from "./admin-auth/login/login";
+import AdminConfirmEmail from "./admin-auth/reset/confirm-email";
+import AdminPasswordResetPage from "./admin-auth/reset/password-reset-page";
 import {
   GetMeasured,
   ManualMeasurement,
@@ -45,6 +47,8 @@ import {
 } from "./guest/guest-shop/import-entry";
 import GuestCartPage from "./guest/cart/guest-cart";
 import GuestCartCheckout from "./guest/cart/guest-cart-checkout";
+import PaystackCallback from "./paystack-callback";
+import CheckoutSuccess from "./user-dashboard/cart/checkout/checkout-success";
 
 /* ---------------------------------------------------------------- */
 
@@ -55,6 +59,10 @@ const pagesRoutes = createBrowserRouter([
   {
     path: "/",
     element: <HomePage />,
+  },
+  {
+    path: "paystack-callback",
+    element: <PaystackCallback />,
   },
   {
     path: "about",
@@ -141,6 +149,18 @@ const pagesRoutes = createBrowserRouter([
     ],
   },
   {
+    path: "admin-auth",
+    children: [
+      {
+        path: "reset",
+        children: [
+          { path: "", element: <AdminConfirmEmail />, index: true },
+          { path: "reset-password", element: <AdminPasswordResetPage /> },
+        ],
+      },
+    ],
+  },
+  {
     path: "dashboard",
     children: [
       { path: "", element: <DashboardHomePage />, index: true },
@@ -170,6 +190,7 @@ const pagesRoutes = createBrowserRouter([
         children: [
           { path: "", element: <DashboardCartPage />, index: true },
           { path: "checkout", element: <DashboardCartCheckout /> },
+          { path: "checkout/success", element: <CheckoutSuccess /> },
         ],
       },
       {
@@ -231,7 +252,7 @@ const pagesRoutes = createBrowserRouter([
       },
 
       {
-        path: "customers/123/activities",
+        path: "customers/:customersId/activities",
         element: <AdminDashboardCustomersActivities />,
       },
       {

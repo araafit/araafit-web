@@ -8,12 +8,14 @@ import {
   UserIcon,
   SignOutIcon,
 } from "@phosphor-icons/react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import DashboardLoader from "./loader";
 import Modal from "../../shared-components/modal";
 import { useSwitch } from "../../shared-hooks/switch";
 import Button from "../../shared-components/button";
 import { NavLink } from "react-router-dom";
+import Spinner from "../../shared-components/spinner";
+import { useAdminLogout } from "../../hooks/admin-auth.hooks";
 
 /* ------------------------------------------------------ */
 
@@ -53,6 +55,8 @@ export default function AdminDashboardLayout({
   children: React.ReactElement;
 }) {
   const { toggleSwitch, switchValue } = useSwitch(false);
+  const navigate = useNavigate();
+  const logoutMutation = useAdminLogout();
 
   const [loading, setLoading] = useState(true);
 
@@ -62,6 +66,19 @@ export default function AdminDashboardLayout({
 
     waitASecond();
   }, [loading]);
+
+  // Handle logout success
+  useEffect(() => {
+    if (logoutMutation.isSuccess) {
+      toggleSwitch(); // Close modal
+      navigate("/auth/admin-login"); // Redirect to admin login
+    }
+  }, [logoutMutation.isSuccess, navigate, toggleSwitch]);
+
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
+
   const iconClass = "mr-3 w-5 h-5";
 
   return (
@@ -82,14 +99,13 @@ export default function AdminDashboardLayout({
                 <NavLink
                   key={idx}
                   to={item.link}
+                  end={item.name.toLowerCase() === "overview"}
                   className={({ isActive }) =>
-                    `px-3 py-3  transition w-full flex items-center justify-between text-neutral-900 
-         hover:bg-primary-900 hover:text-white 
-         ${
-           isActive
-             ? "bg-primary-900 text-white"
-             : "text-gray-700 hover:text-brown-600"
-         }`
+                    `px-3 py-3 transition-colors w-full flex items-center justify-between ${
+                      isActive
+                        ? "bg-primary-900 text-white"
+                        : "text-neutral-900 hover:bg-primary-900 hover:text-white"
+                    }`
                   }
                 >
                   <div className="flex items-center text-base">
@@ -138,13 +154,21 @@ export default function AdminDashboardLayout({
             text="Cancel"
             variant="clear"
             className="w-full text-neutral-900 shadow-sm"
+            onClick={toggleSwitch}
           />
 
           <Button
             text="Logout"
             variant="clear"
+            disabled={logoutMutation.isPending}
             className="w-full bg-red-600 text-white"
-          />
+            onClick={handleLogout}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <span>Logout</span>
+              {logoutMutation.isPending && <Spinner size="sm" speed="fast" />}
+            </div>
+          </Button>
         </div>
       </Modal>
     </section>

@@ -20,6 +20,7 @@ export type Discount = {
   endDate: string;
   status: "Active" | "Inactive";
 };
+import { useToggleDiscount } from "../../../../hooks/admin-discounts.hooks";
 
 interface DiscountStatusToggleProps {
   id: number | string;
@@ -38,22 +39,25 @@ const DiscountStatusToggle: React.FC<DiscountStatusToggleProps> = ({
   const [pendingChecked, setPendingChecked] = React.useState<boolean | null>(
     null
   );
+  const toggleMutation = useToggleDiscount();
 
   const isActive = status === "Active";
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (pendingChecked === null) return;
-
-    setData((old) =>
-      old.map((d) =>
-        d.id === id
-          ? { ...d, status: pendingChecked ? "Active" : "Inactive" }
-          : d
-      )
-    );
-
-    setOpen(false);
-    setPendingChecked(null);
+    try {
+      await toggleMutation.mutateAsync(String(id));
+      setData((old) =>
+        old.map((d) =>
+          d.id === id
+            ? { ...d, status: pendingChecked ? "Active" : "Inactive" }
+            : d
+        )
+      );
+    } finally {
+      setOpen(false);
+      setPendingChecked(null);
+    }
   };
 
   return (
