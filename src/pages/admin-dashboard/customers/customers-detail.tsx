@@ -1,8 +1,4 @@
-import {
-  CaretRightIcon,
-  TrashIcon,
-  ArrowLeftIcon,
-} from "@phosphor-icons/react";
+import { CaretRightIcon, TrashIcon } from "@phosphor-icons/react";
 import TopBar from "../admin-components/top-bar/top-bar";
 import AdminDashboardLayout from "../../../layouts/admin-dashboard/dashboard-layout";
 import Overview from "../admin-components/top-overview-items";
@@ -68,7 +64,7 @@ export function AdminDashboardCustomersDetails() {
       }
       setIsBlockDialogOpen(false);
       setBlockReason("");
-    } catch (error) {
+    } catch {
       // Error handled in hook
     }
   };
@@ -86,7 +82,7 @@ export function AdminDashboardCustomersDetails() {
       setDeleteReason("");
       // Navigate back to customers list after successful deletion
       navigate("/admin-dashboard/customers");
-    } catch (error) {
+    } catch {
       // Error handled in hook
     }
   };
@@ -141,6 +137,7 @@ export function AdminDashboardCustomersDetails() {
 
   return (
     <AdminDashboardLayout>
+      <>
       <div className="h-screen">
         <div className="flex flex-col gap-2 relative">
           <TopBar
@@ -462,6 +459,7 @@ export function AdminDashboardCustomersDetails() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </>
     </AdminDashboardLayout>
   );
 }

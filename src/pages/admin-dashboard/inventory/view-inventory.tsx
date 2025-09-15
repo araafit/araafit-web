@@ -1,7 +1,6 @@
 import {
   CaretRightIcon,
   CloudArrowUpIcon,
-  TrashSimpleIcon,
   XIcon,
 } from "@phosphor-icons/react";
 import TopBar from "../admin-components/top-bar/top-bar";
@@ -30,41 +29,41 @@ export function AdminDashboardViewInventory() {
   const navigate = useNavigate();
   const { data: product, isLoading: isLoadingProduct, error: productError } = useProduct(inventoryId || "");
   
-  const [contributorPhotos, setContributorPhotos] = useState<string[]>([]);
-  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  //const [, setContributorPhotos] = useState<string[]>([]);
+  //const [, setIsUploadingImage] = useState(false);
   const [discountsEnabled, setDiscountsEnabled] = useState(false);
 
-  const handlePhotosChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
+  //const handlePhotosChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  //  if (!e.target.files) return;
 
-    const files = Array.from(e.target.files);
-    setIsUploadingImage(true);
+  //  const files = Array.from(e.target.files);
+  //  setIsUploadingImage(true);
 
-    try {
-      const uploadedUrls: string[] = [];
+  //  try {
+  //    const uploadedUrls: string[] = [];
 
-      for (const file of files) {
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("upload_preset", "oyzsznex"); // your Cloudinary preset
+  //    for (const file of files) {
+  //      const formData = new FormData();
+  //      formData.append("file", file);
+  //      formData.append("upload_preset", "oyzsznex"); // your Cloudinary preset
 
-        const cloudinaryUrl = `https://api.cloudinary.com/v1_1/dbnkyv0ht/upload`;
-        const response = await axios.post(cloudinaryUrl, formData);
+  //      const cloudinaryUrl = `https://api.cloudinary.com/v1_1/dbnkyv0ht/upload`;
+  //      const response = await axios.post(cloudinaryUrl, formData);
 
-        uploadedUrls.push(response.data.secure_url);
-      }
+  //      uploadedUrls.push(response.data.secure_url);
+  //    }
 
-      setContributorPhotos((prev) => [...prev, ...uploadedUrls]);
-    } catch (error) {
-      console.error("Error uploading images:", error);
-    } finally {
-      setIsUploadingImage(false);
-    }
-  };
+  //    setContributorPhotos((prev) => [...prev, ...uploadedUrls]);
+  //  } catch (error) {
+  //    console.error("Error uploading images:", error);
+  //  } finally {
+  //    setIsUploadingImage(false);
+  //  }
+  //};
 
-  const handleDeleteImage = (index: number) => {
-    setContributorPhotos((prev) => prev.filter((_, i) => i !== index));
-  };
+  //const handleDeleteImage = (index: number) => {
+  //  setContributorPhotos((prev) => prev.filter((_, i) => i !== index));
+  //};
   const [selectedTone, setSelectedTone] = useState<string[]>([]);
 
   const toggleTone = (size: string) => {

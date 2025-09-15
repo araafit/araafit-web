@@ -24,7 +24,6 @@ import type { SizeType } from "../../../services/admin-settings.service";
 import Spinner from "../../../shared-components/spinner";
 
 export default function SizeTabs() {
-  const [chartType, setChartType] = useState<SizeType | "">("");
   const [editItemId, setEditItemId] = useState("");
   const [newValue, setNewValue] = useState("");
   const [addChartType, setAddChartType] = useState<SizeType | "">("");
@@ -48,7 +47,7 @@ export default function SizeTabs() {
       setAddChartType("");
       setAddNewValue("");
       setIsAddDialogOpen(false);
-    } catch (error) {
+    } catch {
       // Error handled in hook
     }
   };
@@ -64,7 +63,7 @@ export default function SizeTabs() {
       setEditItemId("");
       setNewValue("");
       setIsEditDialogOpen(false);
-    } catch (error) {
+    } catch {
       // Error handled in hook
     }
   };
@@ -180,7 +179,7 @@ export default function SizeTabs() {
 
               {/* Sizes */}
               <div className="flex gap-2 flex-wrap mt-2">
-                {values.map((item) => (
+                {values.map((item: { id: string; value: number }) => (
                   <div
                     key={item.id}
                     className="relative group w-16 h-10 flex items-center justify-center border border-[#D0D5DD] rounded-md text-sm text-[#1C1C1C] bg-white hover:bg-gray-50 cursor-pointer"

@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import CheckoutDeliveryInfo from "./checkout-delivery-info";
 import CheckoutPaymentInfo from "./checkout-payment-info";
 import { useCart } from "../../../../hooks/cart.hooks";
-import { useCheckout } from "../../../../hooks/orders.hooks";
+//import { useCheckout } from "../../../../hooks/orders.hooks";
 import Spinner from "../../../../shared-components/spinner";
 import { formatPrice } from "../../../../utils/format-price";
 
@@ -21,7 +21,7 @@ import { formatPrice } from "../../../../utils/format-price";
 export function DashboardCartCheckout() {
   const [checkoutTab, setCheckoutTab] = useState("delivery-detail");
   const { data: cart, isLoading: cartLoading, isError: cartError, error: cartErrorMsg } = useCart();
-  const checkoutMutation = useCheckout();
+  //const checkoutMutation = useCheckout();
 
   const BreadCrumb = () => (
     <div className="font-inter font-light capitalize flex items-center">

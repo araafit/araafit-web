@@ -53,7 +53,7 @@ export const AuthStatus = () => {
       <Button
         text="Logout"
         variant="outline"
-        size="sm"
+        //size="sm"
         onClick={() => logoutMutation.mutate()}
         disabled={logoutMutation.isPending}
         className="text-xs px-2 py-1"

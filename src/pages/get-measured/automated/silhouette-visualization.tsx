@@ -242,7 +242,7 @@ export function SilhouetteVisualization({
       // Side view: mask-based but using front landmarks Y positions for consistency
       const sideMeasurements = computeMeasurementRowsWithYPositions(
         sideMask, 
-        sideLandmarks, 
+        //sideLandmarks, 
         sideMask.width, 
         sideMask.height,
         frontMeasurements // Use front Y positions
@@ -462,7 +462,7 @@ export function SilhouetteVisualization({
    */
   const computeMeasurementRowsWithYPositions = (
     mask: ImageData,
-    landmarks: Landmark[],
+    //landmarks: Landmark[],
     imgW: number,
     imgH: number,
     referencePositions: { bust: { y: number }; waist: { y: number }; hip: { y: number } }
@@ -767,7 +767,7 @@ export function SilhouetteVisualization({
   ) => {
     // compute data using mask + landmarks, but use reference Y positions if available for side view
     const levels = referenceYPositions 
-      ? computeMeasurementRowsWithYPositions(mask, landmarks, width, height, referenceYPositions)
+      ? computeMeasurementRowsWithYPositions(mask, /*landmarks*/ width, height, referenceYPositions)
       : computeMeasurementRows(mask, landmarks, width, height);
 
     // For front view, override with more accurate bounds

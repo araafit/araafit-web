@@ -1,13 +1,8 @@
-import {
-  ArrowRightIcon,
-  CaretRightIcon,
-  PlusIcon,
-} from "@phosphor-icons/react";
+import { ArrowRightIcon, CaretRightIcon } from "@phosphor-icons/react";
 import TopBar from "../admin-components/top-bar/top-bar";
 import AdminDashboardLayout from "../../../layouts/admin-dashboard/dashboard-layout";
 import { Link } from "react-router-dom";
 import { OverviewTable } from "../admin-components/overViewTable/overview-data-table";
-import Button from "../../../shared-components/button";
 import NotificationBell from "../admin-components/top-bar/notification-bell";
 import Overview from "../admin-components/top-overview-items";
 import {
@@ -154,7 +149,7 @@ export function AdminDashboardOverview() {
                   </div>
                 </div>
               ) : (
-                <EmptyStateCard 
+                <EmptyStateCard
                   title="New Orders"
                   message="No new orders just yet."
                 />
@@ -229,7 +224,7 @@ export function AdminDashboardOverview() {
                   </div>
                 </div>
               ) : (
-                <EmptyStateCard 
+                <EmptyStateCard
                   title="Tailoring Requests"
                   message="No new request at the moment."
                 />

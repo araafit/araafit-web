@@ -5,7 +5,7 @@ interface EmptyStateCardProps {
   message: string;
 }
 
-export function EmptyStateCard({ title, message }: EmptyStateCardProps) {
+export function EmptyStateCard({ message }: EmptyStateCardProps) {
   return (
     <div className="w-full border border-[#E8E8E8] flex flex-col items-center justify-center px-4 py-12 rounded-md mt-6">
       <div className="flex flex-col items-center gap-4">

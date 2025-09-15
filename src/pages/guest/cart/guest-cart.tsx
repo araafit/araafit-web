@@ -2,7 +2,7 @@ import GuestPageLayout from "../../../layouts/guest/guest-page-layout";
 import Button from "../../../shared-components/button";
 import { useCart } from "../../../hooks/cart.hooks";
 import shoppingCartImg from "../../../shared-images/shopping-cart.png";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import CartEngine from "../../../shared-components/cart-engine";
 import Spinner from "../../../shared-components/spinner";
 import { formatPrice } from "../../../utils/format-price";
@@ -10,7 +10,6 @@ import { formatPrice } from "../../../utils/format-price";
 /* --------------------------------------------------- */
 
 function GuestCart() {
-  const navigate = useNavigate();
   const { data: cart, isLoading, isError, error } = useCart();
   const cartItems = cart?.items || [];
   const cartIsEmpty = cartItems.length === 0;

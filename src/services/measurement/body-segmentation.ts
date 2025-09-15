@@ -538,59 +538,59 @@ export class BodySegmentationService {
    * personMask: binary person ImageData (alpha>0 = person)
    * partMask: colored ImageData where red-channel encodes part ids
    */
-  private _removeArmsFromMask(personMask: ImageData, partMask: ImageData): ImageData {
-    try {
-      const width = personMask.width;
-      const height = personMask.height;
-      const out = new ImageData(width, height);
+  //private _removeArmsFromMask(personMask: ImageData, partMask: ImageData): ImageData {
+  //  try {
+  //    const width = personMask.width;
+  //    const height = personMask.height;
+  //    const out = new ImageData(width, height);
 
-      // IDs commonly used by BodyPix for arms/hands (may vary by version)
-      const ARMS_AND_HANDS = new Set<number>([12,13,14,15,16,17,18,19,20,21]);
+  //    // IDs commonly used by BodyPix for arms/hands (may vary by version)
+  //    const ARMS_AND_HANDS = new Set<number>([12,13,14,15,16,17,18,19,20,21]);
 
-      for (let i = 0; i < personMask.data.length; i += 4) {
-        const a = personMask.data[i + 3];
-        if (a === 0) {
-          // background
-          out.data[i] = 0; out.data[i+1] = 0; out.data[i+2] = 0; out.data[i+3] = 0;
-          continue;
-        }
+  //    for (let i = 0; i < personMask.data.length; i += 4) {
+  //      const a = personMask.data[i + 3];
+  //      if (a === 0) {
+  //        // background
+  //        out.data[i] = 0; out.data[i+1] = 0; out.data[i+2] = 0; out.data[i+3] = 0;
+  //        continue;
+  //      }
 
-        // part id in red channel (0..n)
-        const partId = partMask.data[i];
-        if (ARMS_AND_HANDS.has(partId)) {
-          // remove arms/hands
-          out.data[i] = 0; out.data[i+1] = 0; out.data[i+2] = 0; out.data[i+3] = 0;
-        } else {
-          // keep
-          out.data[i] = 255; out.data[i+1] = 255; out.data[i+2] = 255; out.data[i+3] = 255;
-        }
-      }
+  //      // part id in red channel (0..n)
+  //      const partId = partMask.data[i];
+  //      if (ARMS_AND_HANDS.has(partId)) {
+  //        // remove arms/hands
+  //        out.data[i] = 0; out.data[i+1] = 0; out.data[i+2] = 0; out.data[i+3] = 0;
+  //      } else {
+  //        // keep
+  //        out.data[i] = 255; out.data[i+1] = 255; out.data[i+2] = 255; out.data[i+3] = 255;
+  //      }
+  //    }
 
-      return out;
-    } catch (e) {
-      console.warn("Failed to remove arms from mask, using original person mask:", e);
-      return personMask;
-    }
-  }
+  //    return out;
+  //  } catch (e) {
+  //    console.warn("Failed to remove arms from mask, using original person mask:", e);
+  //    return personMask;
+  //  }
+  //}
 
   /**
    * Combine person mask with a colored body-part mask (where non-arms are opaque)
    */
-  private _combineMaskWithPartAlpha(personMask: ImageData, coloredPartMask: ImageData): ImageData {
-    const width = personMask.width;
-    const height = personMask.height;
-    const out = new ImageData(width, height);
-    for (let i = 0; i < personMask.data.length; i += 4) {
-      const personA = personMask.data[i + 3];
-      const partA = coloredPartMask.data[i + 3];
-      const a = personA > 0 && partA > 0 ? 255 : 0;
-      out.data[i] = a > 0 ? 255 : 0;
-      out.data[i + 1] = a > 0 ? 255 : 0;
-      out.data[i + 2] = a > 0 ? 255 : 0;
-      out.data[i + 3] = a;
-    }
-    return out;
-  }
+  //private _combineMaskWithPartAlpha(personMask: ImageData, coloredPartMask: ImageData): ImageData {
+  //  const width = personMask.width;
+  //  const height = personMask.height;
+  //  const out = new ImageData(width, height);
+  //  for (let i = 0; i < personMask.data.length; i += 4) {
+  //    const personA = personMask.data[i + 3];
+  //    const partA = coloredPartMask.data[i + 3];
+  //    const a = personA > 0 && partA > 0 ? 255 : 0;
+  //    out.data[i] = a > 0 ? 255 : 0;
+  //    out.data[i + 1] = a > 0 ? 255 : 0;
+  //    out.data[i + 2] = a > 0 ? 255 : 0;
+  //    out.data[i + 3] = a;
+  //  }
+  //  return out;
+  //}
 
   /**
    * Calculate torso boundaries to exclude arms from width measurements

@@ -1,7 +1,7 @@
 import { CaretRightIcon, Spinner } from "@phosphor-icons/react";
 import TopBar from "../admin-components/top-bar/top-bar";
 import AdminDashboardLayout from "../../../layouts/admin-dashboard/dashboard-layout";
-import { orderStatuses, OverviewCards2 } from "../_data/_overview";
+import { orderStatuses } from "../_data/_overview";
 import { TableButton } from "../../ui/button";
 import { CaretDownIcon } from "@phosphor-icons/react";
 import Button from "../../../shared-components/button";

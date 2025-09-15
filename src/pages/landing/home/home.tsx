@@ -128,6 +128,7 @@ export function HomePage() {
                   type="button"
                   text="Take your measurement"
                   variant="solid"
+                  onClick={handleGetMeasured}
                 />
               </div>
 
@@ -175,6 +176,7 @@ export function HomePage() {
                   type="button"
                   variant="solid"
                   className="w-full max-w-[145px]"
+                  onClick={() => navigate("/shop")}
                 >
                   <div className="flex items-center gap-2">
                     <span>Shop now</span>
@@ -227,6 +229,7 @@ export function HomePage() {
                   type="button"
                   variant="solid"
                   className="w-full max-w-[185px]"
+                  onClick={() => navigate("/shop")}
                 >
                   <div className="flex items-center gap-2">
                     <span>Explore fabric</span>

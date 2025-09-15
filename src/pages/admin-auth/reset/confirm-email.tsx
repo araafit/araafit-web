@@ -1,4 +1,3 @@
-import { useState } from "react";
 import AuthLayout from "../../../layouts/auth/auth-layout";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { Link } from "react-router-dom";

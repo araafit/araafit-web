@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import {
   TrashSimpleIcon,
   PencilSimpleIcon,
@@ -151,11 +151,13 @@ export default function BillingCardList() {
             disabled={removeCardMutation.isPending}
             onClick={removeCardHandler}
           >
-            {removeCardMutation.isPending && (
+            {removeCardMutation.isPending ? (
               <div className="flex items-center gap-2">
                 <Spinner size="sm" />
                 Removing...
               </div>
+            ) : (
+              <div />
             )}
           </Button>
         </div>

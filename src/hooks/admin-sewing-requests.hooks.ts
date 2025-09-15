@@ -43,7 +43,7 @@ export const useAddRequestRider = () => {
   return useMutation({
     mutationFn: ({ requestId, data }: { requestId: string; data: AddRequestRiderRequest }) =>
       adminSewingRequestsService.addRequestRider(requestId, data),
-    onSuccess: (data, variables) => {
+    onSuccess: (/*data, variables*/) => {
       // Invalidate and refetch sewing requests
       queryClient.invalidateQueries({ queryKey: adminSewingRequestsKeys.lists() });
       toast.success("Rider added successfully");
@@ -61,7 +61,7 @@ export const useUpdateRequestRider = () => {
   return useMutation({
     mutationFn: ({ requestId, data }: { requestId: string; data: UpdateRequestRiderRequest }) =>
       adminSewingRequestsService.updateRequestRider(requestId, data),
-    onSuccess: (data, variables) => {
+    onSuccess: (/*data, variables*/) => {
       // Invalidate and refetch sewing requests
       queryClient.invalidateQueries({ queryKey: adminSewingRequestsKeys.lists() });
       toast.success("Rider information updated successfully");
@@ -79,7 +79,7 @@ export const useUpdateSewingRequest = () => {
   return useMutation({
     mutationFn: ({ requestId, data }: { requestId: string; data: UpdateSewingRequestRequest }) =>
       adminSewingRequestsService.updateSewingRequest(requestId, data),
-    onSuccess: (data, variables) => {
+    onSuccess: (/*data, variables*/) => {
       // Invalidate and refetch sewing requests
       queryClient.invalidateQueries({ queryKey: adminSewingRequestsKeys.lists() });
       // Also invalidate dashboard metrics since request status affects counts
@@ -99,7 +99,7 @@ export const useDeleteSewingRequest = () => {
   return useMutation({
     mutationFn: (requestId: string) =>
       adminSewingRequestsService.deleteSewingRequest(requestId),
-    onSuccess: (data, variables) => {
+    onSuccess: (/*data, variables*/) => {
       // Invalidate and refetch sewing requests
       queryClient.invalidateQueries({ queryKey: adminSewingRequestsKeys.lists() });
       // Also invalidate dashboard metrics since request deletion affects counts
@@ -120,6 +120,7 @@ export const useUpdateRequestStatus = () => {
     mutationFn: ({ requestId, data }: { requestId: string; data: UpdateRequestStatusRequest }) =>
       adminSewingRequestsService.updateRequestStatus(requestId, data),
     onSuccess: (data, variables) => {
+      console.log(data, variables);
       // Invalidate and refetch sewing requests
       queryClient.invalidateQueries({ queryKey: adminSewingRequestsKeys.lists() });
       // Also invalidate dashboard metrics since request status affects counts

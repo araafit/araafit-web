@@ -160,11 +160,13 @@ export function DressDetail() {
               disabled={!selectedSize || addToCartMutation.isPending}
               onClick={handleAddToCart}
             >
-              {addToCartMutation.isPending && (
+              {addToCartMutation.isPending ? (
                 <div className="flex items-center justify-center gap-2">
                   <div className="w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
                   Adding...
                 </div>
+              ) : (
+                <div />
               )}
             </Button>
 
@@ -175,11 +177,13 @@ export function DressDetail() {
               disabled={!selectedSize || addToCartMutation.isPending || instantCheckoutMutation.isPending}
               onClick={handlePayNow}
             >
-              {instantCheckoutMutation.isPending && (
+              {instantCheckoutMutation.isPending ? (
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   Processing...
                 </div>
+              ) : (
+                <div />
               )}
             </Button>
           </div>

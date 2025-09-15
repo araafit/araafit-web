@@ -6,7 +6,7 @@ import AllItems from "../../../shared-components/shop/all-items";
 import DressItems from "../../../shared-components/shop/dress-items";
 import FabricItems from "../../../shared-components/shop/fabric-items";
 import { SearchProvider } from "./context/search-context";
-import SearchInput from "./components/search-input";
+//import SearchInput from "./components/search-input";
 
 /* --------------------------------------------------------------------------------- */
 

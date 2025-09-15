@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from "react";
 import { useState, useCallback, memo, Children } from "react";
 import { CN } from "../../utils/class-merge";
 import Select from "../select";
-import { MagnifyingGlassIcon } from "@phosphor-icons/react";
+//import { MagnifyingGlassIcon } from "@phosphor-icons/react";
 import { useShopStore } from "../../shared-hooks/state-store";
 import SearchInput from "../../pages/user-dashboard/shop/components/search-input";
 
@@ -80,9 +80,9 @@ const ShopTab = ({
   const fabricItems = useShopStore((state) => state.fabrics);
 
   // Search through items
-  const searchAllItem = useShopStore((state) => state.searchAll);
-  const searchFabric = useShopStore((state) => state.searchFabrics);
-  const searchDresses = useShopStore((state) => state.searchDresses);
+  //const searchAllItem = useShopStore((state) => state.searchAll);
+  //const searchFabric = useShopStore((state) => state.searchFabrics);
+  //const searchDresses = useShopStore((state) => state.searchDresses);
 
   const originalAllItems = useRef(allItems);
   const originalDressItems = useRef(dressItems);
@@ -109,23 +109,23 @@ const ShopTab = ({
   );
 
   // Search all, dresses and fabric items
-  const handleSearch = (searchInput: string) => {
-    if (!searchInput || searchInput.trim() === "") {
-      return;
-    }
+  //const handleSearch = (searchInput: string) => {
+  //  if (!searchInput || searchInput.trim() === "") {
+  //    return;
+  //  }
 
-    if (activeTab === 1) {
-      searchDresses(searchInput);
-      return;
-    }
+  //  if (activeTab === 1) {
+  //    searchDresses(searchInput);
+  //    return;
+  //  }
 
-    if (activeTab === 2) {
-      searchFabric(searchInput);
-      return;
-    }
+  //  if (activeTab === 2) {
+  //    searchFabric(searchInput);
+  //    return;
+  //  }
 
-    searchAllItem(searchInput);
-  };
+  //  searchAllItem(searchInput);
+  //};
 
   const options = [
     { label: "Measurement", value: "measurement" },

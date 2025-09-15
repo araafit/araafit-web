@@ -33,8 +33,8 @@ import {
 import Spinner from "../../../shared-components/spinner";
 
 const skinTone = ["Porcelin", "Ivory", "Sand", "Espresso", "Chestnut", "Honey"];
-const categories = ["dress", "fabric"];
-const discountTypes = ["percentage", "fixed"];
+  //const categories = ["dress", "fabric"];
+  //const discountTypes = ["percentage", "fixed"];
 
 interface ProductFormData {
   name: string;
@@ -73,9 +73,8 @@ export function AdminDashboardEditInventory() {
     register,
     handleSubmit,
     watch,
-    setValue,
     reset,
-    formState: { errors, isValid },
+    formState: { errors },
   } = useForm<ProductFormData>({
     mode: "all",
     defaultValues: {

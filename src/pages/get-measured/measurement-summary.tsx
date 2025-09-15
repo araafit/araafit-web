@@ -41,11 +41,11 @@ export function MeasurementSummary() {
     
     try {
       await createGuestUserMutation.mutateAsync({
-        bust: selectedMeasurements.bust || 36,
-        waist: selectedMeasurements.waist || 28,
-        hips: selectedMeasurements.hip || 38,
-        height: selectedMeasurements.height || 165,
-        dressSize: selectedMeasurements.dressSize || 10,
+        bust: Number(selectedMeasurements.bust || 36),
+        waist: Number(selectedMeasurements.waist || 28),
+        hips: Number(selectedMeasurements.hip || 38),
+        height: Number(selectedMeasurements.height || 165),
+        dressSize: Number(selectedMeasurements.dressSize || 10),
         skinTone: "medium", // You might want to get this from the measurements store
       });
       

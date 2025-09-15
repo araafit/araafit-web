@@ -293,7 +293,7 @@ export function DiscountTable({ data: initialData }: { data: Discount[] }) {
                 ) : (
                   <TableRow>
                     <TableCell
-                      colSpan={columns.length}
+                      colSpan={table.getAllColumns().length}
                       className="h-24 text-center"
                     >
                       <div className="bg-white w-full px-4  py-6">

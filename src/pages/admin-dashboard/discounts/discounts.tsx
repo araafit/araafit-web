@@ -98,7 +98,7 @@ export function AdminDashboardDiscounts() {
                 <p className="text-red-600">Failed to load discounts</p>
               </div>
             ) : (
-              <DiscountTable data={tableData} />
+              <DiscountTable data={tableData as Discount[]} />
             )}
           </section>
         </div>

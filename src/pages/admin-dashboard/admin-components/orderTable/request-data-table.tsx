@@ -326,7 +326,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
                       </DialogTrigger>
 
                       <DialogContent className="sm:max-w-[500px]">
-                        <RiderDialogContent />
+                        <RiderDialogContent orderId={row.original.orderId} />
                       </DialogContent>
                     </Dialog>
                     <Button

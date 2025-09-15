@@ -84,7 +84,7 @@ export default function Nav() {
           text="Login"
           variant="outline"
           className={`w-full ${showNav ? "visible" : "invisible"}`}
-          onClick={() => console.log("Login")}
+          onClick={() => navigate("/auth/login")}
         />
 
         <div
@@ -92,7 +92,7 @@ export default function Nav() {
             showNav ? "visible" : "invisible"
           }`}
         >
-          <Link to="/home">Home</Link>
+          <Link to="/">Home</Link>
           <Link to="/about">About us</Link>
           <Link to="/contact">Contact us</Link>
         </div>

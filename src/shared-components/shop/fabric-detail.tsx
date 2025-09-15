@@ -33,15 +33,15 @@ export function FabricDetail() {
     });
   };
 
-  const handlePayNow = () => {
-    if (!product || !selectedStyle) return;
-    
-    instantCheckoutMutation.mutate({
-      productId: product.id,
-      quantity: selectedYards,
-      size: "One Size",
-    });
-  };
+    const handlePayNow = () => {
+      if (!product || !selectedStyle) return;
+      
+      instantCheckoutMutation.mutate({
+        productId: product.id,
+        quantity: selectedYards,
+        size: "One Size",
+      });
+    };
 
   if (isLoading) {
     return (
@@ -248,11 +248,28 @@ export function FabricDetail() {
               disabled={!selectedStyle || addToCartMutation.isPending}
               onClick={handleAddToCart}
             >
-              {addToCartMutation.isPending && (
+              {addToCartMutation.isPending ? (
                 <div className="flex items-center justify-center gap-2">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   Adding...
                 </div>
+              ) : (
+                <div />
+              )}
+            </Button>
+            <Button 
+              text={instantCheckoutMutation.isPending ? "Processing..." : "Pay Now"} 
+              variant="solid" 
+              disabled={!selectedStyle || addToCartMutation.isPending}
+              onClick={handlePayNow}
+            >
+              {instantCheckoutMutation.isPending ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Processing...
+                </div>
+              ) : (
+                <div />
               )}
             </Button>
           </div>

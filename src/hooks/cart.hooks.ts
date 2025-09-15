@@ -47,7 +47,7 @@ export const useAddToCart = () => {
 
   return useMutation({
     mutationFn: (request: AddToCartRequest) => cartService.addToCart(request),
-    onSuccess: (data) => {
+    onSuccess: (/*data*/) => {
       // Invalidate and refetch cart data
       queryClient.invalidateQueries({ queryKey: ["cart"] });
       queryClient.invalidateQueries({ queryKey: ["cart-items"] });
@@ -68,7 +68,7 @@ export const useUpdateQuantity = () => {
   return useMutation({
     mutationFn: ({ itemId, request }: { itemId: string; request: UpdateQuantityRequest }) =>
       cartService.updateQuantity(itemId, request),
-    onSuccess: (data) => {
+    onSuccess: (/*data*/) => {
       // Invalidate and refetch cart data
       queryClient.invalidateQueries({ queryKey: ["cart"] });
       queryClient.invalidateQueries({ queryKey: ["cart-items"] });
@@ -88,7 +88,7 @@ export const useRemoveFromCart = () => {
 
   return useMutation({
     mutationFn: (itemId: string) => cartService.removeItem(itemId),
-    onSuccess: (data) => {
+    onSuccess: (/*data*/) => {
       // Invalidate and refetch cart data
       queryClient.invalidateQueries({ queryKey: ["cart"] });
       queryClient.invalidateQueries({ queryKey: ["cart-items"] });

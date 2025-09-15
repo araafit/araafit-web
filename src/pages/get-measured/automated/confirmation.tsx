@@ -12,7 +12,7 @@ import {
   type MeasurementResult,
 } from "../../../services/measurement";
 import { extractSkinToneFromPhoto } from "../../../services/measurement/skin-tone-extractor";
-import SilhouetteVisualization from "./silhouette-visualization";
+//import SilhouetteVisualization from "./silhouette-visualization";
 import { useCreateMeasurements } from "../../../hooks/measurements.hooks";
 import { useCreateGuestUser } from "../../../hooks/auth.hooks";
 import { useAuthStore } from "../../../stores/auth-store";

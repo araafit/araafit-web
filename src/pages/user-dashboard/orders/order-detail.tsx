@@ -159,7 +159,7 @@ export function DashboardOrderDetailPage() {
                   disabled={cancelOrderMutation.isPending}
                   onClick={handleCancelOrder}
                 />
-              ) : null
+              ) : <div />
             }
           />
         </div>

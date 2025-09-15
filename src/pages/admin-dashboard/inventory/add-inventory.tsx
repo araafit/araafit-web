@@ -35,8 +35,8 @@ import {
 // import { useParams } from "react-router-dom";
 
 const skinTone = ["Porcelin", "Ivory", "Sand", "Espresso", "Chestnut", "Honey"];
-const categories = ["dress", "fabric"];
-const discountTypes = ["percentage", "fixed"];
+//const categories = ["dress", "fabric"];
+//const discountTypes = ["percentage", "fixed"];
 
 interface ProductFormData {
   name: string;
@@ -58,15 +58,15 @@ export function AdminDashboardUploadInventory() {
   const navigate = useNavigate();
   const createProductMutation = useCreateProduct();
   const [contributorPhotos, setContributorPhotos] = useState<File[]>([]);
-  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [isUploadingImage] = useState(false);
   const [discountsEnabled, setDiscountsEnabled] = useState(false);
   const [selectedTone, setSelectedTone] = useState<string[]>([]);
 
   const {
     register,
     handleSubmit,
-    watch,
-    formState: { errors, isValid },
+    //watch,
+    formState: { errors },
   } = useForm<ProductFormData>({
     mode: "all",
     defaultValues: {
@@ -77,7 +77,7 @@ export function AdminDashboardUploadInventory() {
 
   console.log(errors);
 
-  const watchCategory = watch("category");
+  //const watchCategory = watch("category");
 
   const handlePhotosChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;

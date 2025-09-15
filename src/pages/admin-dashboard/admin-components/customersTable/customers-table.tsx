@@ -27,7 +27,6 @@ import {
   useReactTable,
   type VisibilityState,
 } from "@tanstack/react-table";
-import { z } from "zod";
 import { TableButton } from "../../../ui/button";
 import Button from "../../../../shared-components/button";
 import {
@@ -46,7 +45,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../ui/dropdown-menu";
-import { schema } from "../overViewTable/schema/schema";
 import {
   CaretUpDownIcon,
   MagnifyingGlassIcon,
@@ -59,7 +57,16 @@ import cart from "../../../admin-dashboard/images/emptyCart.png";
 import CustomerActions from "../../customers/customer-action";
 import { getCustomerStatusClasses } from "../../../../utils/admin-customers-utils";
 
-const columns: ColumnDef<z.infer<typeof schema>>[] = [
+const columns: ColumnDef<{
+  orderId: string;
+  deliveryInformation: {
+    name: string;
+    email: string;
+  };
+  TotalAmount: number;
+  Date: string;
+  status: "Active" | "Blocked" | "Inactive";
+}>[] = [
   {
     accessorKey: "deliveryInformation.name",
     header: () => (
@@ -133,7 +140,10 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     cell: ({ row }) => (
       <CustomerActions
         customerId={row.original.orderId}
-        isBlocked={row.original.status === "Blocked" || row.original.status === "Inactive"}
+        isBlocked={
+          row.original.status === "Blocked" ||
+          row.original.status === "Inactive"
+        }
       />
     ),
   },
@@ -142,7 +152,16 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
 export function DataTable({
   data: initialData,
 }: {
-  data: z.infer<typeof schema>[];
+  data: {
+    orderId: string;
+    deliveryInformation: {
+      name: string;
+      email: string;
+    };
+    TotalAmount: number;
+    Date: string;
+    status: "Active" | "Blocked";
+  }[];
 }) {
   const [data, setData] = React.useState(() => initialData);
   const [rowSelection, setRowSelection] = React.useState({});

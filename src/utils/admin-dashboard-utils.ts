@@ -2,7 +2,7 @@ import {
   MoneyIcon,
   UserIcon,
   DressIcon,
-  ShoppingBagIcon,
+  //ShoppingBagIcon,
 } from "@phosphor-icons/react";
 import type { ComponentType } from "react";
 import { type AdminDashboardMetrics } from "../services/admin-dashboard.service";

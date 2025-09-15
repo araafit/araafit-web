@@ -1,5 +1,5 @@
 import { PlusIcon } from "@phosphor-icons/react";
-import React, { useRef } from "react";
+import { useRef } from "react";
 import { useCardState } from "../../shared-hooks/state-store";
 import { useSwitch } from "../../shared-hooks/switch";
 import Button from "../button";
