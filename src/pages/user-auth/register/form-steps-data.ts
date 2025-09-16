@@ -9,7 +9,7 @@ type FormSteps = {
 
 export const formSteps: FormSteps = [
   {
-    title: "Create free account",
+    title: "Create Free Account",
     caption:
       "Unlock personalized measurements and custom style recommendations.",
     googleAutBtnText: "Sign up with Google",
