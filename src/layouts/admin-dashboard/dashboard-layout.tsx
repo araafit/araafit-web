@@ -73,7 +73,7 @@ export default function AdminDashboardLayout({
       toggleSwitch(); // Close modal
       navigate("/auth/admin-login"); // Redirect to admin login
     }
-  }, [logoutMutation.isSuccess, navigate, toggleSwitch]);
+  }, [logoutMutation.isSuccess]);
 
   const handleLogout = () => {
     logoutMutation.mutate();
