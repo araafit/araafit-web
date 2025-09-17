@@ -172,7 +172,7 @@ export function FabricDetail() {
                       className={`w-10 h-10 flex items-center justify-center border rounded-md text-sm cursor-pointer transition-colors ${
                         selectedSize === item.toString()
                           ? "border-primary-500 bg-primary-50 text-primary-700"
-                          : "border-[#E8E8E8] text-[#494949] hover:border-gray-300"
+                          : "border-[#E8E8E8] text-[#494949]  hover:border-gray-300"
                       }`}
                       onClick={() => setSelectedSize(item.toString())}
                     >
