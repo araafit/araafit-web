@@ -20,11 +20,15 @@ type ModalShape = {
 // Discount Modal
 const Modal: React.FC<ModalShape> = ({ isOpen, onClose }) => {
   useEffect(() => {
+    const originalOverflow = window.document.body.style.overflow;
     if (isOpen) {
       window.document.body.style.overflow = "hidden";
     } else {
-      window.document.body.style.overflow = "scroll";
+      window.document.body.style.overflow = originalOverflow;
     }
+    return () => {
+      window.document.body.style.overflow = originalOverflow;
+    };
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -32,7 +36,6 @@ const Modal: React.FC<ModalShape> = ({ isOpen, onClose }) => {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm top-0 left-0"
-      onClick={onClose}
     >
       <div
         className="h-[770px] w-[500px] bg-white rounded-md shadow-xl z-50 relative"
@@ -46,7 +49,7 @@ const Modal: React.FC<ModalShape> = ({ isOpen, onClose }) => {
 
         <div className="w-full flex items-center justify-center mt-6 px-6">
           <div className="w-[438px] flex flex-col items-center justify-center text-center">
-            <h3 className="text-[40px] font-semibold text-lg leading-[125%] mb-4">
+            <h3 className="text-[40px] font-semibold leading-[125%] mb-4">
               Enjoy 10% Off Your First Order
             </h3>
 
@@ -57,12 +60,12 @@ const Modal: React.FC<ModalShape> = ({ isOpen, onClose }) => {
 
             <div className="w-full gap-4 flex flex-col mt-6">
               <div className="w-full flex flex-col gap-2 mt-6">
-                <label htmlFor="#email" className="w-full text-left">
+                <label htmlFor="email" className="w-full text-left">
                   Email
                 </label>
 
                 <input
-                  type="text"
+                  type="email"
                   name="email"
                   id="email"
                   placeholder="Email"
@@ -98,7 +101,7 @@ export function GuestShopPage() {
 
   useEffect(() => {
     setTimeout(() => toggleModal(), 3000);
-  });
+  }, []);
 
   return (
     <GuestPageLayout>
