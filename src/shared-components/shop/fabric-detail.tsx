@@ -13,35 +13,36 @@ import { formatPrice } from "../../utils/format-price";
 export function FabricDetail() {
   const { itemName } = useParams<{ itemName: string }>();
   const productId = itemName || "";
-  
+
   const { data: product, isLoading, isError, error } = useProduct(productId);
   const addToCartMutation = useAddToCart();
   const instantCheckoutMutation = useInstantCheckout();
-  
+
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
   const [selectedYards, setSelectedYards] = useState(3);
-  
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
+
   const measurement = [6, 8, 10, 12, 14, 16, 18, 20];
 
   const handleAddToCart = () => {
     if (!product || !selectedStyle) return;
-    
+
     addToCartMutation.mutate({
       productId: product.id,
       quantity: selectedYards,
-      size: "One Size", // Fabric doesn't have traditional sizes
+      size: selectedSize || "One Size", // Fabric doesn't have traditional sizes
     });
   };
 
-    const handlePayNow = () => {
-      if (!product || !selectedStyle) return;
-      
-      instantCheckoutMutation.mutate({
-        productId: product.id,
-        quantity: selectedYards,
-        size: "One Size",
-      });
-    };
+  const handlePayNow = () => {
+    if (!product || !selectedStyle) return;
+
+    instantCheckoutMutation.mutate({
+      productId: product.id,
+      quantity: selectedYards,
+      size: "One Size",
+    });
+  };
 
   if (isLoading) {
     return (
@@ -59,7 +60,9 @@ export function FabricDetail() {
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
           <p className="text-red-600 mb-2">Error loading fabric</p>
-          <p className="text-gray-600">{error?.message || "Fabric not found"}</p>
+          <p className="text-gray-600">
+            {error?.message || "Fabric not found"}
+          </p>
         </div>
       </div>
     );
@@ -133,11 +136,12 @@ export function FabricDetail() {
                 <p className="text-neutral-700 font-light">
                   {product.description}
                 </p>
-                <span className="font-semibold text-neutral-900">
-                  ₦{formatPrice(product.price)} per yard
+                <span className="font-semibold text-neutral-900 font-lora">
+                  ₦{formatPrice(product.price)}/yd
                 </span>
                 <span className="text-sm text-neutral-600">
-                  Total: ₦{formatPrice(product.price * selectedYards)} ({selectedYards} yards)
+                  Total: ₦{formatPrice(product.price * selectedYards)} (
+                  {selectedYards} yards)
                 </span>
               </div>
 
@@ -165,7 +169,12 @@ export function FabricDetail() {
                   {measurement.map((item, idx) => (
                     <div
                       key={idx}
-                      className="w-[3.625rem] h-[2.75rem] p-2 text-[14px] border border-[#E8E8E8] rounded-md flex items-center justify-center cursor-pointer"
+                      className={`w-10 h-10 flex items-center justify-center border rounded-md text-sm cursor-pointer transition-colors ${
+                        selectedSize === item.toString()
+                          ? "border-primary-500 bg-primary-50 text-primary-700"
+                          : "border-[#E8E8E8] text-[#494949] hover:border-gray-300"
+                      }`}
+                      onClick={() => setSelectedSize(item.toString())}
                     >
                       {item}
                     </div>
@@ -208,69 +217,80 @@ export function FabricDetail() {
                     value={selectedYards}
                     onChange={(e) => setSelectedYards(Number(e.target.value))}
                     className="w-24 p-2 border border-gray-300 rounded text-center outline-none focus:border-primary-500"
+                    title="Select number of yards"
                   />
                   <span className="text-sm text-gray-600">yards</span>
                 </div>
-                
+
                 <p className="text-xs text-gray-500">
-                  Estimated based on your measurements and selected style. You can adjust as needed.
+                  Estimated based on your measurements and selected style. You
+                  can adjust as needed.
                 </p>
               </div>
             </div>
           </div>
 
           {/* TC */}
-          <div className="flex items-center justify-center gap-[1.5rem] py-[40px] px-[24px]">
+          <div className="flex items-center justify-center gap-[1.5rem] py-[40px] px-[24px] rounded-md">
             <div className="w-full bg-[#F6F7F9] flex flex-col gap-2 p-3">
-              <span className="text-[#667A91]">No Refund Policy</span>
+              <span className="text-[#667A91] font-semibold">
+                No Refund Policy
+              </span>
 
-              <p className="text-[#333B47] font-light">
+              <p className="text-[#333B47] font-normal">
                 Each piece is custom-made using your unique body measurements.
                 Because of this personalised process, we are unable to offer
                 refunds. Please double-check your entries before placing your
                 order.
               </p>
 
-              <div className="w-full flex gap-4 text-[#516278]">
-                <input type="checkbox" />
-                <span className="font-normal">
+              <div className="w-full flex items-center gap-4 text-[#516278] ">
+                <input
+                  type="checkbox"
+                  name="terms-and-conditions"
+                  className="size-[1rem] border border-[#B9B9B9] rounded focus:outline-none cursor-pointer"
+                  title="I understand and accept the no refund policy."
+                />
+
+                <label className="font-medium" htmlFor="terms-and-conditions">
                   I understand and accept the no refund policy.
-                </span>
+                </label>
               </div>
             </div>
           </div>
 
           {/* Proceed */}
-          <div className="flex items-center justify-center">
-            <Button 
-              text="Add to Cart" 
-              variant="solid" 
+          <div className="w-full flex items-center justify-center gap-4">
+            <Button
+              variant="solid"
               disabled={!selectedStyle || addToCartMutation.isPending}
               onClick={handleAddToCart}
+              className="cursor-pointer"
             >
-              {addToCartMutation.isPending ? (
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Adding...
-                </div>
-              ) : (
-                <div />
-              )}
+              <div className="flex items-center justify-center gap-2">
+                <span className="text-sm text-white">Add to Cart</span>
+                <Spinner
+                  size="sm"
+                  speed="fast"
+                  isLoading={addToCartMutation.isPending}
+                />
+              </div>
             </Button>
-            <Button 
-              text={instantCheckoutMutation.isPending ? "Processing..." : "Pay Now"} 
-              variant="solid" 
+
+            <Button
+              variant="solid"
               disabled={!selectedStyle || addToCartMutation.isPending}
               onClick={handlePayNow}
+              className="cursor-pointer"
             >
-              {instantCheckoutMutation.isPending ? (
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Processing...
-                </div>
-              ) : (
-                <div />
-              )}
+              <div className="flex items-center justify-center gap-2">
+                <span className="text-sm text-white">Pay Now</span>
+                <Spinner
+                  size="sm"
+                  speed="fast"
+                  isLoading={instantCheckoutMutation.isPending}
+                />
+              </div>
             </Button>
           </div>
         </div>
