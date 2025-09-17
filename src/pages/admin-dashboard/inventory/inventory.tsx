@@ -106,7 +106,7 @@ export function AdminDashboardInventory() {
                 <p className="text-red-600">Failed to load products. Please try again.</p>
               </div>
             ) : products ? (
-              <DataTable data={convertApiProductsToInventoryFormat(products)} />
+              <DataTable data={convertApiProductsToInventoryFormat(products.products)} />
             ) : (
               <DataTable data={[]} />
             )}

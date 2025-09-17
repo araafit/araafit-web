@@ -52,6 +52,7 @@ export const convertApiProductToInventoryFormat = (apiProduct: AdminProduct) => 
 
 // Convert multiple API products to inventory table format
 export const convertApiProductsToInventoryFormat = (apiProducts: AdminProduct[]) => {
+  console.log(apiProducts);
   return apiProducts.map(convertApiProductToInventoryFormat);
 };
 

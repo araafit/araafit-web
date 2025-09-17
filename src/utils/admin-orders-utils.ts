@@ -5,7 +5,7 @@ import { formatCurrency, formatDate } from "./admin-dashboard-utils";
 export const convertApiOrderToTableFormat = (apiOrder: AdminOrder) => {
   return {
     orderId: apiOrder.id,
-    dress: apiOrder.items[0]?.product.name || "N/A", // Use first item's product name
+    dress: apiOrder.items[0]?.product?.name || "N/A", // Use first item's product name
     cost: apiOrder.totalAmount,
     status: apiOrder.status,
     image: "", // Will need to be added to API response
@@ -50,6 +50,7 @@ export const convertApiOrderToTableFormat = (apiOrder: AdminOrder) => {
 
 // Convert multiple API orders to table format
 export const convertApiOrdersToTableFormat = (apiOrders: AdminOrder[]) => {
+  console.log(apiOrders);
   return apiOrders.map(convertApiOrderToTableFormat);
 };
 
