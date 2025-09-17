@@ -110,7 +110,7 @@ export default function VerifyEmail() {
     <div className="w-full flex flex-col gap-6">
       <div className="w-full">
         <div className="w-full flex justify-center gap-3 mb-1">
-          {codeValues.map((value, idx) => (
+          {codeValues?.map((value, idx) => (
             <input
               type="text"
               key={idx}
