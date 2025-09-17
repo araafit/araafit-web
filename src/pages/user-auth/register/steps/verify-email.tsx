@@ -73,6 +73,23 @@ export default function VerifyEmail() {
     }
   };
 
+  // Handle paste via mouse (context menu)
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const text = e.clipboardData.getData("text");
+    const digits = text.replace(/\D/g, "").slice(0, 6);
+    const newCode = [...codeValues];
+    for (let i = 0; i < 6; i++) {
+      newCode[i] = digits[i] || "";
+    }
+    setValue("verificationCode", newCode, { shouldValidate: true });
+
+    // Focus the next empty input or the last input
+    const nextEmptyIndex = newCode.findIndex((val) => !val);
+    const focusIndex = nextEmptyIndex === -1 ? 5 : nextEmptyIndex;
+    inputRefs.current![focusIndex]?.focus();
+  };
+
   const assignInputRef = (el: HTMLInputElement, idx: number) => {
     if (inputRefs.current) {
       inputRefs.current[idx] = el;
@@ -110,6 +127,7 @@ export default function VerifyEmail() {
               aria-label={`Digit ${idx + 1}`}
               onChange={(e) => handleInputChange(e.target.value, idx)}
               onKeyDown={(e) => handleKeyDown(idx, e)}
+              onPaste={handlePaste}
               className={`size-[56px] text-center text-[1.2rem] text-neutral-950 ${
                 value ? "border border-primary-200" : "border border-[#E8E8E8]"
               } border border-[#E8E8E8] focus:outline-none rounded-md`}
