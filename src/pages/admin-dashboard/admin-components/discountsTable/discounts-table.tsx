@@ -184,7 +184,7 @@ export function DiscountTable({
   openCreateDrawer,
 }: {
   data: Discount[];
-  openCreateDrawer: () => void;
+  openCreateDrawer: (open: boolean) => void;
 }) {
   const [data, setData] = React.useState(() => initialData);
   const [rowSelection, setRowSelection] = React.useState({});
@@ -325,7 +325,7 @@ export function DiscountTable({
                             <Button
                               variant="solid"
                               text="Create Discounts"
-                              onClick={openCreateDrawer}
+                              onClick={() => openCreateDrawer(true)}
                             />
                           </div>
                         </section>
