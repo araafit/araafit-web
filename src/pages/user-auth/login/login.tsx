@@ -116,6 +116,7 @@ export default function Login({ userType }: LoginProps) {
         </div>
 
         <div className="flex flex-col items-center gap-6">
+          {/* <div className="w-full">Login failed</div> */}
           <p className="self-start text-neutral-900">
             Forgot Password?{" "}
             <Link to="/auth/reset" className="text-primary-500">
@@ -135,7 +136,7 @@ export default function Login({ userType }: LoginProps) {
           >
             <div className="w-full flex items-center justify-center">
               <span>Login</span>
-              {loginMutation.isPending && <Spinner size="sm" speed="fast" className="ml-1" />}
+              <Spinner size="sm" speed="fast" className="ml-1" isLoading={loginMutation.isPending} />
             </div>
           </Button>
 
