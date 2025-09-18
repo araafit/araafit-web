@@ -23,7 +23,7 @@ export default function Login({ userType }: LoginProps) {
   const navigate = useNavigate();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const loginMutation = useLogin();
-  
+
   const googleAuth = () => console.log("Google auth");
 
   const {
@@ -116,7 +116,12 @@ export default function Login({ userType }: LoginProps) {
         </div>
 
         <div className="flex flex-col items-center gap-6">
-          {/* <div className="w-full">Login failed</div> */}
+          {loginMutation.isError && (
+            <div className="w-full border border-red-500 bg-red-200 rounded-sm text-red-500 text-sm p-1">
+              login failed. Please check credentials and try again.
+            </div>
+          )}
+
           <p className="self-start text-neutral-900">
             Forgot Password?{" "}
             <Link to="/auth/reset" className="text-primary-500">
@@ -135,8 +140,14 @@ export default function Login({ userType }: LoginProps) {
             }`}
           >
             <div className="w-full flex items-center justify-center">
-              <span>Login</span>
-              <Spinner size="sm" speed="fast" className="ml-1" isLoading={loginMutation.isPending} />
+              {!loginMutation.isPending && <span>Login</span>}
+              <Spinner
+                size="md"
+                speed="fast"
+                className="ml-1"
+                isLoading={loginMutation.isPending && !loginMutation.isError}
+                circleColor="#9a6c50"
+              />
             </div>
           </Button>
 
