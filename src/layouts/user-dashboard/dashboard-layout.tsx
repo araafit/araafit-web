@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createElement } from "react";
+import React, { useEffect, createElement } from "react";
 import {
   HouseSimpleIcon,
   DressIcon,
@@ -7,7 +7,7 @@ import {
   SignOutIcon,
 } from "@phosphor-icons/react";
 import { Link, useNavigate, NavLink } from "react-router-dom";
-import DashboardLoader from "./loader";
+// import LoaderSkin from "./loader";
 import Modal from "../../shared-components/modal";
 import { useSwitch } from "../../shared-hooks/switch";
 import Button from "../../shared-components/button";
@@ -40,8 +40,6 @@ export default function UserDashboardLayout({
   const navigate = useNavigate();
   const logoutMutation = useLogout();
 
-  const [loading, setLoading] = useState(true);
-
   // Handle logout success
   useEffect(() => {
     if (logoutMutation.isSuccess) {
@@ -53,13 +51,6 @@ export default function UserDashboardLayout({
   const handleLogout = () => {
     logoutMutation.mutate();
   };
-
-  useEffect(() => {
-    const waitASecond = async () =>
-      await setTimeout(() => setLoading(false), 1000);
-
-    waitASecond();
-  }, [loading]);
 
   return (
     <section className="h-screen bg-[#F5F5F5] flex items-start">
@@ -168,7 +159,7 @@ export default function UserDashboardLayout({
         </div>
       </div>
 
-      <div className="grow">{loading ? <DashboardLoader /> : children}</div>
+      <div className="grow">{children}</div>
 
       {/* Logout redirection modal */}
       <Modal
