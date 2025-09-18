@@ -1,8 +1,8 @@
 import { useProducts } from "../../hooks/user-dashboard.hooks";
 import { useSearch } from "../../pages/user-dashboard/shop/context/search-context";
 import Card from "../card";
-import Spinner from "../spinner";
 import type { Product } from "../../services/products.service";
+import LoaderView from "../../layouts/user-dashboard/loader";
 
 /* ------------------------------------------------------------------ */
 
@@ -34,8 +34,7 @@ export default function DressItems({
     return (
       <div className="flex items-center justify-center h-64">
         <div className="flex flex-col items-center gap-4">
-          <Spinner size="lg" />
-          <p className="text-gray-600">Loading dresses...</p>
+         <LoaderView />
         </div>
       </div>
     );
