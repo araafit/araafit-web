@@ -5,8 +5,8 @@ import { useProduct } from "../../hooks/user-dashboard.hooks";
 import { useAddToCart } from "../../hooks/cart.hooks";
 import { useInstantCheckout } from "../../hooks/orders.hooks";
 import Button from "../button";
-import Spinner from "../spinner";
 import { formatPrice } from "../../utils/format-price";
+import LoaderView from "../../layouts/user-dashboard/loader";
 
 /* -------------------------------------------------------- */
 
@@ -47,8 +47,7 @@ export function DressDetail() {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="flex flex-col items-center gap-4">
-          <Spinner size="lg" />
-          <p className="text-gray-600">Loading dress details...</p>
+          <LoaderView />
         </div>
       </div>
     );

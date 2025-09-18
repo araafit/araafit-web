@@ -7,6 +7,7 @@ import Button from "../button";
 import Spinner from "../spinner";
 import { WarningIcon, ArrowRightIcon } from "@phosphor-icons/react";
 import { formatPrice } from "../../utils/format-price";
+import LoaderView from "../../layouts/user-dashboard/loader";
 
 /* --------------------------------------------------------- */
 
@@ -48,8 +49,7 @@ export function FabricDetail() {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="flex flex-col items-center gap-4">
-          <Spinner size="lg" />
-          <p className="text-gray-600">Loading fabric details...</p>
+         <LoaderView />
         </div>
       </div>
     );
