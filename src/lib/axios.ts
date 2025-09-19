@@ -28,7 +28,7 @@ const API_BASE_URL =
 // Create axios instance
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  // timeout: 10000,
   headers: {
     "Content-Type": "application/json",
   },
@@ -139,6 +139,11 @@ apiClient.interceptors.response.use(
     const originalRequest = error.config;
 
     console.log("error", error, originalRequest._retry);
+
+    // Do not attempt refresh for auth endpoints
+    if (error.config?.url?.includes("/auth/")) {
+      return Promise.reject(error);
+    }
 
     // Check if error is 401 and we haven't already tried to refresh
     if (error.response?.status === 401 && !originalRequest._retry) {

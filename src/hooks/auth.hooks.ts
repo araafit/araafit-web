@@ -180,7 +180,7 @@ export const useLogin = () => {
       // Cache the user profile
       queryClient.setQueryData(authKeys.profile(), data.user);
 
-      toast.success(data.message);
+      toast.success(data.message || "Logged in successfully");
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || "Login failed");

@@ -5,9 +5,9 @@ import Button from "../../../shared-components/button";
 import shoppingCart from "./shopping-cart.png";
 import { useCart } from "../../../hooks/cart.hooks";
 import CartEngine from "../../../shared-components/cart-engine";
-import Spinner from "../../../shared-components/spinner";
 import { Link } from "react-router-dom";
 import { formatPrice } from "../../../utils/format-price";
+import LoaderView from "../../../layouts/user-dashboard/loader";
 
 /* -------------------------------------------------------------------- */
 
@@ -52,10 +52,7 @@ export function DashboardCartPage() {
     return (
       <UserDashboardLayout>
         <div className="h-screen flex items-center justify-center">
-          <div className="flex flex-col items-center gap-4">
-            <Spinner size="lg" />
-            <p className="text-gray-600">Loading cart...</p>
-          </div>
+         <LoaderView />
         </div>
       </UserDashboardLayout>
     );

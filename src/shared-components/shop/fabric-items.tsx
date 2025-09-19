@@ -1,8 +1,8 @@
 import { useProducts } from "../../hooks/user-dashboard.hooks";
 import { useSearch } from "../../pages/user-dashboard/shop/context/search-context";
 import Card from "../card";
-import Spinner from "../spinner";
 import type { Product } from "../../services/products.service";
+import LoaderView from "../../layouts/user-dashboard/loader";
 
 /* ------------------------------------------------------------------ */
 
@@ -17,7 +17,12 @@ export default function FabricItems({
   userPage: "shop" | "dashboard";
 }) {
   const { debouncedSearchQuery } = useSearch();
-  const { data: productsData, isLoading, isError, error } = useProducts({
+  const {
+    data: productsData,
+    isLoading,
+    isError,
+    error,
+  } = useProducts({
     category: "fabric",
     limit: 20,
     search: debouncedSearchQuery || undefined,
@@ -34,8 +39,7 @@ export default function FabricItems({
     return (
       <div className="flex items-center justify-center h-64">
         <div className="flex flex-col items-center gap-4">
-          <Spinner size="lg" />
-          <p className="text-gray-600">Loading fabrics...</p>
+          <LoaderView />
         </div>
       </div>
     );
@@ -46,7 +50,9 @@ export default function FabricItems({
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <p className="text-red-600 mb-2">Error loading fabrics</p>
-          <p className="text-gray-600">{error?.message || "Please try again later"}</p>
+          <p className="text-gray-600">
+            {error?.message || "Please try again later"}
+          </p>
         </div>
       </div>
     );
@@ -59,13 +65,14 @@ export default function FabricItems({
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <p className="text-gray-600 mb-2">
-            {debouncedSearchQuery 
-              ? `No fabrics found for "${debouncedSearchQuery}"` 
-              : "No fabrics available"
-            }
+            {debouncedSearchQuery
+              ? `No fabrics found for "${debouncedSearchQuery}"`
+              : "No fabrics available"}
           </p>
           {debouncedSearchQuery && (
-            <p className="text-sm text-gray-500">Try searching with different keywords</p>
+            <p className="text-sm text-gray-500">
+              Try searching with different keywords
+            </p>
           )}
         </div>
       </div>

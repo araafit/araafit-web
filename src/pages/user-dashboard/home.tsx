@@ -8,11 +8,22 @@ import TopBar from "./top-bar";
 import { Link } from "react-router-dom";
 import Card from "../../shared-components/card";
 import { useDashboardData } from "../../hooks/user-dashboard.hooks";
-import Spinner from "../../shared-components/spinner";
 import type { Order } from "../../services/orders.service";
 import type { Product } from "../../services/products.service";
+import LoaderView from "../../layouts/user-dashboard/loader";
+import { useLocalStorage } from "../../shared-hooks/loca-storage";
 
 /* -------------------------------------------------------------------- */
+
+type StoredUser = {
+  state: {
+    adminUser: Record<string, string | null>;
+    isAdmin: boolean;
+    isUser: boolean;
+    user: Record<string, string | null>;
+  };
+  version: number;
+};
 
 /**
  * Dashboard home page
@@ -20,9 +31,15 @@ import type { Product } from "../../services/products.service";
  * @returns ReactElement
  */
 export function DashboardHomePage() {
-  const { orders, dresses, fabrics, isLoading, isError, error } = useDashboardData();
+  const { orders, dresses, fabrics, isLoading, isError, error } =
+    useDashboardData();
   const addToCart = useCartStore((state) => state.addItem);
-  
+  const {
+    storedValue: {
+      state: { user: storedUser },
+    },
+  } = useLocalStorage<StoredUser | null>("araafit-auth-storage", null);
+
   const orderItems = orders.data || [];
   const readyToWearDresses = dresses.data || [];
   const recommendedFabrics = fabrics.data || [];
@@ -32,7 +49,16 @@ export function DashboardHomePage() {
 
   const title = (
     <div className="font-lora text-[#979797]">
-      Welcome, <span className="font-lora text-[#1C1C1C]">Eni</span>
+      {!storedUser ? (
+        <span>Welcome</span>
+      ) : (
+        <div>
+          Welcome,{" "}
+          <span className="font-lora text-[#1C1C1C]">
+            {storedUser?.firstName}
+          </span>
+        </div>
+      )}
     </div>
   );
 
@@ -73,7 +99,11 @@ export function DashboardHomePage() {
 
   // Helper function to get order display data
   const getOrderDisplayData = (order: Order) => {
-    if (order.type === "product_order" && order.items && order.items.length > 0) {
+    if (
+      order.type === "product_order" &&
+      order.items &&
+      order.items.length > 0
+    ) {
       const firstItem = order.items[0];
       return {
         name: firstItem.product.name,
@@ -114,10 +144,7 @@ export function DashboardHomePage() {
     return (
       <UserDashboardLayout>
         <div className="h-screen flex items-center justify-center">
-          <div className="flex flex-col items-center gap-4">
-            <Spinner size="lg" />
-            <p className="text-gray-600">Loading dashboard...</p>
-          </div>
+          <LoaderView />
         </div>
       </UserDashboardLayout>
     );
@@ -130,7 +157,9 @@ export function DashboardHomePage() {
         <div className="h-screen flex items-center justify-center">
           <div className="flex flex-col items-center gap-4 text-center">
             <p className="text-red-600">Error loading dashboard data</p>
-            <p className="text-gray-600">{error?.message || "Please try again later"}</p>
+            <p className="text-gray-600">
+              {error?.message || "Please try again later"}
+            </p>
             <Button
               text="Retry"
               variant="solid"

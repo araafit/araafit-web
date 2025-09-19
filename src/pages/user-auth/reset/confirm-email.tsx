@@ -98,7 +98,7 @@ export default function ConfirmEmail() {
             </strong>
 
             <p className="text-neutral-700 leading-araafit text-center font-light">
-              A reset link has been sent to the email
+              A reset link has been sent to your email
             </p>
           </div>
         </Modal>

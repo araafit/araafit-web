@@ -24,7 +24,7 @@ const CardSkeleton = () => (
  *
  * @returns ReactElement
  */
-export default function DashboardLoader() {
+export default function LoaderView() {
   return (
     <div className="h-screen flex flex-col gap-16 p-2 overflow-y-scroll">
       <div className="w-full flex flex-col gap-4">
