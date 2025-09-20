@@ -7,7 +7,7 @@ import { useAddToCart } from "../hooks/cart.hooks";
 import SizeSelectionModal from "./size-selection-modal";
 import type { Product } from "../services/products.service";
 
-/* --------------------------------------------------------------------------- */
+/* --------------------------------------------------------------------- */
 
 interface Card {
   containerClass?: string;
@@ -37,6 +37,7 @@ function Card({
   const [showSizeModal, setShowSizeModal] = useState(false);
   const addToCartMutation = useAddToCart();
 
+  // Handle add to cart click
   const handleAddToCart = () => {
     if (product) {
       // Use new API approach with size selection
@@ -51,7 +52,6 @@ function Card({
     if (product) {
       const quantity = product.category === "fabric" ? parseInt(size) : 1;
       const sizeValue = product.category === "fabric" ? "One Size" : size;
-      
       addToCartMutation.mutate({
         productId: product.id,
         quantity,
@@ -77,17 +77,19 @@ function Card({
             <span className="text-neutral-900 font-semibold leading-a">
               ₦{formatPrice(Number(itemCost))}
               {product?.category === "fabric" && (
-                <span className="text-xs text-gray-500 ml-1">per yard</span>
+                <span className=" ml-1">/yd</span>
               )}
             </span>
 
             <ShoppingCartSimpleIcon
               className={`size-[20px] cursor-pointer transition-colors ${
-                addToCartMutation.isPending 
-                  ? "text-gray-400 cursor-not-allowed" 
+                addToCartMutation.isPending
+                  ? "text-gray-400 cursor-not-allowed"
                   : "text-primary-500 hover:text-primary-600"
               }`}
-              onClick={addToCartMutation.isPending ? undefined : handleAddToCart}
+              onClick={
+                addToCartMutation.isPending ? undefined : handleAddToCart
+              }
             />
           </div>
         </div>
