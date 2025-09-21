@@ -7,25 +7,35 @@ import { useInstantCheckout } from "../../hooks/orders.hooks";
 import Button from "../button";
 import { formatPrice } from "../../utils/format-price";
 import LoaderView from "../../layouts/user-dashboard/loader";
+import showToast from "../../utils/notification";
+import { notificationStyles } from "../../style/custom";
+import Spinner from "../spinner";
 
-/* -------------------------------------------------------- */
+/* ----------------------------------------------------------------- */
 
 export function DressDetail() {
   const { itemName } = useParams<{ itemName: string }>();
   const productId = itemName || "";
-  
+
   const { data: product, isLoading, isError, error } = useProduct(productId);
   const addToCartMutation = useAddToCart();
   const instantCheckoutMutation = useInstantCheckout();
-  
+
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
-  
+
   const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
 
   const handleAddToCart = () => {
-    if (!product || !selectedSize) return;
-    
+    if (!product || !selectedSize) {
+      showToast.error("Select a size before proceeding to checkout.", {
+        icon: null,
+        position: "top-center",
+        style: notificationStyles.alertError,
+      });
+      return;
+    }
+
     addToCartMutation.mutate({
       productId: product.id,
       quantity,
@@ -34,8 +44,16 @@ export function DressDetail() {
   };
 
   const handlePayNow = () => {
-    if (!product || !selectedSize) return;
-    
+    // console.log("Pay Now clicked");
+    if (!product || !selectedSize) {
+      showToast.error("Select a size before proceeding to checkout.", {
+        icon: null,
+        position: "top-center",
+        style: notificationStyles.alertError,
+      });
+      return;
+    }
+
     instantCheckoutMutation.mutate({
       productId: product.id,
       quantity,
@@ -76,7 +94,7 @@ export function DressDetail() {
                 className="w-full h-full rounded-md object-cover"
               />
               <div className="absolute left-3 top-40 flex flex-col gap-[1rem]">
-                {product.images?.slice(1, 4).map((image, idx) => (
+                {product.images?.slice(0, 4).map((image, idx) => (
                   <img
                     key={idx}
                     src={image.url}
@@ -99,9 +117,16 @@ export function DressDetail() {
                   ₦{formatPrice(product.price)}
                 </span>
               </div>
+
               <div className="border-b border-gray-100 pb-3">
                 <div className="mb-3">Color</div>
                 <div className="size-[40px] bg-[#2280B3] rounded-full" />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-[#1C1C1C] text-[14px]">Dress size</span>
+
+                <span className="text-[#979797] text-[12px]">Size Guide</span>
               </div>
 
               <div className="flex flex-col gap-3 border-b border-gray-100 pb-3">
@@ -137,13 +162,13 @@ export function DressDetail() {
                 <span className="text-[14px]">Quality</span>
 
                 <div className="w-[121px] flex items-center justify-between gap-2 border border-neutral-100 py-[10px] px-[12px] rounded-md">
-                  <MinusIcon 
-                    className="cursor-pointer hover:text-primary-500" 
+                  <MinusIcon
+                    className="cursor-pointer hover:text-primary-500"
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                   />
                   <span>{quantity}</span>
-                  <PlusIcon 
-                    className="cursor-pointer hover:text-primary-500" 
+                  <PlusIcon
+                    className="cursor-pointer hover:text-primary-500"
                     onClick={() => setQuantity(quantity + 1)}
                   />
                 </div>
@@ -153,37 +178,46 @@ export function DressDetail() {
 
           <div className="border-t border-neutral-100 flex items-center justify-center gap-[1.5rem] py-[40px] px-[24px]">
             <Button
-              text="Add to Cart"
               variant="outline"
-              className="w-[23.4375rem] border border-neutral-500 text-neutral-900"
-              disabled={!selectedSize || addToCartMutation.isPending}
+              className="w-[23.4375rem] border border-neutral-500 text-neutral-900 cursor-pointer"
+              disabled={addToCartMutation.isPending}
               onClick={handleAddToCart}
             >
-              {addToCartMutation.isPending ? (
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
-                  Adding...
-                </div>
-              ) : (
-                <div />
-              )}
+              <div className="w-full flex items-center justify-center gap-2">
+                <span>
+                  {addToCartMutation.isPending ? "Adding" : "Add to Cart"}
+                </span>
+                <Spinner
+                  isLoading={addToCartMutation.isPending}
+                  size="sm"
+                  speed="fast"
+                  circleColor="#3D3D3D"
+                />
+              </div>
             </Button>
 
-            <Button 
-              text={instantCheckoutMutation.isPending ? "Processing..." : "Pay Now"}
-              variant="solid" 
-              className="w-[23.4375rem]"
-              disabled={!selectedSize || addToCartMutation.isPending || instantCheckoutMutation.isPending}
+            <Button
+              type="button"
+              variant="solid"
+              className="w-[23.4375rem] cursor-pointer"
+              disabled={
+                addToCartMutation.isPending || instantCheckoutMutation.isPending
+              }
               onClick={handlePayNow}
             >
-              {instantCheckoutMutation.isPending ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Processing...
-                </div>
-              ) : (
-                <div />
-              )}
+              <div className="w-full flex items-center justify-center gap-2">
+                {instantCheckoutMutation.isPending ? (
+                  <span>Processing</span>
+                ) : (
+                  <span>Pay Now</span>
+                )}
+                <Spinner
+                  isLoading={instantCheckoutMutation.isPending}
+                  size="sm"
+                  speed="fast"
+                  circleColor="#9A6C50"
+                />
+              </div>
             </Button>
           </div>
         </div>
