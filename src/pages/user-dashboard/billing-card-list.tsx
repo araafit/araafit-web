@@ -151,13 +151,18 @@ export default function BillingCardList() {
             disabled={removeCardMutation.isPending}
             onClick={removeCardHandler}
           >
-            {removeCardMutation.isPending ? (
-              <div className="flex items-center gap-2">
-                <Spinner size="sm" />
-                Removing...
-              </div>
+            {!removeCardMutation.isPending ? (
+              <span>Remove</span>
             ) : (
-              <div />
+              <div className="flex items-center justify-center gap-2">
+                <span>Removing</span>
+                <Spinner
+                  size="sm"
+                  speed="fast"
+                  isLoading={removeCardMutation.isPending}
+                  circleColor="#9A6C50"
+                />
+              </div>
             )}
           </Button>
         </div>
