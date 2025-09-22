@@ -6,7 +6,6 @@ import AllItems from "../../../shared-components/shop/all-items";
 import DressItems from "../../../shared-components/shop/dress-items";
 import FabricItems from "../../../shared-components/shop/fabric-items";
 import { SearchProvider } from "./context/search-context";
-//import SearchInput from "./components/search-input";
 
 /* --------------------------------------------------------------------------------- */
 
@@ -31,13 +30,6 @@ export function DashboardShopPage() {
           <TopBar title="shop" breadCrumb={<BreadCrumb />} />
 
           <div className="w-full h-[95%] flex flex-col gap-4 p-4 mt-20 overflow-y-scroll">
-            {/* Search Section */}
-            <div className="w-full bg-white rounded-md p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">Shop Products</h2>
-              </div>
-            </div>
-
             {/* Shop Tabs */}
             <div className="size-full bg-white rounded-md">
               <ShopTab

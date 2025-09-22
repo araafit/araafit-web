@@ -1,17 +1,19 @@
-import React, { useState, useEffect } from "react";
 import { CaretRightIcon } from "@phosphor-icons/react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Loader from "./loader";
+import { useCart } from "../../hooks/cart.hooks";
 import Button from "../../shared-components/button";
-import { useCartStore } from "../../shared-hooks/state-store";
+import Loader from "./loader";
 
-/* ----------------------------------------- */
+/* ----------------------------------------------------------- */
 
 function GuestPageLayout({ children }: { children: React.ReactElement }) {
   const navigate = useNavigate();
-  const cartItems = useCartStore((state) => state.items);
+  const { isSuccess, data: cart } = useCart();
 
   const [loading, setLoading] = useState(true);
+
+  const cartLength = cart ? cart.items.length : 0;
 
   useEffect(() => {
     const waitASecond = async () =>
@@ -31,14 +33,20 @@ function GuestPageLayout({ children }: { children: React.ReactElement }) {
             </Link>
             <Link to="/cart" className="p-8 flex items-center gap-2">
               <span>Cart</span>
-              <span className="bg-primary-50 p-[2px] px-[10px] rounded-full h-[1.3rem] text-[12px]">
-                {cartItems.length !== 0 && cartItems.length}
-              </span>
+              {isSuccess && (
+                <span className="bg-primary-50 p-[2px] px-[10px] rounded-full h-[1.3rem] text-[12px]">
+                  {cartLength}
+                </span>
+              )}
             </Link>
           </div>
 
           <div className="flex items-center gap-4">
-            <Button text="Login" variant="outline" onClick={() => navigate("/auth/login")} />
+            <Button
+              text="Login"
+              variant="outline"
+              onClick={() => navigate("/auth/login")}
+            />
 
             <Button variant="solid" onClick={() => navigate("/auth/register")}>
               <div className="flex items-center gap-1">
@@ -51,7 +59,7 @@ function GuestPageLayout({ children }: { children: React.ReactElement }) {
       </div>
 
       <div className="size-full flex items-start justify-center overflow-scroll">
-          {loading ? <Loader /> : children}
+        {loading ? <Loader /> : children}
       </div>
     </main>
   );

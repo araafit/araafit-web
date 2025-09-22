@@ -13,7 +13,11 @@ import { useMeasurementsSummary } from "../../../../hooks/measurements.hooks";
  */
 export default function Measurements() {
   const navigate = useNavigate();
-  const { data: measurementsSummary, isLoading, error } = useMeasurementsSummary();
+  const {
+    data: measurementsSummary,
+    isLoading,
+    error,
+  } = useMeasurementsSummary();
 
   const waterMarkStyle: React.CSSProperties = {
     backgroundImage: `url(${araafitWatermark})`,
@@ -38,7 +42,9 @@ export default function Measurements() {
     return (
       <div className="w-full bg-white py-5 px-8 rounded-md flex flex-col items-center gap-6">
         <div className="text-center py-20">
-          <h5 className="text-[2rem] font-semibold mb-4">No Measurements Found</h5>
+          <h5 className="text-[2rem] font-semibold mb-4">
+            No Measurements Found
+          </h5>
           <p className="text-neutral-500 font-light mb-6">
             Get started by taking your measurements for a perfect fit.
           </p>
@@ -52,7 +58,8 @@ export default function Measurements() {
     );
   }
 
-  const { measurements, formattedHeight, hasCompleteMeasurements } = measurementsSummary;
+  const { measurements, formattedHeight, hasCompleteMeasurements } =
+    measurementsSummary;
 
   return (
     <div className="w-full bg-white py-5 px-8 rounded-md flex flex-col items-center gap-6">
@@ -60,10 +67,9 @@ export default function Measurements() {
         <div className="flex flex-col items-center gap-4">
           <h5 className="text-[2rem] font-semibold">Measurement Summary</h5>
           <p className="text-neutral-500 font-light text-center">
-            {hasCompleteMeasurements 
+            {hasCompleteMeasurements
               ? "We've successfully captured your measurements and detected your skin tone."
-              : "Some measurements are missing. Update them for a better fit."
-            }
+              : "Some measurements are missing. Update them for a better fit."}
           </p>
         </div>
 
@@ -123,13 +129,11 @@ export default function Measurements() {
         </div>
       </div>
 
-      <div className="w-full max-w-[30.125rem] flex justify-end">
-        <Button
-          type="button"
-          text="Share"
-          variant="outline"
-          className="w-[175px] border border-neutral-100 text-neutral-950"
-        />
+      <div className="w-full max-w-[30.125rem] flex justify-end bg-[#F6FEF9] text-[#15803c] text-[14px] border border-[#15803C] p-2 rounded-md">
+        <p>
+          We've successfully capture your measurement and detected your skin
+          tone
+        </p>
       </div>
     </div>
   );

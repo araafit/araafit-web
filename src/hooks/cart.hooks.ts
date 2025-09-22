@@ -9,6 +9,9 @@ import type {
   UpdateCartItemRequest,
 } from "../services/cart.service";
 import { toast } from "react-hot-toast";
+import { notificationStyles } from "../style/custom";
+
+/* ------------------------------------------- */
 
 // Hook for fetching cart
 export const useCart = () => {
@@ -51,12 +54,18 @@ export const useAddToCart = () => {
       // Invalidate and refetch cart data
       queryClient.invalidateQueries({ queryKey: ["cart"] });
       queryClient.invalidateQueries({ queryKey: ["cart-items"] });
-      
-      toast.success("Item added to cart successfully!");
+
+      toast.success("Item added to cart successfully!", {
+        icon: null,
+        style: notificationStyles.alertSuccess,
+      });
     },
     onError: (error: any) => {
       console.error("Error adding to cart:", error);
-      toast.error(error?.response?.data?.message || "Failed to add item to cart");
+      toast.error(
+        error?.response?.data?.message || "Failed to add item to cart",
+        { icon: null }
+      );
     },
   });
 };
@@ -66,18 +75,25 @@ export const useUpdateQuantity = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ itemId, request }: { itemId: string; request: UpdateQuantityRequest }) =>
-      cartService.updateQuantity(itemId, request),
+    mutationFn: ({
+      itemId,
+      request,
+    }: {
+      itemId: string;
+      request: UpdateQuantityRequest;
+    }) => cartService.updateQuantity(itemId, request),
     onSuccess: (/*data*/) => {
       // Invalidate and refetch cart data
       queryClient.invalidateQueries({ queryKey: ["cart"] });
       queryClient.invalidateQueries({ queryKey: ["cart-items"] });
-      
+
       toast.success("Quantity updated successfully!");
     },
     onError: (error: any) => {
       console.error("Error updating quantity:", error);
-      toast.error(error?.response?.data?.message || "Failed to update quantity");
+      toast.error(
+        error?.response?.data?.message || "Failed to update quantity"
+      );
     },
   });
 };
@@ -92,12 +108,14 @@ export const useRemoveFromCart = () => {
       // Invalidate and refetch cart data
       queryClient.invalidateQueries({ queryKey: ["cart"] });
       queryClient.invalidateQueries({ queryKey: ["cart-items"] });
-      
+
       toast.success("Item removed from cart!");
     },
     onError: (error: any) => {
       console.error("Error removing from cart:", error);
-      toast.error(error?.response?.data?.message || "Failed to remove item from cart");
+      toast.error(
+        error?.response?.data?.message || "Failed to remove item from cart"
+      );
     },
   });
 };
@@ -112,8 +130,11 @@ export const useClearCart = () => {
       // Invalidate and refetch cart data
       queryClient.invalidateQueries({ queryKey: ["cart"] });
       queryClient.invalidateQueries({ queryKey: ["cart-items"] });
-      
-      toast.success("Cart cleared successfully!");
+
+      toast.success("Cart cleared successfully!", {
+        icon: null,
+        style: notificationStyles.alertSuccess,
+      });
     },
     onError: (error: any) => {
       console.error("Error clearing cart:", error);
@@ -127,17 +148,23 @@ export const useCreateCartItem = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (request: CreateCartItemRequest) => cartService.createCartItem(request),
+    mutationFn: (request: CreateCartItemRequest) =>
+      cartService.createCartItem(request),
     onSuccess: () => {
       // Invalidate and refetch cart data
       queryClient.invalidateQueries({ queryKey: ["cart"] });
       queryClient.invalidateQueries({ queryKey: ["cart-items"] });
-      
-      toast.success("Item added to cart!");
+
+      toast.success("Item added to cart!", {
+        icon: null,
+        style: notificationStyles.alertSuccess,
+      });
     },
     onError: (error: any) => {
       console.error("Error creating cart item:", error);
-      toast.error(error?.response?.data?.message || "Failed to add item to cart");
+      toast.error(
+        error?.response?.data?.message || "Failed to add item to cart"
+      );
     },
   });
 };
@@ -147,18 +174,28 @@ export const useUpdateCartItem = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ itemId, request }: { itemId: string; request: UpdateCartItemRequest }) =>
-      cartService.updateCartItem(itemId, request),
+    mutationFn: ({
+      itemId,
+      request,
+    }: {
+      itemId: string;
+      request: UpdateCartItemRequest;
+    }) => cartService.updateCartItem(itemId, request),
     onSuccess: () => {
       // Invalidate and refetch cart data
       queryClient.invalidateQueries({ queryKey: ["cart"] });
       queryClient.invalidateQueries({ queryKey: ["cart-items"] });
-      
-      toast.success("Cart item updated!");
+
+      toast.success("Cart item updated!", {
+        icon: null,
+        style: notificationStyles.alertSuccess,
+      });
     },
     onError: (error: any) => {
       console.error("Error updating cart item:", error);
-      toast.error(error?.response?.data?.message || "Failed to update cart item");
+      toast.error(
+        error?.response?.data?.message || "Failed to update cart item"
+      );
     },
   });
 };
@@ -173,12 +210,17 @@ export const useDeleteCartItem = () => {
       // Invalidate and refetch cart data
       queryClient.invalidateQueries({ queryKey: ["cart"] });
       queryClient.invalidateQueries({ queryKey: ["cart-items"] });
-      
-      toast.success("Item removed from cart!");
+
+      toast.success("Item removed from cart!", {
+        icon: null,
+        style: notificationStyles.alertSuccess,
+      });
     },
     onError: (error: any) => {
       console.error("Error deleting cart item:", error);
-      toast.error(error?.response?.data?.message || "Failed to remove item from cart");
+      toast.error(
+        error?.response?.data?.message || "Failed to remove item from cart"
+      );
     },
   });
 };

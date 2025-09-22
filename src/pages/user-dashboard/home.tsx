@@ -265,6 +265,7 @@ export function DashboardHomePage() {
                   itemCost={product.price}
                   itemImage={product.images?.[0]?.url || shoppingBagIcon}
                   link={`/dashboard/shop/dress/${product.id}`}
+                  product={product}
                   addToCart={() => addToCart(productToCartItem(product))}
                 />
               ))}
@@ -292,7 +293,7 @@ export function DashboardHomePage() {
                   itemCost={product.price}
                   itemImage={product.images?.[0]?.url || shoppingBagIcon}
                   link={`/dashboard/shop/fabric/${product.id}`}
-                  addToCart={() => addToCart(productToCartItem(product))}
+                  product={product}
                 />
               ))}
             </div>
