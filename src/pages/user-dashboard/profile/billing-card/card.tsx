@@ -1,6 +1,5 @@
 import { useRef } from "react";
 import { PlusIcon } from "@phosphor-icons/react";
-import { useCardState } from "../../../../shared-hooks/state-store";
 import { useSwitch } from "../../../../shared-hooks/switch";
 import Button from "../../../../shared-components/button";
 import Modal from "../../../../shared-components/modal";
@@ -8,6 +7,7 @@ import paymentWallet from "./payment-wallet.png";
 import checkMark from "../../checkmark.png";
 import BillingCardForm from "../../billing-card-form";
 import BillingCardList from "../../billing-card-list";
+import { useCards } from "../../../../hooks/cards.hooks";
 
 /* ------------------------------------------------------------------ */
 
@@ -26,19 +26,27 @@ export interface BillingCard {
  * @returns ReactElement
  */
 export default function BillingCards() {
-  const billingCards = useCardState((state) => state.cards);
+  const { isSuccess, data: billingCards } = useCards();
   const { toggleSwitch: addModalToggle, switchValue: addModalIsOpen } =
     useSwitch(false);
   const {
     toggleSwitch: confirmationModalToggle,
     switchValue: confirmationModalIsOpen,
   } = useSwitch(false);
-  const currentBillingCardCount = useRef(billingCards.length);
+  const currentBillingCardCount = useRef(billingCards?.length);
 
   const checkBillingCardCount = () => {
-    if (billingCards.length > currentBillingCardCount.current) {
-      currentBillingCardCount.current = billingCards.length;
-      return true;
+    if (
+      billingCards !== undefined &&
+      currentBillingCardCount.current !== undefined
+    ) {
+      if (
+        billingCards &&
+        billingCards.length > currentBillingCardCount.current
+      ) {
+        currentBillingCardCount.current = billingCards.length;
+        return true;
+      }
     }
 
     return false;
@@ -75,7 +83,7 @@ export default function BillingCards() {
       <BillingCardList />
 
       {/* No card */}
-      {billingCards.length === 0 && (
+      {isSuccess && billingCards.length === 0 && (
         <div className="w-full flex flex-col items-center justify-center gap-2">
           <img src={paymentWallet} alt="" className="size-[200px]" />
 
