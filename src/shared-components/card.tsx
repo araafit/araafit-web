@@ -81,16 +81,23 @@ function Card({
               )}
             </span>
 
-            <ShoppingCartSimpleIcon
-              className={`size-[20px] cursor-pointer transition-colors ${
-                addToCartMutation.isPending
-                  ? "text-gray-400 cursor-not-allowed"
-                  : "text-primary-500 hover:text-primary-600"
-              }`}
-              onClick={
-                addToCartMutation.isPending ? undefined : handleAddToCart
-              }
-            />
+            {/* Can only make sewing request if item is fabric */}
+            {addToCart ? (
+              <ShoppingCartSimpleIcon
+                className={`size-[20px] cursor-pointer transition-colors ${
+                  addToCartMutation.isPending
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "text-primary-500 hover:text-primary-600"
+                }`}
+                onClick={
+                  addToCartMutation.isPending ? undefined : handleAddToCart
+                }
+              />
+            ) : (
+              <span className="text-sm text-neutral-700">
+                Click to make sewing request
+              </span>
+            )}
           </div>
         </div>
 
