@@ -4,11 +4,13 @@ export const notificationStyles = {
     backgroundColor: "#F6FEF9",
     color: "#15803c",
     border: "1px solid #15803C",
+    fontSize:"14.5px",
   },
   alertError: {
-    backgroundColor: "#fca5a1",
-    color: "#b91c1c",
-    border: "1px solid #fca5a1",
+    backgroundColor: "#fee2e2",
+    color: " #ef4444",
+    border: "1px solid  #ef4444",
+    fontSize:"14.5px",
   },
 };
 /* End Alert */
