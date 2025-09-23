@@ -30,6 +30,7 @@ import type {
 } from "../../../services/admin-discounts.service";
 import { toast } from "react-hot-toast";
 import showToast from "../../../utils/notification";
+import { notificationStyles } from "../../../style/custom";
 
 /* -------------------------------------------------------------------------------- */
 
@@ -70,17 +71,39 @@ export const CreateDiscountDrawer: React.FC<CreateDiscountDrawerProps> = ({
   };
 
   const handleCreate = async () => {
-    if (!name.trim()) return toast.error("Name is required");
-    if (type !== "percentage" && type !== "fixed") {
-      return toast.error("Select a valid type");
-    }
     const valNum = Number(value);
-    if (Number.isNaN(valNum) || valNum <= 0) {
-      return toast.error("Enter a valid value");
-    }
     const usageNum = Number(usageLimit || 0);
     const apiEligibility = mapEligibilityToApi(eligibility);
-    if (!apiEligibility) return toast.error("Select eligibility");
+
+    if (!name.trim())
+      return showToast.error("Name is required", {
+        icon: null,
+        style: notificationStyles.alertError,
+        position: "top-center",
+      });
+
+    if (type !== "percentage" && type !== "fixed") {
+      return showToast.error("Select a valid type", {
+        icon: null,
+        style: notificationStyles.alertError,
+        position: "top-center",
+      });
+    }
+
+    if (Number.isNaN(valNum) || valNum <= 0) {
+      return showToast.error("Enter a valid value", {
+        icon: null,
+        style: notificationStyles.alertError,
+        position: "top-center",
+      });
+    }
+
+    if (!apiEligibility)
+      return showToast.error("Select eligibility", {
+        icon: null,
+        style: notificationStyles.alertError,
+        position: "top-center",
+      });
     if (!startDate || !endDate)
       return toast.error("Select start and end dates");
 
@@ -103,8 +126,9 @@ export const CreateDiscountDrawer: React.FC<CreateDiscountDrawerProps> = ({
       setUsageLimit("");
       setStartDate("");
       setEndDate("");
-    } catch (e) {
+    } catch (error) {
       // toast handled in hook
+      console.error("Create discount failed:", error);
     }
   };
   return (
