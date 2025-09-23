@@ -13,9 +13,10 @@ interface Item {
   cost: number | string;
   category: string;
 }
-export interface Dresses extends Item {}
-export interface Fabrics extends Item {}
-export interface AllItems extends Item {}
+
+export type Dresses = Item
+export type Fabrics = Item
+export type AllItems = Item
 
 export const allItems: AllItems[] = [
   {
