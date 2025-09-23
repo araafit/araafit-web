@@ -3,8 +3,8 @@ import UserDashboardLayout from "../../../../layouts/user-dashboard/dashboard-la
 import TopBar from "../../top-bar";
 import { CaretRightIcon } from "@phosphor-icons/react";
 import { Link } from "react-router-dom";
-import CheckoutDeliveryInfo from "./checkout-delivery-info";
-import CheckoutPaymentInfo from "./checkout-payment-info";
+import CheckoutDeliveryInfo from "../../../../shared-components/checkout/checkout-delivery-info";
+import CheckoutPaymentInfo from "../../../../shared-components/checkout/checkout-payment-info";
 import { useCart } from "../../../../hooks/cart.hooks";
 //import { useCheckout } from "../../../../hooks/orders.hooks";
 import Spinner from "../../../../shared-components/spinner";
@@ -20,8 +20,12 @@ import { formatPrice } from "../../../../utils/format-price";
  */
 export function DashboardCartCheckout() {
   const [checkoutTab, setCheckoutTab] = useState("delivery-detail");
-  const { data: cart, isLoading: cartLoading, isError: cartError, error: cartErrorMsg } = useCart();
-  //const checkoutMutation = useCheckout();
+  const {
+    data: cart,
+    isLoading: cartLoading,
+    isError: cartError,
+    error: cartErrorMsg,
+  } = useCart();
 
   const BreadCrumb = () => (
     <div className="font-inter font-light capitalize flex items-center">
@@ -59,7 +63,9 @@ export function DashboardCartCheckout() {
               {cartError ? "Error loading cart" : "Your cart is empty"}
             </p>
             <p className="text-gray-600">
-              {cartError ? cartErrorMsg?.message || "Please try again later" : "Add items to cart before checkout"}
+              {cartError
+                ? cartErrorMsg?.message || "Please try again later"
+                : "Add items to cart before checkout"}
             </p>
             <Link to="/dashboard/cart">
               <button className="px-4 py-2 bg-primary-500 text-white rounded-md hover:bg-primary-600">
@@ -114,24 +120,40 @@ export function DashboardCartCheckout() {
                 </h2>
                 <div className="text-right">
                   <p className="text-sm text-gray-600">Total</p>
-                  <p className="text-xl font-semibold">₦{formatPrice(cart.total)}</p>
+                  <p className="text-xl font-semibold">
+                    ₦{formatPrice(cart.total)}
+                  </p>
                 </div>
               </div>
 
               <div className="flex flex-col gap-4">
                 {cart.items.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between border border-neutral-100 rounded-md py-2 px-4">
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between border border-neutral-100 rounded-md py-2 px-4"
+                  >
                     <div className="w-full flex gap-6">
                       <img
-                        src={item.product.images?.[0]?.url || "/placeholder-image.jpg"}
+                        src={
+                          item.product.images?.[0]?.url ||
+                          "/placeholder-image.jpg"
+                        }
                         alt={item.product.name}
                         className="w-[14.125rem] h-[8.75rem] object-cover rounded-md"
                       />
                       <div className="grow flex flex-col gap-2">
-                        <h3 className="font-medium text-neutral-900">{item.product.name}</h3>
-                        <p className="text-sm text-gray-600">Size: {item.size}</p>
-                        <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
-                        <p className="font-semibold text-neutral-900">₦{formatPrice(item.product.price * item.quantity)}</p>
+                        <h3 className="font-medium text-neutral-900">
+                          {item.product.name}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          Size: {item.size}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          Quantity: {item.quantity}
+                        </p>
+                        <p className="font-semibold text-neutral-900">
+                          ₦{formatPrice(item.product.price * item.quantity)}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -141,9 +163,11 @@ export function DashboardCartCheckout() {
           )}
 
           {checkoutTab === "delivery-detail" ? (
-            <CheckoutDeliveryInfo onContinue={() => setCheckoutTab("payment-detail")} />
+            <CheckoutDeliveryInfo
+              onContinue={() => setCheckoutTab("payment-detail")}
+            />
           ) : (
-            <CheckoutPaymentInfo />
+            <CheckoutPaymentInfo redirectionLink="/dashboard/shop" />
           )}
         </div>
       </div>
