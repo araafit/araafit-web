@@ -60,10 +60,10 @@ export const useAddToCart = () => {
         style: notificationStyles.alertSuccess,
       });
     },
-    onError: (error: any) => {
-      console.error("Error adding to cart:", error);
+    onError: (error) => {
+      console.error("Unable to add cart:", error);
       toast.error(
-        error?.response?.data?.message || "Failed to add item to cart",
+        "Failed to add item to cart",
         { icon: null }
       );
     },
@@ -89,11 +89,9 @@ export const useUpdateQuantity = () => {
 
       toast.success("Quantity updated successfully!");
     },
-    onError: (error: any) => {
-      console.error("Error updating quantity:", error);
-      toast.error(
-        error?.response?.data?.message || "Failed to update quantity"
-      );
+    onError: (error) => {
+      console.error("Unable to update quantity:", error);
+      toast.error("Failed to update quantity");
     },
   });
 };
@@ -111,10 +109,9 @@ export const useRemoveFromCart = () => {
 
       toast.success("Item removed from cart!");
     },
-    onError: (error: any) => {
-      console.error("Error removing from cart:", error);
-      toast.error(
-        error?.response?.data?.message || "Failed to remove item from cart"
+    onError: (error) => {
+      console.error("Can't remove cart:", error);
+      toast.error("Failed to remove item from cart"
       );
     },
   });
@@ -136,9 +133,9 @@ export const useClearCart = () => {
         style: notificationStyles.alertSuccess,
       });
     },
-    onError: (error: any) => {
+    onError: (error) => {
       console.error("Error clearing cart:", error);
-      toast.error(error?.response?.data?.message || "Failed to clear cart");
+      toast.error("Failed to clear cart");
     },
   });
 };
@@ -160,10 +157,9 @@ export const useCreateCartItem = () => {
         style: notificationStyles.alertSuccess,
       });
     },
-    onError: (error: any) => {
+    onError: (error) => {
       console.error("Error creating cart item:", error);
-      toast.error(
-        error?.response?.data?.message || "Failed to add item to cart"
+      toast.error("Failed to add item to cart"
       );
     },
   });
@@ -191,10 +187,9 @@ export const useUpdateCartItem = () => {
         style: notificationStyles.alertSuccess,
       });
     },
-    onError: (error: any) => {
+    onError: (error) => {
       console.error("Error updating cart item:", error);
-      toast.error(
-        error?.response?.data?.message || "Failed to update cart item"
+      toast.error("Failed to update cart item"
       );
     },
   });
@@ -216,10 +211,9 @@ export const useDeleteCartItem = () => {
         style: notificationStyles.alertSuccess,
       });
     },
-    onError: (error: any) => {
+    onError: (error) => {
       console.error("Error deleting cart item:", error);
-      toast.error(
-        error?.response?.data?.message || "Failed to remove item from cart"
+      toast.error("Failed to remove item from cart"
       );
     },
   });
