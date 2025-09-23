@@ -53,10 +53,9 @@ export const useCreateMeasurements = () => {
       queryClient.invalidateQueries({ queryKey: measurementsKeys.all });
       toast.success(data.message || "Measurements saved successfully");
     },
-    onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message || "Failed to save measurements"
-      );
+    onError: (error) => {
+      console.log("Unable to save", error);
+      toast.error("Failed to save measurements");
     },
   });
 };
@@ -72,9 +71,10 @@ export const useUpdateMeasurements = () => {
       queryClient.invalidateQueries({ queryKey: measurementsKeys.all });
       toast.success(data.message || "Measurements updated successfully");
     },
-    onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message || "Failed to update measurements"
+    onError: (error) => {
+      console.log("Failed to update", error);
+
+      toast.error("Failed to update measurements"
       );
     },
   });
