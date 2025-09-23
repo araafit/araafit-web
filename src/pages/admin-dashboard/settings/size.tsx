@@ -136,10 +136,16 @@ export default function SizeTabs() {
                 <div className="space-y-1">
                   <label className="text-sm text-[#676767]">New Value</label>
                   <Input
-                    type="number"
-                    value={addNewValue}
-                    onChange={(e) => setAddNewValue(e.target.value)}
-                    placeholder="Enter new value"
+                  type="text"
+                  value={addNewValue}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    // Only allow non-negative numbers
+                    if (val === "" || Number(val) >= 0) {
+                    setAddNewValue(val);
+                    }
+                  }}
+                  placeholder="Enter new value"
                   />
                 </div>
               </div>
