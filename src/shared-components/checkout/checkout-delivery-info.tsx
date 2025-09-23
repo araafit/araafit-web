@@ -28,7 +28,6 @@ export default function CheckoutDeliveryInfo({
 }: {
   onContinue: () => void;
 }) {
-  // const [isLoading, setLoading] = React.useState(false);
   const [editInfo, setEditInfo] = React.useState(false);
   const updateProfile = useUpdateProfile();
   const user = useUser();
