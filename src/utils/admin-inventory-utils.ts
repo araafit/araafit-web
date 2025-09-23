@@ -1,8 +1,16 @@
-import type { AdminProduct, ProductMetrics } from "../services/admin-inventory.service";
+import type {
+  AdminProduct,
+  ProductMetrics,
+} from "../services/admin-inventory.service";
 import { formatCurrency, formatDate } from "./admin-dashboard-utils";
 
+/* -------------------------------------------------------------------- */
+
 // Convert API product to inventory table format
-export const convertApiProductToInventoryFormat = (apiProduct: AdminProduct) => {
+export const convertApiProductToInventoryFormat = (
+  apiProduct: AdminProduct
+) => {
+
   // Determine stock status based on quantity
   const getStockStatus = (quantity?: number, lowStockThreshold = 5) => {
     if (!quantity || quantity === 0) return "Out of Stock";
@@ -28,22 +36,28 @@ export const convertApiProductToInventoryFormat = (apiProduct: AdminProduct) => 
     },
 
     // Dress-specific info
-    dressInformation: apiProduct.category === "dress" ? {
-      materialType: apiProduct.materialType || "",
-      dressSize: apiProduct.dressSize || "",
-      weight: apiProduct.weight || 0,
-      thickness: apiProduct.thickness || "",
-    } : undefined,
+    dressInformation:
+      apiProduct.category === "dress"
+        ? {
+            materialType: apiProduct.materialType || "",
+            dressSize: apiProduct.dressSize || "",
+            weight: apiProduct.weight || 0,
+            thickness: apiProduct.thickness || "",
+          }
+        : undefined,
 
     // Fabric-specific info
-    fabricInformation: apiProduct.category === "fabric" ? {
-      materialType: apiProduct.materialType || "",
-      patternType: apiProduct.patternType || "",
-      style: apiProduct.style || "",
-      totalSize: apiProduct.totalSize || "",
-      weight: apiProduct.weight || 0,
-      thickness: apiProduct.thickness || "",
-    } : undefined,
+    fabricInformation:
+      apiProduct.category === "fabric"
+        ? {
+            materialType: apiProduct.materialType || "",
+            patternType: apiProduct.patternType || "",
+            style: apiProduct.style || "",
+            totalSize: apiProduct.totalSize || "",
+            weight: apiProduct.weight || 0,
+            thickness: apiProduct.thickness || "",
+          }
+        : undefined,
 
     skinTone: apiProduct.skinToneRecommendation || [],
     quantity: apiProduct.quantityInStock || 0,
@@ -51,8 +65,9 @@ export const convertApiProductToInventoryFormat = (apiProduct: AdminProduct) => 
 };
 
 // Convert multiple API products to inventory table format
-export const convertApiProductsToInventoryFormat = (apiProducts: AdminProduct[]) => {
-  console.log(apiProducts);
+export const convertApiProductsToInventoryFormat = (
+  apiProducts: AdminProduct[]
+) => {
   return apiProducts.map(convertApiProductToInventoryFormat);
 };
 
@@ -65,13 +80,13 @@ export const calculateStockDistribution = (metrics: ProductMetrics) => {
       value: metrics.totalInStock,
     },
     {
-      color: "#F3BF02", 
+      color: "#F3BF02",
       label: "Low Stock",
       value: metrics.totalLowStock,
     },
     {
       color: "#FF0005",
-      label: "Out of Stock", 
+      label: "Out of Stock",
       value: metrics.totalOutOfStock,
     },
   ];
@@ -117,7 +132,7 @@ export const getStockStatusColorClasses = (status: string) => {
       bgColor: "bg-[#F0FDF5]",
     },
     "low stock": {
-      textColor: "text-[#F59E0B]", 
+      textColor: "text-[#F59E0B]",
       bgColor: "bg-[#FEF3C7]",
     },
     "out of stock": {
@@ -126,8 +141,10 @@ export const getStockStatusColorClasses = (status: string) => {
     },
   };
 
-  return statusMap[status.toLowerCase()] || {
-    textColor: "text-[#6B7280]",
-    bgColor: "bg-[#F3F4F6]",
-  };
+  return (
+    statusMap[status.toLowerCase()] || {
+      textColor: "text-[#6B7280]",
+      bgColor: "bg-[#F3F4F6]",
+    }
+  );
 };

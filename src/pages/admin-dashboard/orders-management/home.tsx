@@ -1,4 +1,4 @@
-import { CaretRightIcon, Spinner } from "@phosphor-icons/react";
+import { CaretRightIcon } from "@phosphor-icons/react";
 import TopBar from "../admin-components/top-bar/top-bar";
 import AdminDashboardLayout from "../../../layouts/admin-dashboard/dashboard-layout";
 import { orderStatuses } from "../_data/_overview";
@@ -18,6 +18,9 @@ import Orders from "./orders";
 import Requests from "./request";
 import { useAdminDashboardMetrics } from "../../../hooks/admin-dashboard.hooks";
 import { convertMetricsToOverviewCards } from "../../../utils/admin-dashboard-utils";
+import Spinner from "../../../shared-components/spinner";
+
+/* ------------------------------------------------------------------------------------ */
 
 export function AdminDashboardOrders() {
   const {

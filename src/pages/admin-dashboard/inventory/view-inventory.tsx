@@ -1,8 +1,4 @@
-import {
-  CaretRightIcon,
-  CloudArrowUpIcon,
-  XIcon,
-} from "@phosphor-icons/react";
+import { CaretRightIcon, CloudArrowUpIcon, XIcon } from "@phosphor-icons/react";
 import TopBar from "../admin-components/top-bar/top-bar";
 import AdminDashboardLayout from "../../../layouts/admin-dashboard/dashboard-layout";
 import Button from "../../../shared-components/button";
@@ -20,15 +16,20 @@ import {
 import { TableButton } from "../../ui/button";
 import { Switch } from "../../ui/switch";
 import { CaretDownIcon } from "@phosphor-icons/react";
-// import { useParams } from "react-router-dom";
+
+/* ----------------------------------------------------------------------------- */
 
 const skinTone = ["Porcelin", "Ivory", "Sand", "Espresso", "Chestnut", "Honey"];
 
 export function AdminDashboardViewInventory() {
   const { inventoryId } = useParams<{ inventoryId: string }>();
   const navigate = useNavigate();
-  const { data: product, isLoading: isLoadingProduct, error: productError } = useProduct(inventoryId || "");
-  
+  const {
+    data: product,
+    isLoading: isLoadingProduct,
+    error: productError,
+  } = useProduct(inventoryId || "");
+
   //const [, setContributorPhotos] = useState<string[]>([]);
   //const [, setIsUploadingImage] = useState(false);
   const [discountsEnabled, setDiscountsEnabled] = useState(false);
@@ -133,7 +134,9 @@ export function AdminDashboardViewInventory() {
                 <Button
                   text="Edit"
                   variant="solid"
-                  onClick={() => navigate(`/admin-dashboard/inventory/${inventoryId}/edit`)}
+                  onClick={() =>
+                    navigate(`/admin-dashboard/inventory/${inventoryId}/edit`)
+                  }
                   className="text-white shadow-sm w-44"
                 />
               </>
@@ -142,7 +145,9 @@ export function AdminDashboardViewInventory() {
         </div>
         <div className="w-full  flex flex-col  p-4 mt-20 overflow-y-scroll px-10">
           <div>
-            <h2 className="font-semibold text-[28px]">View {product.category === "dress" ? "Dress" : "Fabric"}</h2>
+            <h2 className="font-semibold text-[28px]">
+              View {product.category === "dress" ? "Dress" : "Fabric"}
+            </h2>
             <span className="capitalize text-[#5D5D5D] font-light cursor-pointer text-sm font-inter">
               View, edit, and update your stunning {product.category} here.
             </span>
@@ -161,7 +166,7 @@ export function AdminDashboardViewInventory() {
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  
+
                   {/* Additional Images */}
                   {product.images.length > 1 && (
                     <div className="flex gap-4 flex-wrap">
@@ -186,7 +191,9 @@ export function AdminDashboardViewInventory() {
                     <div className="h-12 w-12 bg-[#F0F2F5] rounded-full flex items-center justify-center mx-auto mb-4">
                       <CloudArrowUpIcon className="text-[#475367]" size={32} />
                     </div>
-                    <span className="text-[#9A9A9A] font-light">No images available</span>
+                    <span className="text-[#9A9A9A] font-light">
+                      No images available
+                    </span>
                   </div>
                 </div>
               )}

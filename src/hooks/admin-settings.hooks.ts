@@ -8,6 +8,10 @@ import type {
   CreateDressStyleRequest,
 } from "../services/admin-settings.service";
 import { toast } from "react-hot-toast";
+import showToast from "../utils/notification";
+import { notificationStyles } from "../style/custom";
+
+/* ------------------------------------------------------------------------- */
 
 // Query keys
 export const adminSettingsKeys = {
@@ -24,7 +28,10 @@ export const useAdminProfile = () => {
     queryFn: () => adminSettingsService.getProfile(),
     retry: (failureCount, error) => {
       const axiosError = error as { response?: { status?: number } };
-      if (axiosError.response?.status === 401 || axiosError.response?.status === 403) {
+      if (
+        axiosError.response?.status === 401 ||
+        axiosError.response?.status === 403
+      ) {
         return false;
       }
       return failureCount < 3;
@@ -39,12 +46,27 @@ export const useUpdateAdminProfile = () => {
     mutationFn: (request: UpdateAdminProfileRequest) =>
       adminSettingsService.updateProfile(request),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [...adminSettingsKeys.all, "profile"] });
-      toast.success("Profile updated successfully");
+      queryClient.invalidateQueries({
+        queryKey: [...adminSettingsKeys.all, "profile"],
+      });
+      showToast.success("Profile updated successfully", {
+        icon: null,
+        style: notificationStyles.alertSuccess,
+        position: "top-center",
+      });
     },
     onError: (error: unknown) => {
-      const axiosError = error as { response?: { data?: { message?: string } } };
-      toast.error(axiosError.response?.data?.message || "Failed to update profile");
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+      };
+      showToast.error(
+        axiosError.response?.data?.message || "Failed to update profile",
+        {
+          icon: null,
+          style: notificationStyles.alertError,
+          position: "top-center",
+        }
+      );
     },
   });
 };
@@ -54,11 +76,20 @@ export const useUpdateAdminPassword = () => {
     mutationFn: (request: UpdateAdminPasswordRequest) =>
       adminSettingsService.updatePassword(request),
     onSuccess: () => {
-      toast.success("Password updated successfully");
+      showToast.success("Password updated successfully", {
+        icon: null,
+        style: notificationStyles.alertSuccess,
+        position: "top-center",
+      });
     },
     onError: (error: unknown) => {
-      const axiosError = error as { response?: { data?: { message?: string } } };
-      toast.error(axiosError.response?.data?.message || "Failed to update password");
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+      };
+      showToast.error(
+        axiosError.response?.data?.message || "Failed to update password",
+        { icon: null, style: { ...notificationStyles.alertError } }
+      );
     },
   });
 };
@@ -70,7 +101,10 @@ export const useSizeChart = () => {
     queryFn: () => adminSettingsService.getSizeChart(),
     retry: (failureCount, error) => {
       const axiosError = error as { response?: { status?: number } };
-      if (axiosError.response?.status === 401 || axiosError.response?.status === 403) {
+      if (
+        axiosError.response?.status === 401 ||
+        axiosError.response?.status === 403
+      ) {
         return false;
       }
       return failureCount < 3;
@@ -85,12 +119,28 @@ export const useCreateSizeChart = () => {
     mutationFn: (request: CreateSizeChartRequest) =>
       adminSettingsService.createSizeChart(request),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: adminSettingsKeys.sizeChart() });
-      toast.success("Size chart item created successfully");
+      queryClient.invalidateQueries({
+        queryKey: adminSettingsKeys.sizeChart(),
+      });
+      toast.success("Size chart item created successfully", {
+        icon: null,
+        style: notificationStyles.alertSuccess,
+        position: "top-center",
+      });
     },
     onError: (error: unknown) => {
-      const axiosError = error as { response?: { data?: { message?: string } } };
-      toast.error(axiosError.response?.data?.message || "Failed to create size chart item");
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+      };
+      showToast.error(
+        axiosError.response?.data?.message ||
+          "Failed to create size chart item",
+        {
+          icon: null,
+          style: notificationStyles.alertError,
+          position: "top-center",
+        }
+      );
     },
   });
 };
@@ -99,15 +149,36 @@ export const useUpdateSizeChart = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, request }: { id: string; request: UpdateSizeChartRequest }) =>
-      adminSettingsService.updateSizeChart(id, request),
+    mutationFn: ({
+      id,
+      request,
+    }: {
+      id: string;
+      request: UpdateSizeChartRequest;
+    }) => adminSettingsService.updateSizeChart(id, request),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: adminSettingsKeys.sizeChart() });
-      toast.success("Size chart item updated successfully");
+      queryClient.invalidateQueries({
+        queryKey: adminSettingsKeys.sizeChart(),
+      });
+      showToast.success("Size chart item updated successfully", {
+        icon: null,
+        style: notificationStyles.alertSuccess,
+        position: "top-center",
+      });
     },
     onError: (error: unknown) => {
-      const axiosError = error as { response?: { data?: { message?: string } } };
-      toast.error(axiosError.response?.data?.message || "Failed to update size chart item");
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+      };
+      showToast.error(
+        axiosError.response?.data?.message ||
+          "Failed to update size chart item",
+        {
+          icon: null,
+          style: notificationStyles.alertError,
+          position: "top-center",
+        }
+      );
     },
   });
 };
@@ -119,7 +190,10 @@ export const useDressStyles = () => {
     queryFn: () => adminSettingsService.getDressStyles(),
     retry: (failureCount, error) => {
       const axiosError = error as { response?: { status?: number } };
-      if (axiosError.response?.status === 401 || axiosError.response?.status === 403) {
+      if (
+        axiosError.response?.status === 401 ||
+        axiosError.response?.status === 403
+      ) {
         return false;
       }
       return failureCount < 3;
@@ -134,7 +208,10 @@ export const useDressStyle = (id: string) => {
     enabled: !!id,
     retry: (failureCount, error) => {
       const axiosError = error as { response?: { status?: number } };
-      if (axiosError.response?.status === 401 || axiosError.response?.status === 403) {
+      if (
+        axiosError.response?.status === 401 ||
+        axiosError.response?.status === 403
+      ) {
         return false;
       }
       return failureCount < 3;
@@ -149,12 +226,27 @@ export const useCreateDressStyle = () => {
     mutationFn: (request: CreateDressStyleRequest) =>
       adminSettingsService.createDressStyle(request),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: adminSettingsKeys.dressStyles() });
-      toast.success("Dress style created successfully");
+      queryClient.invalidateQueries({
+        queryKey: adminSettingsKeys.dressStyles(),
+      });
+      showToast.success("Dress style created successfully", {
+        icon: null,
+        style: notificationStyles.alertSuccess,
+        position: "top-center",
+      });
     },
     onError: (error: unknown) => {
-      const axiosError = error as { response?: { data?: { message?: string } } };
-      toast.error(axiosError.response?.data?.message || "Failed to create dress style");
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+      };
+      showToast.error(
+        axiosError.response?.data?.message || "Failed to create dress style",
+        {
+          icon: null,
+          style: notificationStyles.alertError,
+          position: "top-center",
+        }
+      );
     },
   });
 };
@@ -165,12 +257,27 @@ export const useDeleteDressStyle = () => {
   return useMutation({
     mutationFn: (id: string) => adminSettingsService.deleteDressStyle(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: adminSettingsKeys.dressStyles() });
-      toast.success("Dress style deleted successfully");
+      queryClient.invalidateQueries({
+        queryKey: adminSettingsKeys.dressStyles(),
+      });
+      showToast.success("Dress style deleted successfully", {
+        icon: null,
+        style: notificationStyles.alertSuccess,
+        position: "top-center",
+      });
     },
     onError: (error: unknown) => {
-      const axiosError = error as { response?: { data?: { message?: string } } };
-      toast.error(axiosError.response?.data?.message || "Failed to delete dress style");
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+      };
+      showToast.error(
+        axiosError.response?.data?.message || "Failed to delete dress style",
+        {
+          icon: null,
+          style: notificationStyles.alertError,
+          position: "top-center",
+        }
+      );
     },
   });
 };

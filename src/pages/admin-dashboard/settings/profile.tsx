@@ -129,7 +129,7 @@ export default function ManageOrdersRequests() {
         {/* Header */}
         <div className="flex justify-between">
           <h2 className="font-semibold text-[28px] capitalize">
-            Manage Profile
+            Profile Information
           </h2>
 
           <div

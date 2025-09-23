@@ -1,4 +1,4 @@
-import { CaretRightIcon } from "@phosphor-icons/react";
+import { CaretRightIcon, WarningIcon, XIcon } from "@phosphor-icons/react";
 import TopBar from "../admin-components/top-bar/top-bar";
 import AdminDashboardLayout from "../../../layouts/admin-dashboard/dashboard-layout";
 import { DiscountTable } from "../admin-components/discountsTable/discounts-table";
@@ -19,6 +19,8 @@ export type Discount = {
   endDate: string;
   status: "Active" | "Inactive";
 };
+
+/* -------------------------------------------------------------------------------- */
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const discountData: Discount[] = [
@@ -46,6 +48,8 @@ export const discountData: Discount[] = [
 // const totalDiscounts = discountData.length;
 
 export function AdminDashboardDiscounts() {
+  const [showDisclaimer, setShowDisclaimer] = useState(true);
+
   const title = <div className="font-lora text-[#1C1C1C]">Discounts</div>;
 
   const BreadCrumb = () => (
@@ -82,6 +86,27 @@ export function AdminDashboardDiscounts() {
           />
         </div>
         <div className="w-full  flex flex-col gap-4 p-4 mt-20 overflow-y-scroll px-10">
+          {showDisclaimer && (
+            <div className="flex items-start gap-3 p-4 bg-[#FFF8EB] border border-[#FCBB4D] rounded-md relative">
+              <WarningIcon className="text-[#B47409]" />
+
+              <div>
+                <strong className="text-[#B47409]">Disclaimer</strong>
+                <p className="text-[#D98B06]">
+                  If product discounts exist, customers will always see the
+                  lowest price — whether from the product or this app-wide
+                  discount.
+                </p>
+              </div>
+
+              <XIcon
+                size={20}
+                className="text-[#B47409] font-semibold absolute right-3 cursor-pointer"
+                onClick={() => setShowDisclaimer(false)}
+              />
+            </div>
+          )}
+
           <section className="flex gap-0 flex-col">
             <div className="flex items-center justify-between bg-white rounded-t-md border-b py-4 px-4">
               <h2 className="font-lora text-[28px] text-[#1C1C1C] flex items-center gap-2">
