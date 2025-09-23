@@ -1,4 +1,4 @@
-import { ArrowRightIcon, CaretRightIcon } from "@phosphor-icons/react";
+import { ArrowRightIcon, CaretRightIcon, PlusIcon } from "@phosphor-icons/react";
 import TopBar from "../admin-components/top-bar/top-bar";
 import AdminDashboardLayout from "../../../layouts/admin-dashboard/dashboard-layout";
 import { Link } from "react-router-dom";
@@ -18,14 +18,21 @@ import {
 } from "../../../utils/admin-dashboard-utils";
 import Spinner from "../../../shared-components/spinner";
 import { EmptyStateCard } from "../admin-components/empty-state-card";
+import Button from "../../../shared-components/button";
+import { useNavigate } from "react-router-dom";
+
+/* ------------------------------------------------------------------------------------ */
 
 export function AdminDashboardOverview() {
+  const navigate = useNavigate()
   const { adminUser } = useAuth();
+
   const {
     data: metrics,
     isLoading: metricsLoading,
     error: metricsError,
   } = useAdminDashboardMetrics();
+
   const {
     data: recentActivities,
     isLoading: activitiesLoading,
@@ -41,6 +48,8 @@ export function AdminDashboardOverview() {
     </div>
   );
 
+  console.log(metrics);
+
   const BreadCrumb = () => (
     <div className="font-inter font-light capitalize flex items-center">
       <span className="text-primary-900">Araafit</span>
@@ -48,8 +57,6 @@ export function AdminDashboardOverview() {
       <span className="text-[#979797]">Overview</span>
     </div>
   );
-
-  console.log("metrics", metrics);
 
   return (
     <AdminDashboardLayout>
@@ -59,9 +66,16 @@ export function AdminDashboardOverview() {
             title={title}
             breadCrumb={<BreadCrumb />}
             rightSide={
-              <>
+              <div className="flex items-center gap-6">
                 <NotificationBell />
-              </>
+
+                <Button variant="solid" className="cursor-pointer" onClick={() => navigate("/admin-dashboard/inventory")}>
+                  <div className="flex items-center gap-2">
+                    <PlusIcon />
+                    <span>Add Inventory</span>
+                  </div>
+                </Button>
+              </div>
             }
           />
         </div>
@@ -89,7 +103,7 @@ export function AdminDashboardOverview() {
             <div className=" lg:w-[35.438rem] bg-white rounded-md px-4 py-6 items-center justify-between ">
               <div className="flex items-center justify-between w-full">
                 <h2 className="font-medium text-[28px] capitalize">
-                  New Orders
+                  New Orders {metrics && `(${metrics?.newOrders})`}
                 </h2>
                 <Link
                   to="/admin-dashboard/order-management"
@@ -155,11 +169,15 @@ export function AdminDashboardOverview() {
                 />
               )}
             </div>
+
             {/* Tailoring Requests */}
             <div className=" lg:w-[35.438rem] flex-auto bg-white rounded-md px-4 py-6 items-center justify-between">
               <div className="flex items-center justify-between w-full">
                 <h2 className="font-medium text-[28px] capitalize">
-                  Tailoring Requests
+                  Tailoring Requests{" "}
+                  {metrics && metrics?.mostRecentRequest !== null
+                    ? `(${metrics?.mostRecentRequest})`
+                    : ""}
                 </h2>
                 <Link
                   to="/admin-dashboard/order-management"
