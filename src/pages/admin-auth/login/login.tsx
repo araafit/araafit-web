@@ -25,7 +25,6 @@ const AdminLogin = ({ userType }: LoginProps) => {
   const navigate = useNavigate();
   const { isAuthenticated, isAdminUser, isLoading: authLoading } = useAuth();
   const adminLoginMutation = useAdminLogin();
-
   const googleAuth = () => console.log("Google auth");
 
   const {
