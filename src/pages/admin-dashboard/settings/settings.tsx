@@ -34,15 +34,18 @@ export function AdminDashboardSettings() {
                 <TabsTrigger value="style">Tailoring Styles</TabsTrigger>
               </TabsList>
             </section>
+
             <TabsContent
               value="profile"
               className="relative flex  flex-col gap-4 overflow-auto"
             >
               <Profile />
             </TabsContent>
+
             <TabsContent value="size">
               <SizeTabs />
             </TabsContent>
+            
             <TabsContent value="style">
               <StylesTabs />
             </TabsContent>
