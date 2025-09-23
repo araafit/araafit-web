@@ -65,6 +65,8 @@ function CartEngine({ cartData, checkoutLink }: CartEngine) {
     }
   };
 
+  const totalPrice = cartData.reduce((total, item) => total + item.product.price * item.quantity, 0);
+
   return (
     <div className="w-full flex flex-col gap-6">
       <div className="flex flex-col gap-4">
@@ -74,12 +76,13 @@ function CartEngine({ cartData, checkoutLink }: CartEngine) {
             className="w-full border border-neutral-100 rounded-md py-2 px-4"
           >
             <div className="flex gap-6">
+              
               <input
                 type="checkbox"
                 name={`order_` + item.id}
                 id=""
                 placeholder=""
-                title=""
+                title="checkbox"
                 className="self-start"
               />
 
@@ -135,11 +138,11 @@ function CartEngine({ cartData, checkoutLink }: CartEngine) {
           </div>
           <div className="flex items-center justify-between">
             <span className="text-neutral-800">Subtotal</span>
-            <span className="text-neutral-950">₦170,000.00</span>
+            <span className="text-neutral-950">₦{formatPrice(totalPrice)}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-neutral-800">Total</span>
-            <span className="text-neutral-950">₦170,000,00</span>
+            <span className="text-neutral-950">₦{formatPrice(totalPrice)}</span>
           </div>
         </div>
 
