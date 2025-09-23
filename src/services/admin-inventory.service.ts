@@ -1,5 +1,6 @@
 import apiClient from "../lib/axios";
 import type { ApiResponse } from "./admin-auth.service";
+import type { Pagination } from "./products.service";
 
 // Types for Admin Inventory
 export interface ProductImage {
@@ -115,10 +116,13 @@ class AdminInventoryService {
   /**
    * Get all products
    */
-  async getProducts(): Promise<AdminProduct[]> {
-    const response = await apiClient.get<ApiResponse<AdminProduct[]>>(
-      "/products"
-    );
+  async getProducts(): Promise<{
+    pagination: Pagination;
+    products: AdminProduct[];
+  }> {
+    const response = await apiClient.get<
+      ApiResponse<{ pagination: Pagination; products: AdminProduct[] }>
+    >("/products");
     return response.data.data;
   }
 

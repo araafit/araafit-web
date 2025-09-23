@@ -132,7 +132,7 @@ export function AdminDashboardInventory() {
                 </p>
               </div>
             ) : products ? (
-              <DataTable data={convertApiProductsToInventoryFormat(products)} />
+              <DataTable data={convertApiProductsToInventoryFormat(products.products)} />
             ) : (
               <DataTable data={[]} />
             )}

@@ -32,9 +32,7 @@ import {
   TableHeader,
   TableRow,
 } from "../../../ui/table";
-import {
-  TrashSimpleIcon,
-} from "@phosphor-icons/react";
+import { TrashSimpleIcon } from "@phosphor-icons/react";
 import Button from "../../../../shared-components/button";
 import emptyFolder from "../../images/image 45.png";
 import {
@@ -49,7 +47,10 @@ import {
 } from "../../../ui/dialog";
 import DiscountStatusToggle from "./toggle-status";
 import { EditDiscountDrawer } from "./edit-discount-drawer";
-import { useDeleteDiscount, useUpdateDiscount } from "../../../../hooks/admin-discounts.hooks";
+import {
+  useDeleteDiscount,
+  useUpdateDiscount,
+} from "../../../../hooks/admin-discounts.hooks";
 
 // --- SCHEMA / TYPE ---
 export type Discount = {
@@ -178,7 +179,13 @@ const createColumns = (
 ];
 
 // --- TABLE COMPONENT ---
-export function DiscountTable({ data: initialData }: { data: Discount[] }) {
+export function DiscountTable({
+  data: initialData,
+  openCreateDrawer,
+}: {
+  data: Discount[];
+  openCreateDrawer: (open: boolean) => void;
+}) {
   const [data, setData] = React.useState(() => initialData);
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -315,7 +322,11 @@ export function DiscountTable({ data: initialData }: { data: Discount[] }) {
                             <p className="text-[#5D5D5D] font-light mb-2">
                               Looks like you haven’t created any discounts.{" "}
                             </p>
-                            <Button variant="solid" text="Create Discounts" />
+                            <Button
+                              variant="solid"
+                              text="Create Discounts"
+                              onClick={() => openCreateDrawer(true)}
+                            />
                           </div>
                         </section>
                       </div>

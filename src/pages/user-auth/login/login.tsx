@@ -124,7 +124,7 @@ export default function Login({ userType }: LoginProps) {
 
           <p className="self-start text-neutral-900">
             Forgot Password?{" "}
-            <Link to="/auth/reset" className="text-primary-500">
+            <Link to="/auth/reset/reset-password" className="text-primary-500">
               Reset
             </Link>
           </p>
