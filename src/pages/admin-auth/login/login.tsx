@@ -1,3 +1,4 @@
+import { memo } from "react";
 import AuthLayout from "../../../layouts/auth/auth-layout";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import Button from "../../../shared-components/button";
@@ -19,11 +20,12 @@ type LoginProps = {
  *
  * @returns ReactElement
  */
-export default function AdminLogin({ userType }: LoginProps) {
+
+const AdminLogin = ({ userType }: LoginProps) => {
   const navigate = useNavigate();
   const { isAuthenticated, isAdminUser, isLoading: authLoading } = useAuth();
   const adminLoginMutation = useAdminLogin();
-  
+
   const googleAuth = () => console.log("Google auth");
 
   const {
@@ -119,17 +121,24 @@ export default function AdminLogin({ userType }: LoginProps) {
             disabled={!isValid || adminLoginMutation.isPending}
             className={`w-full max-w-[23.4375rem] ${
               !isValid || adminLoginMutation.isPending
-                ? "bg-neutral-50 text-white"
+                ? "bg-neutral-100 text-white"
                 : "bg-primary-500 text-white"
             }`}
           >
-            <div className="w-full flex items-center justify-center">
+            <div className="w-full flex items-center justify-center gap-2">
               <span>Login</span>
-              {adminLoginMutation.isPending && <Spinner size="sm" speed="fast" className="ml-1" />}
+              <Spinner
+                size="md"
+                speed="fast"
+                isLoading={adminLoginMutation.isPending}
+                circleColor="#9A6C50"
+              />
             </div>
           </Button>
         </div>
       </form>
     </AuthLayout>
   );
-}
+};
+
+export default memo(AdminLogin);
