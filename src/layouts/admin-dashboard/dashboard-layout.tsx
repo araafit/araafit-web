@@ -79,8 +79,6 @@ export default function AdminDashboardLayout({
     logoutMutation.mutate();
   };
 
-  const iconClass = "mr-3 w-5 h-5";
-
   return (
     <section className="h-screen bg-[#F5F5F5] flex items-start">
       <div className="w-[12.375rem] h-screen hidden  lg:block fixed left-0 top-0 border-r-2 border-neutral-100 bg-white">
@@ -114,7 +112,7 @@ export default function AdminDashboardLayout({
                         en
                       </span>
                     ) : (
-                      createElement(item.icon ?? "a", { className: iconClass })
+                      createElement(item.icon ?? "a", { className: "mr-3 w-5 h-5" })
                     )}
 
                     <span className="capitalize text-sm ml-2">{item.name}</span>
