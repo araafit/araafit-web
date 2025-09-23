@@ -24,7 +24,9 @@ import {
 /**
  * Example of how to update your routes.tsx file
  */
-export const exampleRoutes = createBrowserRouter([
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const exampleRoutes = createBrowserRouter([
   // Public routes (accessible to everyone)
   {
     path: "/",
@@ -227,4 +229,3 @@ export const ConditionalContentExample = () => {
  *    - Example: show different content based on auth state
  */
 
-export default exampleRoutes;
