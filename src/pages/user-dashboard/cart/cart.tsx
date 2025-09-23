@@ -52,7 +52,7 @@ export function DashboardCartPage() {
     return (
       <UserDashboardLayout>
         <div className="h-screen flex items-center justify-center">
-         <LoaderView />
+          <LoaderView />
         </div>
       </UserDashboardLayout>
     );
@@ -90,10 +90,13 @@ export function DashboardCartPage() {
               <h2 className="font-semibold text-[28px] capitalize">
                 {cartIsEmpty ? "My Cart" : `My Cart (${cartItems.length})`}
               </h2>
+
               {cart && !cartIsEmpty && (
                 <div className="text-right">
                   <p className="text-sm text-gray-600">Total</p>
-                  <p className="text-xl font-semibold">₦{formatPrice(cart.total)}</p>
+                  <p className="text-xl font-semibold">
+                    ₦{formatPrice(cart.total)}
+                  </p>
                 </div>
               )}
             </div>
@@ -108,9 +111,12 @@ export function DashboardCartPage() {
                 <CartEngine
                   cartData={cartItems.map((item) => ({
                     ...item,
-                    image: item.product.images?.[0]?.url || "/placeholder-image.jpg",
+                    image:
+                      item.product.images?.[0]?.url || "/placeholder-image.jpg",
                     name: item.product.name,
-                    description: item.product.description || `${item.product.category} - Size: ${item.size}`,
+                    description:
+                      item.product.description ||
+                      `${item.product.category} - Size: ${item.size}`,
                     cost: item.product.price,
                   }))}
                   checkoutLink="/dashboard/cart/checkout"
