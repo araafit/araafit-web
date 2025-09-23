@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import {
@@ -48,6 +49,8 @@ export const useAddRequestRider = () => {
       queryClient.invalidateQueries({ queryKey: adminSewingRequestsKeys.lists() });
       toast.success("Rider added successfully");
     },
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       toast.error(error.response?.data?.message || "Failed to add rider");
     },
@@ -66,6 +69,7 @@ export const useUpdateRequestRider = () => {
       queryClient.invalidateQueries({ queryKey: adminSewingRequestsKeys.lists() });
       toast.success("Rider information updated successfully");
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       toast.error(error.response?.data?.message || "Failed to update rider information");
     },
@@ -86,6 +90,7 @@ export const useUpdateSewingRequest = () => {
       queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
       toast.success("Sewing request updated successfully");
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       toast.error(error.response?.data?.message || "Failed to update sewing request");
     },
@@ -106,6 +111,7 @@ export const useDeleteSewingRequest = () => {
       queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
       toast.success("Sewing request deleted successfully");
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       toast.error(error.response?.data?.message || "Failed to delete sewing request");
     },
