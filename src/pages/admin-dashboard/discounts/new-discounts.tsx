@@ -24,14 +24,25 @@ import {
   DrawerClose,
 } from "../../ui/drawer";
 import { useCreateDiscount } from "../../../hooks/admin-discounts.hooks";
-import type { DiscountEligibility, DiscountType } from "../../../services/admin-discounts.service";
+import type {
+  DiscountEligibility,
+  DiscountType,
+} from "../../../services/admin-discounts.service";
 import { toast } from "react-hot-toast";
+import showToast from "../../../utils/notification";
+
+/* -------------------------------------------------------------------------------- */
 
 interface CreateDiscountDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
+/**
+ * This component allows the admin to create a new discount
+ *
+ * @returns React.FC<CreateDiscountDrawerProps>
+ */
 export const CreateDiscountDrawer: React.FC<CreateDiscountDrawerProps> = ({
   open,
   onOpenChange,
@@ -70,7 +81,8 @@ export const CreateDiscountDrawer: React.FC<CreateDiscountDrawerProps> = ({
     const usageNum = Number(usageLimit || 0);
     const apiEligibility = mapEligibilityToApi(eligibility);
     if (!apiEligibility) return toast.error("Select eligibility");
-    if (!startDate || !endDate) return toast.error("Select start and end dates");
+    if (!startDate || !endDate)
+      return toast.error("Select start and end dates");
 
     try {
       await createMutation.mutateAsync({
@@ -114,8 +126,11 @@ export const CreateDiscountDrawer: React.FC<CreateDiscountDrawerProps> = ({
                     size={18}
                   />
                 </TooltipTrigger>
-                <TooltipContent className="max-w-[330px]">
-                  <p>Create a brand new discount and configure its details.</p>
+                <TooltipContent className="max-w-[330px] bg-[#3D3D3D] text-[12px] text-white p-3">
+                  <p>
+                    Set up special offers to reward your customers — whether
+                    it's a percentage off, or flat amount.
+                  </p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -143,7 +158,10 @@ export const CreateDiscountDrawer: React.FC<CreateDiscountDrawerProps> = ({
             <label className="font-inter font-light text-[16px] text-[#1C1C1C]">
               Discount Type
             </label>
-            <Select value={type} onValueChange={(v) => setType(v as DiscountType)}>
+            <Select
+              value={type}
+              onValueChange={(v) => setType(v as DiscountType)}
+            >
               <SelectTrigger className="w-full h-12 border border-[#D0D5DD] rounded-lg px-3 text-sm">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
@@ -189,7 +207,25 @@ export const CreateDiscountDrawer: React.FC<CreateDiscountDrawerProps> = ({
           {/* Usage Limit */}
           <div className="space-y-2">
             <label className="font-inter font-light text-[16px] text-[#1C1C1C]">
-              Usage Limit
+              <div className="flex items-center gap-1">
+                <span>Usage Limit</span>
+                <TooltipProvider delayDuration={0}>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <QuestionIcon
+                        className="text-gray-600 cursor-pointer"
+                        size={18}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-[330px] bg-[#3D3D3D] text-[12px] text-white p-3">
+                      <p>
+                        Usage limit refers to how many times a discount can be
+                        used. Either overall, per customer, or per order.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
             </label>
             <input
               type="number"
