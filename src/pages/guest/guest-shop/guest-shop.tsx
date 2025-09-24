@@ -100,8 +100,7 @@ export function GuestShopPage() {
   const { switchValue: isOpen, toggleSwitch: toggleModal } = useSwitch(false);
 
   useEffect(() => {
-    setTimeout(() => toggleModal(), 3000);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    setTimeout(() => toggleModal(), 10000);
   }, []);
 
   return (

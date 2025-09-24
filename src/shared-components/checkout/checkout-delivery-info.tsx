@@ -3,8 +3,10 @@ import { PencilSimpleIcon } from "@phosphor-icons/react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import Button from "../button";
 import Spinner from "../spinner";
+import { useUpdateProfile } from "../../hooks/users.hooks";
+import { useUser } from "../../stores/auth-store";
 
-/* ------------------------------------------------- */
+/* ----------------------------------------------------------------- */
 
 interface FormValues {
   firstName: string;
@@ -21,26 +23,48 @@ interface FormValues {
  *
  * @returns ReactElement
  */
-export default function CheckoutDeliveryInfo({ onContinue }: { onContinue: () => void }) {
-  const [isLoading, setLoading] = React.useState(false);
+export default function CheckoutDeliveryInfo({
+  onContinue,
+}: {
+  onContinue: () => void;
+}) {
+  const [editInfo, setEditInfo] = React.useState(false);
+  const updateProfile = useUpdateProfile();
+  const user = useUser();
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isValid },
   } = useForm<FormValues>({ mode: "onTouched" });
 
-  const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    setLoading(true);
+  if (user) {
+    setValue("firstName", (user.firstName as string) || "");
+    setValue("lastName", (user.lastName as string) || "");
+    setValue("email", (user.email as string) || "");
+    setValue("city", (user.city as string) || "");
+    setValue("address", (user.deliveryAddress as string) || "");
+    setValue("phoneNumber", (user.phoneNumber as string) || "");
+    setValue("zipCode", (user.zipCode as string) || "");
+  }
 
-    // Simulate form processing (you might want to save delivery info to state/API)
-    await new Promise((res) => setTimeout(res, 1000));
-    
-    setLoading(false);
-    console.log("Delivery information:", data);
-    
-    // Switch to payment info tab
-    onContinue();
+  const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    // setLoading(true);
+
+    updateProfile.mutate({
+      firstName: data.firstName,
+      lastName: data.lastName,
+      phoneNumber: data.phoneNumber,
+      deliveryAddress: data.address,
+      city: data.city,
+      zipCode: data.zipCode,
+    });
+
+    // Switch to payment info on success
+    if (updateProfile.isSuccess) {
+      onContinue();
+    }
   };
 
   return (
@@ -50,9 +74,12 @@ export default function CheckoutDeliveryInfo({ onContinue }: { onContinue: () =>
           Delivery information
         </h2>
 
-        <div className="flex items-center gap-2">
+        <div
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={() => setEditInfo((prev) => !prev)}
+        >
           <PencilSimpleIcon />
-          <span>Edit</span>
+          <span>{!editInfo ? "Edit" : "Cancel edit"}</span>
         </div>
       </div>
 
@@ -66,10 +93,11 @@ export default function CheckoutDeliveryInfo({ onContinue }: { onContinue: () =>
 
               <input
                 type="text"
-                className="w-full p-4 border border-gray-300 outline-none rounded-[6px]"
+                className="w-full p-4 border border-gray-300 outline-none rounded-[6px] disabled:cursor-not-allowed"
                 {...register("firstName", {
                   required: "First name is required",
                 })}
+                disabled={!editInfo}
               />
 
               {errors.firstName && (
@@ -86,10 +114,11 @@ export default function CheckoutDeliveryInfo({ onContinue }: { onContinue: () =>
 
               <input
                 type="text"
-                className="w-full p-4 border border-gray-300 outline-none rounded-[6px]"
+                className="w-full p-4 border border-gray-300 outline-none rounded-[6px] disabled:cursor-not-allowed"
                 {...register("lastName", {
                   required: "Last name is required",
                 })}
+                disabled={!editInfo}
               />
 
               {errors.lastName && (
@@ -112,7 +141,8 @@ export default function CheckoutDeliveryInfo({ onContinue }: { onContinue: () =>
               <input
                 id="email"
                 type="email"
-                className="w-full p-4 border border-gray-300 outline-none rounded-[6px]"
+                className="w-full p-4 border border-gray-300 outline-none rounded-[6px] disabled:cursor-not-allowed"
+                disabled={!editInfo}
                 {...register("email", {
                   required: "Email is required",
                   pattern: {
@@ -134,7 +164,8 @@ export default function CheckoutDeliveryInfo({ onContinue }: { onContinue: () =>
 
               <input
                 type="tel"
-                className="w-full p-4 border border-gray-300 outline-none rounded-[6px]"
+                className="w-full p-4 border border-gray-300 outline-none rounded-[6px] disabled:cursor-not-allowed"
+                disabled={!editInfo}
                 {...register("phoneNumber", {
                   required: "Phone Number",
                 })}
@@ -159,7 +190,8 @@ export default function CheckoutDeliveryInfo({ onContinue }: { onContinue: () =>
 
               <input
                 type="text"
-                className="w-full p-4 border border-gray-300 outline-none rounded-[6px]"
+                className="w-full p-4 border border-gray-300 outline-none rounded-[6px] disabled:cursor-not-allowed"
+                disabled={!editInfo}
                 {...register("city", {
                   required: "City/Town is required",
                 })}
@@ -180,7 +212,8 @@ export default function CheckoutDeliveryInfo({ onContinue }: { onContinue: () =>
 
               <input
                 type="text"
-                className="w-full p-4 border border-gray-300 outline-none rounded-[6px]"
+                className="w-full p-4 border border-gray-300 outline-none rounded-[6px] disabled:cursor-not-allowed"
+                disabled={!editInfo}
                 {...register("zipCode")}
               />
 
@@ -200,7 +233,8 @@ export default function CheckoutDeliveryInfo({ onContinue }: { onContinue: () =>
 
             <input
               type="text"
-              className="w-full p-4 border border-gray-300 outline-none rounded-[6px]"
+              className="w-full p-4 border border-gray-300 outline-none rounded-[6px] disabled:cursor-not-allowed"
+              disabled={!editInfo}
               {...register("address", {
                 required: "City/Town is required",
               })}
@@ -221,7 +255,12 @@ export default function CheckoutDeliveryInfo({ onContinue }: { onContinue: () =>
           >
             <div className="flex items-center justify-center gap-1">
               <span>Continue</span>
-              {isLoading && <Spinner size="sm" speed="fast" />}
+              <Spinner
+                size="sm"
+                speed="fast"
+                isLoading={updateProfile.isPending}
+                circleColor="#9A6C50"
+              />
             </div>
           </Button>
         </div>

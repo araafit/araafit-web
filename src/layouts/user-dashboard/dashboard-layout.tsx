@@ -93,7 +93,7 @@ export default function UserDashboardLayout({
                           </div>
 
                           <span className="w-[26px] h-[19px] py-[2px] px-[10px] bg-primary-50 text-[0.875rem] !text-[#1C1C1C] rounded-full flex items-center justify-center">
-                            {cart?.items?.reduce((sum, item) => sum + item.quantity, 0) ?? 0}
+                            {cart?.items?.length}
                           </span>
                         </div>
                       </NavLink>
