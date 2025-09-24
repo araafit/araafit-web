@@ -30,7 +30,6 @@ export function AdminDashboardInventory() {
 
   /* The API returns an object with a 'products' property that is an array.
   not an array of products */
-  //@ts-expect-error // Temporary fix for type mismatch
   const products = data?.products || [];
 
   const title = (
@@ -132,7 +131,7 @@ export function AdminDashboardInventory() {
                 </p>
               </div>
             ) : products ? (
-              <DataTable data={convertApiProductsToInventoryFormat(products.products)} />
+              <DataTable data={convertApiProductsToInventoryFormat(products)} />
             ) : (
               <DataTable data={[]} />
             )}

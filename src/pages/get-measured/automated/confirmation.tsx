@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import {
-  Sparkle,
-  PencilSimple,
-  ArrowCounterClockwise,
+  SparkleIcon,
+  PencilSimpleIcon,
+  ArrowCounterClockwiseIcon,
 } from "@phosphor-icons/react";
 import { MeasurementStepperLines } from "../stepper-lines";
 import { useGetMeasured } from "../context/get-measured-context";
@@ -481,8 +481,8 @@ export function Confirmation() {
         console.error("Error calculating accurate measurements:", error);
         return null;
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
@@ -601,7 +601,7 @@ export function Confirmation() {
             <div className="flex flex-col items-center gap-6 py-12">
               <div className="relative">
                 <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-500"></div>
-                <Sparkle
+                <SparkleIcon
                   className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-primary-500"
                   size={24}
                 />
@@ -655,7 +655,7 @@ export function Confirmation() {
             className="w-[10rem] px-4 py-2 border border-neutral-300 text-neutral-700 hover:border-neutral-400 hover:bg-neutral-50 rounded-lg flex items-center justify-center gap-2 transition-colors"
             onClick={handleRestart}
           >
-            <ArrowCounterClockwise size={16} />
+            <ArrowCounterClockwiseIcon size={16} />
             <span>Restart</span>
           </button>
 
@@ -699,7 +699,7 @@ export function Confirmation() {
                     Measurement
                   </h3>
                   <button className="flex items-center gap-2 text-neutral-600 hover:text-neutral-800 transition-colors">
-                    <PencilSimple size={16} />
+                    <PencilSimpleIcon size={16} />
                     <span className="text-sm">Edit</span>
                   </button>
                 </div>

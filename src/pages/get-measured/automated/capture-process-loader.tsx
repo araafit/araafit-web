@@ -28,6 +28,8 @@ export function CaptureProcessLoader({ isOpen }: { isOpen: boolean }) {
       stepTo(currentStep + 1);
       window.location.reload();
     }
+    
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadCount, isOpen]);
 
   return (

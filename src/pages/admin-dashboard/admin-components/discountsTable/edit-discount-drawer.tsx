@@ -147,8 +147,9 @@ export const EditDiscountDrawer: React.FC<EditDiscountDrawerProps> = ({
         },
       });
       setOpen(false);
-    } catch (e) {
+    } catch (error) {
       // toast handled in hook
+      console.log(error);
     }
   };
 
@@ -197,6 +198,7 @@ export const EditDiscountDrawer: React.FC<EditDiscountDrawerProps> = ({
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full border border-[#D0D5DD] px-3 py-2 rounded-lg text-sm"
+              title="Discount name"
             />
           </div>
 
@@ -229,6 +231,7 @@ export const EditDiscountDrawer: React.FC<EditDiscountDrawerProps> = ({
               value={value}
               onChange={(e) => setValue(e.target.value)}
               className="w-full border border-[#D0D5DD] px-3 py-2 rounded-lg text-sm"
+              title="Discount value"
             />
           </div>
 
@@ -259,6 +262,7 @@ export const EditDiscountDrawer: React.FC<EditDiscountDrawerProps> = ({
               value={usageLimit}
               onChange={(e) => setUsageLimit(e.target.value)}
               className="w-full border border-[#D0D5DD] px-3 py-2 rounded-lg text-sm"
+              title="Discount limit"
             />
           </div>
 
@@ -273,6 +277,7 @@ export const EditDiscountDrawer: React.FC<EditDiscountDrawerProps> = ({
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 className="w-full border border-[#D0D5DD] px-3 py-2 rounded-lg text-sm"
+                title="Start date"
               />
             </div>
             <div className="flex-1 space-y-2">
@@ -284,6 +289,7 @@ export const EditDiscountDrawer: React.FC<EditDiscountDrawerProps> = ({
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 className="w-full border border-[#D0D5DD] px-3 py-2 rounded-lg text-sm"
+                title="End date"
               />
             </div>
           </div>

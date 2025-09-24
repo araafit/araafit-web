@@ -3,8 +3,8 @@ import UserDashboardLayout from "../../../../layouts/user-dashboard/dashboard-la
 import TopBar from "../../top-bar";
 import { CaretRightIcon } from "@phosphor-icons/react";
 import { Link } from "react-router-dom";
-import CheckoutDeliveryInfo from "./checkout-delivery-info";
-import CheckoutPaymentInfo from "./checkout-payment-info";
+import CheckoutDeliveryInfo from "../../../../shared-components/checkout/checkout-delivery-info";
+import CheckoutPaymentInfo from "../../../../shared-components/checkout/checkout-payment-info";
 import { useCart } from "../../../../hooks/cart.hooks";
 //import { useCheckout } from "../../../../hooks/orders.hooks";
 import Spinner from "../../../../shared-components/spinner";

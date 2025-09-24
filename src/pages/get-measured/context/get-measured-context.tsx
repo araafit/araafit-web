@@ -78,6 +78,8 @@ export const GetMeasuredProvider = ({
   );
 };
 
+
+// eslint-disable-next-line
 export const useGetMeasured = () => {
   const context = useContext(GetMeasuredContext);
 

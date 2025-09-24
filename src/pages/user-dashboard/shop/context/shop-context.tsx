@@ -41,6 +41,7 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
   return <ShopContext.Provider value={value}>{children}</ShopContext.Provider>;
 };
 
+// eslint-disable-next-line
 export const useShop = () => {
   const context = useContext(ShopContext);
 

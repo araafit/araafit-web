@@ -47,6 +47,7 @@ export function SilhouetteVisualization({
         "mask"
       );
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [frontPhoto, frontMask, frontLandmarks]);
 
   useEffect(() => {
@@ -59,6 +60,7 @@ export function SilhouetteVisualization({
         "mask"
       );
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sidePhoto, sideMask, sideLandmarks, referenceYPositions]);
 
   // Calculate measurements when data is available
@@ -66,6 +68,7 @@ export function SilhouetteVisualization({
     if (frontMask && sideMask && heightInCm && frontLandmarks && sideLandmarks) {
       calculateMeasurements();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [frontMask, sideMask, heightInCm, frontLandmarks, sideLandmarks]);
 
   // --- helpers: put these near the top of the file or below your other helpers --- //

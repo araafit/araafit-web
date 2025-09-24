@@ -183,7 +183,7 @@ export class BodySegmentationService {
       );
 
       // Debug: Check a sample of mask pixels to verify it's working correctly
-      const samplePixels = [];
+      const samplePixels: any[] = [];
       for (let i = 0; i < Math.min(10, mask.data.length); i += 4) {
         samplePixels.push({
           r: mask.data[i],

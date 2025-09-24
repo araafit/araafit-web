@@ -48,6 +48,7 @@ export const SearchProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
+// eslint-disable-next-line
 export const useSearch = () => {
   const context = useContext(SearchContext);
 

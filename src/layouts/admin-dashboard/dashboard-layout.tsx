@@ -73,6 +73,7 @@ export default function AdminDashboardLayout({
       toggleSwitch(); // Close modal
       navigate("/auth/admin-login"); // Redirect to admin login
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [logoutMutation.isSuccess]);
 
   const handleLogout = () => {

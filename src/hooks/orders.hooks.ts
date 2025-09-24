@@ -49,7 +49,7 @@ export const useCheckout = () => {
       queryClient.invalidateQueries({ queryKey: ["cart"] });
       queryClient.invalidateQueries({ queryKey: ["orders"] });
     },
-    onError: (error: any) => {
+    onError: (error) => {
       showToast.error(`Checkout failed: ${error.message}`, {
         style: notificationStyles.alertError,
       });
@@ -74,7 +74,7 @@ export const useInstantCheckout = () => {
       // Invalidate orders
       queryClient.invalidateQueries({ queryKey: ["orders"] });
     },
-    onError: (error: any) => {
+    onError: () => {
       showToast.error(`Checkout failed. Please try again later.`, {
         position: "top-center",
         style: notificationStyles.alertError,
@@ -94,7 +94,7 @@ export const useVerifyPayment = () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
       queryClient.invalidateQueries({ queryKey: ["recentOngoingOrders"] });
     },
-    onError: (error: any) => {
+    onError: (error) => {
       showToast.error(`Payment verification failed: ${error.message}`, {
         style: notificationStyles.alertError,
       });
@@ -116,7 +116,7 @@ export const useCancelOrder = () => {
       queryClient.invalidateQueries({ queryKey: ["order", data.id] });
       queryClient.invalidateQueries({ queryKey: ["recentOngoingOrders"] });
     },
-    onError: (error: any) => {
+    onError: (error) => {
       showToast.error(`Failed to cancel order: ${error.message}`, {
         style: notificationStyles.alertError,
       });
@@ -138,7 +138,7 @@ export const useCheckoutWithCard = () => {
       queryClient.invalidateQueries({ queryKey: ["cart"] });
       queryClient.invalidateQueries({ queryKey: ["orders"] });
     },
-    onError: (error: any) => {
+    onError: (error) => {
       showToast.error(`Checkout failed: ${error.message}`, {
         style: notificationStyles.alertError,
       });

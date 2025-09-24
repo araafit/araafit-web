@@ -46,6 +46,7 @@ function CustomerActions({
       setBlockReason("");
     } catch (error) {
       // Error handled in hook
+      console.log(error);
     }
   };
 
@@ -62,6 +63,7 @@ function CustomerActions({
       setDeleteReason("");
     } catch (error) {
       // Error handled in hook
+      console.log(error);
     }
   };
 

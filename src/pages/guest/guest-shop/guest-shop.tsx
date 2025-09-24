@@ -101,6 +101,7 @@ export function GuestShopPage() {
 
   useEffect(() => {
     setTimeout(() => toggleModal(), 3000);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

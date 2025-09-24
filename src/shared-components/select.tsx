@@ -66,6 +66,7 @@ export default function Select({
     if (isOpen) {
       calculatePosition();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, position]);
 
   // Calculate

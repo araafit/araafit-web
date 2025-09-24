@@ -28,7 +28,9 @@ export interface BillingCardFormProps {
  *
  * @returns ReactElement
  */
-export default function BillingCardForm({ checkoutInfo }: BillingCardFormProps) {
+export default function BillingCardForm({
+  checkoutInfo,
+}: BillingCardFormProps) {
   const tokenizeCardMutation = useTokenizeCard();
   const checkoutWithCardMutation = useCheckoutWithCard();
   const {
@@ -47,9 +49,10 @@ export default function BillingCardForm({ checkoutInfo }: BillingCardFormProps) 
       .replace(/\s+/g, "")
       .replace(/[^0-9]/gi, "");
     const matches = cleanCardNumber.match(/\d{4,16}/g);
-    const match = (matches && matches[0]) || "";
+    const match = matches?.[0] || "";
     const parts = [];
     for (let i = 0, len = match.length; i < len; i += 4) {
+      //@ts-expect-error Argument string not assigned to any
       parts.push(match.substring(i, i + 4));
     }
 
@@ -67,8 +70,9 @@ export default function BillingCardForm({ checkoutInfo }: BillingCardFormProps) 
     return value;
   };
 
-
-  const submitHandler: SubmitHandler<FormValues & { saveCard?: boolean }> = async (data) => {
+  const submitHandler: SubmitHandler<
+    FormValues & { saveCard?: boolean }
+  > = async (data) => {
     try {
       if (checkoutInfo) {
         // Use checkout with card endpoint for payment + optional card saving
@@ -80,7 +84,7 @@ export default function BillingCardForm({ checkoutInfo }: BillingCardFormProps) 
           saveCard: data.saveCard || false,
           callbackUrl: checkoutInfo.callbackUrl,
         };
-        
+
         await checkoutWithCardMutation.mutateAsync(checkoutData);
         // No need to call onSuccess here since we're redirecting to payment
       } else {
@@ -92,14 +96,15 @@ export default function BillingCardForm({ checkoutInfo }: BillingCardFormProps) 
           cvv: data.cvv,
           email: data.email,
         };
-        const tokenizeResult = await tokenizeCardMutation.mutateAsync(tokenizeData);
+        const tokenizeResult = await tokenizeCardMutation.mutateAsync(
+          tokenizeData
+        );
         window.location.href = tokenizeResult.authorizationUrl;
       }
     } catch (error) {
       console.error("Card operation failed:", error);
     }
   };
-
 
   return (
     <form className="w-full" onSubmit={handleSubmit(submitHandler)}>
@@ -281,28 +286,38 @@ export default function BillingCardForm({ checkoutInfo }: BillingCardFormProps) 
 
         <div className="w-full flex flex-col gap-1">
           <div>
-            <input 
-              type="checkbox" 
+            <input
+              type="checkbox"
               {...register("saveCard")}
-              id="saveCard" 
-              className="mr-4" 
+              id="saveCard"
+              className="mr-4"
             />
-            <label htmlFor="saveCard" className="font-light">Save this for future use</label>
+            <label htmlFor="saveCard" className="font-light">
+              Save this for future use
+            </label>
           </div>
 
           <Button
             type="submit"
             variant="solid"
             className={`w-full disabled:bg-neutral-100 disabled:cursor-not-allowed`}
-            disabled={!isValid || tokenizeCardMutation.isPending || checkoutWithCardMutation.isPending}
+            disabled={
+              !isValid ||
+              tokenizeCardMutation.isPending ||
+              checkoutWithCardMutation.isPending
+            }
           >
             <div className="flex items-center justify-center gap-1">
               <span>
-                {(tokenizeCardMutation.isPending || checkoutWithCardMutation.isPending) 
-                  ? "Processing..." 
-                  : checkoutInfo ? "Pay Now" : "Add card"}
+                {tokenizeCardMutation.isPending ||
+                checkoutWithCardMutation.isPending
+                  ? "Processing..."
+                  : checkoutInfo
+                  ? "Pay Now"
+                  : "Add card"}
               </span>
-              {(tokenizeCardMutation.isPending || checkoutWithCardMutation.isPending) && (
+              {(tokenizeCardMutation.isPending ||
+                checkoutWithCardMutation.isPending) && (
                 <Spinner size="sm" speed="fast" />
               )}
             </div>

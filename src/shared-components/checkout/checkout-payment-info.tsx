@@ -22,7 +22,7 @@ import { useCheckout } from "../../hooks/orders.hooks";
 export default function CheckoutPaymentInfo({
   redirectionLink,
 }: {
-  redirectionLink: string;
+  redirectionLink?: string;
 }) {
   const navigate = useNavigate();
   const billingCards = useCardState((state) => state.cards);
@@ -150,7 +150,7 @@ export default function CheckoutPaymentInfo({
             text="Continue shopping"
             variant="solid"
             className="w-full bg-primary-500 text-white"
-            onClick={() => navigate(redirectionLink)}
+            onClick={redirectionLink?() => navigate(redirectionLink): () => {}}
           />
         </div>
       </Modal>
