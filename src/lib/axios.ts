@@ -4,7 +4,10 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from "axios";
-import { toast } from "react-hot-toast";
+import showToast from "../utils/notification";
+import { notificationStyles } from "../style/custom";
+
+/* ------------------------------------------------------------- */
 
 // Types for auth response
 export interface AuthTokens {
@@ -88,7 +91,8 @@ export const tokenUtils = {
 };
 
 // Flag to prevent multiple refresh attempts
-let isRefreshing = false;
+let shouldRefresh = false;
+
 let failedQueue: Array<{
   resolve: (value?: any) => void;
   reject: (error?: any) => void;
@@ -113,7 +117,7 @@ apiClient.interceptors.request.use(
     const guestToken = localStorage.getItem("araafit_guest_token");
     const adminAccessToken = tokenUtils.getAdminAccessToken();
 
-    // Priority: admin access token > regular access token > guest token
+    // Priority: admin access token > user access token > guest user token
     if (adminAccessToken && !tokenUtils.isTokenExpired(adminAccessToken)) {
       config.headers.Authorization = `Bearer ${adminAccessToken}`;
     } else if (accessToken && !tokenUtils.isTokenExpired(accessToken)) {
@@ -147,8 +151,12 @@ apiClient.interceptors.response.use(
 
     // Check if error is 401 and we haven't already tried to refresh
     if (error.response?.status === 401 && !originalRequest._retry) {
-      if (isRefreshing) {
-        // If already refreshing, queue this request
+      const refreshToken = tokenUtils.getRefreshToken();
+      const adminRefreshToken = tokenUtils.getAdminRefreshToken();
+      const guestToken = localStorage.getItem("araafit_guest_token");
+
+      // If token should refresh, the go ahead and queue request.
+      if (shouldRefresh) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
@@ -162,17 +170,12 @@ apiClient.interceptors.response.use(
       }
 
       originalRequest._retry = true;
-      isRefreshing = true;
+      shouldRefresh = true;
 
-      const refreshToken = tokenUtils.getRefreshToken();
-      const adminRefreshToken = tokenUtils.getAdminRefreshToken();
-      const guestToken = localStorage.getItem("araafit_guest_token");
-
-      console.log("refreshToken", refreshToken, typeof adminRefreshToken, adminRefreshToken, guestToken);
-
-      // If we have an admin refresh token, try to refresh admin tokens
+      // If there's admin refresh token, then request for access tokens
       if (adminRefreshToken && adminRefreshToken !== "undefined") {
         console.log("Admin refresh token");
+
         try {
           const response = await axios.post(`${API_BASE_URL}/admin/refresh`, {
             refresh_token: adminRefreshToken,
@@ -182,38 +185,62 @@ apiClient.interceptors.response.use(
           tokenUtils.setAdminTokens(newTokens);
 
           processQueue(null, newTokens.access_token);
+          
           return apiClient(originalRequest);
         } catch (refreshError) {
           // Admin refresh failed, clear admin tokens and redirect
           tokenUtils.clearAdminTokens();
+
+          showToast.error("Admin session expired. Please login again.", {
+            icon: null,
+            style: notificationStyles.alertError,
+            position: "top-center",
+          });
+
           processQueue(refreshError, null);
-          toast.error("Admin session expired. Please login again.");
-          window.location.href = "/auth/admin-login";
+
+          setTimeout(() => (window.location.href = "/auth/admin-login"), 1000);
+
           return Promise.reject(refreshError);
         }
       }
 
-      // If we have a guest token but no refresh token, handle guest token expiry
-      if (!refreshToken && guestToken) {
-        console.log("Guest token expired");
+      // If guest user token exist but no logged-in user refresh token, handle guest token expiry
+      if (guestToken && !refreshToken) {
         // Guest token expired, clear it and redirect to measurement or login
-        localStorage.removeItem("araafit_guest_token");
         tokenUtils.clearTokens();
-        toast.error("Guest session expired. Please get measured again.");
-        window.location.href = "/get-measured";
+        localStorage.removeItem("araafit_guest_token");
+
+        showToast.error("Guest session expired. Please get measured again.", {
+          icon: null,
+          style: notificationStyles.alertError,
+          position: "top-center",
+        });
+
+        setTimeout(() => (window.location.href = "/get-measured"), 1000);
+
         return Promise.reject(error);
       }
 
+      // No logged-in user refresh token, redirect to login
       if (!refreshToken) {
         console.log("No refresh token");
-        // No refresh token, redirect to login
+
         tokenUtils.clearTokens();
-        window.location.href = "/auth/login";
+
+        showToast.error("Session expired. Redirecting login page", {
+          icon: null,
+          style: notificationStyles.alertError,
+          position: "top-center",
+        });
+
+        setTimeout(() => (window.location.href = "/auth/login"), 1000);
+
         return Promise.reject(error);
       }
 
+      // Attempt to refresh logged-in user token
       try {
-        // Attempt to refresh token
         const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
           refresh_token: refreshToken,
         });
@@ -230,15 +257,21 @@ apiClient.interceptors.response.use(
         processQueue(null, newTokens.access_token);
 
         return apiClient(originalRequest);
-      } catch (refreshError) {
-        // Refresh failed, clear tokens and redirect to login
-        processQueue(refreshError, null);
+      } catch (error) {
         tokenUtils.clearTokens();
-        toast.error("Session expired. Please login again.");
-        window.location.href = "/auth/login";
-        return Promise.reject(refreshError);
+
+        // Refresh failed, clear tokens and redirect to login
+        showToast.error("Session expired. Redirecting login page.", {
+          icon: null,
+          style: notificationStyles.alertError,
+          position: "top-center",
+        });
+
+        setTimeout(() => (window.location.href = "/auth/login"), 1000);
+
+        return Promise.reject(error);
       } finally {
-        isRefreshing = false;
+        shouldRefresh = false;
       }
     }
 
@@ -248,22 +281,46 @@ apiClient.interceptors.response.use(
 
       switch (status) {
         case 400:
-          toast.error(data.message || "Invalid request");
+          showToast.error(data.message || "Invalid request", {
+            icon: null,
+            style: notificationStyles.alertError,
+            position: "top-center",
+          });
           break;
         case 403:
-          toast.error("Access denied");
+          showToast.error("Access denied", {
+            icon: null,
+            style: notificationStyles.alertError,
+            position: "top-center",
+          });
           break;
         case 404:
-          toast.error("Resource not found");
+          showToast.error("Resource not found", {
+            icon: null,
+            style: notificationStyles.alertError,
+            position: "top-center",
+          });
           break;
         case 500:
-          toast.error("Server error. Please try again later.");
+          showToast.error("Server error. Please try again later.", {
+            icon: null,
+            style: notificationStyles.alertError,
+            position: "top-center",
+          });
           break;
         default:
-          toast.error(data.message || "An error occurred");
+          showToast.error(data.message || "An error occurred", {
+            icon: null,
+            style: notificationStyles.alertError,
+            position: "top-center",
+          });
       }
     } else if (error.request) {
-      toast.error("Network error. Please check your connection.");
+      showToast.error("Network error. Please check your connection.", {
+        icon: null,
+        style: notificationStyles.alertError,
+        position: "top-center",
+      });
     }
 
     return Promise.reject(error);
