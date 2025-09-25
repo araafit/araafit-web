@@ -17,7 +17,7 @@ export function GuestShopPage() {
     <GuestPageLayout>
       <>
         <SearchProvider>
-          <div className="w-full lg:w-[71.875rem] p-8 bg-white rounded-md overflow-y-scroll relative">
+          <div className="w-full h-full lg:w-[71.875rem] p-8 bg-white rounded-md overflow-y-scroll relative mb-10">
             {/* Shop Tabs */}
             <div className="size-full bg-white">
               <ShopTab
