@@ -73,8 +73,8 @@ function Card({
         <div className="rounded-b-md border border-neutral-100 py-2 px-3">
           <div className="font-light text-neutral-700 mb-2">{itemName}</div>
 
-          <div className="flex items-center justify-between">
-            <span className="text-neutral-900 font-semibold leading-a">
+          <div className="w-full flex items-center justify-between xl:flex-col xl:items-start">
+            <span className="text-neutral-900 font-semibold leading-araafit sm:block">
               ₦{formatPrice(Number(itemCost))}
               {product?.category === "fabric" && (
                 <span className=" ml-1">/yd</span>
