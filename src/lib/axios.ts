@@ -222,8 +222,8 @@ apiClient.interceptors.response.use(
         return Promise.reject(error);
       }
 
-      // No logged-in user refresh token, redirect to login
-      if (!refreshToken) {
+      // No user (registered user) refresh token, redirect to login
+      if (!refreshToken || refreshToken === "undefined") {
         console.log("No refresh token");
 
         tokenUtils.clearTokens();
