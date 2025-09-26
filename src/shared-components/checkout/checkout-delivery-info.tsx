@@ -79,7 +79,7 @@ export default function CheckoutDeliveryInfo({
           onClick={() => setEditInfo((prev) => !prev)}
         >
           <PencilSimpleIcon />
-          <span>{!editInfo ? "Edit" : "Cancel edit"}</span>
+          <span>{!editInfo ? "Edit Info" : "Cancel"}</span>
         </div>
       </div>
 
