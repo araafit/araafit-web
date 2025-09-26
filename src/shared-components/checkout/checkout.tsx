@@ -6,13 +6,17 @@ import Spinner from "../spinner";
 import { formatPrice } from "../../utils/format-price";
 import { Link } from "react-router-dom";
 
+/* -------------------------------------------------------------------------- */
+
 /**
  * Checkout component for rendering the checkout page.
  *
  * @returns ReactElement
  */
 function CartCheckout() {
-  const [checkoutTab, setCheckoutTab] = useState("delivery-detail");
+  const [checkoutTab, setCheckoutTab] = useState<
+    "payment-detail" | "delivery-detail"
+  >("delivery-detail");
   const { data: cart, isLoading, isError, error } = useCart();
 
   // Show loading state
@@ -36,7 +40,9 @@ function CartCheckout() {
             {isError ? "Error loading cart" : "Your cart is empty"}
           </p>
           <p className="text-gray-600">
-            {isError ? error?.message || "Please try again later" : "Add items to cart before checkout"}
+            {isError
+              ? error?.message || "Please try again later"
+              : "Add items to cart before checkout"}
           </p>
           <Link to="/shop">
             <button className="px-4 py-2 bg-primary-500 text-white rounded-md hover:bg-primary-600">
@@ -86,24 +92,37 @@ function CartCheckout() {
             </h2>
             <div className="text-right">
               <p className="text-sm text-gray-600">Total</p>
-              <p className="text-xl font-semibold">₦{formatPrice(cart.total)}</p>
+              <p className="text-xl font-semibold">
+                ₦{formatPrice(cart.total)}
+              </p>
             </div>
           </div>
 
           <div className="flex flex-col gap-4">
             {cart.items.map((item) => (
-              <div key={item.id} className="flex items-center justify-between border border-neutral-100 rounded-md py-2 px-4">
+              <div
+                key={item.id}
+                className="flex items-center justify-between border border-neutral-100 rounded-md py-2 px-4"
+              >
                 <div className="w-full flex gap-6">
                   <img
-                    src={item.product.images?.[0]?.url || "/placeholder-image.jpg"}
+                    src={
+                      item.product.images?.[0]?.url || "/placeholder-image.jpg"
+                    }
                     alt={item.product.name}
                     className="w-[14.125rem] h-[8.75rem] object-cover rounded-md"
                   />
                   <div className="grow flex flex-col gap-2">
-                    <h3 className="font-medium text-neutral-900">{item.product.name}</h3>
+                    <h3 className="font-medium text-neutral-900">
+                      {item.product.name}
+                    </h3>
                     <p className="text-sm text-gray-600">Size: {item.size}</p>
-                    <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
-                    <p className="font-semibold text-neutral-900">₦{formatPrice(item.product.price * item.quantity)}</p>
+                    <p className="text-sm text-gray-600">
+                      Quantity: {item.quantity}
+                    </p>
+                    <p className="font-semibold text-neutral-900">
+                      ₦{formatPrice(item.product.price * item.quantity)}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -113,7 +132,9 @@ function CartCheckout() {
       )}
 
       {checkoutTab === "delivery-detail" ? (
-        <CheckoutDeliveryInfo onContinue={() => setCheckoutTab("payment-detail")} />
+        <CheckoutDeliveryInfo
+          onContinue={() => setCheckoutTab("payment-detail")}
+        />
       ) : (
         <CheckoutPaymentInfo redirectionLink="/shop" />
       )}

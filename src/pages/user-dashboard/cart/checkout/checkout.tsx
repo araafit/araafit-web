@@ -19,7 +19,9 @@ import { formatPrice } from "../../../../utils/format-price";
  * @returns ReactElement
  */
 export function DashboardCartCheckout() {
-  const [checkoutTab, setCheckoutTab] = useState("delivery-detail");
+  const [checkoutTab, setCheckoutTab] = useState<
+    "payment-detail" | "delivery-detail"
+  >("delivery-detail");
   const {
     data: cart,
     isLoading: cartLoading,
@@ -78,6 +80,8 @@ export function DashboardCartCheckout() {
     );
   }
 
+  console.log(checkoutTab);
+
   return (
     <UserDashboardLayout>
       <div className="h-screen flex flex-col gap-2 relative">
@@ -98,9 +102,9 @@ export function DashboardCartCheckout() {
 
               <div
                 className={`w-[344px] text-primary-500 cursor-pointer border-t-4 ${
-                  checkoutTab !== "payment-detail"
-                    ? "border-t-primary-300"
-                    : "border-t-primary-500"
+                  checkoutTab === "payment-detail"
+                    ? "border-t-primary-500 text-primary-500"
+                    : "border-t-primary-300"
                 }"`}
                 onClick={() => setCheckoutTab("payment-detail")}
               >

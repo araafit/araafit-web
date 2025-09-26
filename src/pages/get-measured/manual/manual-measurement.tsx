@@ -119,14 +119,17 @@ export function ManualMeasurement() {
 
     createMeasurements.mutate(selectedValues, {
       onSuccess: () => {
-        if (isGuest) {
-          // For guests, stay on the measurement page or redirect to continue guest flow
-          toast.success("Measurements saved! Continue shopping as guest.");
-          navigate("/shop");
-        } else {
-          // For authenticated users, redirect to dashboard
-          navigate("/dashboard/profile");
-        }
+        toast.success("Measurements saved! Continue shopping as guest.");
+        navigate("/get-measured/summary");
+
+        // if (isGuest) {
+        //   // For guests, stay on the measurement page or redirect to continue guest flow
+        //   toast.success("Measurements saved! Continue shopping as guest.");
+        //   navigate("/shop");
+        // } else {
+        //   // For authenticated users, redirect to dashboard
+        //   navigate("/dashboard/profile");
+        // }
       },
     });
   };

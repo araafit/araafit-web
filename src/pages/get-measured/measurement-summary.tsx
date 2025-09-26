@@ -7,6 +7,7 @@ import Button from "../../shared-components/button";
 import { PencilSimpleIcon } from "@phosphor-icons/react";
 import { useCreateGuestUser } from "../../hooks/auth.hooks";
 import { useAuth } from "../../hooks/use-auth";
+// import { useMeasurements } from "../../hooks/measurements.hooks";
 
 /* -------------------------------------------------------------------------- */
 
@@ -34,6 +35,7 @@ export function MeasurementSummary() {
   const selectedMeasurements = useMeasurementsStore((state) => state.data);
   const { isAuthenticated } = useAuth();
   const createGuestUserMutation = useCreateGuestUser();
+  // const { data: existingMeasurements } = useMeasurements();
 
   // Function to create guest user with measurements
   const handleContinueAsGuest = async () => {
@@ -46,7 +48,7 @@ export function MeasurementSummary() {
         hips: Number(selectedMeasurements.hip || 38),
         height: Number(selectedMeasurements.height || 165),
         dressSize: Number(selectedMeasurements.dressSize || 10),
-        skinTone: "medium", // You might want to get this from the measurements store
+        skinTone: String(selectedMeasurements.skinTone), // You might want to get this from the measurements store
       });
       
       setSavedState({ isLoading: false, isSaved: true });

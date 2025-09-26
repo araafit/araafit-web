@@ -60,12 +60,12 @@ export default function CheckoutDeliveryInfo({
       city: data.city,
       zipCode: data.zipCode,
     });
-
-    // Switch to payment info on success
-    if (updateProfile.isSuccess) {
-      onContinue();
-    }
   };
+
+  // Switch to payment info on success
+  if (updateProfile.isSuccess) {
+    onContinue();
+  }
 
   return (
     <div className="w-full bg-white mt-5 rounded-md p-4 flex flex-col gap-6">
@@ -79,7 +79,7 @@ export default function CheckoutDeliveryInfo({
           onClick={() => setEditInfo((prev) => !prev)}
         >
           <PencilSimpleIcon />
-          <span>{!editInfo ? "Edit" : "Cancel edit"}</span>
+          <span>{!editInfo ? "Edit Info" : "Cancel"}</span>
         </div>
       </div>
 
