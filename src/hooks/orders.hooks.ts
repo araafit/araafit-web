@@ -66,10 +66,17 @@ export const useInstantCheckout = () => {
     onSuccess: (data) => {
       console.log(data);
 
-      showToast.info("Redirecting to payment", {});
+      showToast.success("Redirecting to payment", {
+        icon: null,
+        style: notificationStyles.alertSuccess,
+        position: "top-center",
+      });
 
       // Redirect to payment URL
-      setTimeout(() => (window.location.href = data.paymentUrl), 2000);
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      setTimeout(() => (window.location.href = data.data.paymentUrl), 3000);
 
       // Invalidate orders
       queryClient.invalidateQueries({ queryKey: ["orders"] });
