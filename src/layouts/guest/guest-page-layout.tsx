@@ -4,10 +4,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../../hooks/cart.hooks";
 import Button from "../../shared-components/button";
 import Loader from "./loader";
+import useAuth from "../../hooks/use-auth";
 
 /* ----------------------------------------------------------- */
 
 function GuestPageLayout({ children }: { children: React.ReactElement }) {
+  const { isGuest, isAuthenticated, isFullUser, isAdmin } = useAuth();
   const navigate = useNavigate();
   const { isSuccess, data: cart } = useCart();
 
@@ -41,20 +43,42 @@ function GuestPageLayout({ children }: { children: React.ReactElement }) {
             </Link>
           </div>
 
-          <div className="flex items-center gap-4">
+          {isAuthenticated && isAdmin && !isGuest ? (
             <Button
-              text="Login"
-              variant="outline"
-              onClick={() => navigate("/auth/login")}
-            />
-
-            <Button variant="solid" onClick={() => navigate("/auth/register")}>
+              variant="solid"
+              onClick={() => navigate("/admin-dashboard/overview")}
+            >
               <div className="flex items-center gap-1">
-                <span>Create a free account</span>
+                <span>Go To Dashboard</span>
                 <CaretRightIcon />
               </div>
             </Button>
-          </div>
+          ) : isAuthenticated && isFullUser && !isGuest ? (
+            <Button variant="solid" onClick={() => navigate("/dashboard/")}>
+              <div className="flex items-center gap-1">
+                <span>Go To Dashboard</span>
+                <CaretRightIcon />
+              </div>
+            </Button>
+          ) : (
+            <div className="flex items-center gap-4">
+              <Button
+                text="Login"
+                variant="outline"
+                onClick={() => navigate("/auth/login")}
+              />
+
+              <Button
+                variant="solid"
+                onClick={() => navigate("/auth/register")}
+              >
+                <div className="flex items-center gap-1">
+                  <span>Create a free account</span>
+                  <CaretRightIcon />
+                </div>
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
