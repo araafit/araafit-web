@@ -69,8 +69,9 @@ export default function BillingCards() {
         <Button
           type="submit"
           variant="clear"
-          className=""
+          className="disabled:cursor-not-allowed disabled:opacity-50"
           onClick={addModalToggle}
+          disabled
         >
           <div className="w-full flex items-center gap-2 text-neutral-900">
             <PlusIcon size="20px" />
@@ -78,9 +79,6 @@ export default function BillingCards() {
           </div>
         </Button>
       </div>
-
-      {/* Card list */}
-      <BillingCardList />
 
       {/* No card */}
       {isSuccess && billingCards.length === 0 && (
@@ -94,11 +92,15 @@ export default function BillingCards() {
           <Button
             text="Add card"
             variant="solid"
-            className="w-full max-w-[175px]"
+            disabled
+            className="w-full max-w-[175px] disabled:cursor-not-allowed disabled:opacity-50"
             onClick={addModalToggle}
           />
         </div>
       )}
+
+      {/* Card list */}
+      <BillingCardList />
 
       {/* Added card modal */}
       <Modal
