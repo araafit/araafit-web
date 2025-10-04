@@ -44,8 +44,7 @@ export default function BillingCardList() {
     return (
       <div className="w-full flex items-center justify-center py-8">
         <div className="flex flex-col items-center gap-2">
-          <Spinner size="lg" />
-          <p className="text-gray-600">Loading cards...</p>
+          <Spinner size="lg" speed="fast" arcColor="#9A6C50" />
         </div>
       </div>
     );
