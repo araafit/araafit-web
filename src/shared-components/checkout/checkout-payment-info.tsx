@@ -1,4 +1,3 @@
-import { PlusIcon } from "@phosphor-icons/react";
 import { useRef } from "react";
 import { useCardState } from "../../shared-hooks/state-store";
 import { useSwitch } from "../../shared-hooks/switch";
@@ -11,8 +10,11 @@ import { checkMark } from "../../shared-images/image-entry";
 import { paymentWallet } from "../../shared-images/image-entry";
 import { useNavigate } from "react-router-dom";
 import { useCheckout } from "../../hooks/orders.hooks";
+import { useCart } from "../../hooks/cart.hooks";
+import { formatPrice } from "../../utils/format-price";
+import { useCards } from "../../hooks/cards.hooks";
 
-/* ------------------------------------------------------------------------- */
+/* ----------------------------------------------------------- */
 
 /**
  * Checkout payment information component
@@ -24,6 +26,8 @@ export default function CheckoutPaymentInfo({
 }: {
   redirectionLink?: string;
 }) {
+  const { data: cart, isSuccess } = useCart();
+  const { data: cards = [] } = useCards();
   const navigate = useNavigate();
   const billingCards = useCardState((state) => state.cards);
   const { toggleSwitch, switchValue } = useSwitch();
@@ -32,7 +36,6 @@ export default function CheckoutPaymentInfo({
     switchValue: completedPaymentModalToggleValue,
   } = useSwitch();
   const checkoutMutation = useCheckout();
-  const noBillingCards = billingCards.length === 0;
 
   const currentBillingCardCount = useRef(billingCards.length);
 
@@ -59,8 +62,8 @@ export default function CheckoutPaymentInfo({
     checkoutMutation.mutate();
   };
 
-  const noBilling = (
-    <div className="w-full max-w-[500px] flex flex-col items-center justify-center gap-2">
+  const noBilling = cards.length === 0 && (
+    <div className="w-full flex flex-col items-center justify-center gap-2">
       <img src={paymentWallet} alt="" className="size-[200px]" />
 
       <p className="font-light text-center text-neutral-500">
@@ -77,50 +80,37 @@ export default function CheckoutPaymentInfo({
   );
 
   return (
-    <div className="size-full max-h-[500px] bg-white mt-5 rounded-md p-4 flex flex-col gap-6">
+    <div className="size-full ] bg-white mt-5 rounded-md p-4 flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h5 className="text-[28px] font-semibold">Payment Information</h5>
+      </div>
 
+      {noBilling}
+
+      {cards.length > 0 && <BillingCardList />}
+
+      <div className="w-full flex items-center justify-center py-[2.5rem] px-[1.5rem] border-t border-[#E8E8E8] mt-1">
         <Button
           type="submit"
-          variant="clear"
-          className=""
-          onClick={toggleSwitch}
+          variant="solid"
+          className={`w-full max-w-[23.4375rem] disabled:bg-neutral-100 disabled:cursor-not-allowed disabled:text-opacity-40`}
+          disabled={checkoutMutation.isPending || checkoutMutation.isIdle}
+          onClick={paymentHandler}
         >
-          <div className="w-full flex items-center gap-2 text-neutral-900">
-            <PlusIcon size="20px" />
-            <span>Add new card</span>
+          <div className="flex items-center justify-center gap-1">
+            <span>Pay Now</span>
+
+            <Spinner
+              size="sm"
+              speed="fast"
+              isLoading={checkoutMutation.isPending}
+              arcColor="#9A6C50"
+            />
           </div>
         </Button>
       </div>
 
-      {!noBillingCards && <BillingCardList />}
-
-      <div className="w-full h-full flex flex-col items-center justify-center">
-        {noBillingCards && (
-          <div className="w-full h-auto flex items-center justify-center mb-6">
-            {noBilling}
-          </div>
-        )}
-      </div>
-
-      {!noBillingCards && (
-        <div className="w-full flex items-center justify-center py-[2.5rem] px-[1.5rem] border-t border-[#E8E8E8] mt-1">
-          <Button
-            type="submit"
-            variant="solid"
-            className={`w-full max-w-[23.4375rem] disabled:bg-neutral-100 disabled:cursor-not-allowed`}
-            disabled={checkoutMutation.isPending}
-            onClick={paymentHandler}
-          >
-            <div className="flex items-center justify-center gap-1">
-              <span>{checkoutMutation.isPending ? "Processing..." : "Pay Now"}</span>
-              {checkoutMutation.isPending && <Spinner size="sm" speed="fast" />}
-            </div>
-          </Button>
-        </div>
-      )}
-
+      {/* Billing form */}
       <Modal
         isOpen={switchValue}
         onClose={toggleSwitch}
@@ -131,7 +121,7 @@ export default function CheckoutPaymentInfo({
 
       {/* Completed payment modal */}
       <Modal
-        isOpen={completedPaymentModalToggleValue}
+        isOpen={isSuccess && completedPaymentModalToggleValue}
         onClose={completedPaymentModalToggle}
         containerClassName="w-[25rem] flex flex-col items-center justify-center"
       >
@@ -143,14 +133,16 @@ export default function CheckoutPaymentInfo({
           </h2>
 
           <p className="font-light text-neutral-700 text-center leading-snug">
-            Your payment of [₦90,000.00] was successful.
+            Your payment of [₦{cart && formatPrice(cart.total)}] was successful.
           </p>
 
           <Button
             text="Continue shopping"
             variant="solid"
             className="w-full bg-primary-500 text-white"
-            onClick={redirectionLink?() => navigate(redirectionLink): () => {}}
+            onClick={
+              redirectionLink ? () => navigate(redirectionLink) : () => {}
+            }
           />
         </div>
       </Modal>
