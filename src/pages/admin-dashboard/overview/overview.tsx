@@ -1,4 +1,8 @@
-import { ArrowRightIcon, CaretRightIcon, PlusIcon } from "@phosphor-icons/react";
+import {
+  ArrowRightIcon,
+  CaretRightIcon,
+  PlusIcon,
+} from "@phosphor-icons/react";
 import TopBar from "../admin-components/top-bar/top-bar";
 import AdminDashboardLayout from "../../../layouts/admin-dashboard/dashboard-layout";
 import { Link } from "react-router-dom";
@@ -20,11 +24,15 @@ import Spinner from "../../../shared-components/spinner";
 import { EmptyStateCard } from "../admin-components/empty-state-card";
 import Button from "../../../shared-components/button";
 import { useNavigate } from "react-router-dom";
+import {
+  useApproveOrder,
+  useRejectOrder,
+} from "../../../hooks/admin-orders.hooks";
 
 /* ------------------------------------------------------------------------------------ */
 
 export function AdminDashboardOverview() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const { adminUser } = useAuth();
 
   const {
@@ -39,6 +47,11 @@ export function AdminDashboardOverview() {
     error: activitiesError,
   } = useAdminRecentActivities();
 
+  const approveOrder = useApproveOrder();
+  const rejectOrder = useRejectOrder();
+
+  // const orderStatus: "approve" | "rejected" = metrics?.mostRecentRequest.status;
+
   const title = (
     <div className="font-lora text-[#979797]">
       Welcome,{" "}
@@ -48,8 +61,6 @@ export function AdminDashboardOverview() {
     </div>
   );
 
-  console.log(metrics);
-
   const BreadCrumb = () => (
     <div className="font-inter font-light capitalize flex items-center">
       <span className="text-primary-900">Araafit</span>
@@ -57,6 +68,22 @@ export function AdminDashboardOverview() {
       <span className="text-[#979797]">Overview</span>
     </div>
   );
+
+  const handleStatusAction = (status: string, orderId: string) => {
+    if (status === "reject") {
+      rejectOrder.mutateAsync(orderId);
+    }
+
+    if (status === "approve") {
+      approveOrder.mutateAsync(orderId);
+    }
+
+    return;
+  };
+
+  // if (approveOrder.isLoading) {
+    
+  // }
 
   return (
     <AdminDashboardLayout>
@@ -69,7 +96,11 @@ export function AdminDashboardOverview() {
               <div className="flex items-center gap-6">
                 <NotificationBell />
 
-                <Button variant="solid" className="cursor-pointer" onClick={() => navigate("/admin-dashboard/inventory")}>
+                <Button
+                  variant="solid"
+                  className="cursor-pointer"
+                  onClick={() => navigate("/admin-dashboard/inventory")}
+                >
                   <div className="flex items-center gap-2">
                     <PlusIcon />
                     <span>Add Inventory</span>
@@ -126,6 +157,12 @@ export function AdminDashboardOverview() {
                       getStatusColorClasses(metrics.mostRecentOrder.status)
                         .bgColor
                     } px-2 text-xs py-1 inline-flex w-auto rounded-full capitalize`}
+                    onClick={() =>
+                      handleStatusAction(
+                        metrics.mostRecentOrder.status,
+                        metrics.mostRecentOrder.id
+                      )
+                    }
                   >
                     {metrics.mostRecentOrder.status}
                   </div>
@@ -154,11 +191,13 @@ export function AdminDashboardOverview() {
                   </div>
                   <div className="bg-[#F0F2F5] h-[0.094rem] my-3 rounded-full w-full"></div>
                   <div className="flex items-center gap-4 w-full">
-                    <span className="text-[#16A34A] text-sm cursor-pointer">
-                      Approve
-                    </span>
-                    <span className="text-[#DC2626] text-sm cursor-pointer">
-                      Reject
+                    <div className={`text-[#16A34A] text-sm cursor-pointer flex items-center justify-center gap-1 ${ metrics.mostRecentOrder.status === "approved" ? "opacity-50 !cursor-not-allowed" : ""}`} onClick={() => handleStatusAction("approve", metrics.mostRecentOrder.id)}>
+                     <span>Approve</span>
+                     <Spinner size="sm" speed="fast" arcColor="16A34A" isLoading={approveOrder.isPending} />
+                    </div>
+                    <span className={`text-[#DC2626] text-sm cursor-pointer flex items-center justify-center gap-1 ${ metrics.mostRecentOrder.status === "rejected" ? "opacity-50 !cursor-not-allowed" : ""}`}>
+                      <span>Reject</span>
+                     <Spinner size="sm" speed="fast" arcColor="DC2626" isLoading={rejectOrder.isPending} />
                     </span>
                   </div>
                 </div>
@@ -231,7 +270,7 @@ export function AdminDashboardOverview() {
                       <ArrowRightIcon />
                     </span>
                   </div>
-                  <div className="bg-[#F0F2F5] h-[0.094rem] my-3 rounded-full w-full"></div>
+                  <div className="bg-[#F0F2F5] h-[0.094rem] my-3 rounded-full w-full" />
                   <div className="flex items-center gap-4 w-full">
                     <span className="text-[#16A34A] text-sm cursor-pointer">
                       Approve

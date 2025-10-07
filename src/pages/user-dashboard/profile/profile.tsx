@@ -7,7 +7,7 @@ import BillingCards from "./billing-card/card";
 import Notification from "./notification";
 import ProfileSettings from "./profile-settings/profile-settings";
 
-/* --------------------------------------------------------------------- */
+/* ------------------------------------------------------------------- */
 
 /**
  * Dashboard home page

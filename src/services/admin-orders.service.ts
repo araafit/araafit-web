@@ -133,6 +133,31 @@ class AdminOrdersService {
     );
     return response.data;
   }
+
+  // Approve and and reject orders
+  async approveOrder(orderId: string): Promise<AdminOrder> {
+    try {
+      const response = await apiClient.patch<ApiResponse<AdminOrder>>(
+        `/admin/order/${orderId}/approve`
+      );
+      return response.data.data;
+    } catch (error) {
+      console.error(`Error approving order ${orderId}:`, error);
+      throw error;
+    }
+  }
+
+  async rejectOrder(orderId: string): Promise<AdminOrder> {
+    try {
+      const response = await apiClient.patch<ApiResponse<AdminOrder>>(
+        `/admin/order/${orderId}/reject`
+      );
+      return response.data.data;
+    } catch (error) {
+      console.error(`Error rejecting order ${orderId}:`, error);
+      throw error;
+    }
+  }
 }
 
 // Export singleton instance

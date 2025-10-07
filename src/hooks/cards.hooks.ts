@@ -11,6 +11,8 @@ import {
 } from "../services/cards.service";
 import toast from "react-hot-toast";
 
+/* ------------------------------------------ */
+
 // Query hooks for fetching data
 export const useCards = () => {
   return useQuery({
@@ -44,7 +46,7 @@ export const useTokenizeCard = () => {
 
 export const useSaveCard = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (data: CardSaveRequest) => cardsService.saveCard(data),
     onSuccess: () => {
@@ -59,9 +61,10 @@ export const useSaveCard = () => {
 
 export const useDirectSaveCard = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: (data: CardDirectSaveRequest) => cardsService.directSaveCard(data),
+    mutationFn: (data: CardDirectSaveRequest) =>
+      cardsService.directSaveCard(data),
     onSuccess: () => {
       toast.success("Card added successfully!");
       queryClient.invalidateQueries({ queryKey: ["cards"] });
@@ -74,8 +77,13 @@ export const useDirectSaveCard = () => {
 
 export const useChargeCard = () => {
   return useMutation({
-    mutationFn: ({ cardId, data }: { cardId: string; data: CardChargeRequest }) =>
-      cardsService.chargeCard(cardId, data),
+    mutationFn: ({
+      cardId,
+      data,
+    }: {
+      cardId: string;
+      data: CardChargeRequest;
+    }) => cardsService.chargeCard(cardId, data),
     onSuccess: (data) => {
       toast.success(`Payment successful! Reference: ${data.reference}`);
     },
@@ -87,10 +95,15 @@ export const useChargeCard = () => {
 
 export const useUpdateCard = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ cardId, data }: { cardId: string; data: CardUpdateRequest }) =>
-      cardsService.updateCard(cardId, data),
+    mutationFn: ({
+      cardId,
+      data,
+    }: {
+      cardId: string;
+      data: CardUpdateRequest;
+    }) => cardsService.updateCard(cardId, data),
     onSuccess: () => {
       toast.success("Card updated successfully!");
       queryClient.invalidateQueries({ queryKey: ["cards"] });
@@ -103,7 +116,7 @@ export const useUpdateCard = () => {
 
 export const useRemoveCard = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (cardId: string) => cardsService.removeCard(cardId),
     onSuccess: () => {
@@ -118,7 +131,8 @@ export const useRemoveCard = () => {
 
 export const useCheckoutWithCard = () => {
   return useMutation({
-    mutationFn: (data: CardCheckoutRequest) => cardsService.checkoutWithCard(data),
+    mutationFn: (data: CardCheckoutRequest) =>
+      cardsService.checkoutWithCard(data),
     onSuccess: (data) => {
       toast.success("Redirecting to payment...");
       // Redirect to payment URL
@@ -132,9 +146,10 @@ export const useCheckoutWithCard = () => {
 
 export const useSaveAfterPayment = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: (data: SaveAfterPaymentRequest) => cardsService.saveAfterPayment(data),
+    mutationFn: (data: SaveAfterPaymentRequest) =>
+      cardsService.saveAfterPayment(data),
     onSuccess: () => {
       toast.success("Payment successful, card saved for future use!");
       queryClient.invalidateQueries({ queryKey: ["cards"] });
