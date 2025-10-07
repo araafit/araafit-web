@@ -247,6 +247,10 @@ export function DiscountTable({
     }
   }
 
+  React.useEffect(() => {
+    setData(initialData);
+  }, [initialData]);
+
   return (
     <div className="flex items-center justify-between">
       <div className="w-full">

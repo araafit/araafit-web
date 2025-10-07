@@ -6,6 +6,7 @@ import {
   type UpdateMeasurementsRequest,
 } from "../services/measurements.service";
 import { adminSettingsService } from "../services/admin-settings.service";
+import { useAuthStore } from "../stores/auth-store";
 
 // Query keys
 export const measurementsKeys = {
@@ -17,10 +18,12 @@ export const measurementsKeys = {
 
 // Get user measurements
 export const useMeasurements = () => {
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: measurementsKeys.me(),
     queryFn: () => measurementsService.getMeasurements(),
     staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: isAuthenticated,
   });
 };
 

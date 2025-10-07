@@ -10,7 +10,6 @@ import { GetMeasuredProvider, useGetMeasured } from "./context/get-measured-cont
 
 /* ----------------------------------------------------------------------- */
 
-
 const StepContent = () => {
   const { currentStep } = useGetMeasured();
   console.log("currentStep", currentStep);
@@ -42,7 +41,7 @@ const StepContent = () => {
 export function GetMeasured() {
   return (
     <section className="min-h-screen bg-[#F5F5F5] px-0 py-0 md:py-2 md:px-16 overflow-y-scroll relative">
-      <div className="w-full min-h-[809px] bg-white flex justify-center border rounded-md p-14">
+      <div className="w-full min-h-[809px] bg-white flex justify-center border rounded-md p-4 lg:p-14">
         <GetMeasuredProvider>
           <StepContent />
         </GetMeasuredProvider>

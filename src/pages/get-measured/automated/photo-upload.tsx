@@ -104,12 +104,12 @@ export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
   }) => (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-2">
-        <h3 className="text-lg font-semibold text-[#1C1C1C]">{title}</h3>
-        {photo && <CheckCircle className="text-green-500" size={20} />}
+        <h3 className="text-base md:text-lg font-semibold text-[#1C1C1C]">{title}</h3>
+        {photo && <CheckCircle className="text-green-500 flex-shrink-0" size={20} />}
       </div>
       
       <div
-        className={`relative w-full h-[300px] border-2 border-dashed rounded-lg transition-all duration-200 ${
+        className={`relative w-full h-[200px] md:h-[300px] border-2 border-dashed rounded-lg transition-all duration-200 ${
           dragOver === type
             ? 'border-primary-500 bg-primary-50'
             : photo
@@ -133,20 +133,21 @@ export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
             >
               <X size={16} />
             </button>
-            <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-sm">
+            <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs md:text-sm">
               {photo?.name}
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center h-full gap-4 cursor-pointer"
+          <div className="flex flex-col items-center justify-center h-full gap-3 md:gap-4 cursor-pointer p-4"
                onClick={() => type === 'front' ? frontInputRef.current?.click() : sideInputRef.current?.click()}>
-            <CloudArrowUp size={48} className="text-neutral-400" />
+            <CloudArrowUp size={32} className="text-neutral-400 md:hidden" />
+            <CloudArrowUp size={48} className="text-neutral-400 hidden md:block" />
             <div className="text-center">
-              <p className="text-neutral-700 font-medium">
+              <p className="text-neutral-700 font-medium text-sm md:text-base">
                 Drop your {type} photo here, or{' '}
                 <span className="text-primary-500 underline">browse</span>
               </p>
-              <p className="text-sm text-neutral-500 mt-1">{description}</p>
+              <p className="text-xs md:text-sm text-neutral-500 mt-1">{description}</p>
             </div>
             <p className="text-xs text-neutral-400">PNG, JPG up to 10MB</p>
           </div>
@@ -171,22 +172,22 @@ export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
       <div className="w-full flex flex-col gap-5">
         <MeasurementStepperLines stepIndex={currentStep} />
 
-        <div className="w-[51rem] flex flex-col gap-6">
+        <div className="w-full max-w-[51rem] flex flex-col gap-6">
           <div>
-            <h2 className="text-[2rem] text-[#1C1C1C] font-semibold mb-2">
+            <h2 className="text-xl md:text-[2rem] text-[#1C1C1C] font-semibold mb-2">
               Upload Your Photos
             </h2>
-            <p className="text-neutral-500 font-inter">
+            <p className="text-neutral-500 font-inter text-sm md:text-base">
               Upload clear front and side photos instead of using your camera for accurate measurements
             </p>
           </div>
 
           {/* Instructions */}
           <div className="flex items-start gap-2 bg-[#EBF8FF] rounded-md border border-[#0EA5E9] py-3 px-4">
-            <Warning className="text-[#0EA5E9] mt-0.5" size={20} />
+            <Warning className="text-[#0EA5E9] mt-0.5 flex-shrink-0" size={20} />
             <div className="flex flex-col gap-2">
-              <span className="text-[#0EA5E9] font-medium">Photo Guidelines</span>
-              <ul className="text-[#0369A1] text-sm space-y-1">
+              <span className="text-[#0EA5E9] font-medium text-sm md:text-base">Photo Guidelines</span>
+              <ul className="text-[#0369A1] text-xs md:text-sm space-y-1">
                 <li>• Stand straight with arms slightly away from your body</li>
                 <li>• Wear form-fitting clothes that show your body shape</li>
                 <li>• Use good lighting and a plain background</li>
@@ -197,7 +198,7 @@ export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
           </div>
 
           {/* Upload Areas */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <UploadArea
               type="front"
               photo={frontPhoto}
@@ -217,16 +218,16 @@ export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
 
           {/* Progress indicator */}
           {(frontPhoto || sidePhoto) && (
-            <div className="flex items-center gap-4 p-3 bg-neutral-50 rounded-lg">
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4 p-3 bg-neutral-50 rounded-lg">
               <div className="flex items-center gap-2">
                 <div className={`w-3 h-3 rounded-full ${frontPhoto ? 'bg-green-500' : 'bg-neutral-300'}`} />
-                <span className="text-sm text-neutral-600">Front Photo</span>
+                <span className="text-xs md:text-sm text-neutral-600">Front Photo</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className={`w-3 h-3 rounded-full ${sidePhoto ? 'bg-green-500' : 'bg-neutral-300'}`} />
-                <span className="text-sm text-neutral-600">Side Photo</span>
+                <span className="text-xs md:text-sm text-neutral-600">Side Photo</span>
               </div>
-              <span className="text-sm text-neutral-500 ml-auto">
+              <span className="text-xs md:text-sm text-neutral-500 md:ml-auto">
                 {[frontPhoto, sidePhoto].filter(Boolean).length}/2 photos uploaded
               </span>
             </div>
@@ -234,11 +235,11 @@ export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
         </div>
       </div>
 
-      <div className="flex items-center justify-end gap-6 mt-8">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-end gap-4 md:gap-6 mt-8">
         <Button
           text="Back"
           variant="outline"
-          className="w-[10rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed border-neutral-100 text-neutral-950"
+          className="w-full md:w-[10rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed border-neutral-100 text-neutral-950"
           onClick={retake}
         />
 
@@ -246,7 +247,7 @@ export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
           text="Continue"
           variant="solid"
           disabled={!frontPhoto || !sidePhoto}
-          className="w-[10rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed"
+          className="w-full md:w-[10rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed"
           onClick={handleContinue}
         />
       </div>

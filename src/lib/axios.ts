@@ -26,7 +26,7 @@ export interface RefreshTokenResponse {
 
 // Base API URL - update this to your backend URL
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:4000/api";
+  import.meta.env.VITE_API_BASE_URL || "https://araafit-backend.vercel.app/api";
 
 // Create axios instance
 const apiClient: AxiosInstance = axios.create({
@@ -183,6 +183,7 @@ apiClient.interceptors.response.use(
 
           const newTokens: AuthTokens = response.data;
           tokenUtils.setAdminTokens(newTokens);
+          console.log("newTokens", newTokens);
 
           processQueue(null, newTokens.access_token);
           

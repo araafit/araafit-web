@@ -75,7 +75,7 @@ export function Confirmation() {
   /**
    * For every row (y) compute leftmost and rightmost body pixel (or -1 if none).
    */
-  const getRowBoundsFromMask = (mask: ImageData) => {
+  const getRowBoundsFromMask = useCallback((mask: ImageData) => {
     const { width, height, data } = mask;
     const leftBounds = new Array<number>(height).fill(-1);
     const rightBounds = new Array<number>(height).fill(-1);
@@ -95,13 +95,13 @@ export function Confirmation() {
     }
 
     return { leftBounds, rightBounds };
-  };
+  }, []);
 
   /**
    * Compute bust/waist/hip Y rows (pixel indices) and their left/right bounds.
    * Uses silhouette rows and landmarks to center the torso and ignore arms.
    */
-  const computeMeasurementRows = (
+  const computeMeasurementRows = useCallback((
     mask: ImageData,
     _landmarks: Landmark[],
     imgW: number,
@@ -240,12 +240,12 @@ export function Confirmation() {
       waist: buildBounds(waistY),
       hip: buildBounds(foundHipY),
     };
-  };
+  }, [getRowBoundsFromMask]);
 
   /**
    * Compute measurement rows using provided Y positions (for consistency between views)
    */
-  const computeMeasurementRowsWithYPositions = (
+  const computeMeasurementRowsWithYPositions = useCallback((
     mask: ImageData,
     _landmarks: Landmark[],
     imgW: number,
@@ -276,13 +276,13 @@ export function Confirmation() {
       waist: getBoundsAtY(waistY),
       hip: getBoundsAtY(hipY),
     };
-  };
+  }, [getRowBoundsFromMask]);
 
   /**
    * Get inner torso bounds at a specific Y level, excluding arms/hands
    * Looks for gaps in the mask to identify the main torso area
    */
-  const getInnerTorsoBounds = (
+  const getInnerTorsoBounds = useCallback((
     mask: ImageData,
     y: number,
     landmarks: Landmark[]
@@ -346,7 +346,7 @@ export function Confirmation() {
     }
 
     return { left: innerLeft, right: innerRight };
-  };
+  }, [getRowBoundsFromMask]);
   /**
    * Calculate accurate measurements using the visualization method
    */
@@ -482,8 +482,7 @@ export function Confirmation() {
         return null;
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [computeMeasurementRows, computeMeasurementRowsWithYPositions, getInnerTorsoBounds]
   );
 
   const processMeasurements = useCallback(async () => {
@@ -587,37 +586,37 @@ export function Confirmation() {
         <div className="w-full flex flex-col gap-5">
           <MeasurementStepperLines stepIndex={currentStep} />
 
-          <div className="w-[51rem] flex flex-col gap-6">
+          <div className="w-full max-w-[51rem] flex flex-col gap-6">
             <div>
-              <h2 className="text-[2rem] text-[#1C1C1C] font-semibold mb-2">
+              <h2 className="text-xl md:text-[2rem] text-[#1C1C1C] font-semibold mb-2">
                 Processing Your Measurements
               </h2>
-              <p className="text-neutral-500 font-inter">
+              <p className="text-neutral-500 font-inter text-sm md:text-base">
                 Our AI is analyzing your photos to extract precise
                 measurements...
               </p>
             </div>
 
-            <div className="flex flex-col items-center gap-6 py-12">
+            <div className="flex flex-col items-center gap-4 md:gap-6 py-8 md:py-12">
               <div className="relative">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-500"></div>
+                <div className="animate-spin rounded-full h-12 w-12 md:h-16 md:w-16 border-b-2 border-primary-500"></div>
                 <SparkleIcon
                   className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-primary-500"
-                  size={24}
+                  size={20}
                 />
               </div>
 
-              <div className="text-center">
-                <p className="text-lg font-medium text-neutral-700 mb-2">
+              <div className="text-center w-full max-w-sm md:max-w-none">
+                <p className="text-base md:text-lg font-medium text-neutral-700 mb-2">
                   {progress.stage}
                 </p>
-                <div className="w-80 bg-neutral-200 rounded-full h-2">
+                <div className="w-full max-w-80 bg-neutral-200 rounded-full h-2">
                   <div
                     className="bg-primary-500 h-2 rounded-full transition-all duration-300"
                     style={{ width: `${progress.progress * 100}%` }}
                   />
                 </div>
-                <p className="text-sm text-neutral-500 mt-2">
+                <p className="text-xs md:text-sm text-neutral-500 mt-2">
                   {Math.round(progress.progress * 100)}% complete
                 </p>
               </div>
@@ -634,25 +633,25 @@ export function Confirmation() {
         <div className="w-full flex flex-col gap-5">
           <MeasurementStepperLines stepIndex={currentStep} />
 
-          <div className="w-[51rem] flex flex-col gap-6">
+          <div className="w-full max-w-[51rem] flex flex-col gap-6">
             <div>
-              <h2 className="text-[2rem] text-[#1C1C1C] font-semibold mb-2">
+              <h2 className="text-xl md:text-[2rem] text-[#1C1C1C] font-semibold mb-2">
                 Processing Failed
               </h2>
-              <p className="text-neutral-500 font-inter">
+              <p className="text-neutral-500 font-inter text-sm md:text-base">
                 We encountered an issue processing your measurements
               </p>
             </div>
 
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <p className="text-red-700">{error}</p>
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 md:p-4">
+              <p className="text-red-700 text-sm md:text-base">{error}</p>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-6 mt-8">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-end gap-4 md:gap-6 mt-8">
           <button
-            className="w-[10rem] px-4 py-2 border border-neutral-300 text-neutral-700 hover:border-neutral-400 hover:bg-neutral-50 rounded-lg flex items-center justify-center gap-2 transition-colors"
+            className="w-full md:w-[10rem] px-4 py-2 border border-neutral-300 text-neutral-700 hover:border-neutral-400 hover:bg-neutral-50 rounded-lg flex items-center justify-center gap-2 transition-colors"
             onClick={handleRestart}
           >
             <ArrowCounterClockwiseIcon size={16} />
@@ -662,7 +661,7 @@ export function Confirmation() {
           <Button
             text="Try Again"
             variant="solid"
-            className="w-[10rem] self-end"
+            className="w-full md:w-[10rem] self-end"
             onClick={retake}
           />
         </div>
@@ -678,13 +677,13 @@ export function Confirmation() {
       <div className="w-full flex flex-col gap-5">
         <MeasurementStepperLines stepIndex={currentStep} />
 
-        <div className="w-[51rem] flex flex-col gap-8">
+        <div className="w-full max-w-[51rem] flex flex-col gap-6 md:gap-8">
           {/* Header */}
           <div className="text-center">
-            <h2 className="text-[2rem] text-[#1C1C1C] font-semibold mb-4">
+            <h2 className="text-xl md:text-[2rem] text-[#1C1C1C] font-semibold mb-4">
               Measurement Summary
             </h2>
-            <p className="text-neutral-500 font-inter text-lg">
+            <p className="text-neutral-500 font-inter text-sm md:text-lg">
               We've successfully captured your measurements and detected your
               skin tone.
             </p>
@@ -694,17 +693,17 @@ export function Confirmation() {
             <>
               {/* Measurements Section */}
               <div className="bg-white">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-semibold text-[#1C1C1C]">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 md:mb-6 gap-2">
+                  <h3 className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
                     Measurement
                   </h3>
-                  <button className="flex items-center gap-2 text-neutral-600 hover:text-neutral-800 transition-colors">
+                  <button className="flex items-center gap-2 text-neutral-600 hover:text-neutral-800 transition-colors self-start sm:self-center">
                     <PencilSimpleIcon size={16} />
-                    <span className="text-sm">Edit</span>
+                    <span className="text-xs md:text-sm">Edit</span>
                   </button>
                 </div>
 
-                <div className="space-y-6">
+                <div className="space-y-4 md:space-y-6">
                   {/* Show accurate measurements if available, with comparison */}
                   {/*{accurateMeasurements && (
                     <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
@@ -718,11 +717,11 @@ export function Confirmation() {
                   )}*/}
 
                   <div className="flex justify-between items-center py-3 border-b border-neutral-100">
-                    <span className="text-lg text-neutral-700">
+                    <span className="text-sm md:text-lg text-neutral-700">
                       Bust (inches)
                     </span>
                     <div className="text-right">
-                      <span className="text-xl font-semibold text-[#1C1C1C]">
+                      <span className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
                         {accurateMeasurements
                           ? Math.round(
                               accurateMeasurements.bust.circumference / 2.54
@@ -739,11 +738,11 @@ export function Confirmation() {
                   </div>
 
                   <div className="flex justify-between items-center py-3 border-b border-neutral-100">
-                    <span className="text-lg text-neutral-700">
+                    <span className="text-sm md:text-lg text-neutral-700">
                       Waist (inches)
                     </span>
                     <div className="text-right">
-                      <span className="text-xl font-semibold text-[#1C1C1C]">
+                      <span className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
                         {accurateMeasurements
                           ? Math.round(
                               accurateMeasurements.waist.circumference / 2.54
@@ -760,11 +759,11 @@ export function Confirmation() {
                   </div>
 
                   <div className="flex justify-between items-center py-3 border-b border-neutral-100">
-                    <span className="text-lg text-neutral-700">
+                    <span className="text-sm md:text-lg text-neutral-700">
                       Hip (inches)
                     </span>
                     <div className="text-right">
-                      <span className="text-xl font-semibold text-[#1C1C1C]">
+                      <span className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
                         {accurateMeasurements
                           ? Math.round(
                               accurateMeasurements.hip.circumference / 2.54
@@ -781,8 +780,8 @@ export function Confirmation() {
                   </div>
 
                   <div className="flex justify-between items-center py-3 border-b border-neutral-100">
-                    <span className="text-lg text-neutral-700">Height</span>
-                    <span className="text-xl font-semibold text-[#1C1C1C]">
+                    <span className="text-sm md:text-lg text-neutral-700">Height</span>
+                    <span className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
                       {Math.floor(measurements.measurements.height / 30.48)}'
                       {Math.round(
                         (measurements.measurements.height % 30.48) / 2.54
@@ -792,8 +791,8 @@ export function Confirmation() {
                   </div>
 
                   <div className="flex justify-between items-center py-3 border-b border-neutral-100">
-                    <span className="text-lg text-neutral-700">Dress Size</span>
-                    <span className="text-xl font-semibold text-[#1C1C1C]">
+                    <span className="text-sm md:text-lg text-neutral-700">Dress Size</span>
+                    <span className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
                       {measurements.dressSize.us}
                     </span>
                   </div>
@@ -803,14 +802,14 @@ export function Confirmation() {
               {/* Skin Tone Section */}
               {skinTone && (
                 <div className="bg-white">
-                  <div className="flex justify-between items-center">
-                    <span className="text-lg text-neutral-700">Skin Tone</span>
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                    <span className="text-sm md:text-lg text-neutral-700">Skin Tone</span>
                     <div className="flex items-center gap-3">
                       <div
-                        className="w-12 h-8 rounded-lg border border-neutral-200"
+                        className="w-10 h-6 md:w-12 md:h-8 rounded-lg border border-neutral-200"
                         style={{ backgroundColor: skinTone.hex }}
                       />
-                      <span className="text-lg font-medium text-[#1C1C1C]">
+                      <span className="text-sm md:text-lg font-medium text-[#1C1C1C]">
                         {skinTone.name}
                       </span>
                     </div>
@@ -836,18 +835,18 @@ export function Confirmation() {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex items-center justify-center gap-4 mt-12">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-center gap-4 mt-8 md:mt-12">
         {!isAuthenticated ? (
           // Not authenticated: Show guest/signup options
           <>
             <Button
               text="Try Again"
               variant="solid"
-              className="w-[10rem] self-end"
+              className="w-full md:w-[10rem] self-end"
               onClick={handleRestart}
             />
             <button
-              className="text-[#A67C5A] hover:text-[#8B6A4D] font-medium underline transition-colors disabled:opacity-50"
+              className="text-[#A67C5A] hover:text-[#8B6A4D] font-medium underline transition-colors disabled:opacity-50 text-sm md:text-base text-center py-2"
               disabled={createGuestUser.isPending}
               onClick={() => {
                 // Create guest user with measurements then navigate to shop
@@ -911,7 +910,7 @@ export function Confirmation() {
             <Button
               text="Create a free account"
               variant="solid"
-              className="bg-[#A67C5A] hover:bg-[#8B6A4D] text-white px-6 py-3"
+              className="w-full md:w-auto bg-[#A67C5A] hover:bg-[#8B6A4D] text-white px-6 py-3"
               onClick={() => {
                 navigate("/auth/register");
               }}
@@ -923,14 +922,14 @@ export function Confirmation() {
             <Button
               text="Try Again"
               variant="solid"
-              className="w-[10rem] self-end"
+              className="w-full md:w-[10rem] self-end"
               onClick={handleRestart}
             />
 
             <Button
               text="Share"
               variant="outline"
-              className="w-[10rem] border-neutral-300 text-neutral-700 hover:border-neutral-400"
+              className="w-full md:w-[10rem] border-neutral-300 text-neutral-700 hover:border-neutral-400"
               onClick={() => {
                 // Share functionality
                 console.log("Sharing measurements");
@@ -941,7 +940,7 @@ export function Confirmation() {
               text={createMeasurements.isPending ? "Saving..." : "Save"}
               variant="solid"
               disabled={createMeasurements.isPending}
-              className="w-[10rem] bg-[#A67C5A] hover:bg-[#8B6A4D] text-white disabled:bg-gray-400"
+              className="w-full md:w-[10rem] bg-[#A67C5A] hover:bg-[#8B6A4D] text-white disabled:bg-gray-400"
               onClick={() => {
                 // Use accurate measurements if available, otherwise fall back to original
                 const measurementsToSave = accurateMeasurements || measurements;

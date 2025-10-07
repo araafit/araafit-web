@@ -27,12 +27,16 @@ import {
   QuestionIcon,
   PencilSimpleIcon,
 } from "@phosphor-icons/react";
-import { useUpdateDiscount } from "../../../../hooks/admin-discounts.hooks";
+import {
+  discountsKeys,
+  useUpdateDiscount,
+} from "../../../../hooks/admin-discounts.hooks";
 import type {
   DiscountEligibility,
   DiscountType,
 } from "../../../../services/admin-discounts.service";
 import { toast } from "react-hot-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 export type Discount = {
   id: string;
@@ -54,6 +58,7 @@ export const EditDiscountDrawer: React.FC<EditDiscountDrawerProps> = ({
   discount,
   updateDiscount,
 }) => {
+  const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(discount.name);
   const [type, setType] = useState<DiscountType>(
@@ -146,8 +151,11 @@ export const EditDiscountDrawer: React.FC<EditDiscountDrawerProps> = ({
           endDate: new Date(endDate).toISOString(),
         },
       });
-      setOpen(false);
+
+      qc.invalidateQueries({ queryKey: discountsKeys.lists() });
+      qc.invalidateQueries({ queryKey: discountsKeys.detail(discount.id) });
     } catch (error) {
+      setOpen(false);
       // toast handled in hook
       console.log(error);
     }
@@ -301,7 +309,11 @@ export const EditDiscountDrawer: React.FC<EditDiscountDrawerProps> = ({
             text={updateDiscount.isPending ? "Saving..." : "Save"}
             type="button"
             variant="solid"
-            onClick={handleUpdate}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleUpdate();
+            }}
             className="w-full md:max-w-[9.375rem]"
           />
         </div>

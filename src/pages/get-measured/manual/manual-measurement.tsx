@@ -64,7 +64,7 @@ const waterMarkStyle: React.CSSProperties = {
  */
 export function ManualMeasurement() {
   const navigate = useNavigate();
-  const { isAuthenticated, isGuest } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
 
   // API hooks
   const { data: sizeChart, isLoading: sizeChartLoading } = useSizeChart();
@@ -136,11 +136,11 @@ export function ManualMeasurement() {
 
   if (sizeChartLoading) {
     return (
-      <section className="h-screen bg-[#F5F5F5] px-0 py-0 md:py-2 md:px-16 overflow-y-scroll relative">
-        <div className="w-full h-[809px] bg-white flex justify-center items-center border rounded-md p-14">
-          <div className="flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
-            <span className="ml-2">Loading measurement options...</span>
+      <section className="min-h-screen bg-[#F5F5F5] px-0 py-0 md:py-2 md:px-16 overflow-y-scroll relative">
+        <div className="w-full min-h-[809px] bg-white flex justify-center items-center border rounded-md p-4 md:p-14">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-0">
+            <div className="animate-spin rounded-full h-6 w-6 md:h-8 md:w-8 border-b-2 border-primary-500"></div>
+            <span className="text-sm md:text-base">Loading measurement options...</span>
           </div>
         </div>
       </section>
@@ -148,39 +148,39 @@ export function ManualMeasurement() {
   }
 
   return (
-    <section className="h-screen bg-[#F5F5F5] px-0 py-0 md:py-2 md:px-16 overflow-y-scroll relative">
-      <div className="w-full h-[809px] bg-white flex justify-center border rounded-md p-14">
-        <Button
+    <section className="min-h-screen bg-[#F5F5F5] px-0 py-0 md:py-2 md:px-16 overflow-y-scroll relative">
+      <div className="w-full min-h-[809px] bg-white flex justify-center border rounded-md p-4 md:p-14">
+        <button
           type="button"
-          variant="clear"
-          className="absolute top-[32px] left-[200px] w-[40px] h-[40px] rounded-md border border-[#E8E8E8] flex flex-col items-center justify-center bg-white text-neutral-800 cursor-pointer"
+          className="absolute top-4 md:top-[32px] left-4 md:left-[200px] w-8 h-8 md:w-[40px] md:h-[40px] rounded-md border border-[#E8E8E8] flex flex-col items-center justify-center bg-white text-neutral-800 cursor-pointer z-10 hover:bg-gray-50 transition-colors"
           onClick={() => navigate("/get-measured")}
         >
-          <ArrowLeftIcon size={50} className="h-full text-neutral-800 block" />
-        </Button>
+          <ArrowLeftIcon size={20} className="md:hidden text-neutral-800 block" />
+          <ArrowLeftIcon size={50} className="hidden md:block h-full text-neutral-800" />
+        </button>
 
-        <div className="w-auto flex flex-col gap-4" style={waterMarkStyle}>
-          <div className="flex flex-col items-center gap-4">
-            <h5 className="text-[2rem] font-semibold">Manual Measurement</h5>
-            <p className="text-neutral-500 font-light text-center">
+        <div className="w-full max-w-4xl flex flex-col gap-4 md:gap-6" style={waterMarkStyle}>
+          <div className="flex flex-col items-center gap-3 md:gap-4">
+            <h5 className="text-xl md:text-[2rem] font-semibold text-center">Manual Measurement</h5>
+            <p className="text-neutral-500 font-light text-center text-sm md:text-base px-4">
               Enter your measurements to keep your fit just right.
             </p>
           </div>
 
-          <div className="w-full flex flex-col gap-4">
+          <div className="w-full flex flex-col gap-4 md:gap-6">
             {/* Bust */}
-            <div className="w-full flex flex-col gap-3">
-              <span className="font-medium capitalize text-[#1C1C1C]">
+            <div className="w-full flex flex-col gap-2 md:gap-3">
+              <span className="font-medium capitalize text-[#1C1C1C] text-sm md:text-base">
                 Bust:
               </span>
-              <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div className="grid grid-cols-4 sm:grid-cols-6 md:flex md:items-center md:justify-between gap-2 md:gap-4 flex-wrap">
                 {sizeChart?.bust?.map((item) => (
                   <Button
                     key={item.id}
                     type="button"
                     text={String(item.value)}
                     variant="outline"
-                    className={`w-[58px] h-[44px] text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-neutral-700 focus:border-neutral-700 ${
+                    className={`w-full md:w-[58px] h-[36px] md:h-[44px] text-xs md:text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-neutral-700 focus:border-neutral-700 ${
                       selectedValues.bust === item.value
                         ? "border-primary-950 bg-primary-50"
                         : ""
@@ -192,18 +192,18 @@ export function ManualMeasurement() {
             </div>
 
             {/* Waist */}
-            <div className="w-full flex flex-col gap-3">
-              <span className="font-medium capitalize text-[#1C1C1C]">
+            <div className="w-full flex flex-col gap-2 md:gap-3">
+              <span className="font-medium capitalize text-[#1C1C1C] text-sm md:text-base">
                 Waist:
               </span>
-              <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div className="grid grid-cols-4 sm:grid-cols-6 md:flex md:items-center md:justify-between gap-2 md:gap-4 flex-wrap">
                 {waistOptions.map((item, idx) => (
                   <Button
                     key={idx}
                     type="button"
                     text={String(item.label)}
                     variant="outline"
-                    className={`w-[58px] h-[44px] text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-neutral-700 focus:border-neutral-700 ${
+                    className={`w-full md:w-[58px] h-[36px] md:h-[44px] text-xs md:text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-neutral-700 focus:border-neutral-700 ${
                       selectedValues.waist === item.value
                         ? "border-primary-950 bg-primary-50"
                         : ""
@@ -215,18 +215,18 @@ export function ManualMeasurement() {
             </div>
 
             {/* Hips */}
-            <div className="w-full flex flex-col gap-3">
-              <span className="font-medium capitalize text-[#1C1C1C]">
+            <div className="w-full flex flex-col gap-2 md:gap-3">
+              <span className="font-medium capitalize text-[#1C1C1C] text-sm md:text-base">
                 Hips:
               </span>
-              <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div className="grid grid-cols-4 sm:grid-cols-6 md:flex md:items-center md:justify-between gap-2 md:gap-4 flex-wrap">
                 {hipsOptions.map((item, idx) => (
                   <Button
                     key={idx}
                     type="button"
                     text={String(item)}
                     variant="outline"
-                    className={`w-[58px] h-[44px] text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-neutral-700 focus:border-neutral-700 ${
+                    className={`w-full md:w-[58px] h-[36px] md:h-[44px] text-xs md:text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-neutral-700 focus:border-neutral-700 ${
                       selectedValues.hips === Number(item)
                         ? "border-primary-950 bg-primary-50"
                         : ""
@@ -238,18 +238,18 @@ export function ManualMeasurement() {
             </div>
 
             {/* Height */}
-            <div className="w-full flex flex-col gap-3">
-              <span className="font-medium capitalize text-[#1C1C1C]">
+            <div className="w-full flex flex-col gap-2 md:gap-3">
+              <span className="font-medium capitalize text-[#1C1C1C] text-sm md:text-base">
                 Height:
               </span>
-              <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div className="grid grid-cols-2 sm:grid-cols-4 md:flex md:items-center md:justify-between gap-2 md:gap-4 flex-wrap">
                 {heightOptions.map((option) => (
                   <Button
                     key={option.value}
                     type="button"
                     text={option.label}
                     variant="outline"
-                    className={`w-[58px] h-[44px] text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-neutral-700 focus:border-neutral-700 ${
+                    className={`w-full md:w-[58px] h-[36px] md:h-[44px] text-xs md:text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-neutral-700 focus:border-neutral-700 ${
                       selectedValues.height === option.value
                         ? "border-primary-950 bg-primary-50"
                         : ""
@@ -261,18 +261,18 @@ export function ManualMeasurement() {
             </div>
 
             {/* Dress Size */}
-            <div className="w-full flex flex-col gap-3">
-              <span className="font-medium capitalize text-[#1C1C1C]">
+            <div className="w-full flex flex-col gap-2 md:gap-3">
+              <span className="font-medium capitalize text-[#1C1C1C] text-sm md:text-base">
                 Dress Size:
               </span>
-              <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div className="grid grid-cols-4 sm:grid-cols-6 md:flex md:items-center md:justify-between gap-2 md:gap-4 flex-wrap">
                 {dressSizeOptions.map((item, idx) => (
                   <Button
                     key={idx}
                     type="button"
                     text={String(item)}
                     variant="outline"
-                    className={`w-[58px] h-[44px] text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-neutral-700 focus:border-neutral-700 ${
+                    className={`w-full md:w-[58px] h-[36px] md:h-[44px] text-xs md:text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-neutral-700 focus:border-neutral-700 ${
                       selectedValues.dressSize === Number(item)
                         ? "border-primary-950 bg-primary-50"
                         : ""
@@ -284,16 +284,16 @@ export function ManualMeasurement() {
             </div>
 
             {/* Skin Tone */}
-            <div className="w-full flex flex-col gap-3">
-              <span className="font-medium capitalize text-[#1C1C1C]">
+            <div className="w-full flex flex-col gap-2 md:gap-3">
+              <span className="font-medium capitalize text-[#1C1C1C] text-sm md:text-base">
                 Skin Tone:
               </span>
-              <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div className="grid grid-cols-3 sm:grid-cols-6 md:flex md:items-center md:justify-between gap-2 md:gap-4 flex-wrap">
                 {skinToneOptions.map((tone) => (
                   <Button
                     key={tone.name}
                     style={{ backgroundColor: tone.color }}
-                    className={`w-[58px] h-[44px] rounded-md border hover:border-neutral-700 focus:border-neutral-700 cursor-pointer ${
+                    className={`w-full md:w-[58px] h-[36px] md:h-[44px] rounded-md border hover:border-neutral-700 focus:border-neutral-700 cursor-pointer ${
                       selectedValues.skinTone === tone.name
                         ? "border-neutral-700 ring-2 ring-neutral-700"
                         : "border-gray-300"
@@ -308,11 +308,11 @@ export function ManualMeasurement() {
               variant="solid"
               onClick={saveData}
               disabled={measurementNotSelected || createMeasurements.isPending}
-              className="w-[175px] self-end mt-2 disabled:bg-neutral-50 disabled:cursor-not-allowed"
+              className="w-full md:w-[175px] self-end mt-4 md:mt-2 disabled:bg-neutral-50 disabled:cursor-not-allowed"
             >
               <div className="flex items-center justify-center gap-1">
                 {!createMeasurements.isPending && (
-                  <span>Save</span>
+                  <span className="text-sm md:text-base">Save</span>
                 )}
                 <Spinner
                   size="md"

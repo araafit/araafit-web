@@ -47,11 +47,11 @@ export function MeasurementMethod() {
 
 
   return (
-    <div className="flex flex-col gap-[12rem] relative">
+    <div className="flex flex-col gap-8 md:gap-[12rem] relative">
         {/* Back Button */}
         <button
           onClick={handleBack}
-          className="absolute top-0 left-0 w-10 h-10 bg-white border border-gray-200 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors duration-200 shadow-sm z-10"
+          className="lg:absolute top-0 left-0 w-10 h-10 bg-white border border-gray-200 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors duration-200 shadow-sm z-10"
           aria-label="Go back"
         >
           <IconArrowLeft size={16} className="text-gray-600" />
@@ -60,12 +60,12 @@ export function MeasurementMethod() {
         <div className="w-full flex flex-col gap-7">
           <MeasurementStepperLines stepIndex={currentStep} />
 
-          <div className="w-[51rem] flex flex-col gap-6">
+          <div className="w-full max-w-[51rem] flex flex-col gap-6">
             <div>
-              <h2 className="text-[2rem] text-[#1C1C1C] font-semibold mb-2">
+              <h2 className="text-xl md:text-[2rem] text-[#1C1C1C] font-semibold mb-2">
                 Measurement Method
               </h2>
-              <p className="text-neutral-500 font-inter">
+              <p className="text-neutral-500 font-inter text-sm md:text-base">
                 How would you like to get measured?
               </p>
             </div>
@@ -75,53 +75,53 @@ export function MeasurementMethod() {
                 method === "automated" ? "visible" : "invisible"
               }`}
             >
-              <WarningIcon className="text-[#F59E0B]" />
+              <WarningIcon className="text-[#F59E0B] flex-shrink-0 mt-0.5" />
 
               <div className="w-full flex flex-col">
                 <div className="flex items-center gap-2 text-[#F59E0B]">
-                  <span>Instruction</span>
+                  <span className="text-sm font-medium">Instruction</span>
                 </div>
 
-                <p className="text-[#B47409] font-light">
+                <p className="text-[#B47409] font-light text-sm">
                   If your body has undergone augmentation, you might need to
                   input measurements that were taken manually.
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-8 ">
+            <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 md:gap-8">
               <div
-                className={`w-[19.625rem] rounded-md py-6 px-4 border ${
+                className={`w-full md:w-[19.625rem] rounded-md py-4 md:py-6 px-4 border ${
                   method === "manual"
                     ? "border-primary-500"
                     : "border-neutral-100"
-                } flex flex-col gap-2 hover:border-primary-500 cursor-pointer`}
+                } flex flex-col gap-2 hover:border-primary-500 cursor-pointer transition-colors`}
                 onClick={() => setMethod("manual")}
               >
                 <Radio isClicked={method === "manual"} />
-                <h4 className="text-[18px] font-inter">
+                <h4 className="text-base md:text-[18px] font-inter">
                   Enter Measurements Manually
                 </h4>
-                <p className="text-neutral-500 text-base">
+                <p className="text-neutral-500 text-sm md:text-base">
                   Prefer to take control? Fill in your measurements manually to
                   get a perfect fit tailored just for you.
                 </p>
               </div>
 
               <div
-                className={`w-[19.625rem] rounded-md py-6 px-4 border ${
+                className={`w-full md:w-[19.625rem] rounded-md py-4 md:py-6 px-4 border ${
                   method === "automated"
                     ? "border-primary-500"
                     : "border-neutral-100"
-                } flex flex-col gap-2 hover:border-primary-500 cursor-pointer`}
+                } flex flex-col gap-2 hover:border-primary-500 cursor-pointer transition-colors`}
                 onClick={() => setMethod("automated")}
               >
                 <Radio isClicked={method === "automated"} />
-                <h4 className="text-[18px] font-inter">
+                <h4 className="text-base md:text-[18px] font-inter">
                   Get Measured with AraaFit
                 </h4>
-                <p className="text-neutral-500 text-base">
-                  Let AraaFit handle it for you! Using your camera, we’ll
+                <p className="text-neutral-500 text-sm md:text-base">
+                  Let AraaFit handle it for you! Using your camera, we'll
                   capture your body measurements quickly and securely.
                 </p>
               </div>
@@ -133,7 +133,7 @@ export function MeasurementMethod() {
           text="Continue"
           variant="solid"
           disabled={!method}
-          className="w-[10rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed"
+          className="w-full md:w-[10rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed"
           onClick={OpenModal}
         />
     </div>
