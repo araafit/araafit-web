@@ -66,11 +66,20 @@ export default function Measurements() {
       <div className="w-full max-w-[30.125rem]">
         <div className="flex flex-col items-center gap-4">
           <h5 className="text-[2rem] font-semibold">Measurement Summary</h5>
-          <p className="text-neutral-500 font-light text-center">
+          {hasCompleteMeasurements && (
+            <div className="w-full max-w-[30.125rem] flex justify-end bg-[#F6FEF9] text-[#15803c] text-[14px] border border-[#15803C] p-2 rounded-md mb-3">
+              <p>
+                We've successfully capture your measurement and detected your
+                skin tone.
+              </p>
+            </div>
+          )}
+
+          {/* <p className="text-neutral-500 font-light text-center">
             {hasCompleteMeasurements
               ? "We've successfully captured your measurements and detected your skin tone."
               : "Some measurements are missing. Update them for a better fit."}
-          </p>
+          </p> */}
         </div>
 
         <div className="flex flex-col gap-5">
@@ -127,13 +136,6 @@ export default function Measurements() {
             </div>
           </div>
         </div>
-      </div>
-
-      <div className="w-full max-w-[30.125rem] flex justify-end bg-[#F6FEF9] text-[#15803c] text-[14px] border border-[#15803C] p-2 rounded-md">
-        <p>
-          We've successfully capture your measurement and detected your skin
-          tone
-        </p>
       </div>
     </div>
   );

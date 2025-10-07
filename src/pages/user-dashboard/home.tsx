@@ -50,9 +50,9 @@ export function DashboardHomePage() {
   const title = (
     <div className="font-lora text-[#979797]">
       {!storedUser ? (
-        <span>Welcome</span>
+        <span className="">Welcome</span>
       ) : (
-        <div>
+        <div className="font-lora">
           Welcome,{" "}
           <span className="font-lora text-[#1C1C1C]">
             {storedUser?.firstName}

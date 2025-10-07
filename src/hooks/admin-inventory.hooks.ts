@@ -1,17 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "react-hot-toast";
 import {
   adminInventoryService,
   type CreateProductRequest,
   type UpdateProductRequest,
 } from "../services/admin-inventory.service";
+import showToast from "../utils/notification";
+import { notificationStyles } from "../style/custom";
+
+/* ---------------------------------------------------------- */
 
 // Query keys for admin inventory
 export const adminInventoryKeys = {
-  all: ['admin-inventory'] as const,
-  metrics: () => [...adminInventoryKeys.all, 'metrics'] as const,
-  products: () => [...adminInventoryKeys.all, 'products'] as const,
-  product: (id: string) => [...adminInventoryKeys.all, 'product', id] as const,
+  all: ["admin-inventory"] as const,
+  metrics: () => [...adminInventoryKeys.all, "metrics"] as const,
+  products: () => [...adminInventoryKeys.all, "products"] as const,
+  product: (id: string) => [...adminInventoryKeys.all, "product", id] as const,
 };
 
 // Get Product Metrics Query
@@ -23,7 +26,10 @@ export const useProductMetrics = () => {
     retry: (failureCount, error: unknown) => {
       // Don't retry on 401/403 errors
       const axiosError = error as { response?: { status?: number } };
-      if (axiosError?.response?.status === 401 || axiosError?.response?.status === 403) {
+      if (
+        axiosError?.response?.status === 401 ||
+        axiosError?.response?.status === 403
+      ) {
         return false;
       }
       // Retry once for other errors
@@ -41,7 +47,10 @@ export const useProducts = () => {
     retry: (failureCount, error: unknown) => {
       // Don't retry on 401/403 errors
       const axiosError = error as { response?: { status?: number } };
-      if (axiosError?.response?.status === 401 || axiosError?.response?.status === 403) {
+      if (
+        axiosError?.response?.status === 401 ||
+        axiosError?.response?.status === 403
+      ) {
         return false;
       }
       // Retry once for other errors
@@ -60,7 +69,10 @@ export const useProduct = (productId: string) => {
     retry: (failureCount, error: unknown) => {
       // Don't retry on 401/403 errors
       const axiosError = error as { response?: { status?: number } };
-      if (axiosError?.response?.status === 401 || axiosError?.response?.status === 403) {
+      if (
+        axiosError?.response?.status === 401 ||
+        axiosError?.response?.status === 403
+      ) {
         return false;
       }
       // Retry once for other errors
@@ -78,13 +90,23 @@ export const useCreateProduct = () => {
       adminInventoryService.createProduct(data),
     onSuccess: (response) => {
       // Invalidate and refetch products and metrics
-      queryClient.invalidateQueries({ queryKey: adminInventoryKeys.products() });
+      queryClient.invalidateQueries({
+        queryKey: adminInventoryKeys.products(),
+      });
       queryClient.invalidateQueries({ queryKey: adminInventoryKeys.metrics() });
-      toast.success(response.message);
+      showToast.success(response.message || "Product created successfully", {
+        icon: null,
+        style: notificationStyles.alertSuccess,
+      });
     },
     onError: (error: unknown) => {
-      const axiosError = error as { response?: { data?: { message?: string } } };
-      toast.error(axiosError.response?.data?.message || "Failed to create product");
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+      };
+      showToast.error(
+        axiosError.response?.data?.message || "Failed to create product",
+        { icon: null, style: notificationStyles.alertError }
+      );
     },
   });
 };
@@ -94,18 +116,35 @@ export const useUpdateProduct = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ productId, data }: { productId: string; data: UpdateProductRequest }) =>
-      adminInventoryService.updateProduct(productId, data),
+    mutationFn: ({
+      productId,
+      data,
+    }: {
+      productId: string;
+      data: UpdateProductRequest;
+    }) => adminInventoryService.updateProduct(productId, data),
     onSuccess: (response, variables) => {
       // Invalidate and refetch products and metrics
-      queryClient.invalidateQueries({ queryKey: adminInventoryKeys.products() });
+      queryClient.invalidateQueries({
+        queryKey: adminInventoryKeys.products(),
+      });
       queryClient.invalidateQueries({ queryKey: adminInventoryKeys.metrics() });
-      queryClient.invalidateQueries({ queryKey: adminInventoryKeys.product(variables.productId) });
-      toast.success(response.message);
+      queryClient.invalidateQueries({
+        queryKey: adminInventoryKeys.product(variables.productId),
+      });
+      showToast.success(response.message || "Product updated successfully", {
+        icon: null,
+        style: notificationStyles.alertSuccess,
+      });
     },
     onError: (error: unknown) => {
-      const axiosError = error as { response?: { data?: { message?: string } } };
-      toast.error(axiosError.response?.data?.message || "Failed to update product");
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+      };
+      showToast.error(
+        axiosError.response?.data?.message || "Failed to update product",
+        { icon: null, style: notificationStyles.alertError }
+      );
     },
   });
 };
@@ -119,13 +158,23 @@ export const useDeleteProduct = () => {
       adminInventoryService.deleteProduct(productId),
     onSuccess: (response) => {
       // Invalidate and refetch products and metrics
-      queryClient.invalidateQueries({ queryKey: adminInventoryKeys.products() });
+      queryClient.invalidateQueries({
+        queryKey: adminInventoryKeys.products(),
+      });
       queryClient.invalidateQueries({ queryKey: adminInventoryKeys.metrics() });
-      toast.success(response.message);
+      showToast.success(response.message || "Product deleted successfully", {
+        icon: null,
+        style: notificationStyles.alertSuccess,
+      });
     },
     onError: (error: unknown) => {
-      const axiosError = error as { response?: { data?: { message?: string } } };
-      toast.error(axiosError.response?.data?.message || "Failed to delete product");
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+      };
+      showToast.error(
+        axiosError.response?.data?.message || "Failed to delete product",
+        { icon: null, style: notificationStyles.alertError }
+      );
     },
   });
 };

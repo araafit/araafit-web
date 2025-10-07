@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { ListIcon, ArrowElbowDownRightIcon } from "@phosphor-icons/react";
 import Button from "../../shared-components/button";
 import { useNavigate } from "react-router-dom";
+import useAuth from "../../hooks/use-auth";
 
 /* ------------------------------------------------------------- */
 
@@ -15,6 +16,7 @@ export default function Nav() {
   const [showNav, setShowNav] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { isAuthenticated, isAdmin, isFullUser } = useAuth();
 
   const pathname = location.pathname.toLowerCase();
 
@@ -58,20 +60,38 @@ export default function Nav() {
         </div>
       </div>
 
-      <div className="flex items-center">
+      {isAuthenticated && isAdmin ? (
         <Button
           type="button"
-          text="Login"
-          variant="outline"
+          text="Go To Dashboard"
+          variant="solid"
           className="hidden md:block"
-          onClick={() => navigate("/auth/login")}
+          onClick={() => navigate("/admin-dashboard/overview")}
         />
+      ) : isAuthenticated && isFullUser ? (
+        <Button
+          type="button"
+          text="Go To Dashboard"
+          variant="solid"
+          className="hidden md:block"
+          onClick={() => navigate("/dashboard")}
+        />
+      ) : (
+        <div className="flex items-center">
+          <Button
+            type="button"
+            text="Login"
+            variant="outline"
+            className="hidden md:block"
+            onClick={() => navigate("/auth/login")}
+          />
 
-        {/* Mobile screen nav menu trigger burger icon */}
-        <div onClick={() => setShowNav(!showNav)}>
-          <ListIcon className="text-primary-500 block md:hidden" size={24} />
+          {/* Mobile screen nav menu trigger burger icon */}
+          <div onClick={() => setShowNav(!showNav)}>
+            <ListIcon className="text-primary-500 block md:hidden" size={24} />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Mobile screen nav menu */}
       <div
