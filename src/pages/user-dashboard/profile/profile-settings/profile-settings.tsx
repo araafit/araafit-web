@@ -20,12 +20,12 @@ export default function ProfileSettings() {
 
       <ChangePassword />
 
-      <div className="bg-white flex items-center justify-between py-5 px-8 rounded-md">
-        <div className="w-full max-w-[24.125rem]">
-          <h5 className="font-semibold text-neutral-900 mb-3 text-[1.75rem]">
+      <div className="bg-white flex flex-col lg:flex-row items-start lg:items-center justify-between py-3 lg:py-5 px-4 lg:px-8 rounded-md gap-4 lg:gap-0">
+        <div className="w-full lg:max-w-[24.125rem]">
+          <h5 className="font-semibold text-neutral-900 mb-3 text-lg lg:text-[1.75rem]">
             Delete Account
           </h5>
-          <p className="text-[0.875rem] text-[#676767]">
+          <p className="text-sm lg:text-[0.875rem] text-[#676767]">
             Deleting your account will permanently remove all your information.
             This action cannot be undone.
           </p>

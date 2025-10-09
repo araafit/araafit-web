@@ -50,7 +50,7 @@ export default function Accordion({
   const defaultAnswerClass = `faq-answer w-full text-neutral-950 font-normal transition-all`;
 
   const animate = shouldAnimate
-    ? "overflow-hidden transition-all duration-700 ease-in-out"
+    ? "overflow-show transition-all duration-700 ease-in-out"
     : "";
 
   const onClick = (item: any, itemIdx: number) => {
@@ -115,7 +115,7 @@ export default function Accordion({
             {/* Answer content */}
             <div
               className={CN(
-                `${defaultAnswerClass} ${isOpen ? "h-[100px]" : "h-0 "} ${
+                `${defaultAnswerClass} ${isOpen ? "max-h-[200px]" : "max-h-0"} ${
                   animate
                     ? "overflow-hidden transition-all duration-700 ease-in-out"
                     : ""

@@ -141,7 +141,7 @@ const ShopTab = ({
     >
       <div
         className={CN(
-          "w-full flex items-center justify-between sticky top-0 left-0 z-10",
+          "w-full flex flex-col lg:flex-row items-start lg:items-center justify-between sticky top-0 left-0 z-10 gap-4 lg:gap-0",
           tabListClassName
         )}
       >
@@ -160,7 +160,7 @@ const ShopTab = ({
           ))}
         </div>
 
-        <div className="flex items-center gap-6">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-6 w-full lg:w-auto">
           <SearchInput />
           {/*<div className="w-[18.0625rem] flex gap-2 py-[6px] px-3 border border-neutral-100 rounded-md">
             <MagnifyingGlassIcon size="20px" className="text-neutral-500" />
@@ -174,12 +174,12 @@ const ShopTab = ({
             />
           </div>*/}
 
-          <div className="grow flex items-center justify-between">
-            <span className="text-neutral-500 whitespace-nowrap">Sort by:</span>
+          <div className="flex items-center justify-between w-full lg:w-auto">
+            <span className="text-neutral-500 whitespace-nowrap text-sm lg:text-base">Sort by:</span>
             <Select
               options={options}
-              containerClassName="w-[8rem] ml-1"
-              selectClassName="border-none"
+              containerClassName="w-[6rem] lg:w-[8rem] ml-1"
+              selectClassName="border-none text-sm lg:text-base"
               onChange={(item) => console.log(item)}
               value="measurement"
             />
@@ -188,7 +188,7 @@ const ShopTab = ({
       </div>
 
       {children && (
-        <div className="p-4 size-full">
+        <div className="p-2 lg:p-4 size-full">
           {Children.toArray(children)[activeTab]}
         </div>
       )}

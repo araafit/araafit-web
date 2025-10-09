@@ -1,6 +1,7 @@
 import { useForm, type SubmitHandler } from "react-hook-form";
 import Button from "../../../shared-components/button";
-
+import { toast } from "react-hot-toast";
+import { useState } from "react";
 /* ------------------------------------------------------------------ */
 
 type FormValues = {
@@ -20,18 +21,62 @@ export default function ContactForm() {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<FormValues>();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const onSubmit: SubmitHandler<FormValues> = (data) => {
+  const onSubmit: SubmitHandler<FormValues> = async (data) => {
     console.log("form data", data);
 
-    console.log(data)
-    // Send data
+    // Prepare form data for Netlify
+    const formData = new FormData();
+    formData.append('form-name', 'contact');
+    formData.append('firstName', data.firstName);
+    formData.append('lastName', data.lastName);
+    formData.append('email', data.email);
+    formData.append('subject', data.subject);
+    formData.append('message', data.message);
+
+    try {
+      // Submit to Netlify
+      setIsLoading(true);
+      await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(formData as any).toString()
+      });
+      
+      console.log('Form submitted successfully');
+      toast.success('Form submitted successfully');
+      reset();
+      // You can add a success message or redirect here
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error('Error submitting form');
+      // You can add error handling here
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="w-full flex flex-col gap-4">
+    <form 
+      name="contact" 
+      method="POST" 
+      data-netlify="true" 
+      data-netlify-honeypot="bot-field"
+      onSubmit={handleSubmit(onSubmit)} 
+      className="w-full flex flex-col gap-4"
+    >
+      {/* Hidden field for Netlify */}
+      <input type="hidden" name="form-name" value="contact" />
+      <div style={{ display: 'none' }}>
+        <label>
+          Don't fill this out if you're human: <input name="bot-field" />
+        </label>
+      </div>
+
       {/* First name */}
       <div className="flex flex-col justify-center gap-2">
         <label className="text-neutral-950">First Name</label>
@@ -108,7 +153,7 @@ export default function ContactForm() {
         {errors.message && <small className="text-red-400">{errors.message.message}</small>}
       </div>
 
-      <Button type="submit" text="Submit" variant="solid" className="" />
+      <Button type="submit" text="Submit" variant="solid" className="" disabled={isLoading} />
     </form>
   );
 }
