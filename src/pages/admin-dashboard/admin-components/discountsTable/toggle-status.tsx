@@ -107,4 +107,4 @@ const DiscountStatusToggle: React.FC<DiscountStatusToggleProps> = ({
   );
 };
 
-export default DiscountStatusToggle;
+export default React.memo(DiscountStatusToggle);

@@ -1,10 +1,10 @@
 import * as React from "react";
 import {
-  DndContext,
   closestCenter,
+  DndContext,
+  KeyboardSensor,
   MouseSensor,
   TouchSensor,
-  KeyboardSensor,
   useSensor,
   useSensors,
   type DragEndEvent,
@@ -12,7 +12,7 @@ import {
 } from "@dnd-kit/core";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { arrayMove } from "@dnd-kit/sortable";
-import type { ColumnDef } from "@tanstack/react-table";
+import { TrashSimpleIcon } from "@phosphor-icons/react";
 import {
   flexRender,
   getCoreRowModel,
@@ -20,10 +20,26 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
+  type ColumnDef,
+  type ColumnFiltersState,
   type SortingState,
   type VisibilityState,
-  type ColumnFiltersState,
 } from "@tanstack/react-table";
+import {
+  useDeleteDiscount,
+  useUpdateDiscount,
+} from "../../../../hooks/admin-discounts.hooks";
+import Button from "../../../../shared-components/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../../../ui/dialog";
 import {
   Table,
   TableBody,
@@ -32,25 +48,18 @@ import {
   TableHeader,
   TableRow,
 } from "../../../ui/table";
-import { TrashSimpleIcon } from "@phosphor-icons/react";
-import Button from "../../../../shared-components/button";
 import emptyFolder from "../../images/image 45.png";
-import {
-  Dialog,
-  DialogTrigger,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "../../../ui/dialog";
-import DiscountStatusToggle from "./toggle-status";
 import { EditDiscountDrawer } from "./edit-discount-drawer";
-import {
-  useDeleteDiscount,
-  useUpdateDiscount,
-} from "../../../../hooks/admin-discounts.hooks";
+import DiscountStatusToggle from "./toggle-status";
+
+/* -------------------------------------------------------------------------------------------- */
+
+// --- EXTEND REACT TABLE META ---
+declare module "@tanstack/react-table" {
+  interface TableMeta<TData> {
+    setData: React.Dispatch<React.SetStateAction<TData[]>>;
+  }
+}
 
 // --- SCHEMA / TYPE ---
 export type Discount = {
@@ -63,13 +72,6 @@ export type Discount = {
   endDate: string;
   status: "Active" | "Inactive";
 };
-declare module "@tanstack/react-table" {
-  interface TableMeta<TData> {
-    setData: React.Dispatch<React.SetStateAction<TData[]>>;
-  }
-}
-
-// --- SAMPLE DATA ---
 
 // --- COLUMNS ---
 const createColumns = (
@@ -179,13 +181,11 @@ const createColumns = (
 ];
 
 // --- TABLE COMPONENT ---
-export function DiscountTable({
-  data: initialData,
-  openCreateDrawer,
-}: {
+
+const DiscountTable: React.FC<{
   data: Discount[];
   openCreateDrawer: (open: boolean) => void;
-}) {
+}> = React.memo(({ data: initialData, openCreateDrawer }) => {
   const [data, setData] = React.useState(() => initialData);
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -344,4 +344,6 @@ export function DiscountTable({
       </div>
     </div>
   );
-}
+});
+
+export { DiscountTable };
