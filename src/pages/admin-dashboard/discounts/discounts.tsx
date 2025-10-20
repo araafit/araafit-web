@@ -1,14 +1,17 @@
 import { CaretRightIcon, WarningIcon, XIcon } from "@phosphor-icons/react";
-import TopBar from "../admin-components/top-bar/top-bar";
-import AdminDashboardLayout from "../../../layouts/admin-dashboard/dashboard-layout";
-import { DiscountTable } from "../admin-components/discountsTable/discounts-table";
-import Button from "../../../shared-components/button";
-import NotificationBell from "../admin-components/top-bar/notification-bell";
-import { CreateDiscountDrawer } from "./new-discounts";
 import { useState } from "react";
 import { useDiscounts } from "../../../hooks/admin-discounts.hooks";
-import { convertApiDiscountsToTable } from "../../../utils/admin-discounts-utils";
+import AdminDashboardLayout from "../../../layouts/admin-dashboard/dashboard-layout";
+import Button from "../../../shared-components/button";
 import Spinner from "../../../shared-components/spinner";
+import { convertApiDiscountsToTable } from "../../../utils/admin-discounts-utils";
+import { DiscountTable } from "../admin-components/discountsTable/discounts-table";
+import NotificationBell from "../admin-components/top-bar/notification-bell";
+import TopBar from "../admin-components/top-bar/top-bar";
+import { CreateDiscountDrawer } from "./new-discounts";
+
+/* -------------------------------------------------------------------------------- */
+
 export type Discount = {
   id: string;
   name: string;
@@ -20,35 +23,12 @@ export type Discount = {
   status: "Active" | "Inactive";
 };
 
-/* -------------------------------------------------------------------------------- */
-
-// eslint-disable-next-line react-refresh/only-export-components
-export const discountData: Discount[] = [
-  {
-    id: "1",
-    name: "New User Discount",
-    type: "Percentage",
-    value: "10%",
-    eligible: "First-time buyers",
-    startDate: "27 Aug 2020 10:26 AM",
-    endDate: "26 Aug 2020 10:01 PM",
-    status: "Active",
-  },
-  {
-    id: "2",
-    name: "Guest Discount",
-    type: "Flat",
-    value: "₦2000",
-    eligible: "Guest customers",
-    startDate: "27 Aug 2020 10:26 AM",
-    endDate: "26 Aug 2020 10:01 PM",
-    status: "Inactive",
-  },
-];
-// const totalDiscounts = discountData.length;
-
 export function AdminDashboardDiscounts() {
   const [showDisclaimer, setShowDisclaimer] = useState(true);
+  const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false);
+  const { data, isLoading, error } = useDiscounts();
+  const tableData = data ? convertApiDiscountsToTable(data) : [];
+  const totalDiscounts = data?.length ?? 0;
 
   const title = <div className="font-lora text-[#1C1C1C]">Discounts</div>;
 
@@ -59,10 +39,6 @@ export function AdminDashboardDiscounts() {
       <span className="text-[#979797]">Discounts</span>
     </div>
   );
-  const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false);
-  const { data, isLoading, error } = useDiscounts();
-  const tableData = data ? convertApiDiscountsToTable(data) : [];
-  const totalDiscounts = data?.length ?? 0;
 
   return (
     <AdminDashboardLayout>
@@ -116,7 +92,7 @@ export function AdminDashboardDiscounts() {
             </div>
             {isLoading ? (
               <div className="flex justify-center items-center py-12 bg-white rounded-b-md">
-                <Spinner size="lg" speed="fast" />
+                <Spinner size="lg" speed="fast" arcColor="#9A6C50" />
               </div>
             ) : error ? (
               <div className="bg-red-50 border border-red-200 rounded-md p-6">

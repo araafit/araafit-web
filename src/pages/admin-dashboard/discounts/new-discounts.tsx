@@ -267,6 +267,7 @@ export const CreateDiscountDrawer: React.FC<CreateDiscountDrawerProps> = ({
                 Start Date
               </label>
               <input
+                title="Start date"
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
@@ -278,6 +279,7 @@ export const CreateDiscountDrawer: React.FC<CreateDiscountDrawerProps> = ({
                 End Date
               </label>
               <input
+                title="End date"
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
