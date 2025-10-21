@@ -1,11 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
-import adminDiscountsService, { type CreateDiscountRequest, type UpdateDiscountRequest } from "../services/admin-discounts.service";
+import adminDiscountsService, {
+  type CreateDiscountRequest,
+  type UpdateDiscountRequest,
+} from "../services/admin-discounts.service";
+import showToast from "../utils/notification";
+import { notificationStyles } from "../style/custom";
+
+/* ---------------------------------------------------------------------------------------------------------------- */
 
 export const discountsKeys = {
-  all: ['admin-discounts'] as const,
-  lists: () => [...discountsKeys.all, 'list'] as const,
-  detail: (id: string) => [...discountsKeys.all, 'detail', id] as const,
+  all: ["admin-discounts"] as const,
+  lists: () => [...discountsKeys.all, "list"] as const,
+  detail: (id: string) => [...discountsKeys.all, "detail", id] as const,
+  activeDiscount: () => [...discountsKeys.all, "active"] as const,
 };
 
 export const useDiscounts = () => {
@@ -15,7 +23,11 @@ export const useDiscounts = () => {
     staleTime: 2 * 60 * 1000,
     retry: (failureCount, error: unknown) => {
       const axiosError = error as { response?: { status?: number } };
-      if (axiosError?.response?.status === 401 || axiosError?.response?.status === 403) return false;
+      if (
+        axiosError?.response?.status === 401 ||
+        axiosError?.response?.status === 403
+      )
+        return false;
       return failureCount < 1;
     },
   });
@@ -33,14 +45,23 @@ export const useDiscount = (id: string) => {
 export const useCreateDiscount = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: CreateDiscountRequest) => adminDiscountsService.createDiscount(payload),
+    mutationFn: (payload: CreateDiscountRequest) =>
+      adminDiscountsService.createDiscount(payload),
     onSuccess: () => {
-      toast.success('Discount created');
+      showToast.success("Discount created", {
+        style: notificationStyles.alertSuccess,
+        icon: null,
+      });
       qc.invalidateQueries({ queryKey: discountsKeys.lists() });
     },
     onError: (error: unknown) => {
-      const axiosError = error as { response?: { data?: { message?: string } } };
-      toast.error(axiosError.response?.data?.message || 'Failed to create discount');
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+      };
+      showToast.error(
+        axiosError.response?.data?.message || "Failed to create discount",
+        { style: notificationStyles.alertError, icon: null }
+      );
     },
   });
 };
@@ -48,15 +69,26 @@ export const useCreateDiscount = () => {
 export const useUpdateDiscount = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: UpdateDiscountRequest }) => adminDiscountsService.updateDiscount(id, payload),
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: string;
+      payload: UpdateDiscountRequest;
+    }) => adminDiscountsService.updateDiscount(id, payload),
     onSuccess: (_data, vars) => {
-      toast.success('Discount updated');
+      toast.success("Discount updated");
       qc.invalidateQueries({ queryKey: discountsKeys.lists() });
       qc.invalidateQueries({ queryKey: discountsKeys.detail(vars.id) });
     },
     onError: (error: unknown) => {
-      const axiosError = error as { response?: { data?: { message?: string } } };
-      toast.error(axiosError.response?.data?.message || 'Failed to update discount');
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+      };
+      showToast.error(
+        axiosError.response?.data?.message || "Failed to update discount",
+        { style: notificationStyles.alertError, icon: null }
+      );
     },
   });
 };
@@ -66,12 +98,20 @@ export const useDeleteDiscount = () => {
   return useMutation({
     mutationFn: (id: string) => adminDiscountsService.deleteDiscount(id),
     onSuccess: (res) => {
-      toast.success(res.message || 'Discount deleted');
+      showToast.success(res.message || "Discount deleted", {
+        style: notificationStyles.alertSuccess,
+        icon: null,
+      });
       qc.invalidateQueries({ queryKey: discountsKeys.lists() });
     },
     onError: (error: unknown) => {
-      const axiosError = error as { response?: { data?: { message?: string } } };
-      toast.error(axiosError.response?.data?.message || 'Failed to delete discount');
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+      };
+      showToast.error(
+        axiosError.response?.data?.message || "Failed to delete discount",
+        { style: notificationStyles.alertSuccess, icon: null }
+      );
     },
   });
 };
@@ -84,10 +124,33 @@ export const useToggleDiscount = () => {
       qc.invalidateQueries({ queryKey: discountsKeys.lists() });
     },
     onError: (error: unknown) => {
-      const axiosError = error as { response?: { data?: { message?: string } } };
-      toast.error(axiosError.response?.data?.message || 'Failed to toggle discount');
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+      };
+      showToast.error(
+        axiosError.response?.data?.message || "Failed to toggle discount",
+        {
+          style: notificationStyles.alertError,
+          icon: null,
+        }
+      );
     },
   });
 };
 
-
+export const useActiveDiscounts = () => {
+  return useQuery({
+    queryFn: () => adminDiscountsService.getActiveDiscounts(),
+    queryKey: discountsKeys.activeDiscount(),
+    staleTime: 2 * 60 * 1000,
+    retry: (failureCount, error: unknown) => {
+      const axiosError = error as { response?: { status?: number } };
+      if (
+        axiosError?.response?.status === 401 ||
+        axiosError?.response?.status === 403
+      )
+        return false;
+      return failureCount < 1;
+    },
+  });
+};
