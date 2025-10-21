@@ -10,7 +10,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../../../ui/dialog";
-export type Discount = {
+import { useToggleDiscount } from "../../../../hooks/admin-discounts.hooks";
+import Spinner from "../../../../shared-components/spinner";
+
+/* -------------------------------------------------------------------------------- */
+
+export interface Discount {
   id: string;
   name: string;
   type: "Percentage" | "Flat";
@@ -20,7 +25,6 @@ export type Discount = {
   endDate: string;
   status: "Active" | "Inactive";
 };
-import { useToggleDiscount } from "../../../../hooks/admin-discounts.hooks";
 
 interface DiscountStatusToggleProps {
   id: number | string;
@@ -83,6 +87,7 @@ const DiscountStatusToggle: React.FC<DiscountStatusToggleProps> = ({
                 : "Are you sure you want to deactivate this discount? You can always turn it back on later using the toggle switch."}
             </DialogDescription>
           </DialogHeader>
+
           <DialogFooter className="flex">
             <DialogClose asChild className="flex-1">
               <Button
@@ -92,14 +97,18 @@ const DiscountStatusToggle: React.FC<DiscountStatusToggleProps> = ({
               />
             </DialogClose>
             <Button
-              text={pendingChecked ? "Reactivate" : "Deactivate"}
               type="submit"
               variant="solid"
               onClick={handleConfirm}
               className={`bg-[#9A6C50] text-white flex-1 ${
                 pendingChecked ? "bg-[#DC2626]" : "bg-[#16A34A]"
               }`}
-            />
+            >
+              <div className="w-full flex items-center justify-center gap-1">
+                <span>{pendingChecked ? "Reactivate" : "Deactivate"}</span>
+                <Spinner size="sm" speed="fast"  arcColor="#ffff" isLoading={toggleMutation.isPending} />
+              </div>
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
