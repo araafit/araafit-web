@@ -26,7 +26,7 @@ export type Discount = {
 export function AdminDashboardDiscounts() {
   const [showDisclaimer, setShowDisclaimer] = useState(true);
   const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false);
-  const { data, isLoading, error } = useDiscounts();
+  const { data, isLoading, isError, isSuccess } = useDiscounts();
   const tableData = data ? convertApiDiscountsToTable(data) : [];
   const totalDiscounts = data?.length ?? 0;
 
@@ -83,22 +83,32 @@ export function AdminDashboardDiscounts() {
             </div>
           )}
 
-          <section className="flex gap-0 flex-col">
+          <section className="flex gap-2 flex-col">
             <div className="flex items-center justify-between bg-white rounded-t-md border-b py-4 px-4">
               <h2 className="font-lora text-[28px] text-[#1C1C1C] flex items-center gap-2">
                 Total Discounts
                 <span className="font-lora">{totalDiscounts}</span>
               </h2>
             </div>
-            {isLoading ? (
-              <div className="flex justify-center items-center py-12 bg-white rounded-b-md">
-                <Spinner size="lg" speed="fast" arcColor="#9A6C50" />
+
+            {isLoading && (
+              <div className="w-full flex justify-center items-center rounded-b-md">
+                <Spinner
+                  size="md"
+                  speed="fast"
+                  arcColor="#9A6C50"
+                  isLoading={true}
+                />
               </div>
-            ) : error ? (
-              <div className="bg-red-50 border border-red-200 rounded-md p-6">
+            )}
+
+            {isError && (
+              <div className="bg-red-50 border border-red-200 rounded-md p-6 mt-10">
                 <p className="text-red-600">Failed to load discounts</p>
               </div>
-            ) : (
+            )}
+
+            {isSuccess && (
               <DiscountTable
                 data={tableData as Discount[]}
                 openCreateDrawer={setIsCreateDrawerOpen}
