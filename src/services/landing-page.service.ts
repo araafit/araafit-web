@@ -1,4 +1,5 @@
 import apiClient from "../lib/axios";
+import { AxiosError } from "axios";
 
 /* ------------------------------------------------------------ */
 
@@ -6,6 +7,7 @@ export interface ApiResponse<T> {
   message: string;
   success: boolean;
   data: T;
+  errors: never;
 }
 
 export interface ClaimDiscount {
@@ -18,9 +20,9 @@ export interface ClaimDiscount {
 export interface ActiveDiscount {
   id: string;
   name: string;
-  type: string;
+  type: "percentage" | "fixed_amount";
   value: string;
-  eligibility: string;
+  eligibility: "all_customers" | "guest_customers" | "first_time_buyers";
   usageLimit: string;
   startDate: string;
   endDate: string;
@@ -42,13 +44,25 @@ class LandingPageService {
     return data;
   }
 
-  async getActiveDiscounts(): Promise<ActiveDiscount> {
-    const response = await apiClient.get<ApiResponse<ActiveDiscount>>(
+  async getActiveDiscounts(): Promise<ActiveDiscount[]> {
+    const response = await apiClient.get<ApiResponse<ActiveDiscount[]>>(
       "/discounts/active"
     );
-    const data: any = response.data as any;
+    const data: ApiResponse<ActiveDiscount[]> = response.data;
 
-    return data as ActiveDiscount;
+    if (!data.success) {
+      const axiosError = new AxiosError(
+        data.message || "Failed to catch active discount",
+        response.status === 401 ? "ERR_BAD_REQUEST" : "ERR_BAD_RESPONSE",
+        response.config,
+        response.request,
+        response
+      );
+
+      throw axiosError;
+    }
+
+    return data.data;
   }
 }
 
