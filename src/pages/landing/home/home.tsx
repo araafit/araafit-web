@@ -25,9 +25,12 @@ import {
 import Testimonials from "./testimonials";
 import guestImage from "./discount-image.png";
 import { useSwitch } from "../../../shared-hooks/switch";
-import { useMutation } from "@tanstack/react-query";
-import { claimDiscount } from "../../../services/landing-page.service";
 import Spinner from "../../../shared-components/spinner";
+import {
+  useClaimDiscount,
+  useActiveDiscounts,
+} from "../../../hooks/discount.hook";
+import type { ActiveDiscount } from "../../../services/landing-page.service";
 
 /* --------------------------------------------------------------------- */
 
@@ -39,6 +42,7 @@ const bgImage = {
 type ModalShape = {
   isOpen: boolean;
   onClose?: () => void;
+  discountData: ActiveDiscount | null;
 };
 
 /**
@@ -49,128 +53,28 @@ type ModalShape = {
 export function HomePage() {
   const { switchValue: isOpen, toggleSwitch: toggleModal } = useSwitch(false);
   const [feature, setFeature] = useState<AccordionItemType>(features[0]);
+  const [discountData, setDiscountData] = useState<ActiveDiscount | null>(null);
   const [windowWidth] = useWindowSize();
   const navigate = useNavigate();
+  const activeDiscounts = useActiveDiscounts();
 
-  useEffect(() => {
-    setTimeout(() => toggleModal(), 10000);
-  }, []);
+  if (activeDiscounts.isError) {
+    console.log("Error:", activeDiscounts.error);
+  }
 
-  const handleGetMeasured = () => {
-    navigate("/get-measured");
-  };
+  // Whether 'all_customers', 'first_time_buyers' or 'guest_customers'
+  if (
+    activeDiscounts.isSuccess &&
+    activeDiscounts.data &&
+    activeDiscounts.data[0].eligibility === "first_time_buyers"
+  ) {
+    setDiscountData(activeDiscounts.data[0]);
 
-  // Discount Modal
-  const Modal: React.FC<ModalShape> = memo(({ isOpen, onClose }) => {
-    const [discountInput, setDiscountInput] = useState("");
-    const [fieldIsEmpty, setFieldIsEmpty] = useState(false);
+    // Show discount modal
+    setTimeout(() => toggleModal(), 5000);
+  }
 
-    const discountMutation = useMutation({
-      mutationFn: () => claimDiscount(),
-      onSuccess: () => toggleModal(),
-    });
-
-    useEffect(() => {
-      const originalOverflow = window.document.body.style.overflow;
-      if (isOpen) {
-        window.document.body.style.overflow = "hidden";
-      } else {
-        window.document.body.style.overflow = originalOverflow;
-      }
-      return () => {
-        window.document.body.style.overflow = originalOverflow;
-      };
-    }, [isOpen]);
-
-    const submitDiscount = () => {
-      if (discountInput === "") {
-        setFieldIsEmpty(true);
-
-        return;
-      }
-
-      discountMutation.mutateAsync();
-      setFieldIsEmpty(false);
-    };
-
-    if (!isOpen) return null;
-
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm top-0 left-0">
-        <div
-          className="h-[770px] w-[500px] bg-white rounded-md shadow-xl z-50 relative"
-          onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
-        >
-          <img
-            src={guestImage}
-            alt="discount image"
-            className="w-full h-[350px] object-center object-contain rounded-t-md"
-          />
-
-          <div className="w-full flex items-center justify-center mt-6 px-6">
-            <div className="w-[438px] flex flex-col items-center justify-center text-center">
-              <h3 className="text-[40px] font-semibold leading-[125%] mb-4">
-                Enjoy 10% Off Your First Order
-              </h3>
-
-              <p className="text-sm text-neutral-500">
-                Join our style circle and enjoy a special welcome gift on your
-                first order.
-              </p>
-
-              <div className="w-full gap-4 flex flex-col mt-6">
-                <div className="w-full flex flex-col gap-2 mt-6">
-                  <label htmlFor="email" className="w-full text-left">
-                    Email
-                  </label>
-
-                  <input
-                    type="email"
-                    name="email"
-                    id="email"
-                    value={discountInput}
-                    onChange={(e) => setDiscountInput(e.currentTarget.value)}
-                    placeholder="Email"
-                    className="border border-neutral-300 rounded-md p-3 w-full focus:outline-none focus:border-grey-300"
-                  />
-
-                  <small
-                    className={`w-full ${
-                      fieldIsEmpty ? "text-red-400" : "text-white"
-                    } text-left`}
-                  >
-                    Please fill discount field
-                  </small>
-                </div>
-
-                <Button
-                  type="submit"
-                  variant="solid"
-                  className="w-full"
-                  onClick={submitDiscount}
-                >
-                  <div className="flex items-center justify-center gap-2">
-                    <span>Claim my 10% off</span>
-                    <Spinner
-                      isLoading={discountMutation.isPending}
-                      circleColor="white"
-                      size="sm"
-                      speed="fast"
-                    />
-                  </div>
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          <XIcon
-            className="absolute right-5 top-5 text-white cursor-pointer"
-            onClick={onClose}
-          />
-        </div>
-      </div>
-    );
-  });
+  const redirectToMeasurementPage = () => navigate("/get-measured");
 
   return (
     <LandingLayout>
@@ -198,7 +102,7 @@ export function HomePage() {
                 text="Get measured"
                 variant="solid"
                 className="w-full md:max-w-[9.375rem]"
-                onClick={handleGetMeasured}
+                onClick={() => navigate("/get-measured")}
               />
 
               <Button
@@ -255,7 +159,7 @@ export function HomePage() {
                   type="button"
                   text="Take your measurement"
                   variant="solid"
-                  onClick={handleGetMeasured}
+                  onClick={redirectToMeasurementPage}
                 />
               </div>
 
@@ -418,15 +322,144 @@ export function HomePage() {
                   variant="solid"
                   className="w-auto bg-primary-950"
                   text="Start your custom fit journey"
-                  onClick={handleGetMeasured}
+                  onClick={redirectToMeasurementPage}
                 />
               </div>
             </div>
           </section>
         </div>
 
-        <Modal isOpen={isOpen} onClose={toggleModal} />
+        <Modal
+          isOpen={isOpen}
+          onClose={toggleModal}
+          discountData={discountData}
+        />
       </>
     </LandingLayout>
   );
 }
+
+// claim discount Modal
+const Modal: React.FC<ModalShape> = memo(
+  ({ isOpen, onClose, discountData }) => {
+    const [discountInput, setDiscountInput] = useState("");
+    const [fieldIsEmpty, setFieldIsEmpty] = useState(false);
+    const claimDiscountMutation = useClaimDiscount();
+
+    // Stop scroll
+    useEffect(() => {
+      const originalOverflow = window.document.body.style.overflow;
+      if (isOpen) {
+        window.document.body.style.overflow = "hidden";
+      } else {
+        window.document.body.style.overflow = originalOverflow;
+      }
+      return () => {
+        window.document.body.style.overflow = originalOverflow;
+      };
+    }, [isOpen]);
+
+    if (claimDiscountMutation.isSuccess) onClose?.();
+
+    const submitDiscount = () => {
+      if (discountInput === "") {
+        setFieldIsEmpty(true);
+
+        return;
+      }
+
+      claimDiscountMutation.mutateAsync();
+      setFieldIsEmpty(false);
+    };
+
+    if (!isOpen) return null;
+
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm top-0 left-0">
+        <div
+          className="h-[770px] w-[500px] bg-white rounded-md shadow-xl z-50 relative"
+          onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
+        >
+          <img
+            src={guestImage}
+            alt="discount image"
+            className="w-full h-[350px] object-center object-contain rounded-t-md"
+          />
+
+          <div className="w-full flex items-center justify-center mt-6 px-6">
+            <div className="w-[438px] flex flex-col items-center justify-center text-center">
+              <h3 className="text-[40px] font-semibold leading-[125%] mb-4">
+                Enjoy{" "}
+                {discountData?.type === "percentage"
+                  ? `${Number(discountData.value).toFixed()}%`
+                  : `&naira;${discountData?.value}`}{" "}
+                Off Your First Order
+              </h3>
+
+              <p className="text-sm text-neutral-500">
+                Join our style circle and enjoy a special welcome gift on your
+                first order.
+              </p>
+
+              <div className="w-full gap-4 flex flex-col mt-6">
+                <div className="w-full flex flex-col gap-2 mt-6">
+                  <label htmlFor="email" className="w-full text-left">
+                    Email
+                  </label>
+
+                  <input
+                    type="email"
+                    name="email"
+                    id="email"
+                    value={discountInput}
+                    onChange={(e) => setDiscountInput(e.currentTarget.value)}
+                    placeholder="Email"
+                    className="border border-neutral-300 rounded-md p-3 w-full focus:outline-none focus:border-grey-300"
+                  />
+
+                  <small
+                    className={`w-full ${
+                      fieldIsEmpty ? "text-red-400" : "text-white"
+                    } text-left`}
+                  >
+                    Please fill discount field
+                  </small>
+                </div>
+
+                <Button
+                  type="submit"
+                  variant="solid"
+                  className="w-full"
+                  onClick={submitDiscount}
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <span>
+                      Claim my{" "}
+                      {discountData?.type === "percentage"
+                        ? `${Number(discountData.value).toFixed()}%`
+                        : `&naira;${Number(
+                            discountData?.value
+                          ).toFixed()}`}{" "}
+                      off
+                    </span>
+                    <Spinner
+                      isLoading={claimDiscountMutation.isPending}
+                      circleColor="white"
+                      size="sm"
+                      speed="fast"
+                    />
+                  </div>
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <XIcon
+            className="absolute right-5 top-5 text-white cursor-pointer"
+            onClick={onClose}
+          />
+        </div>
+      </div>
+    );
+  }
+);
