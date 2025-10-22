@@ -117,13 +117,6 @@ class AdminDiscountsService {
     const data: any = response.data as any;
     return (data.data as ApiDiscount) ?? (data as ApiDiscount);
   }
-
-  async getActiveDiscounts(): Promise<ActiveDiscount> {
-    const response = await apiClient.get<ApiResponse<ActiveDiscount>>("/discounts/active")
-    const data: any = response.data as any;
-
-    return (data as ActiveDiscount)
-  }
 }
 
 export const adminDiscountsService = new AdminDiscountsService();
