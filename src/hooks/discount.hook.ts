@@ -43,8 +43,10 @@ export const useActiveDiscounts = () => {
       if (
         axiosError?.response?.status === 401 ||
         axiosError?.response?.status === 403
-      )
+      ) {
         return false;
+      }
+      
       return failureCount < 1;
     },
   });
