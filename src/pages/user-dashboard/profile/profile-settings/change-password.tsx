@@ -49,17 +49,17 @@ export default function ChangePassword() {
   };
 
   return (
-    <div className="bg-white py-5 px-8 rounded-md">
+    <div className="bg-white py-3 lg:py-5 px-4 lg:px-8 rounded-md">
       <form
-        className="w-[54.9375rem] flex justify-between"
+        className="w-full lg:w-[54.9375rem] flex flex-col lg:flex-row lg:justify-between gap-6 lg:gap-0"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div className="w-[300px]">
-          <div className="flex flex-col gap-2 mb-5">
-            <h4 className="font-semibold text-[28px] text-neutral-900">
+        <div className="w-full lg:w-[300px]">
+          <div className="flex flex-col gap-2 mb-4 lg:mb-5">
+            <h4 className="font-semibold text-lg lg:text-[28px] text-neutral-900">
               Change Password
             </h4>
-            <p>Keep your account secure by updating your password.</p>
+            <p className="text-sm lg:text-base">Keep your account secure by updating your password.</p>
           </div>
 
           <Button
@@ -71,15 +71,15 @@ export default function ChangePassword() {
           />
         </div>
 
-        <div className="w-[24rem] flex flex-col gap-6">
+        <div className="w-full lg:w-[24rem] flex flex-col gap-4 lg:gap-6">
           <div className="flex flex-col gap-1">
             <label
               htmlFor="currentPassword"
-              className="text-[0.875rem] text-[#1C1C1C]"
+              className="text-sm lg:text-[0.875rem] text-[#1C1C1C]"
             >
               Current Password
             </label>
-            <div className="border border-neutral-100 rounded-md p-4 flex items-center justify-between gap-3">
+            <div className="border border-neutral-100 rounded-md p-3 lg:p-4 flex items-center justify-between gap-3">
               <input
                 type={passwordReveal.currentPassword ? "text" : "password"}
                 {...register("currentPassword", {
@@ -87,7 +87,7 @@ export default function ChangePassword() {
                 })}
                 id="currentPassword"
                 placeholder="Enter password"
-                className="grow outline-none placeholder:text-neutral-100"
+                className="grow outline-none placeholder:text-neutral-100 text-sm lg:text-base"
               />
               {passwordReveal.currentPassword ? (
                 <EyeIcon
@@ -111,11 +111,11 @@ export default function ChangePassword() {
           <div className="flex flex-col gap-1">
             <label
               htmlFor="newPassword"
-              className="text-[0.875rem] text-[#1C1C1C]"
+              className="text-sm lg:text-[0.875rem] text-[#1C1C1C]"
             >
               New Password
             </label>
-            <div className="border border-neutral-100 rounded-md p-4 flex items-center justify-between gap-3">
+            <div className="border border-neutral-100 rounded-md p-3 lg:p-4 flex items-center justify-between gap-3">
               <input
                 type={passwordReveal.newPassword ? "text" : "password"}
                 {...register("newPassword", {
@@ -123,7 +123,7 @@ export default function ChangePassword() {
                 })}
                 id="newPassword"
                 placeholder="Enter password"
-                className="grow outline-none placeholder:text-neutral-100"
+                className="grow outline-none placeholder:text-neutral-100 text-sm lg:text-base"
               />
               {passwordReveal.newPassword ? (
                 <EyeIcon
@@ -147,11 +147,11 @@ export default function ChangePassword() {
           <div className="flex flex-col gap-1">
             <label
               htmlFor="retypePassword"
-              className="text-[0.875rem] text-[#1C1C1C]"
+              className="text-sm lg:text-[0.875rem] text-[#1C1C1C]"
             >
               Retype Password
             </label>
-            <div className="border border-neutral-100 rounded-md p-4 flex items-center justify-between gap-3">
+            <div className="border border-neutral-100 rounded-md p-3 lg:p-4 flex items-center justify-between gap-3">
               <input
                 type={passwordReveal.retypePassword ? "text" : "password"}
                 {...register("retypePassword", {
@@ -159,7 +159,7 @@ export default function ChangePassword() {
                 })}
                 id="retypePassword"
                 placeholder="Enter password"
-                className="grow outline-none placeholder:text-neutral-100"
+                className="grow outline-none placeholder:text-neutral-100 text-sm lg:text-base"
               />
               {passwordReveal.retypePassword ? (
                 <EyeIcon

@@ -1,10 +1,12 @@
-import React, { useEffect, createElement } from "react";
+import React, { useEffect, createElement, useState } from "react";
 import {
   HouseSimpleIcon,
   DressIcon,
   ShoppingBagIcon,
   ShoppingCartSimpleIcon,
   SignOutIcon,
+  ListIcon,
+  XIcon,
 } from "@phosphor-icons/react";
 import { Link, useNavigate, NavLink } from "react-router-dom";
 // import LoaderSkin from "./loader";
@@ -39,6 +41,7 @@ export default function UserDashboardLayout({
   const { data: cart } = useCart();
   const navigate = useNavigate();
   const logoutMutation = useLogout();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Handle logout success
   useEffect(() => {
@@ -52,12 +55,56 @@ export default function UserDashboardLayout({
     logoutMutation.mutate();
   };
 
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <section className="h-screen bg-[#F5F5F5] flex items-start">
-      <div className="w-[12.375rem] h-screen border-r-2 border-neutral-100 bg-white">
+      {/* Mobile Header */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-neutral-100 p-4 flex items-center justify-between">
+        <Link to="/" className="block">
+          <img
+            src="/logo/logo.png"
+            alt="Araafit logo"
+            className="w-[5.626rem] h-auto"
+          />
+        </Link>
+        <button
+          onClick={toggleMobileMenu}
+          className="p-2 rounded-md hover:bg-gray-100 transition-colors"
+        >
+          {isMobileMenuOpen ? <XIcon size={24} /> : <ListIcon size={24} />}
+        </button>
+      </div>
+
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={closeMobileMenu}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={`
+        w-[12.375rem] h-screen border-r-2 border-neutral-100 bg-white
+        lg:block
+        ${isMobileMenuOpen ? 'block' : 'hidden'}
+        fixed lg:relative z-50 lg:z-auto
+        top-0 left-0
+        lg:translate-x-0
+        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+        transition-transform duration-300 ease-in-out
+      `}>
         <div className="w-full h-[90%] flex flex-col justify-between">
           <div>
-            <Link to="/" className="block w-full mb-7">
+            {/* Desktop Logo */}
+            <Link to="/" className="hidden lg:block w-full mb-7">
               <img
                 src="/logo/logo.png"
                 alt="Araafit logo"
@@ -74,6 +121,7 @@ export default function UserDashboardLayout({
                         to={item.link}
                         key={idx}
                         end={item.name.toLowerCase() === "home"}
+                        onClick={closeMobileMenu}
                         className={({ isActive }) =>
                           `w-full flex flex-col gap-4 p-[0.5rem] transition-colors ${
                             isActive
@@ -105,6 +153,7 @@ export default function UserDashboardLayout({
                       to={item.link}
                       key={idx}
                       end={item.name.toLowerCase() === "home"}
+                      onClick={closeMobileMenu}
                       className={({ isActive }) =>
                         `w-full flex flex-col gap-4 p-[0.5rem] transition-colors ${
                           isActive
@@ -128,6 +177,7 @@ export default function UserDashboardLayout({
                     to={item.link}
                     key={idx}
                     end={item.name.toLowerCase() === "home"}
+                    onClick={closeMobileMenu}
                     className={({ isActive }) =>
                       `w-full flex flex-col gap-4 p-[0.5rem] transition-colors ${
                         isActive
@@ -151,7 +201,10 @@ export default function UserDashboardLayout({
 
           <div
             className="text-[0.875rem] flex items-center gap-[0.75rem] text-neutral-900 border-t-2 border-neutral-100 p-[0.5rem] hover:bg-primary-900 hover:text-white cursor-pointer"
-            onClick={toggleSwitch}
+            onClick={() => {
+              toggleSwitch();
+              closeMobileMenu();
+            }}
           >
             <SignOutIcon />
             <span>Logout</span>
@@ -159,7 +212,10 @@ export default function UserDashboardLayout({
         </div>
       </div>
 
-      <div className="grow">{children}</div>
+      {/* Main Content */}
+      <div className="grow lg:ml-0 pt-16 lg:pt-0">
+        {children}
+      </div>
 
       {/* Logout redirection modal */}
       <Modal

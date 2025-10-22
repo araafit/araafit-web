@@ -39,9 +39,13 @@ const TabItem = memo(
       type="button"
       title={label}
       onClick={onClick}
-      className={`px-4 
-      py-2  
+      className={`px-3 lg:px-4 
+      py-2 lg:py-2  
       font-medium 
+      text-xs lg:text-base
+      whitespace-nowrap
+      flex-shrink-0
+      min-w-fit
       transition-colors 
       duration-200 ${
         active
@@ -84,7 +88,7 @@ const Tab = ({
     <div className={CN("rounded-lg flex flex-col h-full", tabContainerClassName)}>
       <div
         className={CN(
-          "flex items-center justify-center space-x-1 flex-shrink-0",
+          "flex items-center justify-start lg:justify-center space-x-0 lg:space-x-1 flex-shrink-0 flex-wrap lg:flex-nowrap gap-1 lg:gap-0 overflow-x-auto lg:overflow-x-visible",
           tabListClassName
         )}
       >
@@ -102,7 +106,7 @@ const Tab = ({
       </div>
 
       {children && (
-        <div className="p-4 w-full flex-1 overflow-y-auto">
+        <div className="p-2 lg:p-4 w-full flex-1 overflow-y-auto">
           {Children.toArray(children)[activeTab]}
         </div>
       )}

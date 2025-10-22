@@ -63,10 +63,10 @@ export function DashboardHomePage() {
   );
 
   const emptyOrder = (
-    <div className="w-full max-w-[500px] flex flex-col items-center justify-center gap-2">
-      <img src={shoppingBagIcon} alt="" className="size-[200px]" />
+    <div className="w-full max-w-[500px] flex flex-col items-center justify-center gap-2 p-4">
+      <img src={shoppingBagIcon} alt="" className="size-[150px] lg:size-[200px]" />
 
-      <p className="font-light text-center text-neutral-500">
+      <p className="font-light text-center text-neutral-500 text-sm lg:text-base">
         You haven't placed any orders yet. Browse through our curated collection
         based on your unique measurements and style.
       </p>
@@ -178,10 +178,10 @@ export function DashboardHomePage() {
           <TopBar title={title} breadCrumb={<BreadCrumb />} />
         </div>
 
-        <div className="w-full h-[95%] flex flex-col gap-4 p-4 mt-20 overflow-y-scroll">
-          <div className="w-full bg-white mt-5 rounded-sm p-4 flex flex-col gap-6">
+        <div className="w-full h-[95%] flex flex-col gap-4 p-2 lg:p-4 mt-16 lg:mt-20 overflow-y-scroll">
+          <div className="w-full bg-white mt-5 rounded-sm p-2 lg:p-4 flex flex-col gap-4 lg:gap-6">
             <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-[28px] capitalize">
+              <h2 className="font-semibold text-xl lg:text-[28px] capitalize">
                 Ongoing Orders
               </h2>
 
@@ -205,17 +205,17 @@ export function DashboardHomePage() {
                     return (
                       <div
                         key={order.id}
-                        className="flex items-center justify-between border border-neutral-100 rounded-md py-2 px-4"
+                        className="flex flex-col lg:flex-row items-start lg:items-center justify-between border border-neutral-100 rounded-md py-2 px-2 lg:px-4 gap-4"
                       >
-                        <div className="w-full flex gap-6">
+                        <div className="w-full flex flex-col lg:flex-row gap-4 lg:gap-6">
                           <img
                             src={displayData.image}
                             alt={displayData.name}
-                            className="w-[14.125rem] h-[8.75rem] object-cover rounded-md"
+                            className="w-full lg:w-[14.125rem] h-48 lg:h-[8.75rem] object-cover rounded-md"
                           />
 
                           <div className="grow inline-flex flex-col gap-[9px]">
-                            <div className="w-full flex items-center justify-between">
+                            <div className="w-full flex flex-col lg:flex-row items-start lg:items-center justify-between gap-2">
                               {statusAlert(order.status.toLowerCase())}
                               <Link
                                 to={`/dashboard/orders/${order.id}`}
@@ -225,13 +225,13 @@ export function DashboardHomePage() {
                               </Link>
                             </div>
 
-                            <span className="text-neutral-700">
+                            <span className="text-neutral-700 text-sm lg:text-base">
                               Order ID: {order.id}
                             </span>
-                            <span className="font-medium text-neutral-900">
+                            <span className="font-medium text-neutral-900 text-sm lg:text-base">
                               {displayData.name}
                             </span>
-                            <span className="text-neutral-900 font-semibold">
+                            <span className="text-neutral-900 font-semibold text-sm lg:text-base">
                               &#8358;{formatPrice(order.totalAmount)}
                             </span>
                           </div>
@@ -245,9 +245,9 @@ export function DashboardHomePage() {
           </div>
 
           {/* Ready to wear dress */}
-          <div className="w-full bg-white rounded-sm p-4 flex flex-col gap-6">
+          <div className="w-full bg-white rounded-sm p-2 lg:p-4 flex flex-col gap-4 lg:gap-6">
             <div className="flex items-center justify-between">
-              <h2 className="font-medium text-[28px] capitalize">
+              <h2 className="font-medium text-xl lg:text-[28px] capitalize">
                 Ready to wear dresses
               </h2>
               <Link to="/dashboard/shop">
@@ -257,7 +257,7 @@ export function DashboardHomePage() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
               {readyToWearDresses.map((product) => (
                 <Card
                   key={product.id}
@@ -273,9 +273,9 @@ export function DashboardHomePage() {
           </div>
 
           {/* Recommended fabrics */}
-          <div className="w-full bg-white rounded-sm p-4 flex flex-col gap-6">
+          <div className="w-full bg-white rounded-sm p-2 lg:p-4 flex flex-col gap-4 lg:gap-6">
             <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-[28px] capitalize">
+              <h2 className="font-semibold text-xl lg:text-[28px] capitalize">
                 Recommended Fabrics
               </h2>
               <Link to="/dashboard/shop">
@@ -285,7 +285,7 @@ export function DashboardHomePage() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
               {recommendedFabrics.map((product) => (
                 <Card
                   key={product.id}

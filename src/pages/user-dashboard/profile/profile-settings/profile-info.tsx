@@ -80,16 +80,16 @@ function ProfileInfo() {
   };
 
   return (
-    <div className="bg-white py-5 px-8 rounded-md flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <h5 className="font-semibold text-neutral-900 mb-3 text-[1.75rem]">
+    <div className="bg-white py-3 lg:py-5 px-4 lg:px-8 rounded-md flex flex-col gap-4 lg:gap-6">
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-2 lg:gap-0">
+        <h5 className="font-semibold text-neutral-900 mb-3 text-lg lg:text-[1.75rem]">
           Profile Information
         </h5>
 
         <div className="flex items-center gap-2">
           <PencilSimpleIcon />
 
-          <span>Edit Info</span>
+          <span className="text-sm lg:text-base">Edit Info</span>
         </div>
       </div>
 
@@ -131,15 +131,15 @@ function ProfileInfo() {
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col gap-[1.8125rem]"
       >
-        <div className="grid grid-cols-2 gap-7">
-          <div className="w-[34rem] flex flex-col gap-2">
-            <label htmlFor="" className="w-full text-[1rem] text-[#676767]">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-7">
+          <div className="w-full lg:w-[34rem] flex flex-col gap-2">
+            <label htmlFor="" className="w-full text-sm lg:text-[1rem] text-[#676767]">
               First Name
             </label>
 
             <input
               type="text"
-              className="w-full p-4 border border-gray-300 outline-none rounded-[6px]"
+              className="w-full p-3 lg:p-4 border border-gray-300 outline-none rounded-[6px] text-sm lg:text-base"
               {...register("firstName", {
                 required: "First name is required",
               })}
@@ -151,13 +151,13 @@ function ProfileInfo() {
           </div>
 
           <div className="grow flex flex-col gap-2">
-            <label htmlFor="" className="w-full text-[1rem] text-[#676767]">
+            <label htmlFor="" className="w-full text-sm lg:text-[1rem] text-[#676767]">
               Last Name
             </label>
 
             <input
               type="text"
-              className="w-full p-4 border border-gray-300 outline-none rounded-[6px]"
+              className="w-full p-3 lg:p-4 border border-gray-300 outline-none rounded-[6px] text-sm lg:text-base"
               {...register("lastName", {
                 required: "Last name is required",
               })}
@@ -169,8 +169,8 @@ function ProfileInfo() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-7">
-          <div className="w-[34rem] flex flex-col gap-2">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-7">
+          <div className="w-full lg:w-[34rem] flex flex-col gap-2">
             <label
               htmlFor="email"
               className="w-full text-[1rem] text-[#676767]"
@@ -181,7 +181,7 @@ function ProfileInfo() {
             <input
               id="email"
               type="email"
-              className="w-full p-4 border border-gray-300 outline-none rounded-[6px] bg-gray-50"
+              className="w-full p-3 lg:p-4 border border-gray-300 outline-none rounded-[6px] bg-gray-50 text-sm lg:text-base"
               {...register("email")}
               readOnly
             />
@@ -192,13 +192,13 @@ function ProfileInfo() {
           </div>
 
           <div className="grow flex flex-col gap-2">
-            <label htmlFor="" className="w-full text-[1rem] text-[#676767]">
+            <label htmlFor="" className="w-full text-sm lg:text-[1rem] text-[#676767]">
               Phone Number
             </label>
 
             <input
               type="tel"
-              className="w-full p-4 border border-gray-300 outline-none rounded-[6px]"
+              className="w-full p-3 lg:p-4 border border-gray-300 outline-none rounded-[6px] text-sm lg:text-base"
               {...register("phoneNumber", {
                 required: "Phone number is required",
               })}
@@ -212,15 +212,15 @@ function ProfileInfo() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-7">
-          <div className="w-[34rem] flex flex-col gap-2">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-7">
+          <div className="w-full lg:w-[34rem] flex flex-col gap-2">
             <label htmlFor="city" className="w-full text-[1rem] text-[#676767]">
               City/Town
             </label>
 
             <input
               type="text"
-              className="w-full p-4 border border-gray-300 outline-none rounded-[6px]"
+              className="w-full p-3 lg:p-4 border border-gray-300 outline-none rounded-[6px] text-sm lg:text-base"
               {...register("city", {
                 required: "City/Town is required",
               })}
@@ -241,7 +241,7 @@ function ProfileInfo() {
 
             <input
               type="text"
-              className="w-full p-4 border border-gray-300 outline-none rounded-[6px]"
+              className="w-full p-3 lg:p-4 border border-gray-300 outline-none rounded-[6px] text-sm lg:text-base"
               {...register("zipCode")}
             />
 

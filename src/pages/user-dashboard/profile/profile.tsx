@@ -30,11 +30,11 @@ export function DashboardProfilePage() {
       <div className="h-screen flex flex-col gap-2 relative">
         <TopBar title="Profile" breadCrumb={<BreadCrumb />} />
 
-        <div className="w-full h-[95%] flex flex-col gap-4 p-4 mt-20 overflow-y-scroll">
+        <div className="w-full h-[95%] flex flex-col gap-4 p-2 lg:p-4 mt-16 lg:mt-20 overflow-y-scroll">
           <Tab
             items={tabItems}
             tabContainerClassName="bg-transparent h-full"
-            tabListClassName="w-[30rem] text-[0.875rem] text-neutral-700 border border-neutral-100 p-[0.254rem] bg-transparent rounded-md"
+            tabListClassName="w-full lg:w-[30rem] text-xs lg:text-[0.875rem] text-neutral-700 border border-neutral-100 p-1 lg:p-[0.254rem] bg-transparent rounded-md flex flex-nowrap overflow-x-auto lg:flex-wrap"
             activeTabClassName="bg-primary-900 text-white rounded-md"
           >
             <ProfileSettings />

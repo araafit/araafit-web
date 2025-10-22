@@ -29,13 +29,13 @@ export function DashboardShopPage() {
         <div className="h-screen flex flex-col gap-2 relative">
           <TopBar title="shop" breadCrumb={<BreadCrumb />} />
 
-          <div className="w-full h-[95%] flex flex-col gap-4 p-4 mt-20 overflow-y-scroll">
+          <div className="w-full h-[95%] flex flex-col gap-4 p-2 lg:p-4 mt-0 lg:mt-20 overflow-y-scroll">
             {/* Shop Tabs */}
             <div className="size-full bg-white rounded-md">
               <ShopTab
                 items={["All", "Dresses", "Fabrics"]}
                 tabContainerClassName="bg-transparent h-full"
-                tabListClassName=" text-[0.875rem] text-neutral-700 border border-neutral-100 p-[0.254rem] bg-white rounded-md"
+                tabListClassName="text-xs lg:text-[0.875rem] text-neutral-700 border border-neutral-100 p-1 lg:p-[0.254rem] bg-white rounded-md flex flex-wrap lg:flex-nowrap"
                 activeTabClassName="bg-primary-900 text-white rounded-md"
                 // onChange={(item) => console.log(item)}
               >
