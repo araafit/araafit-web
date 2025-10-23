@@ -1,40 +1,46 @@
 import {
+  CaretDownIcon,
   CaretRightIcon,
   CloudArrowUpIcon,
+  PlusIcon,
   TrashSimpleIcon,
   XIcon,
-  PlusIcon,
 } from "@phosphor-icons/react";
-import TopBar from "../admin-components/top-bar/top-bar";
+import { useState } from "react";
+import {
+  Controller,
+  useForm,
+  type Control,
+  type SubmitHandler,
+} from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { useCreateProduct } from "../../../hooks/admin-inventory.hooks";
 import AdminDashboardLayout from "../../../layouts/admin-dashboard/dashboard-layout";
 import Button from "../../../shared-components/button";
-import NotificationBell from "../admin-components/top-bar/notification-bell";
-import { useState } from "react";
-import { useForm, type SubmitHandler } from "react-hook-form";
-import { useCreateProduct } from "../../../hooks/admin-inventory.hooks";
-import { useNavigate } from "react-router-dom";
+import Spinner from "../../../shared-components/spinner";
+import { TableButton } from "../../ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../ui/dropdown-menu";
-import { TableButton } from "../../ui/button";
-import { Switch } from "../../ui/switch";
-import { CaretDownIcon } from "@phosphor-icons/react";
 import {
   Select,
-  SelectLabel,
-  SelectGroup,
   SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
-  SelectItem,
 } from "../../ui/select";
-// import { Link } from "react-router-dom";
-// import { useParams } from "react-router-dom";
+import { Switch } from "../../ui/switch";
+import NotificationBell from "../admin-components/top-bar/notification-bell";
+import TopBar from "../admin-components/top-bar/top-bar";
 
-const skinTone = ["Porcelin", "Ivory", "Sand", "Espresso", "Chestnut", "Honey"];
+/* -------------------------------------------------------------------------------------------------- */
+
+const skinTone = ["porcelin", "ivory", "sand", "espresso", "chestnut", "honey"];
 //const categories = ["dress", "fabric"];
 //const discountTypes = ["percentage", "fixed"];
 
@@ -46,6 +52,7 @@ interface ProductFormData {
   dressSize: string;
   weight: number;
   thickness: string;
+  skinTone: string[];
   quantityInStock: number;
   price: number;
   discountType: "percentage" | "fixed";
@@ -60,12 +67,12 @@ export function AdminDashboardUploadInventory() {
   const [contributorPhotos, setContributorPhotos] = useState<File[]>([]);
   const [isUploadingImage] = useState(false);
   const [discountsEnabled, setDiscountsEnabled] = useState(false);
-  const [selectedTone, setSelectedTone] = useState<string[]>([]);
 
   const {
     register,
     handleSubmit,
-    //watch,
+    // watch,
+    control,
     formState: { errors },
   } = useForm<ProductFormData>({
     mode: "all",
@@ -74,10 +81,6 @@ export function AdminDashboardUploadInventory() {
       discountType: "percentage",
     },
   });
-
-  console.log(errors);
-
-  //const watchCategory = watch("category");
 
   const handlePhotosChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -90,36 +93,27 @@ export function AdminDashboardUploadInventory() {
     setContributorPhotos((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const toggleTone = (tone: string) => {
-    setSelectedTone((prev) =>
-      prev.includes(tone) ? prev.filter((s) => s !== tone) : [...prev, tone]
-    );
-  };
-
-  const removeTone = (tone: string) => {
-    setSelectedTone((prev) => prev.filter((s) => s !== tone));
-  };
-
   const onSubmit: SubmitHandler<ProductFormData> = async (data) => {
-    console.log("submitting..", data);
+    const payload = {
+      files: contributorPhotos,
+      name: data.name,
+      category: data.category,
+      description: data.description,
+      materialType: data.materialType,
+      dressSize: data.dressSize,
+      weight: data.weight,
+      thickness: data.thickness,
+      quantityInStock: data.quantityInStock,
+      price: data.price,
+      discountType: discountsEnabled ? data.discountType : undefined,
+      discountValue: discountsEnabled ? data.discountValue : undefined,
+      discountStart: discountsEnabled ? data.discountStart : undefined,
+      discountEnd: discountsEnabled ? data.discountEnd : undefined,
+      skinToneRecommendation: data.skinTone,
+    };
+
     try {
-      await createProductMutation.mutateAsync({
-        files: contributorPhotos,
-        name: data.name,
-        category: data.category,
-        description: data.description,
-        materialType: data.materialType,
-        dressSize: data.dressSize,
-        weight: data.weight,
-        thickness: data.thickness,
-        quantityInStock: data.quantityInStock,
-        price: data.price,
-        discountType: discountsEnabled ? data.discountType : undefined,
-        discountValue: discountsEnabled ? data.discountValue : undefined,
-        discountStart: discountsEnabled ? data.discountStart : undefined,
-        discountEnd: discountsEnabled ? data.discountEnd : undefined,
-        skinToneRecommendation: selectedTone,
-      });
+      await createProductMutation.mutateAsync(payload);
 
       // Navigate back to inventory on success
       navigate("/admin-dashboard/inventory");
@@ -127,9 +121,6 @@ export function AdminDashboardUploadInventory() {
       console.error("Failed to create product:", error);
     }
   };
-  const title = (
-    <div className="font-lora font-medium text-[#1C1C1C]">Inventory</div>
-  );
 
   const BreadCrumb = () => (
     <div className="font-inter font-light capitalize flex items-center">
@@ -140,25 +131,120 @@ export function AdminDashboardUploadInventory() {
       <span className="text-[#979797]">Dress</span>
     </div>
   );
+
+  const SkinToneSelectField: React.FC<{
+    name: "skinTone";
+    label: string;
+    options: string[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    control: Control<ProductFormData, any, ProductFormData>;
+  }> = ({ name, label, options, control }) => (
+    <Controller
+      name={name}
+      control={control}
+      defaultValue={[]}
+      render={({ field }) => (
+        <DropdownMenu>
+          <label
+            htmlFor="name"
+            className="block text-[#4F4F4F] font-light  text-sm"
+          >
+            {label}
+          </label>
+
+          {/* Tags outside to prevent event bubbling */}
+          <div className="flex flex-wrap gap-2 mb-2">
+            {field.value.length > 0 &&
+              field.value.map((tone) => (
+                <span
+                  key={tone}
+                  className="flex items-center gap-1 border border-[#E7E7E7] p-2 rounded-[4px] text-sm capitalize"
+                >
+                  {tone}
+                  <XIcon
+                    size={16}
+                    className="text-red-500 cursor-pointer"
+                    onClick={() => {
+                      field.onChange(field.value.filter((t) => t !== tone));
+                    }}
+                  />
+                </span>
+              ))}
+          </div>
+
+          <DropdownMenuTrigger asChild>
+            <TableButton
+              variant="outline"
+              size="sm"
+              className="w-full min-h-14 border border-[#D0D5DD] text-[#676767] text-sm bg-white flex items-center justify-between px-3"
+            >
+              <span className="text-[#9A9A9A] font-light">
+                {field.value.length > 0
+                  ? `${field.value.length} selected`
+                  : "Skin Tone"}
+              </span>
+
+              <CaretDownIcon className="text-[#676767] ml-auto" size={20} />
+            </TableButton>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent className="w-52 flex flex-col items-start gap-2 p-3">
+            {options.map((tone) => (
+              <DropdownMenuItem
+                key={tone}
+                onClick={() => {
+                  // Toggle tone in array
+                  const currentValues = field.value || [];
+                  const newValues = currentValues.includes(tone)
+                    ? currentValues.filter((t) => t !== tone)
+                    : [...currentValues, tone];
+                  field.onChange(newValues);
+                }}
+                className={`cursor-pointer w-full px-2 py-1 rounded-md capitalize ${
+                  field.value?.includes(tone) ? "bg-[#9A6C50] text-white" : ""
+                }`}
+              >
+                {tone}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
+    />
+  );
+
   return (
     <AdminDashboardLayout>
       <div className="h-screen">
         <div className="flex flex-col gap-2  relative">
           <TopBar
-            title={title}
+            title={
+              <div className="font-lora font-medium text-[#1C1C1C]">
+                Inventory
+              </div>
+            }
             breadCrumb={<BreadCrumb />}
             rightSide={
               <>
                 <NotificationBell />
 
                 <Button
-                  text={createProductMutation.isPending ? "Adding..." : "Add"}
                   icon={<PlusIcon className="size-[1.25rem] text-white" />}
                   variant="solid"
                   disabled={createProductMutation.isPending}
                   onClick={handleSubmit(onSubmit)}
                   className="text-white shadow-sm"
-                />
+                >
+                  <div className="w-full flex items-center justify-center gap-2">
+                    <span>Add</span>
+                    <Spinner
+                      size="sm"
+                      speed="fast"
+                      arcColor="#ffff"
+                      isLoading={createProductMutation.isPending}
+                    />
+                  </div>
+                </Button>
               </>
             }
           />
@@ -170,6 +256,7 @@ export function AdminDashboardUploadInventory() {
               Upload dresses your clients will love to explore and choose from.
             </span>
           </div>
+
           <section className="flex justify-between gap-10 mt-8">
             {" "}
             <div className="w-full max-w-[448px] relative">
@@ -278,24 +365,33 @@ export function AdminDashboardUploadInventory() {
                     )}
                   </div>
                   <div className="flex-1">
-                    <Select {...register("category")}>
-                      <label
-                        htmlFor="name"
-                        className="block text-[#4F4F4F] font-light text-sm"
-                      >
-                        Category
-                      </label>
-                      <SelectTrigger className="w-full h-14 border border-[#D0D5DD] text-[#676767] text-sm bg-white flex items-center justify-between px-3">
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Categories</SelectLabel>
-                          <SelectItem value="fabric">Fabric</SelectItem>
-                          <SelectItem value="dress">Dress</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
+                    <label
+                      htmlFor="category"
+                      className="block text-[#4F4F4F] font-light text-sm"
+                    >
+                      Category
+                    </label>
+                    <Controller
+                      name="category"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <SelectTrigger className="w-full h-14 border border-[#D0D5DD] text-[#676767] text-sm bg-white flex items-center justify-between px-3">
+                            <SelectValue placeholder="Select a category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectLabel>Categories</SelectLabel>
+                              <SelectItem value="fabric">Fabric</SelectItem>
+                              <SelectItem value="dress">Dress</SelectItem>
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
                   </div>
                 </div>
                 <div className="w-full mt-4">
@@ -313,6 +409,7 @@ export function AdminDashboardUploadInventory() {
                   />
                 </div>
               </div>
+
               {/* Dress Info */}
               <div className="bg-white rounded-[6px] py-6 px-4 mt-4">
                 <h4 className="font-semibold">Dress Information</h4>
@@ -332,27 +429,36 @@ export function AdminDashboardUploadInventory() {
                     />
                   </div>
                   <div className="flex-1">
-                    <Select>
-                      <label
-                        htmlFor="name"
-                        className="block text-[#4F4F4F] font-light text-sm"
-                      >
-                        General Dress Size
-                      </label>
-                      <SelectTrigger className="w-full h-14 border border-[#D0D5DD] text-[#676767] text-sm bg-white flex items-center justify-between px-3">
-                        <SelectValue placeholder="Select a dress size" />
-                      </SelectTrigger>
-                      <SelectContent {...register("dressSize")}>
-                        <SelectGroup>
-                          <SelectLabel>Dress Sizes</SelectLabel>
-                          {[6, 8, 10, 12, 14, 16, 18, 20].map((size) => (
-                            <SelectItem key={size} value={size.toString()}>
-                              {size}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
+                    <label
+                      htmlFor="name"
+                      className="block text-[#4F4F4F] font-light text-sm"
+                    >
+                      General Dress Size
+                    </label>
+                    <Controller
+                      name="dressSize"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <SelectTrigger className="w-full h-14 border border-[#D0D5DD] text-[#676767] text-sm bg-white flex items-center justify-between px-3">
+                            <SelectValue placeholder="Select a dress size" />
+                          </SelectTrigger>
+                          <SelectContent {...register("dressSize")}>
+                            <SelectGroup>
+                              <SelectLabel>Dress Sizes</SelectLabel>
+                              {[6, 8, 10, 12, 14, 16, 18, 20].map((size) => (
+                                <SelectItem key={size} value={size.toString()}>
+                                  {size}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
                   </div>
                 </div>
                 <div className="flex gap-4 items-center mt-4">
@@ -384,76 +490,22 @@ export function AdminDashboardUploadInventory() {
                   </div>
                 </div>
               </div>
-              {/* skintone Info */}
+
+              {/* skin tone Info */}
               <div className="bg-white rounded-[6px] py-6 px-4 mt-4">
                 <h4 className="font-semibold">Skin Tone Recommendation</h4>
                 <div className="flex gap-4 items-center mt-4">
                   <div className="w-full ">
-                    <DropdownMenu>
-                      <label
-                        htmlFor="name"
-                        className="block text-[#4F4F4F] font-light  text-sm"
-                      >
-                        Skin Tone
-                      </label>
-
-                      <DropdownMenuTrigger asChild>
-                        <TableButton
-                          variant="outline"
-                          size="sm"
-                          className="w-full min-h-14 border border-[#D0D5DD] text-[#676767] text-sm bg-white flex items-center justify-between px-3"
-                        >
-                          <div className="flex flex-wrap gap-2">
-                            {selectedTone.length > 0 ? (
-                              selectedTone.map((size) => (
-                                <span
-                                  key={size}
-                                  className="flex items-center gap-1 border border-[#E7E7E7] p-2 rounded-[4px]  text-sm"
-                                >
-                                  {size}
-                                  <XIcon
-                                    size={16}
-                                    className="text-red-500 cursor-pointer"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      removeTone(size);
-                                    }}
-                                  />
-                                </span>
-                              ))
-                            ) : (
-                              <span className="text-[#9A9A9A] font-light">
-                                Skin Tone
-                              </span>
-                            )}
-                          </div>
-
-                          <CaretDownIcon
-                            className="text-[#676767] ml-auto"
-                            size={20}
-                          />
-                        </TableButton>
-                      </DropdownMenuTrigger>
-
-                      <DropdownMenuContent className="w-52 flex flex-col items-start gap-2 p-3">
-                        {skinTone.map((tone) => (
-                          <DropdownMenuItem
-                            key={tone}
-                            onClick={() => toggleTone(tone)}
-                            className={`cursor-pointer w-full px-2 py-1 rounded-md ${
-                              selectedTone.includes(tone)
-                                ? "bg-[#9A6C50] text-white"
-                                : ""
-                            }`}
-                          >
-                            {tone}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <SkinToneSelectField
+                      name="skinTone"
+                      label="Skin Tone"
+                      options={skinTone}
+                      control={control}
+                    />
                   </div>
                 </div>
               </div>
+
               {/* Quantity/Price */}
               <div className="bg-white rounded-[6px] py-6 px-4 mt-4">
                 <h4 className="font-semibold">Quantity/Price</h4>
@@ -486,6 +538,7 @@ export function AdminDashboardUploadInventory() {
                   </div>
                 </div>
               </div>
+
               {/* Discounts */}
               <div className="bg-white rounded-[6px] py-6 px-4 mt-4">
                 <div className="flex items-center justify-between">
@@ -507,23 +560,37 @@ export function AdminDashboardUploadInventory() {
 
                 <div className="flex gap-4 items-center mt-4">
                   <div className="w-[303px]">
-                    <Select disabled={!discountsEnabled}>
-                      <label
-                        htmlFor="name"
-                        className="block text-[#4F4F4F] font-light text-sm"
-                      >
-                        Discount Type
-                      </label>
-                      <SelectTrigger className="w-full h-14 border border-[#D0D5DD] text-[#676767] text-sm bg-white flex items-center justify-between px-3">
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent {...register("discountType")}>
-                        <SelectGroup>
-                          <SelectItem value="percentage">Percentage</SelectItem>
-                          <SelectItem value="fixed">Fixed Amount</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
+                    <label
+                      htmlFor="name"
+                      className="block text-[#4F4F4F] font-light text-sm"
+                    >
+                      Discount Type
+                    </label>
+                    <Controller
+                      name="discountType"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          disabled={!discountsEnabled}
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <SelectTrigger className="w-full h-14 border border-[#D0D5DD] text-[#676767] text-sm bg-white flex items-center justify-between px-3">
+                            <SelectValue placeholder="Select type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectItem value="percentage">
+                                Percentage
+                              </SelectItem>
+                              <SelectItem value="fixed">
+                                Fixed Amount
+                              </SelectItem>
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
                   </div>
 
                   <div className="flex-1">
@@ -539,12 +606,12 @@ export function AdminDashboardUploadInventory() {
                       disabled={!discountsEnabled}
                       placeholder="Araafit"
                       className={`h-14 w-full pl-2 rounded-lg outline-none placeholder:font-light font-light
-    ${
-      discountsEnabled
-        ? "border border-[#D0D5DD] bg-white text-[#4F4F4F]"
-        : "border border-gray-200 bg-white text-gray-400 cursor-not-allowed"
-    }
-  `}
+                      ${
+                        discountsEnabled
+                          ? "border border-[#D0D5DD] bg-white text-[#4F4F4F]"
+                          : "border border-gray-200 bg-white text-gray-400 cursor-not-allowed"
+                      }
+                    `}
                     />
                   </div>
                 </div>
@@ -560,14 +627,15 @@ export function AdminDashboardUploadInventory() {
                     </label>
                     <input
                       type="date"
+                      title="date"
                       disabled={!discountsEnabled}
                       className={`h-14 w-full pl-2 rounded-lg outline-none
-        ${
-          discountsEnabled
-            ? "border border-[#D0D5DD] bg-white text-[#4F4F4F]"
-            : "border border-gray-200 bg-white text-gray-400 cursor-not-allowed"
-        }
-      `}
+                        ${
+                          discountsEnabled
+                            ? "border border-[#D0D5DD] bg-white text-[#4F4F4F]"
+                            : "border border-gray-200 bg-white text-gray-400 cursor-not-allowed"
+                        }
+                      `}
                     />
                   </div>
                   <div className="flex-1">
@@ -580,26 +648,39 @@ export function AdminDashboardUploadInventory() {
                     </label>
                     <input
                       type="date"
+                      title="date"
                       disabled={!discountsEnabled}
                       className={`h-14 w-full pl-2 rounded-lg outline-none
-        ${
-          discountsEnabled
-            ? "border border-[#D0D5DD] bg-white text-[#4F4F4F]"
-            : "border border-gray-200 bg-white text-gray-400 cursor-not-allowed"
-        }
-      `}
+                      ${
+                        discountsEnabled
+                          ? "border border-[#D0D5DD] bg-white text-[#4F4F4F]"
+                          : "border border-gray-200 bg-white text-gray-400 cursor-not-allowed"
+                      }
+                    `}
                     />
                   </div>
                 </div>
               </div>
-              {/*<div className="w-full flex justify-end">
+
+              <div className="w-full flex justify-end">
                 <Button
-                  text="Add"
                   icon={<PlusIcon className="size-[1.25rem] text-white" />}
                   variant="solid"
-                  className="text-white self-end shadow-sm mt-12 relative right-0"
-                />
-              </div>*/}
+                  disabled={createProductMutation.isPending}
+                  onClick={handleSubmit(onSubmit)}
+                  className="text-white shadow-sm"
+                >
+                  <div className="w-full flex items-center justify-center gap-2">
+                    <span>Add</span>
+                    <Spinner
+                      size="sm"
+                      speed="fast"
+                      arcColor="#ffff"
+                      isLoading={createProductMutation.isPending}
+                    />
+                  </div>
+                </Button>
+              </div>
             </div>
           </section>
         </div>
