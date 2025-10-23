@@ -142,10 +142,10 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    console.log("error", error, originalRequest._retry);
+    // console.log("error:", error, originalRequest._retry);
 
     // Do not attempt refresh for auth endpoints
-    if (error.config?.url?.includes("/auth/")) {
+    if (error.config?.url?.includes("/auth/") || error.config?.url?.includes("/")) {
       return Promise.reject(error);
     }
 

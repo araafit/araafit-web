@@ -145,40 +145,55 @@ class AdminInventoryService {
     const formData = new FormData();
 
     // Add files if provided
-    if (data.files && data.files.length > 0) {
-      data.files.forEach((file) => {
-        formData.append("files", file);
-      });
+    if (data.files && data.files?.length > 0) {
+      data.files.forEach((file) => formData.append("files", file));
     }
 
-    // Add all other fields
+    // Add required fields
     formData.append("name", data.name);
     formData.append("category", data.category);
 
-    if (data.description) formData.append("description", data.description);
-    if (data.materialType) formData.append("materialType", data.materialType);
-    if (data.dressSize) formData.append("dressSize", data.dressSize);
-    if (data.totalSize) formData.append("totalSize", data.totalSize);
-    if (data.patternType) formData.append("patternType", data.patternType);
-    if (data.pricePerYard !== undefined)
-      formData.append("pricePerYard", data.pricePerYard.toString());
-    if (data.weight !== undefined)
-      formData.append("weight", data.weight.toString());
-    if (data.thickness) formData.append("thickness", data.thickness);
-    if (data.quantityInStock !== undefined)
-      formData.append("quantityInStock", data.quantityInStock.toString());
-    if (data.price !== undefined)
-      formData.append("price", data.price.toString());
-    if (data.discountType) formData.append("discountType", data.discountType);
-    if (data.discountValue !== undefined)
-      formData.append("discountValue", data.discountValue.toString());
-    if (data.discountStart)
-      formData.append("discountStart", data.discountStart);
-    if (data.discountEnd) formData.append("discountEnd", data.discountEnd);
-    if (data.styleId !== undefined)
-      formData.append("styleId", data.styleId.toString());
+    // Add optional string fields
+    const stringFields = [
+      "description",
+      "materialType",
+      "dressSize",
+      "totalSize",
+      "patternType",
+      "thickness",
+      "discountType",
+      "discountStart",
+      "discountEnd",
+    ] as const;
 
-    if (data.skinToneRecommendation && data.skinToneRecommendation.length > 0) {
+    stringFields.forEach((field) => {
+      if (data[field]) formData.append(field, data[field]);
+    });
+
+    // Add optional numeric fields
+    const numericFields = [
+      "pricePerYard",
+      "weight",
+      "quantityInStock",
+      "price",
+      "discountValue",
+      "styleId",
+    ] as const;
+
+    numericFields.forEach((field) => {
+      if (data[field] !== undefined)
+        formData.append(field, data[field].toString());
+    });
+
+    // Add skin tone recommendations if provided
+    if (
+      data.skinToneRecommendation &&
+      data.skinToneRecommendation?.length > 0
+    ) {
+      formData.append(
+        "skinToneRecommendation",
+        data.skinToneRecommendation.join(",")
+      );
       data.skinToneRecommendation.forEach((tone) => {
         formData.append("skinToneRecommendation", tone);
       });
