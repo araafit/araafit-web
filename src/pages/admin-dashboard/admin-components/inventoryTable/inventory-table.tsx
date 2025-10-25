@@ -12,8 +12,6 @@ import {
 } from "@dnd-kit/core";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { arrayMove } from "@dnd-kit/sortable";
-
-import type { ColumnDef } from "@tanstack/react-table";
 import {
   type ColumnFiltersState,
   flexRender,
@@ -49,207 +47,14 @@ import {
   MagnifyingGlassIcon,
   FunnelSimpleIcon,
   DownloadSimpleIcon,
-  CaretUpDownIcon,
-  PencilSimpleIcon,
 } from "@phosphor-icons/react";
 import Button from "../../../../shared-components/button";
-import * as XLSX from "xlsx";
-import { TrashIcon } from "lucide-react";
 import { inventoryItemSchema } from "./schema";
-import type { FilterFn } from "@tanstack/react-table";
-import { Link } from "react-router-dom";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../../../ui/dialog";
-import { useDeleteProduct } from "../../../../hooks/admin-inventory.hooks";
+import { equalsIgnoreCase } from "./utils";
+import { createColumns } from "./column";
+import { exportToExcel } from "./utils";
 
-type InventoryItem = z.infer<typeof inventoryItemSchema>;
-
-const equalsIgnoreCase: FilterFn<InventoryItem> = (
-  row,
-  columnId,
-  filterValue
-) => {
-  const v = String(row.getValue<string>(columnId) ?? "");
-  const f = String(filterValue ?? "");
-  return v.localeCompare(f, undefined, { sensitivity: "accent" }) === 0;
-};
-
-// -------------------- Columns --------------------
-const createColumns = (deleteProductMutation: ReturnType<typeof useDeleteProduct>): ColumnDef<z.infer<typeof inventoryItemSchema>>[] => [
-  {
-    accessorKey: "generalInformation.name",
-    header: "Product Name / Image",
-
-    cell: ({ row }) => {
-      const info = row.original.generalInformation;
-      return (
-        <div className="flex items-center gap-3">
-          {info?.image ? (
-            <img
-              src={info.image}
-              alt={info.name}
-              className="w-10 h-10 object-cover rounded-md"
-            />
-          ) : (
-            <div className="w-10 h-10 rounded-md bg-gray-200 flex items-center justify-center text-xs text-gray-500">
-              N/A
-            </div>
-          )}
-          <span className=" max-w-[150px]">{info?.name ?? "Unnamed"}</span>
-        </div>
-      );
-    },
-
-    enableHiding: false,
-  },
-  {
-    id: "category",
-    accessorFn: (row) => row.generalInformation?.category ?? "",
-    header: () => (
-      <div className="w-full text-center flex items-center gap-2">
-        Category <CaretUpDownIcon />
-      </div>
-    ),
-    cell: ({ getValue }) => {
-      const category = (getValue() as string) || "N/A";
-      return <div>{category}</div>;
-    },
-    filterFn: equalsIgnoreCase,
-  },
-  {
-    accessorKey: "Price",
-    header: () => (
-      <div className="w-full text-center flex items-center gap-2">
-        Price (₦) <CaretUpDownIcon />
-      </div>
-    ),
-    cell: ({ row }) => {
-      const price = row.original?.Price;
-      const amount = typeof price === "number" ? price : Number(price) || 0;
-      return <div>₦{amount.toLocaleString()}</div>;
-    },
-  },
-
-  {
-    accessorKey: "stock",
-    header: () => (
-      <div className="w-full text-center flex items-center gap-2">
-        Stock <CaretUpDownIcon />
-      </div>
-    ),
-    cell: ({ row }) => <div>{row.original.stock || "N/A"}</div>,
-  },
-  {
-    accessorKey: "status",
-    header: () => (
-      <div className="w-full text-center flex items-center gap-2">
-        Status <CaretUpDownIcon />
-      </div>
-    ),
-    cell: ({ row }) => {
-      const status = row.original.status;
-
-      const isInStock = status === "In Stock";
-      const bgColor = isInStock ? "bg-[#F0FDF5]" : "bg-[#FEF2F2]";
-      const textColor = isInStock ? "text-[#16A34A]" : "text-[#DC2626]";
-      return (
-        <div
-          className={`px-2 py-1 text-xs rounded-full w-fit ${bgColor} ${textColor}`}
-        >
-          {status}
-        </div>
-      );
-    },
-  },
-
-  {
-    accessorKey: "Date",
-    header: () => (
-      <div className="w-full text-center flex items-start justify-start gap-4">
-        Date & Time Uploaded
-      </div>
-    ),
-    cell: () => <div className="">15 May 2025 6:00 PM</div>,
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => (
-      <div className="flex items-center gap-3">
-        {/* View */}
-        <button
-          onClick={() => console.log("View", row.original.orderId)}
-          className="text-[#9A6C50] hover:underline flex items-center gap-1"
-        >
-          <Link to={`/admin-dashboard/inventory/${row.original.orderId}`}>
-            View
-          </Link>
-        </button>
-        {/* Edit */}
-        <Link to={`/admin-dashboard/inventory/${row.original.orderId}/edit`}>
-          <button
-            onClick={() => console.log("Edit", row.original.orderId)}
-            className=""
-          >
-            <PencilSimpleIcon size={20} />
-          </button>
-        </Link>
-        {/* Delete */}
-        <Dialog>
-          <DialogTrigger asChild>
-            <button
-              className="text-red-600 hover:text-red-800"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <TrashIcon size={20} />
-            </button>
-          </DialogTrigger>
-          <DialogContent className="max-w-[400px]">
-            <DialogHeader>
-              <DialogTitle className="mb-4">
-                Delete {row.original.generalInformation?.name || "Product"}?
-              </DialogTitle>
-              <DialogDescription className="mb-4">
-                Are you sure you want to delete this item and all its
-                information? This action cannot be undone.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="flex flex-auto w-full gap-3">
-              {" "}
-              <DialogClose>
-                <Button
-                  type="button"
-                  text="Cancel"
-                  variant="clear"
-                  className="text-[#3D3D3D] border h-[37px] w-[170px] flex justify-center items-center text-sm border-[#E7E7E7] shadow-sm"
-                />{" "}
-              </DialogClose>
-              <DialogClose asChild>
-                <Button
-                  type="button"
-                  text={deleteProductMutation.isPending ? "Deleting..." : "Delete"}
-                  variant="solid"
-                  disabled={deleteProductMutation.isPending}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    deleteProductMutation.mutate(row.original.orderId);
-                  }}
-                  className="text-white flex-1 bg-red-600  h-[37px] flex justify-center items-center text-sm shadow-sm"
-                />
-              </DialogClose>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-    ),
-  },
-];
+/* ------------------------------------------------------------------------------------ */
 
 // -------------------- Table Component --------------------
 export function DataTable({
@@ -257,8 +62,7 @@ export function DataTable({
 }: {
   data: z.infer<typeof inventoryItemSchema>[];
 }) {
-  const deleteProductMutation = useDeleteProduct();
-  const columns = createColumns(deleteProductMutation);
+  const columns = createColumns();
   const [data, setData] = React.useState(() => initialData);
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -326,16 +130,6 @@ export function DataTable({
     }
   }
 
-  // -------------------- Export to Excel --------------------
-  function exportToExcel() {
-    const worksheet = XLSX.utils.json_to_sheet(
-      table.getFilteredRowModel().rows.map((r) => r.original)
-    );
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Orders");
-    XLSX.writeFile(workbook, "orders.xlsx");
-  }
-
   return (
     <div className="flex flex-col gap-4 w-full">
       {/* Search , Filters , Export */}
@@ -393,6 +187,7 @@ export function DataTable({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+
           {/* Search */}
           <div className="relative w-64">
             <input
@@ -407,13 +202,14 @@ export function DataTable({
               size={18}
             />
           </div>
+          
           {/* Export */}
           <Button
             type="button"
             text="Export"
             variant="clear"
             icon={<DownloadSimpleIcon size={16} />}
-            onClick={exportToExcel}
+            onClick={() => exportToExcel(table)}
             className="text-[#3D3D3D] border h-[37px] font-light text-sm border-[#E7E7E7] shadow-sm"
           />
         </div>
@@ -454,6 +250,7 @@ export function DataTable({
                     </TableRow>
                   ))}
                 </TableHeader>
+
                 <TableBody>
                   {table.getRowModel().rows?.length ? (
                     table.getRowModel().rows.map((row, idx) => {
