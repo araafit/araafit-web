@@ -662,7 +662,7 @@ export function AdminDashboardUploadInventory() {
                 </div>
               </div>
 
-              <div className="w-full flex justify-end">
+              {/* <div className="w-full flex justify-end">
                 <Button
                   icon={<PlusIcon className="size-[1.25rem] text-white" />}
                   variant="solid"
@@ -680,7 +680,7 @@ export function AdminDashboardUploadInventory() {
                     />
                   </div>
                 </Button>
-              </div>
+              </div> */}
             </div>
           </section>
         </div>
