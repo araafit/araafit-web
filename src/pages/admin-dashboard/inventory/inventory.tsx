@@ -22,15 +22,13 @@ export function AdminDashboardInventory() {
     isLoading: metricsLoading,
     error: metricsError,
   } = useProductMetrics();
+
   const {
     data,
     isLoading: productsLoading,
-    error: productsError,
+    isSuccess: productsLoaded,
+    isError: productsError,
   } = useProducts();
-
-  /* The API returns an object with a 'products' property that is an array.
-  not an array of products */
-  const products = data?.products || [];
 
   const title = (
     <div className="font-lora font-medium text-[#1C1C1C]">Inventory</div>
@@ -67,16 +65,23 @@ export function AdminDashboardInventory() {
           />
         </div>
 
+        {/* ------------- Metric data  ------------- */}
         <div className="w-full  flex flex-col  p-4 mt-20 overflow-y-scroll px-10">
           <h2 className="font-semibold text-[28px]">Inventory</h2>
           <span className="capitalize text-neutral-400 font-light cursor-pointer font-inter">
             Track and manage your inventory with ease.
           </span>
+
           {/* ----------- */}
           <div className="bg-white w-full max-w-[1126px] mx-auto py-4 my-8 flex justify-center rounded-sm items-center">
             {metricsLoading ? (
               <div className="flex justify-center items-center h-20">
-                <Spinner size="lg" speed="fast" />
+                <Spinner
+                  size="lg"
+                  speed="fast"
+                  isLoading={metricsLoading}
+                  arcColor="#523531"
+                />
               </div>
             ) : metricsError ? (
               <div className="bg-red-50 border border-red-200 rounded-md p-4">
@@ -118,24 +123,38 @@ export function AdminDashboardInventory() {
             ) : null}
           </div>
 
-          {/* ------------------- */}
+          {/* --------Data table----------- */}
           <div className="w-full  bg-white rounded-sm px-4 mt-6 py-6 flex flex-col gap-6">
-            {productsLoading ? (
-              <div className="flex justify-center items-center h-32">
-                <Spinner size="lg" speed="fast" />
-              </div>
-            ) : productsError ? (
-              <div className="bg-red-50 border border-red-200 rounded-md p-4">
-                <p className="text-red-600">
-                  Failed to load products. Please try again.
-                </p>
-              </div>
-            ) : products ? (
-              <DataTable data={convertApiProductsToInventoryFormat(products)} />
-            ) : (
-              <DataTable data={[]} />
+            <div
+              className={`${
+                productsLoading ? "flex" : "hidden"
+              } justify-center items-center h-32`}
+            >
+              <Spinner
+                size="lg"
+                speed="fast"
+                isLoading={productsLoading}
+                arcColor="#523531"
+              />
+            </div>
+
+            <div
+              className={`bg-red-50 border border-red-200 rounded-md p-4 ${
+                productsError ? "block" : "hidden"
+              }`}
+            >
+              <p className="text-red-600">
+                Failed to load products. Please try again.
+              </p>
+            </div>
+
+            {productsLoaded && data && (
+              <DataTable
+                data={convertApiProductsToInventoryFormat(data.products)}
+              />
             )}
           </div>
+          
           <Outlet />
         </div>
       </div>
