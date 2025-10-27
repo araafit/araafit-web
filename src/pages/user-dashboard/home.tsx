@@ -45,8 +45,6 @@ export function DashboardHomePage() {
   const recommendedFabrics = fabrics.data || [];
   const orderIsEmpty = orderItems.length === 0;
 
-  console.log(orders, orderItems, readyToWearDresses, recommendedFabrics);
-
   const title = (
     <div className="font-lora text-[#979797]">
       {!storedUser ? (
