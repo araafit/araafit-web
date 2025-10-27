@@ -62,7 +62,7 @@ export default function AdminDashboardLayout({
 
   useEffect(() => {
     const waitASecond = async () =>
-      await setTimeout(() => setLoading(false), 1000);
+      setTimeout(() => setLoading(false), 1000);
 
     waitASecond();
   }, [loading]);
@@ -158,7 +158,7 @@ export default function AdminDashboardLayout({
 
           <Button
             text="Logout"
-            variant="clear"
+            variant="solid"
             disabled={logoutMutation.isPending}
             className="w-full bg-red-600 text-white"
             onClick={handleLogout}
