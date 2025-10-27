@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { useEffect, useState, memo } from "react";
 import {
   CaretDownIcon,
   CaretRightIcon,
@@ -8,7 +8,6 @@ import {
   XIcon,
 } from "@phosphor-icons/react";
 import { useWindowSize } from "@react-hook/window-size";
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LandingLayout from "../../../layouts/landing/landing-layout";
 import Accordion, {
@@ -63,16 +62,18 @@ export function HomePage() {
   }
 
   // Whether 'all_customers', 'first_time_buyers' or 'guest_customers'
-  if (
-    activeDiscounts.isSuccess &&
-    activeDiscounts.data &&
-    activeDiscounts.data[0].eligibility === "first_time_buyers"
-  ) {
-    setDiscountData(activeDiscounts.data[0]);
+  useEffect(() => {
+    if (
+      activeDiscounts.isSuccess &&
+      activeDiscounts.data &&
+      activeDiscounts.data[0].eligibility === "first_time_buyers"
+    ) {
+      setDiscountData(activeDiscounts.data[0]);
 
-    // Show discount modal
-    setTimeout(() => toggleModal(), 5000);
-  }
+      // Show discount modal
+      setTimeout(() => toggleModal(), 5000);
+    }
+  }, [activeDiscounts.isSuccess, activeDiscounts.data]);
 
   const redirectToMeasurementPage = () => navigate("/get-measured");
 
@@ -389,10 +390,10 @@ const Modal: React.FC<ModalShape> = memo(
           <div className="w-full flex items-center justify-center mt-6 px-6">
             <div className="w-[438px] flex flex-col items-center justify-center text-center">
               <h3 className="text-[40px] font-semibold leading-[125%] mb-4">
-                Enjoy{" "}
+                Enjoy ₦
                 {discountData?.type === "percentage"
                   ? `${Number(discountData.value).toFixed()}%`
-                  : `&naira;${discountData?.value}`}{" "}
+                  : `${Number(discountData?.value).toFixed()}`}{" "}
                 Off Your First Order
               </h3>
 
@@ -434,12 +435,10 @@ const Modal: React.FC<ModalShape> = memo(
                 >
                   <div className="flex items-center justify-center gap-2">
                     <span>
-                      Claim my{" "}
+                      Claim my ₦
                       {discountData?.type === "percentage"
                         ? `${Number(discountData.value).toFixed()}%`
-                        : `&naira;${Number(
-                            discountData?.value
-                          ).toFixed()}`}{" "}
+                        : `${Number(discountData?.value).toFixed()}`}{" "}
                       off
                     </span>
                     <Spinner
