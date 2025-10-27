@@ -8,6 +8,10 @@ import {
   type AdminResetPasswordRequest,
 } from "../services/admin-auth.service";
 import { useAuthStore } from "../stores/auth-store";
+import showToast from "../utils/notification";
+import { notificationStyles } from "../style/custom";
+
+/* ------------------------------------------------------------ */
 
 // Admin Login Mutation
 export const useAdminLogin = () => {
@@ -16,7 +20,6 @@ export const useAdminLogin = () => {
   return useMutation({
     mutationFn: (data: AdminLoginRequest) => adminAuthService.login(data),
     onSuccess: (data) => {
-      console.log("data", data);
       // Set admin tokens and user data
       setAdminTokens({
         access_token: data.access_token,
@@ -24,12 +27,19 @@ export const useAdminLogin = () => {
         expires_in: data.expires_in,
         token_type: data.token_type,
       });
+
       setAdminUser(data.user);
-      
-      toast.success("Admin login successful");
+
+      showToast.success("Admin login successful", {
+        icon: null,
+        style: notificationStyles.alertSuccess,
+      });
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Admin login failed");
+      showToast.error(error.response?.data?.message || "Admin login failed", {
+        icon: null,
+        style: notificationStyles.alertError,
+      });
     },
   });
 };
@@ -41,7 +51,9 @@ export const useAdminLogout = () => {
 
   return useMutation({
     mutationFn: () => {
-      const adminRefreshToken = localStorage.getItem("araafit_admin_refresh_token");
+      const adminRefreshToken = localStorage.getItem(
+        "araafit_admin_refresh_token"
+      );
       if (!adminRefreshToken) {
         throw new Error("No admin refresh token found");
       }
@@ -50,14 +62,20 @@ export const useAdminLogout = () => {
     onSuccess: (data) => {
       logout();
       queryClient.clear(); // Clear all cached data
-      toast.success(data.message);
+      showToast.success(data.message || "Logout successful", {
+        icon: null,
+        style: notificationStyles.alertSuccess,
+      });
     },
     onError: (error: any) => {
       console.log("error", error);
       // Even if logout fails on server, clear local state
       logout();
       queryClient.clear();
-      toast.error(error.response?.data?.message || "Admin logout failed");
+      showToast.error(error.response?.data?.message || "Admin logout failed", {
+        icon: null,
+        style: notificationStyles.alertSuccess,
+      });
     },
   });
 };
@@ -89,14 +107,14 @@ export const useAdminResetPassword = () => {
       adminAuthService.resetPassword(data),
     onSuccess: (data) => {
       if (data.isSuccess) {
-        toast.success(data.message);
+        showToast.success(data.message, {icon: null, style: notificationStyles.alertSuccess});
       } else {
-        toast.error(data.message);
+        showToast.error(data.message, {icon: null, style: notificationStyles.alertError});
       }
     },
     onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message || "Failed to reset admin password"
+      showToast.error(
+        error.response?.data?.message || "Failed to reset admin password", {icon: null, style: notificationStyles.alertError}
       );
     },
   });
