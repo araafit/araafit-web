@@ -41,9 +41,9 @@ export const useProductMetrics = () => {
 // Get Products Query
 export const useProducts = () => {
   return useQuery({
-    queryKey: adminInventoryKeys.products(),
     queryFn: () => adminInventoryService.getProducts(),
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    queryKey: adminInventoryKeys.products(),
+    staleTime: 0,
     retry: (failureCount, error: unknown) => {
       // Don't retry on 401/403 errors
       const axiosError = error as { response?: { status?: number } };
@@ -94,6 +94,7 @@ export const useCreateProduct = () => {
         queryKey: adminInventoryKeys.products(),
       });
       queryClient.invalidateQueries({ queryKey: adminInventoryKeys.metrics() });
+
       showToast.success(response.message || "Product created successfully", {
         icon: null,
         style: notificationStyles.alertSuccess,
@@ -158,10 +159,11 @@ export const useDeleteProduct = () => {
       adminInventoryService.deleteProduct(productId),
     onSuccess: (response) => {
       // Invalidate and refetch products and metrics
+      queryClient.invalidateQueries({ queryKey: adminInventoryKeys.metrics() });
       queryClient.invalidateQueries({
         queryKey: adminInventoryKeys.products(),
       });
-      queryClient.invalidateQueries({ queryKey: adminInventoryKeys.metrics() });
+
       showToast.success(response.message || "Product deleted successfully", {
         icon: null,
         style: notificationStyles.alertSuccess,

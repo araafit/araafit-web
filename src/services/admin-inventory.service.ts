@@ -1,3 +1,4 @@
+import { AxiosError } from "axios";
 import apiClient from "../lib/axios";
 import type { ApiResponse } from "./admin-auth.service";
 import type { Pagination } from "./products.service";
@@ -278,7 +279,20 @@ class AdminInventoryService {
     const response = await apiClient.delete<ApiResponse<DeleteProductResponse>>(
       `/products/${productId}`
     );
-    return response.data.data;
+
+    if (response.status !== 200) {
+      const error = new AxiosError(
+        "Something went went wrong!",
+        undefined,
+        response.config,
+        response.request,
+        response
+      );
+
+      throw error;
+    }
+
+    return response.data;
   }
 }
 
