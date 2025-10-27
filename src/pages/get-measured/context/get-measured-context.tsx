@@ -12,6 +12,18 @@ interface GetMeasuredContext {
   setPhotos: (front: File, side: File) => void;
   setHeight: (height: number) => void;
   resetProgress: () => void;
+  uploaded:
+    | {
+        front: { url: string; publicId: string } | null;
+        side: { url: string; publicId: string } | null;
+      }
+    | null;
+  setUploaded: (
+    data: {
+      front: { url: string; publicId: string };
+      side: { url: string; publicId: string };
+    } | null
+  ) => void;
 }
 
 const GetMeasuredContext = createContext<GetMeasuredContext | null>(null);
@@ -30,6 +42,13 @@ export const GetMeasuredProvider = ({
   const [frontPhoto, setFrontPhoto] = useState<File | null>(null);
   const [sidePhoto, setSidePhoto] = useState<File | null>(null);
   const [height, setHeightState] = useState<number | null>(null);
+  const [uploaded, setUploadedState] = useState<
+    | {
+        front: { url: string; publicId: string } | null;
+        side: { url: string; publicId: string } | null;
+      }
+    | null
+  >(null);
 
   // Move to next step and save state in browser
   const stepTo = (to?: number) => {
@@ -58,6 +77,7 @@ export const GetMeasuredProvider = ({
     setFrontPhoto(null);
     setSidePhoto(null);
     setHeightState(null);
+    setUploadedState(null);
   };
 
   const value = { 
@@ -68,7 +88,9 @@ export const GetMeasuredProvider = ({
     height,
     setPhotos, 
     setHeight,
-    resetProgress
+    resetProgress,
+    uploaded,
+    setUploaded: setUploadedState,
   };
 
   return (

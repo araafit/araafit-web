@@ -52,6 +52,17 @@ export interface UpdateMeasurementsResponse {
   lastUpdated: string;
 }
 
+// Image upload types
+export interface UploadedImageInfo {
+  url: string;
+  publicId: string;
+}
+
+export interface UploadMeasurementImagesResponse {
+  front: UploadedImageInfo;
+  side: UploadedImageInfo;
+}
+
 export const measurementsService = {
   async getMeasurements(): Promise<MeasurementsResponse> {
     const response = await apiClient.get<ApiResponse<MeasurementsResponse>>("/measurements/me");
@@ -80,6 +91,27 @@ export const measurementsService = {
       "/measurements",
       data
     );
+    return response.data.data;
+  },
+
+  async uploadMeasurementImages(
+    front: File,
+    side: File
+  ): Promise<UploadMeasurementImagesResponse> {
+    const formData = new FormData();
+    formData.append("front", front);
+    formData.append("side", side);
+
+    const response = await apiClient.post<ApiResponse<UploadMeasurementImagesResponse>>(
+      "/measurements/images",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
     return response.data.data;
   },
 };

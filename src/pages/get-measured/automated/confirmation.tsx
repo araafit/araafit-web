@@ -12,7 +12,7 @@ import {
   type MeasurementResult,
 } from "../../../services/measurement";
 import { extractSkinToneFromPhoto } from "../../../services/measurement/skin-tone-extractor";
-//import SilhouetteVisualization from "./silhouette-visualization";
+import SilhouetteVisualization from "./silhouette-visualization";
 import { useCreateMeasurements } from "../../../hooks/measurements.hooks";
 import { useCreateGuestUser } from "../../../hooks/auth.hooks";
 import { useAuthStore } from "../../../stores/auth-store";
@@ -704,8 +704,8 @@ export function Confirmation() {
                 </div>
 
                 <div className="space-y-4 md:space-y-6">
-                  {/* Show accurate measurements if available, with comparison */}
-                  {/*{accurateMeasurements && (
+                  Show accurate measurements if available, with comparison
+                  {accurateMeasurements && (
                     <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
                       <h4 className="font-medium text-green-800 mb-2">
                         ✨ Enhanced Accurate Measurements
@@ -714,7 +714,7 @@ export function Confirmation() {
                         Using advanced silhouette analysis for improved accuracy
                       </p>
                     </div>
-                  )}*/}
+                  )}
 
                   <div className="flex justify-between items-center py-3 border-b border-neutral-100">
                     <span className="text-sm md:text-lg text-neutral-700">
@@ -728,12 +728,12 @@ export function Confirmation() {
                             )
                           : Math.round(measurements.measurements.bust / 2.54)}
                       </span>
-                      {/*{accurateMeasurements && (
+                      {accurateMeasurements && (
                         <div className="text-sm text-green-600">
                           Enhanced (was{" "}
                           {Math.round(measurements.measurements.bust / 2.54)})
                         </div>
-                      )}*/}
+                      )}
                     </div>
                   </div>
 
@@ -749,12 +749,12 @@ export function Confirmation() {
                             )
                           : Math.round(measurements.measurements.waist / 2.54)}
                       </span>
-                      {/*{accurateMeasurements && (
+                      {accurateMeasurements && (
                         <div className="text-sm text-green-600">
                           Enhanced (was{" "}
                           {Math.round(measurements.measurements.waist / 2.54)})
                         </div>
-                      )}*/}
+                      )}
                     </div>
                   </div>
 
@@ -770,12 +770,12 @@ export function Confirmation() {
                             )
                           : Math.round(measurements.measurements.hip / 2.54)}
                       </span>
-                      {/*{accurateMeasurements && (
+                      {accurateMeasurements && (
                         <div className="text-sm text-green-600">
                           Enhanced (was{" "}
                           {Math.round(measurements.measurements.hip / 2.54)})
                         </div>
-                      )}*/}
+                      )}
                     </div>
                   </div>
 
@@ -818,7 +818,7 @@ export function Confirmation() {
               )}
 
               {/* Silhouette Visualization (Debug) */}
-              {/*{frontPhoto && sidePhoto && measurements?.debug && (
+              {frontPhoto && sidePhoto && measurements?.debug && (
                 <SilhouetteVisualization
                   frontPhoto={frontPhoto}
                   sidePhoto={sidePhoto}
@@ -828,7 +828,7 @@ export function Confirmation() {
                   sideLandmarks={measurements.debug.sideLandmarks}
                   heightInCm={measurements.metadata.heightInCm}
                 />
-              )}*/}
+              )}
             </>
           )}
         </div>
