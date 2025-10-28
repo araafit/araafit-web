@@ -1,4 +1,10 @@
 import apiClient from "../lib/axios";
+import { getFirebaseStorage } from "../lib/firebase";
+import {
+  ref,
+  getDownloadURL,
+  uploadBytesResumable,
+} from "firebase/storage";
 import type { ApiResponse } from "./auth.service";
 
 export interface Measurements {
@@ -65,32 +71,34 @@ export interface UploadMeasurementImagesResponse {
 
 export const measurementsService = {
   async getMeasurements(): Promise<MeasurementsResponse> {
-    const response = await apiClient.get<ApiResponse<MeasurementsResponse>>("/measurements/me");
+    const response = await apiClient.get<ApiResponse<MeasurementsResponse>>(
+      "/measurements/me"
+    );
     return response.data.data;
   },
 
   async getMeasurementsSummary(): Promise<MeasurementsSummaryResponse> {
-    const response = await apiClient.get<ApiResponse<MeasurementsSummaryResponse>>("/measurements/me/summary");
+    const response = await apiClient.get<
+      ApiResponse<MeasurementsSummaryResponse>
+    >("/measurements/me/summary");
     return response.data.data;
   },
 
   async createMeasurements(
     data: CreateMeasurementsRequest
   ): Promise<CreateMeasurementsResponse> {
-    const response = await apiClient.post<ApiResponse<CreateMeasurementsResponse>>(
-      "/measurements",
-      data
-    );
+    const response = await apiClient.post<
+      ApiResponse<CreateMeasurementsResponse>
+    >("/measurements", data);
     return response.data.data;
   },
 
   async updateMeasurements(
     data: UpdateMeasurementsRequest
   ): Promise<UpdateMeasurementsResponse> {
-    const response = await apiClient.patch<ApiResponse<UpdateMeasurementsResponse>>(
-      "/measurements",
-      data
-    );
+    const response = await apiClient.patch<
+      ApiResponse<UpdateMeasurementsResponse>
+    >("/measurements", data);
     return response.data.data;
   },
 
@@ -98,20 +106,41 @@ export const measurementsService = {
     front: File,
     side: File
   ): Promise<UploadMeasurementImagesResponse> {
-    const formData = new FormData();
-    formData.append("front", front);
-    formData.append("side", side);
+    const storage = getFirebaseStorage();
 
-    const response = await apiClient.post<ApiResponse<UploadMeasurementImagesResponse>>(
-      "/measurements/images",
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
+    const toExt = (mime: string): string => {
+      if (mime.includes("jpeg")) return "jpg";
+      if (mime.includes("png")) return "png";
+      if (mime.includes("webp")) return "webp";
+      return "jpg";
+    };
 
-    return response.data.data;
+    const uid =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
+    const makePath = (type: "front" | "side", file: File): string => {
+      const ext = toExt(file.type || "image/jpeg");
+      return `measurement-images/${uid}-${type}.${ext}`;
+    };
+
+    const uploadOne = async (type: "front" | "side", file: File) => {
+      console.log("uploading one", type, file);
+      const path = makePath(type, file);
+      const storageRef = ref(storage, path);
+      const uploadTask = await uploadBytesResumable(storageRef, file, {
+        contentType: file.type,
+      });
+      const url = await getDownloadURL(uploadTask.ref);
+      return { url, publicId: path } as UploadedImageInfo;
+    };
+
+    const [frontInfo, sideInfo] = await Promise.all([
+      uploadOne("front", front),
+      uploadOne("side", side),
+    ]);
+
+    return { front: frontInfo, side: sideInfo };
   },
 };

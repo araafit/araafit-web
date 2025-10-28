@@ -39,6 +39,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "fetchfully": "^1.6.0",
+    "firebase": "^12.4.0",
     "image-js": "^1.0.0",
     "lucide-react": "^0.542.0",
     "postcss": "^8.5.6",
