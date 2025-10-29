@@ -39,6 +39,7 @@ import {
   GetMeasured,
   ManualMeasurement,
   MeasurementSummary,
+  PickGender,
 } from "./get-measured/import-entry";
 import {
   GuestShopPage,
@@ -82,6 +83,10 @@ const pagesRoutes = createBrowserRouter([
       },
       {
         path: "/get-measured/manual",
+        element: <PickGender />,
+      },
+      {
+        path: "/get-measured/manual/measurement",
         element: <ManualMeasurement />,
       },
       {
@@ -94,9 +99,9 @@ const pagesRoutes = createBrowserRouter([
     path: "shop",
     children: [
       {
-        path:"",
+        path: "",
         element: <GuestShopPage />,
-        index: true
+        index: true,
       },
       {
         path: "dress/:itemName",
