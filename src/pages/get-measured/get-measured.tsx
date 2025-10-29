@@ -12,7 +12,7 @@ import { GetMeasuredProvider, useGetMeasured } from "./context/get-measured-cont
 
 const StepContent = () => {
   const { currentStep } = useGetMeasured();
-  console.log("currentStep", currentStep);
+  // console.log("currentStep", currentStep);
 
   // Toggle between SmartCapture (camera) and PhotoUpload (file upload)
   // Change this flag to switch between the two methods

@@ -1,5 +1,10 @@
-import React, { useState, useRef } from 'react';
-import { CloudArrowUp, X, CheckCircle, Warning } from "@phosphor-icons/react";
+import React, { useState, useRef } from "react";
+import {
+  CloudArrowUpIcon,
+  XIcon,
+  CheckCircleIcon,
+  WarningIcon,
+} from "@phosphor-icons/react";
 import Button from "../../../shared-components/button";
 import { useGetMeasured } from "../context/get-measured-context";
 import { MeasurementStepperLines } from "../stepper-lines";
@@ -16,26 +21,27 @@ export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
   const [sidePhoto, setSidePhoto] = useState<File | null>(null);
   const [frontPreview, setFrontPreview] = useState<string | null>(null);
   const [sidePreview, setSidePreview] = useState<string | null>(null);
-  const [dragOver, setDragOver] = useState<'front' | 'side' | null>(null);
+  const [dragOver, setDragOver] = useState<"front" | "side" | null>(null);
 
   const frontInputRef = useRef<HTMLInputElement>(null);
   const sideInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileSelect = (file: File, type: 'front' | 'side') => {
-    if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
+  const handleFileSelect = (file: File, type: "front" | "side") => {
+    if (!file.type.startsWith("image/")) {
+      alert("Please select an image file");
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) { // 10MB limit
-      alert('File size must be less than 10MB');
+    if (file.size > 10 * 1024 * 1024) {
+      // 10MB limit
+      alert("File size must be less than 10MB");
       return;
     }
 
     const reader = new FileReader();
     reader.onload = (e) => {
       const preview = e.target?.result as string;
-      if (type === 'front') {
+      if (type === "front") {
         setFrontPhoto(file);
         setFrontPreview(preview);
       } else {
@@ -46,7 +52,7 @@ export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
     reader.readAsDataURL(file);
   };
 
-  const handleDrop = (e: React.DragEvent, type: 'front' | 'side') => {
+  const handleDrop = (e: React.DragEvent, type: "front" | "side") => {
     e.preventDefault();
     setDragOver(null);
     const files = e.dataTransfer.files;
@@ -55,7 +61,7 @@ export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
     }
   };
 
-  const handleDragOver = (e: React.DragEvent, type: 'front' | 'side') => {
+  const handleDragOver = (e: React.DragEvent, type: "front" | "side") => {
     e.preventDefault();
     setDragOver(type);
   };
@@ -64,15 +70,15 @@ export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
     setDragOver(null);
   };
 
-  const removePhoto = (type: 'front' | 'side') => {
-    if (type === 'front') {
+  const removePhoto = (type: "front" | "side") => {
+    if (type === "front") {
       setFrontPhoto(null);
       setFrontPreview(null);
-      if (frontInputRef.current) frontInputRef.current.value = '';
+      if (frontInputRef.current) frontInputRef.current.value = "";
     } else {
       setSidePhoto(null);
       setSidePreview(null);
-      if (sideInputRef.current) sideInputRef.current.value = '';
+      if (sideInputRef.current) sideInputRef.current.value = "";
     }
   };
 
@@ -89,14 +95,14 @@ export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
     window.location.reload();
   };
 
-  const UploadArea = ({ 
-    type, 
-    photo, 
-    preview, 
-    title, 
-    description 
-  }: { 
-    type: 'front' | 'side';
+  const UploadArea = ({
+    type,
+    photo,
+    preview,
+    title,
+    description,
+  }: {
+    type: "front" | "side";
     photo: File | null;
     preview: string | null;
     title: string;
@@ -104,17 +110,18 @@ export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
   }) => (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-2">
-        <h3 className="text-base md:text-lg font-semibold text-[#1C1C1C]">{title}</h3>
-        {photo && <CheckCircle className="text-green-500 flex-shrink-0" size={20} />}
+        <h3 className="text-base font-normal text-[#1C1C1C] font-inter">
+          {title}
+        </h3>
       </div>
-      
+
       <div
         className={`relative w-full h-[200px] md:h-[300px] border-2 border-dashed rounded-lg transition-all duration-200 ${
           dragOver === type
-            ? 'border-primary-500 bg-primary-50'
+            ? "border-primary-500 bg-primary-50"
             : photo
-            ? 'border-green-500 bg-green-50'
-            : 'border-neutral-300 bg-neutral-50 hover:border-primary-500 hover:bg-primary-50'
+            ? "border-green-500 bg-green-50"
+            : "border-neutral-300 bg-white"
         }`}
         onDrop={(e) => handleDrop(e, type)}
         onDragOver={(e) => handleDragOver(e, type)}
@@ -129,32 +136,50 @@ export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
             />
             <button
               onClick={() => removePhoto(type)}
-              className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+              className="absolute top-2 right-2 p-1 text-red-500 rounded-full transition-colors"
             >
-              <X size={16} />
+              <XIcon size={16} />
             </button>
             <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs md:text-sm">
               {photo?.name}
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center h-full gap-3 md:gap-4 cursor-pointer p-4"
-               onClick={() => type === 'front' ? frontInputRef.current?.click() : sideInputRef.current?.click()}>
-            <CloudArrowUp size={32} className="text-neutral-400 md:hidden" />
-            <CloudArrowUp size={48} className="text-neutral-400 hidden md:block" />
+          <div
+            className="flex flex-col items-center justify-center h-full gap-3 md:gap-4 cursor-pointer p-4"
+            onClick={() =>
+              type === "front"
+                ? frontInputRef.current?.click()
+                : sideInputRef.current?.click()
+            }
+          >
+            <div className="flex items-center justify-center md:hidden size-[56px] bg-gray-100 rounded-full">
+              <CloudArrowUpIcon size={25} className="text-gray-600" />
+            </div>
+
+            <div className="hidden size-[56px] bg-gray-100 rounded-full md:flex items-center justify-center">
+              <CloudArrowUpIcon size={25} className="text-gray-600" />
+            </div>
+
             <div className="text-center">
               <p className="text-neutral-700 font-medium text-sm md:text-base">
-                Drop your {type} photo here, or{' '}
-                <span className="text-primary-500 underline">browse</span>
+                Click to upload{" "}
+                <span className="text-[14px] font-light font-gray-600">
+                  or drag drop
+                </span>
               </p>
-              <p className="text-xs md:text-sm text-neutral-500 mt-1">{description}</p>
+
+              {/* <p className="text-xs md:text-sm text-neutral-500 mt-1">
+                {description}
+              </p> */}
+
+              <p className="text-xs text-gray-400">PNG, JPG (max. 800x400px)</p>
             </div>
-            <p className="text-xs text-neutral-400">PNG, JPG up to 10MB</p>
           </div>
         )}
-        
+
         <input
-          ref={type === 'front' ? frontInputRef : sideInputRef}
+          ref={type === "front" ? frontInputRef : sideInputRef}
           type="file"
           accept="image/*"
           onChange={(e) => {
@@ -170,30 +195,35 @@ export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
   return (
     <div className="flex flex-col">
       <div className="w-full flex flex-col gap-5">
-        <MeasurementStepperLines stepIndex={currentStep} />
+        <MeasurementStepperLines stepIndex={currentStep} className="mb-10" />
 
         <div className="w-full max-w-[51rem] flex flex-col gap-6">
-          <div>
-            <h2 className="text-xl md:text-[2rem] text-[#1C1C1C] font-semibold mb-2">
+          <div className="w-full max-w-[500px] my-0 mx-auto">
+            <h2 className="text-xl md:text-[2rem] text-[#1C1C1C] font-semibold mb-2 text-center">
               Upload Your Photos
             </h2>
-            <p className="text-neutral-500 font-inter text-sm md:text-base">
-              Upload clear front and side photos instead of using your camera for accurate measurements
+            <p className="text-neutral-500 font-inter text-sm md:text-base text-center">
+              Upload clear front and side photos.
             </p>
           </div>
 
           {/* Instructions */}
-          <div className="flex items-start gap-2 bg-[#EBF8FF] rounded-md border border-[#0EA5E9] py-3 px-4">
-            <Warning className="text-[#0EA5E9] mt-0.5 flex-shrink-0" size={20} />
+          <div className="flex items-start gap-2 bg-[#FFF8EB] rounded-md border border-[#FCBB4D] py-3 px-4">
+            <WarningIcon
+              className="text-[#F59E0B] mt-0.5 flex-shrink-0"
+              size={20}
+            />
+
             <div className="flex flex-col gap-2">
-              <span className="text-[#0EA5E9] font-medium text-sm md:text-base">Photo Guidelines</span>
-              <ul className="text-[#0369A1] text-xs md:text-sm space-y-1">
-                <li>• Stand straight with arms slightly away from your body</li>
-                <li>• Wear form-fitting clothes that show your body shape</li>
-                <li>• Use good lighting and a plain background</li>
-                <li>• Front photo: Face the camera directly</li>
-                <li>• Side photo: Turn 90° to show your profile</li>
-              </ul>
+              <span className="text-[#F59E0B] font-medium text-sm md:text-base">
+                Instructions
+              </span>
+
+              <p className="text-[#B47409] text-xs md:text-sm font-light">
+                Upload two clear full-body photos: one facing the camera (front
+                view) with arms slightly away from your sides, and one from the
+                side (side view) standing upright and looking straight ahead.
+              </p>
             </div>
           </div>
 
@@ -206,7 +236,7 @@ export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
               title="Front Photo"
               description="Face the camera directly"
             />
-            
+
             <UploadArea
               type="side"
               photo={sidePhoto}
@@ -217,21 +247,31 @@ export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
           </div>
 
           {/* Progress indicator */}
-          {(frontPhoto || sidePhoto) && (
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4 p-3 bg-neutral-50 rounded-lg">
-              <div className="flex items-center gap-2">
-                <div className={`w-3 h-3 rounded-full ${frontPhoto ? 'bg-green-500' : 'bg-neutral-300'}`} />
-                <span className="text-xs md:text-sm text-neutral-600">Front Photo</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className={`w-3 h-3 rounded-full ${sidePhoto ? 'bg-green-500' : 'bg-neutral-300'}`} />
-                <span className="text-xs md:text-sm text-neutral-600">Side Photo</span>
-              </div>
-              <span className="text-xs md:text-sm text-neutral-500 md:ml-auto">
-                {[frontPhoto, sidePhoto].filter(Boolean).length}/2 photos uploaded
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4 p-3 bg-neutral-50 rounded-lg">
+            <div className="flex items-center gap-2">
+              <span
+                className={`text-xs ${
+                  frontPhoto ? "text-green-500" : "text-neutral-600"
+                }`}
+              >
+                Front Photo
               </span>
             </div>
-          )}
+
+            <div className="flex items-center gap-2">
+              <span
+                className={`text-xs md:text-sm ${
+                  sidePhoto ? "text-green-500" : "text-neutral-600"
+                }`}
+              >
+                Side Photo
+              </span>
+            </div>
+
+            <span className="text-xs md:text-sm text-neutral-500 md:ml-auto">
+              {[frontPhoto, sidePhoto].filter(Boolean).length}/2 photos uploaded
+            </span>
+          </div>
         </div>
       </div>
 
