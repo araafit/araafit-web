@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useAuthStore } from '../stores/auth-store';
 import { useGetProfile } from './auth.hooks';
-import { tokenUtils } from '../lib/axios';
+import { tokenUtils } from '../lib/utils';
 
 /**
  * Main authentication hook that provides:

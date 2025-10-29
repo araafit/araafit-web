@@ -6,25 +6,26 @@ import axios, {
 } from "axios";
 import showToast from "../utils/notification";
 import { notificationStyles } from "../style/custom";
+import { tokenUtils, type AuthTokens } from "./utils";
+import { type ToastOptions } from "react-hot-toast";
 
 /* ------------------------------------------------------------- */
 
-// Types for auth response
-export interface AuthTokens {
-  access_token: string;
-  refresh_token: string;
-  expires_in: number;
-  token_type: string;
-}
-
-export interface RefreshTokenResponse {
-  access_token: string;
-  refresh_token: string;
-  expires_in: number;
-  token_type: string;
-}
-
 const currentPath = window.location.pathname;
+
+// Track recently shown error messages to prevent duplicates
+const shownErrors = new Set<string>();
+const ERROR_TOAST_COOLDOWN = 3000; // 3 seconds
+
+// Flag to prevent multiple simultaneous refresh attempts
+let isRefreshing = false;
+let refreshAttempts = 0;
+const MAX_REFRESH_ATTEMPTS = 3;
+
+let failedQueue: Array<{
+  resolve: (value?: any) => void;
+  reject: (error?: any) => void;
+}> = [];
 
 // Base API URL - update this to your backend URL
 const API_BASE_URL =
@@ -39,66 +40,17 @@ const apiClient: AxiosInstance = axios.create({
   },
 });
 
-// Token management utilities
-const ADMIN_ACCESS_TOKEN_STORAGE_KEY = "araafit_admin_access_token";
-const ADMIN_REFRESH_TOKEN_STORAGE_KEY = "araafit_admin_refresh_token";
-const TOKEN_STORAGE_KEY = "araafit_access_token";
-const REFRESH_TOKEN_STORAGE_KEY = "araafit_refresh_token";
+function showErrorOnce(message: string, options: ToastOptions) {
+  const errorKey = `${message}-${options.position}`;
 
-export const tokenUtils = {
-  getAccessToken: (): string | null => {
-    return localStorage.getItem(TOKEN_STORAGE_KEY);
-  },
+  if (!shownErrors.has(errorKey)) {
+    shownErrors.add(errorKey);
+    showToast.error(message, options);
 
-  getRefreshToken: (): string | null => {
-    return localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
-  },
-
-  getAdminAccessToken: (): string | null => {
-    return localStorage.getItem(ADMIN_ACCESS_TOKEN_STORAGE_KEY);
-  },
-
-  getAdminRefreshToken: (): string | null => {
-    return localStorage.getItem(ADMIN_REFRESH_TOKEN_STORAGE_KEY);
-  },
-
-  setTokens: (tokens: AuthTokens): void => {
-    localStorage.setItem(TOKEN_STORAGE_KEY, tokens.access_token);
-    localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, tokens.refresh_token);
-  },
-
-  setAdminTokens: (tokens: AuthTokens): void => {
-    localStorage.setItem(ADMIN_ACCESS_TOKEN_STORAGE_KEY, tokens.access_token);
-    localStorage.setItem(ADMIN_REFRESH_TOKEN_STORAGE_KEY, tokens.refresh_token);
-  },
-
-  clearTokens: (): void => {
-    localStorage.removeItem(TOKEN_STORAGE_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
-  },
-
-  clearAdminTokens: (): void => {
-    localStorage.removeItem(ADMIN_ACCESS_TOKEN_STORAGE_KEY);
-    localStorage.removeItem(ADMIN_REFRESH_TOKEN_STORAGE_KEY);
-  },
-
-  isTokenExpired: (token: string): boolean => {
-    try {
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      return Date.now() >= payload.exp * 1000;
-    } catch {
-      return true;
-    }
-  },
-};
-
-// Flag to prevent multiple refresh attempts
-let shouldRefresh = false;
-
-let failedQueue: Array<{
-  resolve: (value?: any) => void;
-  reject: (error?: any) => void;
-}> = [];
+    // Clear after cool-down period
+    setTimeout(() => shownErrors.delete(errorKey), ERROR_TOAST_COOLDOWN);
+  }
+}
 
 const processQueue = (error: any, token: string | null = null) => {
   failedQueue.forEach(({ resolve, reject }) => {
@@ -110,6 +62,36 @@ const processQueue = (error: any, token: string | null = null) => {
   });
 
   failedQueue = [];
+};
+
+const handleLogout = (userType: "admin" | "user" | "guest") => {
+  // Clear tokens based on user type
+  if (userType === "admin") {
+    tokenUtils.clearAdminTokens();
+    showErrorOnce("Admin session expired. Please login again.", {
+      icon: null,
+      style: notificationStyles.alertError,
+      position: "top-center",
+    });
+    setTimeout(() => (window.location.href = "/auth/admin-login"), 1000);
+  } else if (userType === "user") {
+    tokenUtils.clearTokens();
+    showErrorOnce("Session expired. Please login again.", {
+      icon: null,
+      style: notificationStyles.alertError,
+      position: "top-center",
+    });
+    setTimeout(() => (window.location.href = "/auth/login"), 1000);
+  } else if (userType === "guest") {
+    tokenUtils.clearTokens();
+    localStorage.removeItem("araafit_guest_token");
+    showErrorOnce("Guest session expired. Please get measured again.", {
+      icon: null,
+      style: notificationStyles.alertError,
+      position: "top-center",
+    });
+    setTimeout(() => (window.location.href = "/get-measured"), 1000);
+  }
 };
 
 // Request interceptor to add auth token
@@ -144,8 +126,6 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // console.log("error:", error, originalRequest._retry);
-
     // Do not attempt refresh for auth endpoints
     if (error.config?.url?.includes("/auth/")) {
       return Promise.reject(error);
@@ -157,8 +137,8 @@ apiClient.interceptors.response.use(
       const adminRefreshToken = tokenUtils.getAdminRefreshToken();
       const guestToken = localStorage.getItem("araafit_guest_token");
 
-      // If token should refresh, the go ahead and queue request.
-      if (shouldRefresh) {
+      // If token already refreshing, queue request.
+      if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
@@ -171,37 +151,32 @@ apiClient.interceptors.response.use(
           });
       }
 
+      if (refreshAttempts >= MAX_REFRESH_ATTEMPTS) {
+        console.log("Max refresh attempts exceeded. Logging out...");
+
+        // reset for next session
+        refreshAttempts = 0;
+        return Promise.reject(error);
+      }
+
       originalRequest._retry = true;
-      shouldRefresh = true;
+      isRefreshing = true;
+      refreshAttempts++;
 
+      // ADMIN REFRESH LOGIC
       if (currentPath.includes("/admin-dashboard/")) {
-        // If not refresh token, redirect to login
         if (!adminRefreshToken || adminRefreshToken === "undefined") {
-          console.log("No admin refresh token, Should redirect to login");
+          console.log("No admin refresh token, redirecting to login");
 
-          setTimeout(() => (window.location.href = "/auth/admin-login"), 1000);
-
+          isRefreshing = false;
+          refreshAttempts = 0;
+          handleLogout("admin");
           return Promise.reject(error);
         }
 
-        // Enough retry. token is invalid, just go to admin login page.
-        if (originalRequest._retry && failedQueue.length >= 2) {
-          const adminAccessToken = tokenUtils.getAdminAccessToken();
-
-          if (adminAccessToken && tokenUtils.isTokenExpired(adminAccessToken)) {
-            showToast.error("Session expired. Redirecting to admin login.", {
-              icon: null,
-              style: notificationStyles.alertError,
-              position: "top-center",
-            });
-
-            // setTimeout(() => (window.location.href = "/auth/admin-login"), 1000);
-
-            return Promise.reject(error);
-          }
-        }
-
-        console.log("Making request to get refresh token...");
+        console.log(
+          `Admin refresh attempt ${refreshAttempts}/${MAX_REFRESH_ATTEMPTS}`
+        );
         try {
           const response = await axios.post(`${API_BASE_URL}/admin/refresh`, {
             refresh_token: adminRefreshToken,
@@ -219,57 +194,40 @@ apiClient.interceptors.response.use(
           processQueue(null, newTokens.access_token);
 
           return apiClient(originalRequest);
-        } catch (refreshError) {
-          console.log(
-            "Unable to refresh token for admin. Should redirect login page"
-          );
+        } catch (refreshError: any) {
+          console.log("Admin token refresh failed");
 
-          // Admin refresh failed, clear admin tokens and redirect
-          tokenUtils.clearAdminTokens();
+          // Check if refresh itself returned 401 (refresh token expired)
+          if (refreshError.response?.status === 401) {
+            console.log("Admin refresh token expired, logging out");
+            processQueue(refreshError, null);
+            handleLogout("admin");
+            return Promise.reject(refreshError);
+          }
 
-          showToast.error("Admin session expired. Please login again.", {
-            icon: null,
-            style: notificationStyles.alertError,
-            position: "top-center",
-          });
-
+          // For other errors, reject but don't logout yet
           processQueue(refreshError, null);
-
-          setTimeout(() => (window.location.href = "/auth/admin-login"), 1000);
-
           return Promise.reject(refreshError);
         } finally {
-          shouldRefresh = false;
+          isRefreshing = false;
         }
       }
 
-      if (currentPath.includes("/dashboard/")) {
+      if (
+        currentPath.includes("/dashboard") ||
+        currentPath.includes("/dashboard/")
+      ) {
         if (!refreshToken || refreshToken === "undefined") {
-          console.log("No user refresh token, Should redirect to login");
-
-          setTimeout(() => (window.location.href = "/auth/login"), 1000);
-
+          console.log("No user refresh token, redirecting to login");
+          isRefreshing = false;
+          refreshAttempts = 0;
+          handleLogout("user");
           return Promise.reject(error);
         }
 
-        // Enough retry. token is invalid, just go to user login page.
-        if (originalRequest._retry && failedQueue.length >= 2) {
-          const userAccessToken = tokenUtils.getAccessToken();
-
-          if (userAccessToken && tokenUtils.isTokenExpired(userAccessToken)) {
-            showToast.error("Session expired. Redirecting to user login.", {
-              icon: null,
-              style: notificationStyles.alertError,
-              position: "top-center",
-            });
-
-            setTimeout(() => (window.location.href = "/auth/login"), 1000);
-
-            return Promise.reject(error);
-          }
-        }
-
-        console.log("Making request to get user refresh token ...");
+        console.log(
+          `User refresh attempt ${refreshAttempts}/${MAX_REFRESH_ATTEMPTS}`
+        );
         try {
           const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
             refresh_token: refreshToken,
@@ -286,72 +244,67 @@ apiClient.interceptors.response.use(
 
           processQueue(null, newTokens.access_token);
 
+          // Reset attempts on success
+          refreshAttempts = 0;
+
           return apiClient(originalRequest);
-        } catch (error) {
-          tokenUtils.clearTokens();
+        } catch (refreshError: any) {
+          console.log("User token refresh failed");
 
-          showToast.error("Session expired. Redirecting login.", {
-            icon: null,
-            style: notificationStyles.alertError,
-            position: "top-center",
-          });
+          // Check if refresh itself returned 401 (refresh token expired)
+          if (refreshError.response?.status === 401) {
+            console.log("User refresh token expired, logging out");
+            processQueue(refreshError, null);
+            handleLogout("user");
+            return Promise.reject(refreshError);
+          }
 
-          console.log("User refresh token failed");
-
-          setTimeout(() => (window.location.href = "/auth/login"), 1000);
-
-          return Promise.reject(error);
+          // For other errors, reject but don't logout yet
+          processQueue(refreshError, null);
+          return Promise.reject(refreshError);
         } finally {
-          shouldRefresh = false;
+          isRefreshing = false;
         }
       }
 
-      // If guest user token exist but no user refresh token, handle guest token expiry
+      // GUEST TOKEN LOGIC
       if (guestToken && !refreshToken) {
-        // Guest token expired, clear it and redirect to measurement or login
-        tokenUtils.clearTokens();
-        localStorage.removeItem("araafit_guest_token");
-
-        showToast.error("Guest session expired. Please get measured again.", {
-          icon: null,
-          style: notificationStyles.alertError,
-          position: "top-center",
-        });
-
-        setTimeout(() => (window.location.href = "/get-measured"), 1000);
-
+        console.log("Guest session expired");
+        isRefreshing = false;
+        refreshAttempts = 0;
+        handleLogout("guest");
         return Promise.reject(error);
       }
     }
 
     // Handle other errors
-    if (error.response) {
+    if (error.response && !originalRequest._retry) {
       const { status, data } = error.response;
 
       switch (status) {
         case 400:
-          showToast.error(data.message || "Invalid request", {
+          showErrorOnce(data.message || "Invalid request", {
             icon: null,
             style: notificationStyles.alertError,
             position: "top-center",
           });
           break;
         case 403:
-          showToast.error("Access denied", {
+          showErrorOnce(data.message || "Access denied", {
             icon: null,
             style: notificationStyles.alertError,
             position: "top-center",
           });
           break;
         case 404:
-          showToast.error("Resource not found", {
+          showErrorOnce(data.message || "Resource not found", {
             icon: null,
             style: notificationStyles.alertError,
             position: "top-center",
           });
           break;
         case 500:
-          showToast.error("Server error. Please try again later.", {
+          showErrorOnce("Server error. Please try again later.", {
             icon: null,
             style: notificationStyles.alertError,
             position: "top-center",
@@ -364,8 +317,8 @@ apiClient.interceptors.response.use(
             position: "top-center",
           });
       }
-    } else if (error.request) {
-      showToast.error("Network error. Please check your connection.", {
+    } else if (error.request && !originalRequest._retry) {
+      showErrorOnce("Network error. Please check your connection.", {
         icon: null,
         style: notificationStyles.alertError,
         position: "top-center",
