@@ -13,7 +13,7 @@ import {
   type ResetPasswordRequest,
 } from "../services/auth.service";
 import { useAuthStore } from "../stores/auth-store";
-import { tokenUtils } from "../lib/axios";
+import { tokenUtils } from "../lib/utils";
 
 // Query keys
 export const authKeys = {
