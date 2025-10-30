@@ -59,12 +59,12 @@ export function AdminDashboardOrders() {
         <div className="w-full  flex flex-col gap-4 p-4 mt-20 overflow-y-scroll px-10">
           {metricsLoading ? (
             <div className="flex justify-center items-center h-32">
-              <Spinner size="lg" speed="fast" />
+              <Spinner size="lg" speed="fast" isLoading={metricsLoading} arcColor="#9A6C50" />
             </div>
           ) : metricsError ? (
             <div className="bg-red-50 border border-red-200 rounded-md p-4">
               <p className="text-red-600">
-                Failed to load dashboard metrics. Please try again.
+                Unable to load dashboard metrics.
               </p>
             </div>
           ) : metrics ? (
@@ -123,6 +123,7 @@ export function AdminDashboardOrders() {
                 />
               </div>
             </section>
+            
             <TabsContent
               value="orders"
               className="relative flex  flex-col gap-4 overflow-auto"
