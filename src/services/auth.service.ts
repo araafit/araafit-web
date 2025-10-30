@@ -1,5 +1,8 @@
-import apiClient, { type AuthTokens } from "../lib/axios";
+import apiClient from "../lib/axios";
 import { type User } from "../stores/auth-store";
+import { type AuthTokens } from "../lib/utils";
+
+/* ------------------------------------------------------ */
 
 export interface ApiResponse<T> {
   message: string;

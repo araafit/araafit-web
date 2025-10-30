@@ -2,7 +2,6 @@ import React, { useState, useRef } from "react";
 import {
   CloudArrowUpIcon,
   XIcon,
-  CheckCircleIcon,
   WarningIcon,
 } from "@phosphor-icons/react";
 import Button from "../../../shared-components/button";
@@ -100,13 +99,12 @@ export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
     photo,
     preview,
     title,
-    description,
   }: {
     type: "front" | "side";
     photo: File | null;
     preview: string | null;
     title: string;
-    description: string;
+    description?: string;
   }) => (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-2">
@@ -137,6 +135,7 @@ export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
             <button
               onClick={() => removePhoto(type)}
               className="absolute top-2 right-2 p-1 text-red-500 rounded-full transition-colors"
+              title="remove photo"
             >
               <XIcon size={16} />
             </button>
@@ -187,6 +186,7 @@ export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
             if (file) handleFileSelect(file, type);
           }}
           className="hidden"
+          title="image"
         />
       </div>
     </div>
