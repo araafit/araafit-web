@@ -92,6 +92,7 @@ export function AdminDashboardOrders() {
                 <TabsTrigger value="orders">Orders</TabsTrigger>
                 <TabsTrigger value="past-performance">Requests</TabsTrigger>
               </TabsList>
+
               <div className="flex items-center gap-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -116,6 +117,7 @@ export function AdminDashboardOrders() {
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
+
                 <Button
                   text="Save"
                   variant="solid"
@@ -123,13 +125,14 @@ export function AdminDashboardOrders() {
                 />
               </div>
             </section>
-            
+
             <TabsContent
               value="orders"
               className="relative flex  flex-col gap-4 overflow-auto"
             >
               <Orders />
             </TabsContent>
+            
             <TabsContent value="past-performance">
               <Requests />
             </TabsContent>
