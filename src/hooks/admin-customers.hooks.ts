@@ -84,6 +84,7 @@ export const useBlockCustomer = () => {
     mutationFn: ({ id, request }: { id: string; request: BlockCustomerRequest }) =>
       adminCustomersService.blockCustomer(id, request),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminCustomersKeys.all });
       queryClient.invalidateQueries({ queryKey: adminCustomersKeys.lists() });
       queryClient.invalidateQueries({ queryKey: adminCustomersKeys.details() });
       toast.success("Customer blocked successfully");
@@ -101,6 +102,7 @@ export const useUnblockCustomer = () => {
   return useMutation({
     mutationFn: (id: string) => adminCustomersService.unblockCustomer(id),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminCustomersKeys.all });
       queryClient.invalidateQueries({ queryKey: adminCustomersKeys.lists() });
       queryClient.invalidateQueries({ queryKey: adminCustomersKeys.details() });
       toast.success("Customer unblocked successfully");
@@ -119,6 +121,7 @@ export const useDeleteCustomer = () => {
     mutationFn: ({ id, request }: { id: string; request: DeleteCustomerRequest }) =>
       adminCustomersService.deleteCustomer(id, request),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminCustomersKeys.all });
       queryClient.invalidateQueries({ queryKey: adminCustomersKeys.lists() });
       queryClient.invalidateQueries({ queryKey: adminCustomersKeys.details() });
       toast.success("Customer deleted successfully");
