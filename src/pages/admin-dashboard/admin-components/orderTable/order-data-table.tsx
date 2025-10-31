@@ -43,7 +43,7 @@ import { schema } from "../overViewTable/schema/schema";
 
 import EmptyState from "../emptycart";
 import cart from "../../../admin-dashboard/images/emptyCart.png";
-import { useUpdateOrderStatus } from "../../../../hooks/admin-orders.hooks";
+// import { useUpdateOrderStatus } from "../../../../hooks/admin-orders.hooks";
 import { orderTableColumn } from "./table-columns/order-columns";
 
 /* -------------------------------------------------------------------------------------------------------- */
@@ -53,8 +53,8 @@ export function DataTable({
 }: {
   data: z.infer<typeof schema>[];
 }) {
-  const updateOrderStatusMutation = useUpdateOrderStatus();
-  const columns = orderTableColumn(updateOrderStatusMutation);
+  // const updateOrderStatusMutation = useUpdateOrderStatus();
+  const columns = orderTableColumn;
   const [data, setData] = React.useState(() => initialData);
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
