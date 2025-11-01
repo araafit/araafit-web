@@ -9,7 +9,6 @@ import {
   XIcon,
 } from "@phosphor-icons/react";
 import { Link, useNavigate, NavLink } from "react-router-dom";
-// import LoaderSkin from "./loader";
 import Modal from "../../shared-components/modal";
 import { useSwitch } from "../../shared-hooks/switch";
 import Button from "../../shared-components/button";
@@ -17,7 +16,7 @@ import { useCart } from "../../hooks/cart.hooks";
 import { useLogout } from "../../hooks/auth.hooks";
 import Spinner from "../../shared-components/spinner";
 
-/* ------------------------------------------------------ */
+/* ---------------------------------------------------------------------------------- */
 
 const navMenu = [
   { name: "home", link: "/dashboard", icon: HouseSimpleIcon },
@@ -91,16 +90,18 @@ export default function UserDashboardLayout({
       )}
 
       {/* Sidebar */}
-      <div className={`
+      <div
+        className={`
         w-[12.375rem] h-screen border-r-2 border-neutral-100 bg-white
         lg:block
-        ${isMobileMenuOpen ? 'block' : 'hidden'}
+        ${isMobileMenuOpen ? "block" : "hidden"}
         fixed lg:relative z-50 lg:z-auto
         top-0 left-0
         lg:translate-x-0
-        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+        ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
         transition-transform duration-300 ease-in-out
-      `}>
+      `}
+      >
         <div className="w-full h-[90%] flex flex-col justify-between">
           <div>
             {/* Desktop Logo */}
@@ -213,9 +214,7 @@ export default function UserDashboardLayout({
       </div>
 
       {/* Main Content */}
-      <div className="grow lg:ml-0 pt-16 lg:pt-0">
-        {children}
-      </div>
+      <div className="grow lg:ml-0 pt-16 lg:pt-0">{children}</div>
 
       {/* Logout redirection modal */}
       <Modal
