@@ -65,7 +65,7 @@ export function PickGender() {
             text="Continue"
             variant="solid"
             disabled={selectedGender === null}
-            className={`w-full sm:w-[175px] disabled:opacity-10 cursor-not-allowed`}
+            className={`w-full sm:w-[175px] disabled:opacity-10 disabled:cursor-not-allowed`}
             onClick={() => navigate("/get-measured/manual/measurement")}
           />
         </div>
