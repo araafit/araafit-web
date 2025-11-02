@@ -17,7 +17,7 @@ import LoaderView from "../../../layouts/user-dashboard/loader";
  * @returns ReactElement
  */
 export function DashboardCartPage() {
-  const { data: cart, isLoading, isError, error } = useCart();
+  const { data: cart, isLoading, isError } = useCart();
   const cartItems = cart?.items || [];
   const cartIsEmpty = cartItems.length === 0;
 
@@ -63,16 +63,17 @@ export function DashboardCartPage() {
     return (
       <UserDashboardLayout>
         <div className="h-screen flex items-center justify-center">
-          <div className="flex flex-col items-center gap-4 text-center">
-            <p className="text-red-600">Error loading cart</p>
-            <p className="text-gray-600">
-              {error?.message || "Please try again later"}
+          <div className="flex flex-col items-center bg-[#FFF8EB] border border-[#FFD8A8] rounded-md p-4">
+            <p className="text-[#B47409]">
+              Unable to load cart. Click{" "}
+              <span
+                className="underline cursor-pointer"
+                onClick={() => window.location.reload()}
+              >
+                here
+              </span>{" "}
+              to reload
             </p>
-            <Button
-              text="Retry"
-              variant="solid"
-              onClick={() => window.location.reload()}
-            />
           </div>
         </div>
       </UserDashboardLayout>
