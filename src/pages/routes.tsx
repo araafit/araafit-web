@@ -50,6 +50,7 @@ import GuestCartPage from "./guest/cart/guest-cart";
 import GuestCartCheckout from "./guest/cart/guest-cart-checkout";
 import PaystackCallback from "./paystack-callback";
 import CheckoutSuccess from "./user-dashboard/cart/checkout/checkout-success";
+import { FabricRequestSummary } from "./guest/guest-shop/fabric-request-summary";
 
 /* ---------------------------------------------------------------- */
 
@@ -110,6 +111,10 @@ const pagesRoutes = createBrowserRouter([
       {
         path: "fabric/:itemName",
         element: <GuestFabricDetailPage />,
+      },
+       {
+        path: "summary",
+        element: <FabricRequestSummary />,
       },
     ],
   },

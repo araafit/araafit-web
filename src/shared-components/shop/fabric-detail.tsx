@@ -1,13 +1,14 @@
 import { Link, useParams } from "react-router-dom";
 import { useState } from "react";
 import { useProduct } from "../../hooks/user-dashboard.hooks";
-import { useAddToCart } from "../../hooks/cart.hooks";
-import { useInstantCheckout } from "../../hooks/orders.hooks";
+// import { useAddToCart } from "../../hooks/cart.hooks";
+// import { useInstantCheckout } from "../../hooks/orders.hooks";
 import Button from "../button";
-import Spinner from "../spinner";
+// import Spinner from "../spinner";
 import { WarningIcon, ArrowRightIcon } from "@phosphor-icons/react";
 import { formatPrice } from "../../utils/format-price";
 import LoaderView from "../../layouts/user-dashboard/loader";
+import { useNavigate } from "react-router-dom";
 
 /* --------------------------------------------------------- */
 
@@ -16,16 +17,17 @@ export function FabricDetail() {
   const productId = itemName || "";
 
   const { data: product, isLoading, isError, error } = useProduct(productId);
-  const addToCartMutation = useAddToCart();
-  const instantCheckoutMutation = useInstantCheckout();
+  // const addToCartMutation = useAddToCart();
+  // const instantCheckoutMutation = useInstantCheckout();
 
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
   const [selectedYards, setSelectedYards] = useState(3);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const measurement = [6, 8, 10, 12, 14, 16, 18, 20];
 
-  const handleAddToCart = () => {
+  /*const handleAddToCart = () => {
     if (!product || !selectedStyle) return;
 
     addToCartMutation.mutate({
@@ -43,13 +45,13 @@ export function FabricDetail() {
       quantity: selectedYards,
       size: "One Size",
     });
-  };
+  };*/
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="flex flex-col items-center gap-4">
-         <LoaderView />
+          <LoaderView />
         </div>
       </div>
     );
@@ -205,22 +207,20 @@ export function FabricDetail() {
 
               {/* Yard estimate */}
               <div className="w-full flex flex-col gap-3">
-                <span className="text-[14px]">
+                <span className="text-[14px] text-[#494949]">
                   Yard Estimate (based on measurement & style)
                 </span>
 
-                <div className="flex items-center gap-4">
-                  <input
-                    type="number"
-                    min="1"
-                    max="20"
-                    value={selectedYards}
-                    onChange={(e) => setSelectedYards(Number(e.target.value))}
-                    className="w-24 p-2 border border-gray-300 rounded text-center outline-none focus:border-primary-500"
-                    title="Select number of yards"
-                  />
-                  <span className="text-sm text-gray-600">yards</span>
-                </div>
+                <input
+                  type="number"
+                  min="1"
+                  max="20"
+                  value={selectedYards}
+                  onChange={(e) => setSelectedYards(Number(e.target.value))}
+                  className="h-[75px] w-full p-2 border border-gray-300 rounded outline-none focus:border-primary-500 placeholder:text-[14px]"
+                  title="Select number of yards"
+                  placeholder="Number of yards based on your measurement and preferred choice of style."
+                />
 
                 <p className="text-xs text-gray-500">
                   Estimated based on your measurements and selected style. You
@@ -239,7 +239,7 @@ export function FabricDetail() {
 
               <p className="text-[#333B47] font-normal">
                 Each piece is custom-made using your unique body measurements.
-                Because of this personalised process, we are unable to offer
+                Because of this personalized process, we are unable to offer
                 refunds. Please double-check your entries before placing your
                 order.
               </p>
@@ -247,7 +247,7 @@ export function FabricDetail() {
               <div className="w-full flex items-center gap-4 text-[#516278] ">
                 <input
                   type="checkbox"
-                  name="terms-and-conditions"
+                  name="no-refund-checkbox"
                   className="size-[1rem] border border-[#B9B9B9] rounded focus:outline-none cursor-pointer"
                   title="I understand and accept the no refund policy."
                 />
@@ -261,7 +261,7 @@ export function FabricDetail() {
 
           {/* Proceed */}
           <div className="w-full flex items-center justify-center gap-4">
-            <Button
+            {/* <Button
               variant="solid"
               disabled={!selectedStyle || addToCartMutation.isPending}
               onClick={handleAddToCart}
@@ -291,7 +291,14 @@ export function FabricDetail() {
                   isLoading={instantCheckoutMutation.isPending}
                 />
               </div>
-            </Button>
+            </Button> */}
+
+            <Button
+              text="Proceed"
+              variant="solid"
+              className="w-full max-w-[24rem] disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => navigate("/shop/summary")}
+            />
           </div>
         </div>
       </div>
