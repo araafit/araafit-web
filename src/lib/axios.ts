@@ -286,42 +286,42 @@ apiClient.interceptors.response.use(
           showErrorOnce(data.message || "Invalid request", {
             icon: null,
             style: notificationStyles.alertError,
-            position: "top-center",
+            position: "top-right",
           });
           break;
         case 403:
           showErrorOnce(data.message || "Access denied", {
             icon: null,
             style: notificationStyles.alertError,
-            position: "top-center",
+            position: "top-right",
           });
           break;
         case 404:
-          showErrorOnce(data.message || "Resource not found", {
+          showErrorOnce("Resource not found", {
             icon: null,
             style: notificationStyles.alertError,
-            position: "top-center",
+            position: "top-right",
           });
           break;
         case 500:
           showErrorOnce("Server error. Please try again later.", {
             icon: null,
             style: notificationStyles.alertError,
-            position: "top-center",
+            position: "top-right",
           });
           break;
         default:
           showToast.error(data.message || "An error occurred", {
             icon: null,
             style: notificationStyles.alertError,
-            position: "top-center",
+            position: "top-right",
           });
       }
     } else if (error.request && !originalRequest._retry) {
       showErrorOnce("Network error. Please check your connection.", {
         icon: null,
         style: notificationStyles.alertError,
-        position: "top-center",
+        position: "top-right",
       });
     }
 
