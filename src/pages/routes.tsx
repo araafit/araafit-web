@@ -113,7 +113,7 @@ const pagesRoutes = createBrowserRouter([
         element: <GuestFabricDetailPage />,
       },
        {
-        path: "summary",
+        path: ":fabricId/summary",
         element: <FabricRequestSummary />,
       },
     ],
