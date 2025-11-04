@@ -1,10 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import { useState } from "react";
 import { useProduct } from "../../hooks/user-dashboard.hooks";
-// import { useAddToCart } from "../../hooks/cart.hooks";
-// import { useInstantCheckout } from "../../hooks/orders.hooks";
 import Button from "../button";
-// import Spinner from "../spinner";
 import { WarningIcon, ArrowRightIcon } from "@phosphor-icons/react";
 import { formatPrice } from "../../utils/format-price";
 import LoaderView from "../../layouts/user-dashboard/loader";
@@ -13,39 +10,19 @@ import { useNavigate } from "react-router-dom";
 /* --------------------------------------------------------- */
 
 export function FabricDetail() {
+  const navigate = useNavigate();
+
   const { itemName } = useParams<{ itemName: string }>();
   const productId = itemName || "";
 
   const { data: product, isLoading, isError, error } = useProduct(productId);
-  // const addToCartMutation = useAddToCart();
-  // const instantCheckoutMutation = useInstantCheckout();
 
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
   const [selectedYards, setSelectedYards] = useState(3);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
-  const navigate = useNavigate();
+  const [noRefundAccepted, setNoRefundAccepted] = useState(false);
 
   const measurement = [6, 8, 10, 12, 14, 16, 18, 20];
-
-  /*const handleAddToCart = () => {
-    if (!product || !selectedStyle) return;
-
-    addToCartMutation.mutate({
-      productId: product.id,
-      quantity: selectedYards,
-      size: selectedSize || "One Size", // Fabric doesn't have traditional sizes
-    });
-  };
-
-  const handlePayNow = () => {
-    if (!product || !selectedStyle) return;
-
-    instantCheckoutMutation.mutate({
-      productId: product.id,
-      quantity: selectedYards,
-      size: "One Size",
-    });
-  };*/
 
   if (isLoading) {
     return (
@@ -250,6 +227,7 @@ export function FabricDetail() {
                   name="no-refund-checkbox"
                   className="size-[1rem] border border-[#B9B9B9] rounded focus:outline-none cursor-pointer"
                   title="I understand and accept the no refund policy."
+                  onClick={(e) => setNoRefundAccepted(e.currentTarget.checked)}
                 />
 
                 <label className="font-medium" htmlFor="terms-and-conditions">
@@ -261,43 +239,19 @@ export function FabricDetail() {
 
           {/* Proceed */}
           <div className="w-full flex items-center justify-center gap-4">
-            {/* <Button
-              variant="solid"
-              disabled={!selectedStyle || addToCartMutation.isPending}
-              onClick={handleAddToCart}
-              className="cursor-pointer"
-            >
-              <div className="flex items-center justify-center gap-2">
-                <span className="text-sm text-white">Add to Cart</span>
-                <Spinner
-                  size="sm"
-                  speed="fast"
-                  isLoading={addToCartMutation.isPending}
-                />
-              </div>
-            </Button>
-
-            <Button
-              variant="solid"
-              disabled={!selectedStyle || addToCartMutation.isPending}
-              onClick={handlePayNow}
-              className="cursor-pointer"
-            >
-              <div className="flex items-center justify-center gap-2">
-                <span className="text-sm text-white">Pay Now</span>
-                <Spinner
-                  size="sm"
-                  speed="fast"
-                  isLoading={instantCheckoutMutation.isPending}
-                />
-              </div>
-            </Button> */}
-
             <Button
               text="Proceed"
               variant="solid"
-              className="w-full max-w-[24rem] disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={() => navigate("/shop/summary")}
+              className="w-full max-w-[24rem] disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-opacity-50"
+              disabled={!noRefundAccepted}
+              onClick={() =>
+                navigate({
+                  pathname: `/shop/${productId}/summary`,
+                  search: `?yards=${selectedYards}&style=${
+                    selectedStyle || ""
+                  }&size=${selectedSize || ""}`,
+                })
+              }
             />
           </div>
         </div>
