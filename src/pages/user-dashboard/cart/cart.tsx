@@ -4,7 +4,7 @@ import TopBar from "../top-bar";
 import Button from "../../../shared-components/button";
 import shoppingCart from "./shopping-cart.png";
 import { useCart } from "../../../hooks/cart.hooks";
-import CartEngine from "../../../shared-components/cart-engine";
+import CartList from "../../../shared-components/cart-list";
 import { Link } from "react-router-dom";
 import { formatPrice } from "../../../utils/format-price";
 import LoaderView from "../../../layouts/user-dashboard/loader";
@@ -109,7 +109,7 @@ export function DashboardCartPage() {
               {cartIsEmpty ? (
                 emptyCart
               ) : (
-                <CartEngine
+                <CartList
                   cartData={cartItems.map((item) => ({
                     ...item,
                     image:
