@@ -52,34 +52,66 @@ export interface UpdateMeasurementsResponse {
   lastUpdated: string;
 }
 
+export interface MeasurementMe {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  deliveryAddress: string;
+  dateOfBirth: string;
+  isVerified: string;
+  phoneNumber: string | number;
+  city: string;
+  zipCode: string | null;
+  bust: number | null;
+  waist: number | null;
+  hips: number | null;
+  height: number | null;
+  dressSize: number | null;
+  chest: string | null;
+  skinTone: string | null;
+  inseam: string | number | null;
+  shoulder: number | null;
+  size: string | null;
+  gender: string | null;
+  isGuest: boolean;
+  orderCount: number;
+  createdAt: string;
+  updateAt: string;
+  isActive: boolean;
+  blockReason: string | null;
+}
+
 export const measurementsService = {
-  async getMeasurements(): Promise<MeasurementsResponse> {
-    const response = await apiClient.get<ApiResponse<MeasurementsResponse>>("/measurements/me");
+  async getMeasurements(): Promise<MeasurementMe> {
+    const response = await apiClient.get<ApiResponse<MeasurementMe>>(
+      "/measurements/me"
+    );
     return response.data.data;
   },
 
   async getMeasurementsSummary(): Promise<MeasurementsSummaryResponse> {
-    const response = await apiClient.get<ApiResponse<MeasurementsSummaryResponse>>("/measurements/me/summary");
+    const response = await apiClient.get<
+      ApiResponse<MeasurementsSummaryResponse>
+    >("/measurements/me/summary");
     return response.data.data;
   },
 
   async createMeasurements(
     data: CreateMeasurementsRequest
   ): Promise<CreateMeasurementsResponse> {
-    const response = await apiClient.post<ApiResponse<CreateMeasurementsResponse>>(
-      "/measurements",
-      data
-    );
+    const response = await apiClient.post<
+      ApiResponse<CreateMeasurementsResponse>
+    >("/measurements", data);
     return response.data.data;
   },
 
   async updateMeasurements(
     data: UpdateMeasurementsRequest
   ): Promise<UpdateMeasurementsResponse> {
-    const response = await apiClient.patch<ApiResponse<UpdateMeasurementsResponse>>(
-      "/measurements",
-      data
-    );
+    const response = await apiClient.patch<
+      ApiResponse<UpdateMeasurementsResponse>
+    >("/measurements", data);
     return response.data.data;
   },
 };
