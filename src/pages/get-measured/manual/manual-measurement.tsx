@@ -119,8 +119,6 @@ export function ManualMeasurement() {
 
     createMeasurements.mutate(selectedValues, {
       onSuccess: () => {
-        toast.success("Measurements saved! Continue shopping as guest.");
-
         if (isGuest) {
           // For guests, stay on the measurement page or redirect to continue guest flow
           toast.success("Measurements saved! Continue shopping as guest.");
