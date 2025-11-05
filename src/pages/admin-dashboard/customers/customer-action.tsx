@@ -62,16 +62,20 @@ function CustomerActions({
       if (!deleteReason.trim()) {
         return;
       }
+      
       await deleteMutation.mutateAsync({
         id: customerId,
         request: { reason: deleteReason },
       });
+
       setIsDeleteDialogOpen(false);
       setDeleteReason("");
     } catch (error) {
       // Error handled in hook
       console.log(error);
     }
+
+    console.log(customerId);
   };
 
   return (
