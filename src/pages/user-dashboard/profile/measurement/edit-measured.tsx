@@ -47,16 +47,16 @@ export function DashboardEditMeasurementPage() {
     skinTone: "",
   });
 
-  // Prefill current measurements
+  // Set pre-existing measurements
   useEffect(() => {
     if (currentMeasurements) {
       setSelectedValues({
-        bust: currentMeasurements.measurements.bust,
-        waist: currentMeasurements.measurements.waist,
-        hips: currentMeasurements.measurements.hips,
-        height: currentMeasurements.measurements.height,
-        dressSize: currentMeasurements.measurements.dressSize,
-        skinTone: currentMeasurements.measurements.skinTone,
+        bust: currentMeasurements.bust as  number,
+        waist: currentMeasurements.waist as number,
+        hips: currentMeasurements.hips as number,
+        height: currentMeasurements.height as number,
+        dressSize: currentMeasurements.dressSize as number,
+        skinTone: currentMeasurements.skinTone as string,
       });
     }
   }, [currentMeasurements]);
