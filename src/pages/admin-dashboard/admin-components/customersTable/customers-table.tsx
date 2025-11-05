@@ -116,7 +116,10 @@ const columns: ColumnDef<{
         Date Ordered <CaretUpDownIcon />
       </div>
     ),
-    cell: () => <div className="">15 May 2025 6:00 PM</div>,
+    cell: ({ row }) => {
+      const date = new Date(row.original.Date);
+      return <div>{date.toLocaleDateString()}</div>;
+    },
   },
   {
     accessorKey: "status",
