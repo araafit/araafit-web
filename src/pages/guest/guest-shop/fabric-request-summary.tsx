@@ -45,7 +45,7 @@ export function FabricRequestSummary() {
   const sewingRequest = useMakeSewingRequest();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const selectedStyle = searchParams.get("style");
   const selectedSize = searchParams.get("size");
   const selectedYards = searchParams.get("yards");
