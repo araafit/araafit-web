@@ -153,7 +153,7 @@ export function ManualMeasurement() {
         <button
           type="button"
           className="absolute top-4 md:top-[32px] left-4 md:left-[200px] w-8 h-8 md:w-[40px] md:h-[40px] rounded-md border border-[#E8E8E8] flex flex-col items-center justify-center bg-white text-neutral-800 cursor-pointer z-10 hover:bg-gray-50 transition-colors"
-          onClick={() => navigate("/get-measured")}
+          onClick={() => navigate(-1)}
           title="Go back"
         >
           <ArrowLeftIcon size={20} className="md:hidden text-neutral-800 block" />
