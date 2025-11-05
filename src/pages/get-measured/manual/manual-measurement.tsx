@@ -6,10 +6,10 @@ import {
   useCreateMeasurements,
   useMeasurements,
 } from "../../../hooks/measurements.hooks";
-import { useAuthStore } from "../../../stores/auth-store";
 import Spinner from "../../../shared-components/spinner";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import useAuth from "../../../hooks/use-auth";
 
 /* ------------------------------------------------------------- */
 
@@ -64,7 +64,7 @@ const waterMarkStyle: React.CSSProperties = {
  */
 export function ManualMeasurement() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuthStore();
+  const {isAuthenticated, isGuest } = useAuth();
 
   // API hooks
   const { data: sizeChart, isLoading: sizeChartLoading } = useSizeChart();
@@ -83,19 +83,19 @@ export function ManualMeasurement() {
 
   // Prefill existing measurements if available
   useEffect(() => {
-    if (existingMeasurements?.measurements) {
+    if (existingMeasurements) {
       setSelectedValues({
-        bust: existingMeasurements.measurements.bust,
-        waist: existingMeasurements.measurements.waist,
-        hips: existingMeasurements.measurements.hips,
-        height: existingMeasurements.measurements.height,
-        dressSize: existingMeasurements.measurements.dressSize,
-        skinTone: existingMeasurements.measurements.skinTone,
+        bust: existingMeasurements.bust as number,
+        waist: existingMeasurements.waist as number,
+        hips: existingMeasurements.hips as number,
+        height: existingMeasurements.height as number,
+        dressSize: existingMeasurements.dressSize as number,
+        skinTone: existingMeasurements.skinTone as string,
       });
     }
   }, [existingMeasurements]);
 
-  const handleValueSelect = (
+  const handleSelection = (
     type: keyof typeof selectedValues,
     value: number | string
   ) => {
@@ -111,8 +111,8 @@ export function ManualMeasurement() {
   );
 
   const saveData = async () => {
-    if (!isAuthenticated) {
-      toast.error("Please log in to save measurements");
+    if (!isAuthenticated && !isGuest) {
+      toast.error("Please log in to continue");
       navigate("/auth/login");
       return;
     }
@@ -120,16 +120,18 @@ export function ManualMeasurement() {
     createMeasurements.mutate(selectedValues, {
       onSuccess: () => {
         toast.success("Measurements saved! Continue shopping as guest.");
-        navigate("/get-measured/summary");
 
-        // if (isGuest) {
-        //   // For guests, stay on the measurement page or redirect to continue guest flow
-        //   toast.success("Measurements saved! Continue shopping as guest.");
-        //   navigate("/shop");
-        // } else {
-        //   // For authenticated users, redirect to dashboard
-        //   navigate("/dashboard/profile");
-        // }
+        if (isGuest) {
+          // For guests, stay on the measurement page or redirect to continue guest flow
+          toast.success("Measurements saved! Continue shopping as guest.");
+          navigate("/shop");
+        }
+
+        // For authenticated users, redirect to dashboard
+        if (isAuthenticated) {
+          toast.success("Measurements saved successfully!");
+          navigate("/dashboard/profile");
+        }
       },
     });
   };
@@ -138,9 +140,9 @@ export function ManualMeasurement() {
     return (
       <section className="min-h-screen bg-[#F5F5F5] px-0 py-0 md:py-2 md:px-16 overflow-y-scroll relative">
         <div className="w-full min-h-[809px] bg-white flex justify-center items-center border rounded-md p-4 md:p-14">
-          <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-0">
-            <div className="animate-spin rounded-full h-6 w-6 md:h-8 md:w-8 border-b-2 border-primary-500"></div>
-            <span className="text-sm md:text-base">Loading measurement options...</span>
+          <div className="flex flex-col md:flex-row items-center justify-center gap-2">
+            <span className="text-sm md:text-base">Loading measurement options</span>
+            <Spinner isLoading={sizeChartLoading} speed="fast" size="lg" arcColor="#9A6C50" />
           </div>
         </div>
       </section>
@@ -186,7 +188,7 @@ export function ManualMeasurement() {
                         ? "border-primary-950 bg-primary-50"
                         : ""
                     }`}
-                    onClick={() => handleValueSelect("bust", item.value)}
+                    onClick={() => handleSelection("bust", item.value)}
                   />
                 ))}
               </div>
@@ -209,7 +211,7 @@ export function ManualMeasurement() {
                         ? "border-primary-950 bg-primary-50"
                         : ""
                     }`}
-                    onClick={() => handleValueSelect("waist", item.value)}
+                    onClick={() => handleSelection("waist", item.value)}
                   />
                 ))}
               </div>
@@ -232,7 +234,7 @@ export function ManualMeasurement() {
                         ? "border-primary-950 bg-primary-50"
                         : ""
                     }`}
-                    onClick={() => handleValueSelect("hips", Number(item))}
+                    onClick={() => handleSelection("hips", Number(item))}
                   />
                 ))}
               </div>
@@ -255,7 +257,7 @@ export function ManualMeasurement() {
                         ? "border-primary-950 bg-primary-50"
                         : ""
                     }`}
-                    onClick={() => handleValueSelect("height", option.value)}
+                    onClick={() => handleSelection("height", option.value)}
                   />
                 ))}
               </div>
@@ -278,7 +280,7 @@ export function ManualMeasurement() {
                         ? "border-primary-950 bg-primary-50"
                         : ""
                     }`}
-                    onClick={() => handleValueSelect("dressSize", Number(item))}
+                    onClick={() => handleSelection("dressSize", Number(item))}
                   />
                 ))}
               </div>
@@ -299,7 +301,7 @@ export function ManualMeasurement() {
                         ? "border-neutral-700 ring-2 ring-neutral-700"
                         : "border-gray-300"
                     }`}
-                    onClick={() => handleValueSelect("skinTone", tone.name)}
+                    onClick={() => handleSelection("skinTone", tone.name)}
                   />
                 ))}
               </div>
