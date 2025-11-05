@@ -45,6 +45,7 @@ const skinTone = ["porcelin", "ivory", "sand", "espresso", "chestnut", "honey"];
 //const discountTypes = ["percentage", "fixed"];
 
 interface ProductFormData {
+  ageGroup: string;
   name: string;
   category: "dress" | "fabric";
   description: string;
@@ -71,7 +72,7 @@ export function AdminDashboardUploadInventory() {
   const {
     register,
     handleSubmit,
-    // watch,
+    watch,
     control,
     formState: { errors },
   } = useForm<ProductFormData>({
@@ -79,8 +80,11 @@ export function AdminDashboardUploadInventory() {
     defaultValues: {
       category: "dress",
       discountType: "percentage",
+      ageGroup: "adults",
     },
   });
+
+  const selectedAgeGroup = watch("ageGroup"); // Watch value to style the checked state
 
   const handlePhotosChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -97,6 +101,7 @@ export function AdminDashboardUploadInventory() {
     const payload = {
       files: contributorPhotos,
       name: data.name,
+      ageGroup: data.ageGroup,
       category: data.category,
       description: data.description,
       materialType: data.materialType,
@@ -334,12 +339,79 @@ export function AdminDashboardUploadInventory() {
                 </div>
               )}
             </div>
-            {/* Information section */}
+            {/* ----- Inventory fields ----- */}
             <div className="flex-1 max-w-[654px]">
-              {/* generals */}
+              {/* Gender selection */}
+              <div className="w-full bg-white rounded-[6px] py-6 px-4 mb-4">
+                <h2 className="mb-4 text-[1.4rem] font-semibold">
+                  Who Is This For?
+                </h2>
+
+                <div className="flex items-center gap-12">
+                  <label
+                    htmlFor="for-adult"
+                    className="cursor-pointer flex items-center"
+                  >
+                    <input
+                      type="radio"
+                      id="for-adult"
+                      className="hidden"
+                      value="adults"
+                      {...register("ageGroup")}
+                    />
+                    <div
+                      className={`border rounded-full p-1 flex items-center justify-center ${
+                        selectedAgeGroup === "adults"
+                          ? "border-primary-500"
+                          : "border-gray-300"
+                      }`}
+                    >
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          selectedAgeGroup === "adults"
+                            ? "bg-primary-500"
+                            : "bg-transparent"
+                        }`}
+                      />
+                    </div>
+                    <span className="ml-2 text-sm">For Adult</span>
+                  </label>
+
+                  <label
+                    htmlFor="for-kids"
+                    className="cursor-pointer flex items-center"
+                  >
+                    <input
+                      type="radio"
+                      id="for-kids"
+                      className="hidden"
+                      value="kids"
+                      {...register("ageGroup")}
+                    />
+                    <div
+                      className={`border rounded-full p-1 flex items-center justify-center ${
+                        selectedAgeGroup === "kids"
+                          ? "border-primary-500"
+                          : "border-gray-300"
+                      }`}
+                    >
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          selectedAgeGroup === "kids"
+                            ? "bg-primary-500"
+                            : "bg-transparent"
+                        }`}
+                      />
+                    </div>
+                    <span className="ml-2 text-sm">For Kids</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* General Information */}
               <div className="bg-white rounded-[6px] py-6 px-4">
                 <h4 className="font-semibold">General Information</h4>
-                <div className="flex gap-4 items-center mt-4">
+                <div className="flex items-center gap-4 mt-4">
                   <div className="w-[303px] ">
                     <label
                       htmlFor="name"
@@ -364,6 +436,7 @@ export function AdminDashboardUploadInventory() {
                       </p>
                     )}
                   </div>
+
                   <div className="flex-1">
                     <label
                       htmlFor="category"
@@ -410,7 +483,7 @@ export function AdminDashboardUploadInventory() {
                 </div>
               </div>
 
-              {/* Dress Info */}
+              {/* Dress Information */}
               <div className="bg-white rounded-[6px] py-6 px-4 mt-4">
                 <h4 className="font-semibold">Dress Information</h4>
                 <div className="flex gap-4 items-center mt-4">
