@@ -16,6 +16,8 @@ export interface VerifyEmailRequest {
 }
 
 export interface VerifyEmailResponse {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [name: string]: any;
   message: string;
   isSuccess: boolean;
 }
@@ -26,6 +28,8 @@ export interface VerifyOtpRequest {
 }
 
 export interface VerifyOtpResponse {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [name: string]: any;
   isSuccess: boolean;
   message: string;
 }
