@@ -4,7 +4,9 @@ import AdminDashboardLayout from "../../../layouts/admin-dashboard/dashboard-lay
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 import Profile from "./profile";
 import SizeTabs from "./size";
-import StylesTabs from "./styles";
+import StylesTabs from "./styles/styles";
+
+/* ------------------------------------------------------------------------------------------ */
 
 export function AdminDashboardSettings() {
   const title = <div className="font-lora text-[#1C1C1C]">Settings</div>;
@@ -45,7 +47,7 @@ export function AdminDashboardSettings() {
             <TabsContent value="size">
               <SizeTabs />
             </TabsContent>
-            
+
             <TabsContent value="style">
               <StylesTabs />
             </TabsContent>
