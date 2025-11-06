@@ -14,13 +14,14 @@ import { useSwitch } from "../../../shared-hooks/switch";
 import checkmark from "../checkmark.png";
 import Spinner from "../../../shared-components/spinner";
 import Button from "../../../shared-components/button";
-import { 
-  useVerifyEmail, 
-  useVerifyOtp, 
-  useRegister 
+import {
+  useVerifyEmail,
+  useVerifyOtp,
+  useRegister,
 } from "../../../hooks/auth.hooks";
 import { useAuth } from "../../../hooks/use-auth";
-/* ------------------------------------------------------------------------- */
+
+/* ------------------------------------------------------------------------------------- */
 
 export type FormValues = {
   firstName: string;
@@ -64,10 +65,10 @@ export default function Register() {
   const [currentStep, setCurrentStep] = useState(0);
   const { toggleSwitch, switchValue: isOpen } = useSwitch(false);
   const [emailVerified, setEmailVerified] = useState(false);
-  
+
   const navigate = useNavigate();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
-  
+
   // Auth mutations
   const verifyEmailMutation = useVerifyEmail();
   const verifyOtpMutation = useVerifyOtp();
@@ -92,11 +93,12 @@ export default function Register() {
   const onNext = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
 
+    // Step 1: Verify email
     if (currentStep === 0) {
-      // Step 1: Verify email
       const emailValid = await methods.trigger("email");
       if (emailValid) {
         const email = methods.getValues("email");
+
         try {
           await verifyEmailMutation.mutateAsync({ email });
           setCurrentStep(1);
@@ -104,31 +106,52 @@ export default function Register() {
           console.error("Email verification failed:", error);
         }
       }
-    } else if (currentStep === 1) {
-      // Step 2: Verify OTP
+    }
+
+    // Step 2: Verify OTP
+    if (currentStep === 1) {
       const otpValid = await methods.trigger("verificationCode");
+
       if (otpValid) {
         const email = methods.getValues("email");
         const otpArray = methods.getValues("verificationCode");
         const otp = otpArray.join("");
-        
+
         try {
-          await verifyOtpMutation.mutateAsync({ email, otp });
+          const response = await verifyOtpMutation.mutateAsync({ email, otp });
+
+          // Invalid or expired OTP
+          if (response && !response.data.isSuccess) {
+            setCurrentStep(1);
+            return;
+          }
+
           setEmailVerified(true);
           setCurrentStep(2);
         } catch (error) {
           console.error("OTP verification failed:", error);
         }
       }
-    } else if (currentStep === 2) {
-      // Step 3: Personal details (KYC)
-      const detailsValid = await methods.trigger(["firstName", "lastName", "dateOfBirth", "deliveryAddress"]);
+    }
+
+    // Step 3: Personal details (KYC)
+    if (currentStep === 2) {
+      const detailsValid = await methods.trigger([
+        "firstName",
+        "lastName",
+        "dateOfBirth",
+        "deliveryAddress",
+      ]);
       if (detailsValid) {
         setCurrentStep(3);
       }
     } else {
       // Step 4: Final registration
-      const passwordValid = await methods.trigger(["password", "confirmPassword"]);
+
+      const passwordValid = await methods.trigger([
+        "password",
+        "confirmPassword",
+      ]);
       if (passwordValid) {
         methods.handleSubmit(onSubmit)();
       }
@@ -180,33 +203,54 @@ export default function Register() {
               type="submit"
               onClick={onNext}
               className={`w-full text-white px-5 py-3 rounded-md ${
-                !methods.formState.isValid || 
-                verifyEmailMutation.isPending || 
-                verifyOtpMutation.isPending || 
-                registerMutation.isPending
-                  ? "bg-neutral-50" 
-                  : "bg-primary-500"
-              } capitalize`}
+                !methods.formState.isValid ? "bg-neutral-50" : "bg-primary-500"
+              } capitalize disabled:opacity-70`}
               disabled={
-                !methods.formState.isValid || 
-                verifyEmailMutation.isPending || 
-                verifyOtpMutation.isPending || 
+                !methods.formState.isValid ||
+                verifyEmailMutation.isPending ||
+                verifyOtpMutation.isPending ||
                 registerMutation.isPending
               }
             >
               {currentStep === formSteps.length - 1 ? (
-                <div className="flex items-center justify-center">
-                  <span>Submit</span>
-                  {registerMutation.isPending && (
-                    <Spinner size="sm" speed="fast" className="ml-1" />
-                  )}
+                <div className="flex items-center justify-center gap-1">
+                  <span
+                    className={`${
+                      registerMutation.isPending ? "hidden" : "block"
+                    }`}
+                  >
+                    Submit
+                  </span>
+                  <Spinner
+                    size="md"
+                    speed="fast"
+                    isLoading={registerMutation.isPending}
+                    className="ml-1"
+                  />
                 </div>
               ) : (
-                <div className="flex items-center justify-center">
-                  <span>Continue</span>
-                  {(verifyEmailMutation.isPending || verifyOtpMutation.isPending) && (
-                    <Spinner size="sm" speed="fast" className="ml-1" />
-                  )}
+                <div className="flex items-center justify-center gap-1">
+                  <span
+                    className={`${
+                      verifyEmailMutation.isPending ||
+                      verifyOtpMutation.isPending
+                        ? "hidden"
+                        : "block"
+                    }`}
+                  >
+                    Continue
+                  </span>
+
+                  <Spinner
+                    size="md"
+                    speed="fast"
+                    isLoading={
+                      verifyEmailMutation.isPending ||
+                      verifyOtpMutation.isPending
+                    }
+                    arcColor="#9A6C50"
+                    className="ml-1"
+                  />
                 </div>
               )}
             </button>
