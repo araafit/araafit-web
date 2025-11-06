@@ -14,6 +14,10 @@ import {
 } from "../services/auth.service";
 import { useAuthStore } from "../stores/auth-store";
 import { tokenUtils } from "../lib/utils";
+import showToast from "../utils/notification";
+import { notificationStyles } from "../style/custom";
+
+/* ---------------------------------------------------------------------------------- */
 
 // Query keys
 export const authKeys = {
@@ -49,15 +53,18 @@ export const useVerifyEmail = () => {
   return useMutation({
     mutationFn: (data: VerifyEmailRequest) => authService.verifyEmail(data),
     onSuccess: (data) => {
-      if (data.isSuccess) {
-        toast.success(data.message);
+      if (data.data.isSuccess) {
+        showToast.success(
+          data.message || "Sent! Check your email for an OTP code",
+          { icon: null, style: notificationStyles.alertSuccess }
+        );
       } else {
-        toast.error(data.message);
+        showToast.error(data.message, { icon: null, style: notificationStyles.alertError });
       }
     },
     onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message || "Failed to send verification email"
+      showToast.error(
+        error.response?.data?.message || "Failed to send verification email", { icon: null, style: notificationStyles.alertError }
       );
     },
   });
@@ -68,14 +75,14 @@ export const useVerifyOtp = () => {
   return useMutation({
     mutationFn: (data: VerifyOtpRequest) => authService.verifyOtp(data),
     onSuccess: (data) => {
-      if (data.isSuccess) {
-        toast.success(data.message);
+      if (data.data.isSuccess) {
+        showToast.success(data.message, {icon: null, style: notificationStyles.alertSuccess, duration: 10000});
       } else {
-        toast.error(data.message);
+        showToast.error(data.message || "OTP is expired or invalid", {icon: null, style: notificationStyles.alertError, duration: 10000});
       }
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Failed to verify OTP");
+      showToast.error(error.response?.data?.message || "Failed to verify OTP", {icon: null, style: notificationStyles.alertError});
     },
   });
 };
@@ -216,7 +223,7 @@ export const useLogout = () => {
       // Even if logout fails on server, clear local state
       logout();
       queryClient.clear();
-      
+
       if (isGuest) {
         toast.success("Guest session ended");
       } else {
