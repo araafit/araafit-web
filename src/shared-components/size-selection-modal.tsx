@@ -2,6 +2,7 @@ import { useState } from "react";
 import { XIcon } from "@phosphor-icons/react";
 import Button from "./button";
 import Modal from "./modal";
+import Spinner from "./spinner";
 
 /* --------------------------------------------------------------------------- */
 
@@ -48,31 +49,32 @@ export default function SizeSelectionModal({
   const label = productCategory === "dress" ? "Select Size" : "Select Yards";
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} containerClassName="w-full max-w-md">
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      containerClassName="w-full max-w-md"
+    >
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-900">Add to Cart</h2>
           <button
             onClick={handleClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
+            title="close modal"
           >
             <XIcon className="size-6" />
           </button>
         </div>
 
         <div className="flex flex-col gap-2">
-          <p className="text-sm text-gray-600">
-            {productName}
-          </p>
+          <p className="text-sm text-gray-600">{productName}</p>
           <p className="text-xs text-gray-500">
             {label} to add this {productCategory} to your cart
           </p>
         </div>
 
         <div className="flex flex-col gap-3">
-          <label className="text-sm font-medium text-gray-700">
-            {label}
-          </label>
+          <label className="text-sm font-medium text-gray-700">{label}</label>
           <div className="grid grid-cols-3 gap-2">
             {options.map((option) => (
               <button
@@ -85,7 +87,8 @@ export default function SizeSelectionModal({
                 }`}
               >
                 {option}
-                {productCategory === "fabric" && (option === "1" ? " yard" : " yards")}
+                {productCategory === "fabric" &&
+                  (option === "1" ? " yard" : " yards")}
               </button>
             ))}
           </div>
@@ -99,21 +102,20 @@ export default function SizeSelectionModal({
             onClick={handleClose}
             disabled={isLoading}
           />
+
           <Button
-            text="Add to Cart"
             variant="solid"
             className="flex-1"
             onClick={handleConfirm}
             disabled={!selectedSize || isLoading}
           >
-            {isLoading ? (
-              <div className="flex items-center justify-center gap-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Adding...
-              </div>
-            ) : (
-              <div />
-            )}
+            <div className="flex items-center justify-center gap-1">
+              <span className={`${isLoading ? "hidden" : "block"}`}>
+                Add to cart
+              </span>
+
+              <Spinner isLoading={isLoading} size="sm" />
+            </div>
           </Button>
         </div>
       </div>
