@@ -45,7 +45,7 @@ const skinTone = ["porcelin", "ivory", "sand", "espresso", "chestnut", "honey"];
 //const discountTypes = ["percentage", "fixed"];
 
 interface ProductFormData {
-  ageGroup: string;
+  gender: "men" | "women" | "kids";
   name: string;
   category: "dress" | "fabric";
   description: string;
@@ -80,11 +80,11 @@ export function AdminDashboardUploadInventory() {
     defaultValues: {
       category: "dress",
       discountType: "percentage",
-      ageGroup: "adults",
+      gender:"men"
     },
   });
 
-  const selectedAgeGroup = watch("ageGroup"); // Watch value to style the checked state
+  const selectedGender = watch("gender"); // Watch value to style the checked state
 
   const handlePhotosChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -101,7 +101,7 @@ export function AdminDashboardUploadInventory() {
     const payload = {
       files: contributorPhotos,
       name: data.name,
-      ageGroup: data.ageGroup,
+      ageGroup: data.gender,
       category: data.category,
       description: data.description,
       materialType: data.materialType,
@@ -349,32 +349,61 @@ export function AdminDashboardUploadInventory() {
 
                 <div className="flex items-center gap-12">
                   <label
-                    htmlFor="for-adult"
+                    htmlFor="for-men"
                     className="cursor-pointer flex items-center"
                   >
                     <input
                       type="radio"
-                      id="for-adult"
+                      id="for-men"
                       className="hidden"
-                      value="adults"
-                      {...register("ageGroup")}
+                      value="men"
+                      {...register("gender")}
                     />
                     <div
                       className={`border rounded-full p-1 flex items-center justify-center ${
-                        selectedAgeGroup === "adults"
+                        selectedGender === "men"
                           ? "border-primary-500"
                           : "border-gray-300"
                       }`}
                     >
                       <div
                         className={`w-2 h-2 rounded-full ${
-                          selectedAgeGroup === "adults"
+                          selectedGender === "men"
                             ? "bg-primary-500"
                             : "bg-transparent"
                         }`}
                       />
                     </div>
-                    <span className="ml-2 text-sm">For Adult</span>
+                    <span className="ml-2 text-sm">For Men</span>
+                  </label>
+
+                  <label
+                    htmlFor="for-women"
+                    className="cursor-pointer flex items-center"
+                  >
+                    <input
+                      type="radio"
+                      id="for-women"
+                      className="hidden"
+                      value="female"
+                      {...register("gender")}
+                    />
+                    <div
+                      className={`border rounded-full p-1 flex items-center justify-center ${
+                        selectedGender === "women"
+                          ? "border-primary-500"
+                          : "border-gray-300"
+                      }`}
+                    >
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          selectedGender === "women"
+                            ? "bg-primary-500"
+                            : "bg-transparent"
+                        }`}
+                      />
+                    </div>
+                    <span className="ml-2 text-sm">For Women</span>
                   </label>
 
                   <label
@@ -386,18 +415,18 @@ export function AdminDashboardUploadInventory() {
                       id="for-kids"
                       className="hidden"
                       value="kids"
-                      {...register("ageGroup")}
+                      {...register("gender")}
                     />
                     <div
                       className={`border rounded-full p-1 flex items-center justify-center ${
-                        selectedAgeGroup === "kids"
+                        selectedGender === "kids"
                           ? "border-primary-500"
                           : "border-gray-300"
                       }`}
                     >
                       <div
                         className={`w-2 h-2 rounded-full ${
-                          selectedAgeGroup === "kids"
+                          selectedGender === "kids"
                             ? "bg-primary-500"
                             : "bg-transparent"
                         }`}
