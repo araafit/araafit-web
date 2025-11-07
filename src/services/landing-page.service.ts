@@ -37,7 +37,7 @@ class LandingPageService {
   async claimDiscount(): Promise<DiscountObjType> {
     const response = await apiClient.post<
       ApiResponse<DiscountObjType> | DiscountObjType
-    >("/discount/claim");
+    >("/discounts/claim");
 
     const data = response.data as DiscountObjType;
 
