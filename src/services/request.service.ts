@@ -86,7 +86,7 @@ class FabricRequestService {
 
   async makeSewingRequest(payload: SewingRequest) {
     const response = await apiClient.post<ApiResponse<SewingRequestResponse>>(
-      "/sewing-requests",
+      "/sewing-requests/checkout",
       payload
     );
 
