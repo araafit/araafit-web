@@ -45,7 +45,7 @@ const skinTone = ["porcelin", "ivory", "sand", "espresso", "chestnut", "honey"];
 //const discountTypes = ["percentage", "fixed"];
 
 interface ProductFormData {
-  gender: "men" | "women" | "kids";
+  audience: "men" | "women" | "kids";
   name: string;
   category: "dress" | "fabric";
   description: string;
@@ -84,7 +84,7 @@ export function AdminDashboardUploadInventory() {
     },
   });
 
-  const selectedGender = watch("gender"); // Watch value to style the checked state
+  const selectedAudience = watch("audience"); // Watch value to style the checked state
 
   const handlePhotosChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -357,18 +357,18 @@ export function AdminDashboardUploadInventory() {
                       id="for-men"
                       className="hidden"
                       value="men"
-                      {...register("gender")}
+                      {...register("audience")}
                     />
                     <div
                       className={`border rounded-full p-1 flex items-center justify-center ${
-                        selectedGender === "men"
+                        selectedAudience === "men"
                           ? "border-primary-500"
                           : "border-gray-300"
                       }`}
                     >
                       <div
                         className={`w-2 h-2 rounded-full ${
-                          selectedGender === "men"
+                          selectedAudience === "men"
                             ? "bg-primary-500"
                             : "bg-transparent"
                         }`}
@@ -386,18 +386,18 @@ export function AdminDashboardUploadInventory() {
                       id="for-women"
                       className="hidden"
                       value="female"
-                      {...register("gender")}
+                      {...register("audience")}
                     />
                     <div
                       className={`border rounded-full p-1 flex items-center justify-center ${
-                        selectedGender === "women"
+                        selectedAudience === "women"
                           ? "border-primary-500"
                           : "border-gray-300"
                       }`}
                     >
                       <div
                         className={`w-2 h-2 rounded-full ${
-                          selectedGender === "women"
+                          selectedAudience === "women"
                             ? "bg-primary-500"
                             : "bg-transparent"
                         }`}
@@ -415,18 +415,18 @@ export function AdminDashboardUploadInventory() {
                       id="for-kids"
                       className="hidden"
                       value="kids"
-                      {...register("gender")}
+                      {...register("audience")}
                     />
                     <div
                       className={`border rounded-full p-1 flex items-center justify-center ${
-                        selectedGender === "kids"
+                        selectedAudience === "kids"
                           ? "border-primary-500"
                           : "border-gray-300"
                       }`}
                     >
                       <div
                         className={`w-2 h-2 rounded-full ${
-                          selectedGender === "kids"
+                          selectedAudience === "kids"
                             ? "bg-primary-500"
                             : "bg-transparent"
                         }`}
