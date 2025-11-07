@@ -2,10 +2,11 @@ import { memo, useState } from "react";
 import { ShoppingCartSimpleIcon } from "@phosphor-icons/react";
 import { CN } from "../utils/class-merge";
 import { formatPrice } from "../utils/format-price";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAddToCart } from "../hooks/cart.hooks";
 import SizeSelectionModal from "./size-selection-modal";
 import type { Product } from "../services/products.service";
+import Button from "./button";
 
 /* --------------------------------------------------------------------- */
 
@@ -36,6 +37,7 @@ function Card({
 }: Card) {
   const [showSizeModal, setShowSizeModal] = useState(false);
   const addToCartMutation = useAddToCart();
+  const navigate = useNavigate();
 
   // Handle add to cart click
   const handleAddToCart = () => {
@@ -73,7 +75,7 @@ function Card({
         <div className="rounded-b-md border border-neutral-100 py-2 px-3">
           <div className="font-light text-neutral-700 mb-2">{itemName}</div>
 
-          <div className="w-full flex items-center justify-between xl:flex-col xl:items-start">
+          <div className="w-full flex flex-col md:flex-row md:items-center md:justify-between gap-2">
             <span className="text-neutral-900 font-semibold leading-araafit sm:block">
               ₦{formatPrice(Number(itemCost))}
               {product?.category === "fabric" && (
@@ -82,7 +84,14 @@ function Card({
             </span>
 
             {/* Can only make sewing request if item is fabric */}
-            {addToCart ? (
+            {product && product.category === "fabric" ? (
+              <Button
+                text="Make request"
+                variant="outline"
+                className="md:h-8 md:p-2 md:text-sm md:flex items-center justify-center"
+                onClick={() => navigate(link as string)}
+              />
+            ) : (
               <ShoppingCartSimpleIcon
                 className={`size-[20px] cursor-pointer transition-colors ${
                   addToCartMutation.isPending
@@ -93,10 +102,6 @@ function Card({
                   addToCartMutation.isPending ? undefined : handleAddToCart
                 }
               />
-            ) : (
-              <span className="text-sm text-neutral-700">
-                Click to make sewing request
-              </span>
             )}
           </div>
         </div>
@@ -108,6 +113,8 @@ function Card({
           />
         )}
       </div>
+
+      {product?.category === "fabric" ? <></> : <></>}
 
       {/* Size Selection Modal */}
       {product && (
