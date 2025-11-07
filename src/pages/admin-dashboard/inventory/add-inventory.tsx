@@ -80,7 +80,7 @@ export function AdminDashboardUploadInventory() {
     defaultValues: {
       category: "dress",
       discountType: "percentage",
-      gender:"men"
+      audience:"men"
     },
   });
 
@@ -101,7 +101,7 @@ export function AdminDashboardUploadInventory() {
     const payload = {
       files: contributorPhotos,
       name: data.name,
-      ageGroup: data.gender,
+      ageGroup: data.audience,
       category: data.category,
       description: data.description,
       materialType: data.materialType,
