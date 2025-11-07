@@ -38,7 +38,7 @@ import { Switch } from "../../ui/switch";
 import NotificationBell from "../admin-components/top-bar/notification-bell";
 import TopBar from "../admin-components/top-bar/top-bar";
 
-/* -------------------------------------------------------------------------------------------------- */
+/* ---------------------------------------------------------------------------------------------------- */
 
 const skinTone = ["porcelin", "ivory", "sand", "espresso", "chestnut", "honey"];
 //const categories = ["dress", "fabric"];
