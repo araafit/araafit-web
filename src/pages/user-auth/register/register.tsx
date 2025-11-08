@@ -65,7 +65,6 @@ export default function Register() {
   const [currentStep, setCurrentStep] = useState(0);
   const { toggleSwitch, switchValue: isOpen } = useSwitch(false);
   const [emailVerified, setEmailVerified] = useState(false);
-
   const navigate = useNavigate();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
 
@@ -193,7 +192,7 @@ export default function Register() {
         title={formSteps[currentFormStep].title}
         description={formSteps[currentFormStep].caption}
         googleAutBtnText={formSteps[currentFormStep].googleAutBtnText}
-        googleAuthTrigger={formSteps[currentFormStep].googleAuthTrigger}
+        // googleAuthTrigger={googleLogin}
       >
         <>
           <form className="w-full flex flex-col gap-6">
