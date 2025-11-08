@@ -34,6 +34,30 @@ export interface VerifyOtpResponse {
   message: string;
 }
 
+export interface GoogleAuthRequest {
+  idToken: string;
+  measurement?: {
+    gender?: string;
+    bust: number;
+    waist: number;
+    hips: number;
+    height: number;
+    dressSize?: number;
+    size?: string;
+    skinTone: string;
+  };
+}
+
+export interface GoogleAuthResponse {
+  user: User;
+  tokens: {
+    access_token: string;
+    refresh_token: string;
+    expires_in: number;
+    token_type: string;
+  };
+}
+
 export interface RegisterRequest {
   email: string;
   firstName: string;
@@ -134,6 +158,21 @@ export interface ResetPasswordResponse {
 
 // Auth Service Class
 class AuthService {
+  /**
+   *  O-auth registration with Google
+   */
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async googleAuth(payload?: GoogleAuthRequest): Promise<GoogleAuthResponse> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const response = await apiClient.post<ApiResponse<GoogleAuthResponse>>(
+      "/auth/google-auth",
+      { payload }
+    );
+
+    return response.data.data;
+  }
+
   /**
    * Send OTP to email for verification
    */
