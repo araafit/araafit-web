@@ -1,5 +1,6 @@
 import React from "react";
-import googleIcon from "./google-icon-image.png";
+import { GoogleLogin } from "@react-oauth/google";
+import authService from "../../services/auth.service";
 
 /* -------------------------------------- */
 
@@ -9,6 +10,24 @@ type AuthLayoutType = {
   googleAutBtnText?: string;
   googleAuthTrigger?: () => void;
   children: React.ReactElement;
+};
+
+const googleAuthSuccess = async (credentialResponse) => {
+  const idToken = credentialResponse.credential;
+
+  // Send to your backend
+  try {
+    const response = await authService.googleAuth(idToken);
+
+    console.log("Backend response:", response);
+    // Handle login success (save tokens, redirect, etc.)
+  } catch (error) {
+    console.error("Login failed:", error);
+  }
+};
+
+const googleAuthError = () => {
+  console.log("Login Failed");
 };
 
 /**
@@ -21,7 +40,6 @@ export default function AuthLayout({
   title,
   description,
   googleAutBtnText,
-  googleAuthTrigger,
   children,
 }: AuthLayoutType) {
   return (
@@ -36,7 +54,7 @@ export default function AuthLayout({
               {description}
             </p>
 
-            {googleAutBtnText && (
+            {/* {googleAutBtnText && (
               <button
                 type="button"
                 className="w-full border-[1.5px] border-danger-500 flex items-center justify-center gap-4 p-4 rounded-md"
@@ -52,7 +70,15 @@ export default function AuthLayout({
                   {googleAutBtnText}
                 </span>
               </button>
-            )}
+            )} */}
+
+            <GoogleLogin
+              onSuccess={googleAuthSuccess}
+              onError={googleAuthError}
+              useOneTap
+              width="300"
+              text="signup_with"
+            />
           </div>
 
           {googleAutBtnText && (
