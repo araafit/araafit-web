@@ -16,6 +16,7 @@ import { useAuthStore } from "../stores/auth-store";
 import { tokenUtils } from "../lib/utils";
 import showToast from "../utils/notification";
 import { notificationStyles } from "../style/custom";
+import type { GoogleAuthRequest } from "../services/auth.service";
 
 /* ---------------------------------------------------------------------------------- */
 
@@ -24,6 +25,35 @@ export const authKeys = {
   all: ["auth"] as const,
   profile: () => [...authKeys.all, "profile"] as const,
 } as const;
+
+
+/* Google Auth */ 
+
+export const useGoogleAuth = () => {
+  const { setUser, setTokens } = useAuthStore();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (token: GoogleAuthRequest) => authService.googleAuth(token),
+    onSuccess: (data) => {
+      setTokens({
+        access_token: data.tokens.access_token,
+        refresh_token: data.tokens.refresh_token,
+        expires_in: data.tokens.expires_in,
+        token_type: data.tokens.token_type,
+      });
+      setUser(data.user);
+
+      // Cache the user profile
+      queryClient.setQueryData(authKeys.profile(), data.user);
+
+      toast.success("Logged in with Google successfully");
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Google authentication failed");
+    },
+  });
+}
 
 // Get Profile Query
 export const useGetProfile = () => {
