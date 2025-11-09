@@ -3,18 +3,18 @@ import { useCardState } from "../../shared-hooks/state-store";
 import { useSwitch } from "../../shared-hooks/switch";
 import Button from "../button";
 import Modal from "../modal";
-import Spinner from "../spinner";
+// import Spinner from "../spinner";
 import BillingCardForm from "../../pages/user-dashboard/billing-card-form";
 import BillingCardList from "../../pages/user-dashboard/billing-card-list";
 import { checkMark } from "../../shared-images/image-entry";
 import { paymentWallet } from "../../shared-images/image-entry";
 import { useNavigate } from "react-router-dom";
-import { useCheckout } from "../../hooks/orders.hooks";
+// import { useCheckout } from "../../hooks/orders.hooks";
 import { useCart } from "../../hooks/cart.hooks";
 import { formatPrice } from "../../utils/format-price";
 import { useCards } from "../../hooks/cards.hooks";
 
-/* ----------------------------------------------------------- */
+/* ---------------------------------------------------------------------------------- */
 
 /**
  * Checkout payment information component
@@ -35,7 +35,7 @@ export default function CheckoutPaymentInfo({
     toggleSwitch: completedPaymentModalToggle,
     switchValue: completedPaymentModalToggleValue,
   } = useSwitch();
-  const checkoutMutation = useCheckout();
+  // const checkoutMutation = useCheckout();
 
   const currentBillingCardCount = useRef(billingCards.length);
 
@@ -57,21 +57,21 @@ export default function CheckoutPaymentInfo({
     }, 500);
   }
 
-  const paymentHandler = async () => {
+  /*const paymentHandler = async () => {
     // Use the real checkout API instead of fake timeout
     checkoutMutation.mutate();
-  };
+  };*/
 
   const noBilling = cards.length === 0 && (
     <div className="w-full flex flex-col items-center justify-center gap-2">
       <img src={paymentWallet} alt="" className="size-[200px]" />
 
-      <p className="font-light text-center text-neutral-500">
+      {/* <p className="font-light text-center text-neutral-500">
         you have not added a payment option.
-      </p>
+      </p> */}
 
       <Button
-        text="Add card"
+        text="Pay Now"
         variant="solid"
         className="w-full max-w-[175px]"
         onClick={toggleSwitch}
@@ -89,7 +89,7 @@ export default function CheckoutPaymentInfo({
 
       {cards.length > 0 && <BillingCardList />}
 
-      <div className="w-full flex items-center justify-center py-[2.5rem] px-[1.5rem] border-t border-[#E8E8E8] mt-1">
+      {/* <div className="w-full flex items-center justify-center py-[2.5rem] px-[1.5rem] border-t border-[#E8E8E8] mt-1">
         <Button
           type="submit"
           variant="solid"
@@ -108,7 +108,7 @@ export default function CheckoutPaymentInfo({
             />
           </div>
         </Button>
-      </div>
+      </div> */}
 
       {/* Billing form */}
       <Modal
