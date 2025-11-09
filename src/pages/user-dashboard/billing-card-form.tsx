@@ -285,7 +285,7 @@ export default function BillingCardForm({
         </div>
 
         <div className="w-full flex flex-col gap-1">
-          <div>
+          {/* <div>
             <input
               type="checkbox"
               {...register("saveCard")}
@@ -295,12 +295,12 @@ export default function BillingCardForm({
             <label htmlFor="saveCard" className="font-light">
               Save this for future use
             </label>
-          </div>
+          </div> */}
 
           <Button
             type="submit"
             variant="solid"
-            className={`w-full disabled:bg-neutral-100 disabled:cursor-not-allowed`}
+            className={`w-full disabled:opacity-70 disabled:cursor-not-allowed`}
             disabled={
               !isValid ||
               tokenizeCardMutation.isPending ||
@@ -308,17 +308,19 @@ export default function BillingCardForm({
             }
           >
             <div className="flex items-center justify-center gap-1">
-              <span>
-                {tokenizeCardMutation.isPending ||
-                checkoutWithCardMutation.isPending
-                  ? "Processing..."
-                  : checkoutInfo
-                  ? "Pay Now"
-                  : "Add card"}
-              </span>
+              <span>Pay Now</span>
+
               {(tokenizeCardMutation.isPending ||
                 checkoutWithCardMutation.isPending) && (
-                <Spinner size="sm" speed="fast" />
+                <Spinner
+                  size="sm"
+                  speed="fast"
+                  isLoading={
+                    tokenizeCardMutation.isPending ||
+                    checkoutWithCardMutation.isPending
+                  }
+                  arcColor="#9a6c50"
+                />
               )}
             </div>
           </Button>
