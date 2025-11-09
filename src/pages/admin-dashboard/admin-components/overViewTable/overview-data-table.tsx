@@ -7,16 +7,25 @@ import {
   TableRow,
 } from "../../../ui/table";
 import { useAdminRecentActivities } from "../../../../hooks/admin-dashboard.hooks";
-import { formatCurrency, formatDate } from "../../../../utils/admin-dashboard-utils";
+import {
+  formatCurrency,
+  formatDate,
+} from "../../../../utils/admin-dashboard-utils";
 import Spinner from "../../../../shared-components/spinner";
 
+/* ------------------------------------------------------------------------------------------------ */
+
 export function OverviewTable() {
-  const { data: recentActivities, isLoading, error } = useAdminRecentActivities();
+  const {
+    data: recentActivities,
+    isLoading,
+    error,
+  } = useAdminRecentActivities();
 
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-32">
-        <Spinner size="lg" speed="fast" />
+        <Spinner size="md" speed="fast" arcColor="#9a6c50" />
       </div>
     );
   }
@@ -24,7 +33,13 @@ export function OverviewTable() {
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-md p-4">
-        <p className="text-red-600">Failed to load recent activities. Please try again.</p>
+        <p className="text-red-600">
+          Unable load recent activities. Click{" "}
+          <span className="underline" onClick={() => window.location.reload()}>
+            here
+          </span>{" "}
+          to reload.
+        </p>
       </div>
     );
   }
@@ -66,16 +81,20 @@ export function OverviewTable() {
                   className={`border-0  h-20 text-sm font-inter text-[#4F4F4F] font-light  ${
                     idx % 2 === 0 ? "bg-[#F9FAFB]" : "bg-white"
                   }`}
-                > 
+                >
                   <TableCell className="pl-6">
                     {activity.customerName}
                   </TableCell>
                   <TableCell>{activity.activityType}</TableCell>
                   <TableCell>{formatCurrency(activity.amountSpent)}</TableCell>
-                  <TableCell className="">{formatDate(activity.dateTime)}</TableCell>
+                  <TableCell className="">
+                    {formatDate(activity.dateTime)}
+                  </TableCell>
                   <TableCell className="tt">
                     <button
-                      onClick={() => window.open(`/admin-dashboard${activity.detailsUrl}`, '_blank')}
+                      onClick={() =>
+                        window.open(`/admin-dashboard${activity.detailsUrl}`)
+                      }
                       className="text-[#9A6C50] hover:text-[#7A5C40] transition-colors"
                     >
                       View Details
