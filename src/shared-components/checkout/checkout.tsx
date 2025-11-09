@@ -24,8 +24,7 @@ function CartCheckout() {
     return (
       <div className="size-full flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <Spinner size="lg" />
-          <p className="text-gray-600">Loading checkout...</p>
+          <Spinner size="lg" arcColor="#9a6c50" isLoading={isLoading} />
         </div>
       </div>
     );
@@ -37,7 +36,7 @@ function CartCheckout() {
       <div className="size-full flex items-center justify-center">
         <div className="flex flex-col items-center gap-4 text-center">
           <p className="text-red-600">
-            {isError ? "Error loading cart" : "Your cart is empty"}
+            {isError ? "Unable to load cart" : "Your cart is empty"}
           </p>
           <p className="text-gray-600">
             {isError

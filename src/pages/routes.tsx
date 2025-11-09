@@ -218,11 +218,11 @@ const pagesRoutes = createBrowserRouter([
       {
         path: "overview",
         element: <AdminDashboardOverview />,
+        index: true,
       },
       {
         path: "/admin-dashboard/overview/recent-activity",
         element: <AdminDashboardRecentActivities />,
-        // index: true,
       },
       {
         path: "order-management",
