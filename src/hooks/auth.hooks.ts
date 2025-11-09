@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "react-hot-toast";
 import {
   authService,
   type VerifyEmailRequest,
@@ -26,9 +25,7 @@ export const authKeys = {
   profile: () => [...authKeys.all, "profile"] as const,
 } as const;
 
-
-/* Google Auth */ 
-
+/* Google Auth */
 export const useGoogleAuth = () => {
   const { setUser, setTokens } = useAuthStore();
   const queryClient = useQueryClient();
@@ -47,13 +44,23 @@ export const useGoogleAuth = () => {
       // Cache the user profile
       queryClient.setQueryData(authKeys.profile(), data.user);
 
-      toast.success("Logged in with Google successfully");
+      showToast.success("Logged in with Google successfully", {
+        icon: null,
+        style: notificationStyles.alertSuccess,
+      });
+
+      setTimeout(() => {
+        window.location.href = "/dashboard";
+      }, 1000);
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Google authentication failed");
+      showToast.error(
+        error.response?.data?.message || "Google authentication failed",
+        { icon: null, style: notificationStyles.alertError }
+      );
     },
   });
-}
+};
 
 // Get Profile Query
 export const useGetProfile = () => {
@@ -89,12 +96,16 @@ export const useVerifyEmail = () => {
           { icon: null, style: notificationStyles.alertSuccess }
         );
       } else {
-        showToast.error(data.message, { icon: null, style: notificationStyles.alertError });
+        showToast.error(data.message, {
+          icon: null,
+          style: notificationStyles.alertError,
+        });
       }
     },
     onError: (error: any) => {
       showToast.error(
-        error.response?.data?.message || "Failed to send verification email", { icon: null, style: notificationStyles.alertError }
+        error.response?.data?.message || "Failed to send verification email",
+        { icon: null, style: notificationStyles.alertError }
       );
     },
   });
@@ -106,13 +117,24 @@ export const useVerifyOtp = () => {
     mutationFn: (data: VerifyOtpRequest) => authService.verifyOtp(data),
     onSuccess: (data) => {
       if (data.data.isSuccess) {
-        showToast.success(data.message, {icon: null, style: notificationStyles.alertSuccess, duration: 10000});
+        showToast.success(data.message, {
+          icon: null,
+          style: notificationStyles.alertSuccess,
+          duration: 10000,
+        });
       } else {
-        showToast.error(data.message || "OTP is expired or invalid", {icon: null, style: notificationStyles.alertError, duration: 10000});
+        showToast.error(data.message || "OTP is expired or invalid", {
+          icon: null,
+          style: notificationStyles.alertError,
+          duration: 10000,
+        });
       }
     },
     onError: (error: any) => {
-      showToast.error(error.response?.data?.message || "Failed to verify OTP", {icon: null, style: notificationStyles.alertError});
+      showToast.error(error.response?.data?.message || "Failed to verify OTP", {
+        icon: null,
+        style: notificationStyles.alertError,
+      });
     },
   });
 };
@@ -137,10 +159,16 @@ export const useRegister = () => {
       // Cache the user profile
       queryClient.setQueryData(authKeys.profile(), data.user);
 
-      toast.success(data.message);
+      showToast.success(data.message, {
+        icon: null,
+        style: notificationStyles.alertSuccess,
+      });
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Registration failed");
+      showToast.error(error.response?.data?.message || "Registration failed", {
+        icon: null,
+        style: notificationStyles.alertError,
+      });
     },
   });
 };
@@ -154,11 +182,18 @@ export const useCreateGuestUser = () => {
     onSuccess: (data) => {
       setGuestToken(data.token);
       setUser(data.user);
-      toast.success(data.message);
+      showToast.success(data.message, {
+        icon: null,
+        style: notificationStyles.alertSuccess,
+      });
     },
     onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message || "Failed to create guest user"
+      showToast.error(
+        error.response?.data?.message || "Failed to create guest user",
+        {
+          icon: null,
+          style: notificationStyles.alertError,
+        }
       );
     },
   });
@@ -187,11 +222,18 @@ export const useCompleteRegistration = () => {
       // Cache the user profile
       queryClient.setQueryData(authKeys.profile(), data.user);
 
-      toast.success(data.message);
+      showToast.success(data.message, {
+        icon: null,
+        style: notificationStyles.alertSuccess,
+      });
     },
     onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message || "Failed to complete registration"
+      showToast.error(
+        error.response?.data?.message || "Failed to complete registration",
+        {
+          icon: null,
+          style: notificationStyles.alertError,
+        }
       );
     },
   });
@@ -217,10 +259,16 @@ export const useLogin = () => {
       // Cache the user profile
       queryClient.setQueryData(authKeys.profile(), data.user);
 
-      toast.success(data.message || "Logged in successfully");
+      showToast.success(data.message || "Logged in successfully", {
+        icon: null,
+        style: notificationStyles.alertSuccess,
+      });
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Login failed");
+      showToast.error(error.response?.data?.message || "Login failed", {
+        icon: null,
+        style: notificationStyles.alertError,
+      });
     },
   });
 };
@@ -247,7 +295,10 @@ export const useLogout = () => {
     onSuccess: (data) => {
       logout();
       queryClient.clear(); // Clear all cached data
-      toast.success(data.message || "Logged out successfully");
+      showToast.success(data.message || "Logged out successfully", {
+        icon: null,
+        style: notificationStyles.alertSuccess,
+      });
     },
     onError: (error: any) => {
       // Even if logout fails on server, clear local state
@@ -255,9 +306,15 @@ export const useLogout = () => {
       queryClient.clear();
 
       if (isGuest) {
-        toast.success("Guest session ended");
+        showToast.success("Guest session ended", {
+          icon: null,
+          style: notificationStyles.alertSuccess,
+        });
       } else {
-        toast.error(error.response?.data?.message || "Logout failed");
+        showToast.error(error.response?.data?.message || "Logout failed", {
+          icon: null,
+          style: notificationStyles.alertError,
+        });
       }
     },
   });
@@ -270,14 +327,24 @@ export const useForgotPassword = () => {
       authService.forgotPassword(data),
     onSuccess: (data) => {
       if (data.isSuccess) {
-        toast.success(data.message);
+        showToast.success(data.message, {
+          icon: null,
+          style: notificationStyles.alertSuccess,
+        });
       } else {
-        toast.error(data.message);
+        showToast.error(data.message, {
+          icon: null,
+          style: notificationStyles.alertError,
+        });
       }
     },
     onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message || "Failed to send reset email"
+      showToast.error(
+        error.response?.data?.message || "Failed to send reset email",
+        {
+          icon: null,
+          style: notificationStyles.alertError,
+        }
       );
     },
   });
@@ -289,13 +356,25 @@ export const useResetPassword = () => {
     mutationFn: (data: ResetPasswordRequest) => authService.resetPassword(data),
     onSuccess: (data) => {
       if (data.isSuccess) {
-        toast.success(data.message);
+        showToast.success(data.message, {
+          icon: null,
+          style: notificationStyles.alertSuccess,
+        });
       } else {
-        toast.error(data.message);
+        showToast.error(data.message, {
+          icon: null,
+          style: notificationStyles.alertError,
+        });
       }
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Failed to reset password");
+      showToast.error(
+        error.response?.data?.message || "Failed to reset password",
+        {
+          icon: null,
+          style: notificationStyles.alertError,
+        }
+      );
     },
   });
 };
