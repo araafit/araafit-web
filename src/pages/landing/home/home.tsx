@@ -261,7 +261,7 @@ export function HomePage() {
                   type="button"
                   variant="solid"
                   className="w-full max-w-[185px]"
-                  onClick={() => navigate("/shop")}
+                  onClick={() => navigate("/shop?explore=fabric")}
                 >
                   <div className="flex items-center gap-2">
                     <span>Explore fabric</span>
