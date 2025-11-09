@@ -66,7 +66,7 @@ export function OverviewTable() {
                   className={`border-0  h-20 text-sm font-inter text-[#4F4F4F] font-light  ${
                     idx % 2 === 0 ? "bg-[#F9FAFB]" : "bg-white"
                   }`}
-                >
+                > 
                   <TableCell className="pl-6">
                     {activity.customerName}
                   </TableCell>
@@ -75,7 +75,7 @@ export function OverviewTable() {
                   <TableCell className="">{formatDate(activity.dateTime)}</TableCell>
                   <TableCell className="tt">
                     <button
-                      onClick={() => window.open(activity.detailsUrl, '_blank')}
+                      onClick={() => window.open(`/admin-dashboard${activity.detailsUrl}`, '_blank')}
                       className="text-[#9A6C50] hover:text-[#7A5C40] transition-colors"
                     >
                       View Details
