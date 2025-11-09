@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useRef } from "react";
 import { GoogleLogin } from "@react-oauth/google";
-import authService from "../../services/auth.service";
+// import authService from "../../services/auth.service";
+import { useGoogleAuth } from "../../hooks/auth.hooks";
+import googleIcon from "./google-icon-image.png"
 
 /* -------------------------------------- */
 
@@ -10,24 +12,6 @@ type AuthLayoutType = {
   googleAutBtnText?: string;
   googleAuthTrigger?: () => void;
   children: React.ReactElement;
-};
-
-const googleAuthSuccess = async (credentialResponse) => {
-  const idToken = credentialResponse.credential;
-
-  // Send to your backend
-  try {
-    const response = await authService.googleAuth(idToken);
-
-    console.log("Backend response:", response);
-    // Handle login success (save tokens, redirect, etc.)
-  } catch (error) {
-    console.error("Login failed:", error);
-  }
-};
-
-const googleAuthError = () => {
-  console.log("Login Failed");
 };
 
 /**
@@ -42,6 +26,33 @@ export default function AuthLayout({
   googleAutBtnText,
   children,
 }: AuthLayoutType) {
+  const googleAuthMutation = useGoogleAuth();
+  const googleButtonRef = useRef<HTMLDivElement | null>(null);
+
+  const googleAuthSuccess = async (credentialResponse) => {
+    const idToken = credentialResponse.credential;
+
+    // Send to your backend
+    try {
+      const response = await googleAuthMutation.mutateAsync({ idToken });
+
+      console.log("Backend response:", response);
+    } catch (error) {
+      console.error("Login failed:", error);
+    }
+  };
+
+  const googleAuthError = () => {
+    console.log("Login Failed");
+  };
+
+  const customClick = () => {
+    const googleButton = googleButtonRef.current?.querySelector<HTMLDivElement>("div[role=button]");
+
+    
+    if (googleButton) googleButton.click();
+  }
+
   return (
     <section className="h-screen bg-[#F5F5F5] px-0 py-0 md:py-2 md:px-16 overflow-y-scroll">
       <div className="w-full h-[809px] bg-white flex items-center justify-center border rounded-md">
@@ -54,12 +65,12 @@ export default function AuthLayout({
               {description}
             </p>
 
-            {/* {googleAutBtnText && (
+            {googleAutBtnText && (
               <button
                 type="button"
                 className="w-full border-[1.5px] border-danger-500 flex items-center justify-center gap-4 p-4 rounded-md"
                 title="Google authentication button"
-                onClick={googleAuthTrigger}
+                onClick={customClick}
               >
                 <img
                   src={googleIcon}
@@ -70,15 +81,17 @@ export default function AuthLayout({
                   {googleAutBtnText}
                 </span>
               </button>
-            )} */}
+            )}
 
-            <GoogleLogin
-              onSuccess={googleAuthSuccess}
-              onError={googleAuthError}
-              useOneTap
-              width="300"
-              text="signup_with"
-            />
+            <div ref={(ref) => { googleButtonRef.current = ref; }} style={{ position: 'absolute', left: '-9999px', opacity: 0 }}>
+              <GoogleLogin
+                onSuccess={googleAuthSuccess}
+                onError={googleAuthError}
+                useOneTap
+                width="300"
+                text="signup_with"
+              />
+            </div>
           </div>
 
           {googleAutBtnText && (
