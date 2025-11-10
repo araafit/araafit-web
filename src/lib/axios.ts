@@ -15,7 +15,7 @@ const currentPath = window.location.pathname;
 
 // Track recently shown error messages to prevent duplicates
 const shownErrors = new Set<string>();
-const ERROR_TOAST_COOLDOWN = 3000; // 3 seconds
+const ERROR_TOAST_COOLDOWN = 5000; // 5 seconds
 
 // Flag to prevent multiple simultaneous refresh attempts
 let isRefreshing = false;
@@ -297,11 +297,12 @@ apiClient.interceptors.response.use(
           });
           break;
         case 404:
-          showErrorOnce("Resource not found", {
-            icon: null,
-            style: notificationStyles.alertError,
-            position: "top-right",
-          });
+          // showErrorOnce("Resource not found", {
+          //   icon: null,
+          //   style: notificationStyles.alertError,
+          //   position: "top-right",
+          // });
+          console.log("Error:", data.message);
           break;
         case 500:
           showErrorOnce("Server error. Please try again later.", {
@@ -322,6 +323,7 @@ apiClient.interceptors.response.use(
         icon: null,
         style: notificationStyles.alertError,
         position: "top-right",
+        duration: 7000,
       });
     }
 
