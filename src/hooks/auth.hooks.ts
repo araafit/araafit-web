@@ -159,10 +159,12 @@ export const useRegister = () => {
       // Cache the user profile
       queryClient.setQueryData(authKeys.profile(), data.user);
 
-      showToast.success(data.message, {
+      showToast.success("Account created successfully. Redirecting to dashboard", {
         icon: null,
         style: notificationStyles.alertSuccess,
       });
+
+      setTimeout(() => window.location.href = "/dashboard", 1000)
     },
     onError: (error: any) => {
       showToast.error(error.response?.data?.message || "Registration failed", {
