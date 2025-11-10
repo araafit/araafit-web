@@ -3,8 +3,27 @@ import Button from "../../../../shared-components/button";
 import { PencilSimpleIcon } from "@phosphor-icons/react";
 import araafitWatermark from "./araafit-watermark.png";
 import { useNavigate } from "react-router-dom";
-import { useMeasurementsSummary } from "../../../../hooks/measurements.hooks";
+import { useMeasurements } from "../../../../hooks/measurements.hooks";
+import Spinner from "../../../../shared-components/spinner";
+import type { MeasurementMe } from "../../../../services/measurements.service";
 /* -------------------------------------------------------------- */
+
+const waterMarkStyle: React.CSSProperties = {
+  backgroundImage: `url(${araafitWatermark})`,
+  backgroundRepeat: "no-repeat",
+  backgroundSize: "cover",
+  backgroundPosition: "bottom",
+  objectFit: "fill",
+};
+
+const MANUAL_SKIN_TONES: Record<string, string> = {
+  deep: "#33251c",
+  dark: "#55322e",
+  medium: "#8c5a47",
+  tan: "#b0522d",
+  light: "#c4976c",
+  fair: "#deb588",
+} as const;
 
 /**
  * All measurement
@@ -13,26 +32,18 @@ import { useMeasurementsSummary } from "../../../../hooks/measurements.hooks";
  */
 export default function Measurements() {
   const navigate = useNavigate();
-  const {
-    data: measurementsSummary,
-    isLoading,
-    error,
-  } = useMeasurementsSummary();
-
-  const waterMarkStyle: React.CSSProperties = {
-    backgroundImage: `url(${araafitWatermark})`,
-    backgroundRepeat: "no-repeat",
-    backgroundSize: "cover",
-    backgroundPosition: "bottom",
-    objectFit: "fill",
-  };
+  const { data: measurementsSummary, isLoading, error } = useMeasurements();
 
   if (isLoading) {
     return (
       <div className="w-full bg-white py-5 px-8 rounded-md flex flex-col items-center gap-6">
         <div className="flex items-center justify-center py-20">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
-          <span className="ml-2">Loading measurements...</span>
+          <Spinner
+            isLoading={isLoading}
+            size="md"
+            speed="fast"
+            arcColor="#9a6c50"
+          />
         </div>
       </div>
     );
@@ -58,8 +69,20 @@ export default function Measurements() {
     );
   }
 
-  const { measurements, formattedHeight, hasCompleteMeasurements } =
-    measurementsSummary;
+  const measurements: MeasurementMe = measurementsSummary;
+
+  const hasCompleteMeasurements =
+    measurements.bust &&
+    measurements.waist &&
+    measurements.hips &&
+    measurements.height &&
+    measurements.dressSize &&
+    measurements.skinTone;
+
+  // Format height from inches to feet and inches
+  const feet = measurements.height ? Math.floor(measurements?.height / 12) : 0;
+  const inches = measurements.height ? measurements?.height % 12 : 0;
+  const formattedHeight = `${feet}'${inches}`;
 
   return (
     <div className="w-full bg-white py-5 px-8 rounded-md flex flex-col items-center gap-6">
@@ -74,12 +97,6 @@ export default function Measurements() {
               </p>
             </div>
           )}
-
-          {/* <p className="text-neutral-500 font-light text-center">
-            {hasCompleteMeasurements
-              ? "We've successfully captured your measurements and detected your skin tone."
-              : "Some measurements are missing. Update them for a better fit."}
-          </p> */}
         </div>
 
         <div className="flex flex-col gap-5">
@@ -101,19 +118,19 @@ export default function Measurements() {
             <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
               <span className="text-neutral-800 font-medium">Bust</span>
               <span className="font-semibold text-neutral-950">
-                {measurements.bust} inches
+                {measurements.bust}
               </span>
             </div>
             <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
               <span className="text-neutral-800 font-medium">Waist</span>
               <span className="font-semibold text-neutral-950">
-                {measurements.waist} inches
+                {measurements.waist}
               </span>
             </div>
             <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
               <span className="text-neutral-800 font-medium">Hip (inches)</span>
               <span className="font-semibold text-neutral-950">
-                {measurements.hips} inches
+                {measurements.hips}
               </span>
             </div>
             <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
@@ -130,9 +147,13 @@ export default function Measurements() {
             </div>
             <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
               <span className="text-neutral-800 font-medium">Skin Tone</span>
-              <span className="font-semibold text-neutral-950 capitalize">
-                {measurements.skinTone}
-              </span>
+              <span
+                className="font-semibold text-neutral-950 capitalize size-[44px] rounded-md"
+                style={{
+                  backgroundColor:
+                    MANUAL_SKIN_TONES[measurements.skinTone || "deep"],
+                }}
+              />
             </div>
           </div>
         </div>
