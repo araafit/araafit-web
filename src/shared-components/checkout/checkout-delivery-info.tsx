@@ -36,7 +36,7 @@ export default function CheckoutDeliveryInfo({
     register,
     handleSubmit,
     setValue,
-    formState: { errors, isValid },
+    formState: { errors },
   } = useForm<FormValues>({ mode: "onTouched" });
 
   useEffect(() => {
@@ -49,11 +49,17 @@ export default function CheckoutDeliveryInfo({
       setValue("phoneNumber", user.phoneNumber as string);
       setValue("zipCode", user.zipCode as string);
     }
-  },[user])
-
+  }, [user]);
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    // If user exists and no need to update delivery info, continue
+    if (user && !editInfo) {
+      onContinue();
 
+      return;
+    }
+
+    // User exists and edits were made, update profile
     updateProfile.mutate({
       firstName: data.firstName,
       lastName: data.lastName,
@@ -62,8 +68,6 @@ export default function CheckoutDeliveryInfo({
       city: data.city,
       zipCode: data.zipCode,
     });
-
-    console.log(data);
   };
 
   // Switch to payment info on success
@@ -255,7 +259,7 @@ export default function CheckoutDeliveryInfo({
             type="submit"
             variant="solid"
             className={`w-full max-w-[23.4375rem] disabled:bg-neutral-100 disabled:cursor-not-allowed`}
-            disabled={!isValid}
+            // disabled={!isValid}
           >
             <div className="flex items-center justify-center gap-1">
               <span>Continue</span>

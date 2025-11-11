@@ -18,7 +18,7 @@ import type { Order } from "../../../services/orders.service";
 
 export function DashboardOrderDetailPage() {
   const { orderId } = useParams<{ orderId: string }>();
-  const { data: order, isLoading, isError, error } = useOrder(orderId || "");
+  const { data: order, isLoading, isError } = useOrder(orderId || "");
   const cancelOrderMutation = useCancelOrder();
 
   const statusAlert = (status: string) => {
@@ -100,8 +100,7 @@ export function DashboardOrderDetailPage() {
       <UserDashboardLayout>
         <div className="h-screen flex items-center justify-center">
           <div className="flex flex-col items-center gap-4">
-            <Spinner size="lg" />
-            <p className="text-gray-600">Loading order details...</p>
+            <Spinner size="lg"speed="fast" arcColor="#9a6c50" isLoading={isLoading} />
           </div>
         </div>
       </UserDashboardLayout>
@@ -114,8 +113,8 @@ export function DashboardOrderDetailPage() {
       <UserDashboardLayout>
         <div className="h-screen flex items-center justify-center">
           <div className="flex flex-col items-center gap-4 text-center">
-            <p className="text-red-600">Error loading order details</p>
-            <p className="text-gray-600">{error?.message || "Order not found"}</p>
+            <p className="text-red-600">Unable load order</p>
+            <p className="text-gray-600">{"Order not found"}</p>
             <Link to="/dashboard/orders">
               <Button text="Back to Orders" variant="solid" />
             </Link>

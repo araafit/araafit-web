@@ -142,7 +142,7 @@ export default function VerifyEmail() {
       </div>
 
       <p className="text-center">
-        Didn’t receive code? <span className="text-primary-500">Resend</span>
+        Didn’t receive code? <span className="text-primary-500 cursor-pointer" onClick={() => console.log("Resend")}>Resend</span>
       </p>
     </div>
   );

@@ -82,7 +82,7 @@ export function AdminDashboardOverview() {
   };
 
   // if (approveOrder.isLoading) {
-    
+
   // }
 
   return (
@@ -114,7 +114,12 @@ export function AdminDashboardOverview() {
         <div className="w-full  flex flex-col gap-4 p-4 mt-20 overflow-y-scroll px-10">
           {metricsLoading ? (
             <div className="flex justify-center items-center h-32">
-              <Spinner size="lg" speed="fast" />
+              <Spinner
+                size="md"
+                speed="fast"
+                isLoading={metricsLoading}
+                arcColor="#9A6C50"
+              />
             </div>
           ) : metricsError ? (
             <div className="bg-red-50 border border-red-200 rounded-md p-4">
@@ -145,7 +150,12 @@ export function AdminDashboardOverview() {
               </div>
               {metricsLoading ? (
                 <div className="flex justify-center items-center h-32">
-                  <Spinner size="md" speed="fast" />
+                  <Spinner
+                    size="md"
+                    speed="fast"
+                    isLoading={metricsLoading}
+                    arcColor="#9A6C50"
+                  />
                 </div>
               ) : metrics?.mostRecentOrder ? (
                 <div className="w-full border border-[#E8E8E8] flex flex-col items-start px-4 py-3 rounded-md mt-6">
@@ -191,13 +201,41 @@ export function AdminDashboardOverview() {
                   </div>
                   <div className="bg-[#F0F2F5] h-[0.094rem] my-3 rounded-full w-full"></div>
                   <div className="flex items-center gap-4 w-full">
-                    <div className={`text-[#16A34A] text-sm cursor-pointer flex items-center justify-center gap-1 ${ metrics.mostRecentOrder.status === "approved" ? "opacity-50 !cursor-not-allowed" : ""}`} onClick={() => handleStatusAction("approve", metrics.mostRecentOrder.id)}>
-                     <span>Approve</span>
-                     <Spinner size="sm" speed="fast" arcColor="16A34A" isLoading={approveOrder.isPending} />
+                    <div
+                      className={`text-[#16A34A] text-sm cursor-pointer flex items-center justify-center gap-1 ${
+                        metrics.mostRecentOrder.status === "approved"
+                          ? "opacity-50 !cursor-not-allowed"
+                          : ""
+                      }`}
+                      onClick={() =>
+                        handleStatusAction(
+                          "approve",
+                          metrics.mostRecentOrder.id
+                        )
+                      }
+                    >
+                      <span>Approve</span>
+                      <Spinner
+                        size="sm"
+                        speed="fast"
+                        arcColor="16A34A"
+                        isLoading={approveOrder.isPending}
+                      />
                     </div>
-                    <span className={`text-[#DC2626] text-sm cursor-pointer flex items-center justify-center gap-1 ${ metrics.mostRecentOrder.status === "rejected" ? "opacity-50 !cursor-not-allowed" : ""}`}>
+                    <span
+                      className={`text-[#DC2626] text-sm cursor-pointer flex items-center justify-center gap-1 ${
+                        metrics.mostRecentOrder.status === "rejected"
+                          ? "opacity-50 !cursor-not-allowed"
+                          : ""
+                      }`}
+                    >
                       <span>Reject</span>
-                     <Spinner size="sm" speed="fast" arcColor="DC2626" isLoading={rejectOrder.isPending} />
+                      <Spinner
+                        size="sm"
+                        speed="fast"
+                        arcColor="DC2626"
+                        isLoading={rejectOrder.isPending}
+                      />
                     </span>
                   </div>
                 </div>
@@ -227,7 +265,12 @@ export function AdminDashboardOverview() {
               </div>
               {metricsLoading ? (
                 <div className="flex justify-center items-center h-32">
-                  <Spinner size="md" speed="fast" />
+                  <Spinner
+                    size="md"
+                    speed="fast"
+                    arcColor="#9A6C50"
+                    isLoading={metricsLoading}
+                  />
                 </div>
               ) : metrics?.mostRecentRequest ? (
                 <div className="w-full border border-[#E8E8E8] flex flex-col items-start px-4 py-3 rounded-md mt-6">
@@ -305,7 +348,12 @@ export function AdminDashboardOverview() {
             </div>
             {activitiesLoading ? (
               <div className="flex justify-center items-center h-32">
-                <Spinner size="lg" speed="fast" />
+                <Spinner
+                  size="lg"
+                  speed="fast"
+                  isLoading={activitiesLoading}
+                  arcColor="#9A6C50"
+                />
               </div>
             ) : activitiesError ? (
               <div className="bg-red-50 border border-red-200 rounded-md p-4">

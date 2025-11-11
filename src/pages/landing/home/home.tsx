@@ -261,7 +261,7 @@ export function HomePage() {
                   type="button"
                   variant="solid"
                   className="w-full max-w-[185px]"
-                  onClick={() => navigate("/shop")}
+                  onClick={() => navigate("/shop?explore=fabric")}
                 >
                   <div className="flex items-center gap-2">
                     <span>Explore fabric</span>
@@ -390,10 +390,10 @@ const Modal: React.FC<ModalShape> = memo(
           <div className="w-full flex items-center justify-center mt-6 px-6">
             <div className="w-[438px] flex flex-col items-center justify-center text-center">
               <h3 className="text-[40px] font-semibold leading-[125%] mb-4">
-                Enjoy ₦
+                Enjoy{" "}
                 {discountData?.type === "percentage"
                   ? `${Number(discountData.value).toFixed()}%`
-                  : `${Number(discountData?.value).toFixed()}`}{" "}
+                  : `₦${Number(discountData?.value).toFixed()}`}{" "}
                 Off Your First Order
               </h3>
 
@@ -435,10 +435,10 @@ const Modal: React.FC<ModalShape> = memo(
                 >
                   <div className="flex items-center justify-center gap-2">
                     <span>
-                      Claim my ₦
+                      Claim my {" "}
                       {discountData?.type === "percentage"
                         ? `${Number(discountData.value).toFixed()}%`
-                        : `${Number(discountData?.value).toFixed()}`}{" "}
+                        : ` ₦${Number(discountData?.value).toFixed()}`}{" "}
                       off
                     </span>
                     <Spinner

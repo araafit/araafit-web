@@ -5,6 +5,7 @@ import Select from "../select";
 //import { MagnifyingGlassIcon } from "@phosphor-icons/react";
 import { useShopStore } from "../../shared-hooks/state-store";
 import SearchInput from "../../pages/user-dashboard/shop/components/search-input";
+import { useSearchParams } from "react-router-dom";
 
 /* ---------------------------------------------------------------------- */
 
@@ -79,14 +80,13 @@ const ShopTab = ({
   const dressItems = useShopStore((state) => state.dresses);
   const fabricItems = useShopStore((state) => state.fabrics);
 
-  // Search through items
-  //const searchAllItem = useShopStore((state) => state.searchAll);
-  //const searchFabric = useShopStore((state) => state.searchFabrics);
-  //const searchDresses = useShopStore((state) => state.searchDresses);
-
   const originalAllItems = useRef(allItems);
   const originalDressItems = useRef(dressItems);
   const originalFabricItems = useRef(fabricItems);
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [searchParam] = useSearchParams();
+  const exploreParam = searchParam.get("explore");
 
   useEffect(() => {
     if (dressItems.length > 0 && originalDressItems.current.length === 0) {
@@ -100,6 +100,17 @@ const ShopTab = ({
     }
   }, [fabricItems]);
 
+  // Set active tab based on query param
+  useEffect(() => {
+    if (exploreParam === "dress") {
+      setActiveTab(1);
+    } else if (exploreParam === "fabric") {
+      setActiveTab(2);
+    } else {
+      setActiveTab(0);
+    }
+  }, [exploreParam]);
+
   const handleTabClick = useCallback(
     (index: number, tabItem?: string) => {
       setActiveTab(index);
@@ -107,25 +118,6 @@ const ShopTab = ({
     },
     [onChange]
   );
-
-  // Search all, dresses and fabric items
-  //const handleSearch = (searchInput: string) => {
-  //  if (!searchInput || searchInput.trim() === "") {
-  //    return;
-  //  }
-
-  //  if (activeTab === 1) {
-  //    searchDresses(searchInput);
-  //    return;
-  //  }
-
-  //  if (activeTab === 2) {
-  //    searchFabric(searchInput);
-  //    return;
-  //  }
-
-  //  searchAllItem(searchInput);
-  //};
 
   const options = [
     { label: "Measurement", value: "measurement" },
@@ -175,7 +167,9 @@ const ShopTab = ({
           </div>*/}
 
           <div className="flex items-center justify-between w-full lg:w-auto">
-            <span className="text-neutral-500 whitespace-nowrap text-sm lg:text-base">Sort by:</span>
+            <span className="text-neutral-500 whitespace-nowrap text-sm lg:text-base">
+              Sort by:
+            </span>
             <Select
               options={options}
               containerClassName="w-[6rem] lg:w-[8rem] ml-1"

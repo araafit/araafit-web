@@ -45,7 +45,7 @@ function CartList({ cartData, checkoutLink }: CartEngine) {
       toggleModal();
       return;
     }
-    
+
     updateQuantityMutation.mutate({
       itemId,
       request: {
@@ -65,7 +65,10 @@ function CartList({ cartData, checkoutLink }: CartEngine) {
     }
   };
 
-  const totalPrice = cartData.reduce((total, item) => total + item.product.price * item.quantity, 0);
+  const totalPrice = cartData.reduce(
+    (total, item) => total + item.product.price * item.quantity,
+    0
+  );
 
   return (
     <div className="w-full flex flex-col gap-6">
@@ -76,7 +79,6 @@ function CartList({ cartData, checkoutLink }: CartEngine) {
             className="w-full border border-neutral-100 rounded-md py-2 px-4"
           >
             <div className="flex gap-6">
-              
               <input
                 type="checkbox"
                 name={`order_` + item.id}
@@ -106,22 +108,48 @@ function CartList({ cartData, checkoutLink }: CartEngine) {
                 <div className="flex items-center gap-6">
                   <div className="w-[102px] flex items-center justify-evenly rounded-md py-[7px] px-3 border gap-2 border-neutral-100">
                     <MinusIcon
-                      className={`cursor-pointer ${updateQuantityMutation.isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      onClick={() => !updateQuantityMutation.isPending && handleQuantityChange(item.id, item.quantity - 1)}
+                      className={`cursor-pointer ${
+                        updateQuantityMutation.isPending
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
+                      onClick={() =>
+                        !updateQuantityMutation.isPending &&
+                        handleQuantityChange(item.id, item.quantity - 1)
+                      }
                     />
                     <span className="flex items-center gap-1">
                       {item.quantity}
-                      {updateQuantityMutation.isPending && <Spinner size="sm" />}
+                      {updateQuantityMutation.isPending && (
+                        <Spinner
+                          size="sm"
+                          arcColor="#9a6c50"
+                          isLoading={updateQuantityMutation.isPending}
+                        />
+                      )}
                     </span>
                     <PlusIcon
-                      className={`cursor-pointer ${updateQuantityMutation.isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      onClick={() => !updateQuantityMutation.isPending && handleQuantityChange(item.id, item.quantity + 1)}
+                      className={`cursor-pointer ${
+                        updateQuantityMutation.isPending
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
+                      onClick={() =>
+                        !updateQuantityMutation.isPending &&
+                        handleQuantityChange(item.id, item.quantity + 1)
+                      }
                     />
                   </div>
 
                   <TrashSimpleIcon
-                    className={`size-[20px] text-red-500 cursor-pointer ${removeFromCartMutation.isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    onClick={() => !removeFromCartMutation.isPending && triggerModal(item.id)}
+                    className={`size-[20px] text-red-500 cursor-pointer ${
+                      removeFromCartMutation.isPending
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }`}
+                    onClick={() =>
+                      !removeFromCartMutation.isPending && triggerModal(item.id)
+                    }
                   />
                 </div>
               </div>
