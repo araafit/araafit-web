@@ -51,6 +51,12 @@ import GuestCartCheckout from "./guest/cart/guest-cart-checkout";
 import PaystackCallback from "./paystack-callback";
 import CheckoutSuccess from "./user-dashboard/cart/checkout/checkout-success";
 import { FabricRequestSummary } from "./guest/guest-shop/fabric-request-summary";
+import {
+  KidsShop,
+  WomenShop,
+  MenShop,
+} from "./user-dashboard/shop/shop-pages-export";
+import { SearchProvider } from "./user-dashboard/shop/context/search-context";
 
 /* ---------------------------------------------------------------- */
 
@@ -112,7 +118,7 @@ const pagesRoutes = createBrowserRouter([
         path: "fabric/:itemName",
         element: <GuestFabricDetailPage />,
       },
-       {
+      {
         path: ":fabricId/summary",
         element: <FabricRequestSummary />,
       },
@@ -178,6 +184,16 @@ const pagesRoutes = createBrowserRouter([
         path: "shop",
         children: [
           { path: "", element: <DashboardShopPage />, index: true },
+          {
+            path: "men",
+            element: (
+              <SearchProvider>
+                <MenShop />
+              </SearchProvider>
+            ),
+          },
+          { path: "women", element: <WomenShop /> },
+          { path: "kids", element: <KidsShop /> },
           {
             path: "dress/:itemName",
             element: <DashboardShopDressDetailPage />,
