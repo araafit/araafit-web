@@ -46,7 +46,7 @@ export function MeasurementMethod() {
     <div className="flex flex-col gap-8 md:gap-[12rem] relative">
         {/* Back Button */}
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => stepTo(0)}
           className="lg:absolute top-0 left-0 w-10 h-10 bg-white border border-gray-200 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors duration-200 shadow-sm z-10"
           aria-label="Go back"
         >

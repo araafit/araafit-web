@@ -37,7 +37,6 @@ export const GetMeasuredProvider = ({
     "get-measured-steps",
     0
   );
-  console.log("storedStep", storedStep);
   const [currentStep, setCurrentStep] = useState(storedStep as number);
   const [frontPhoto, setFrontPhoto] = useState<File | null>(null);
   const [sidePhoto, setSidePhoto] = useState<File | null>(null);
@@ -52,14 +51,14 @@ export const GetMeasuredProvider = ({
 
   // Move to next step and save state in browser
   const stepTo = (to?: number) => {
-    if (to && (to <= 2 || to === 0)) {
+    if (typeof to === "number") {
       setCurrentStep(to);
       setStoredStep(to);
       return;
     }
-
-    setStoredStep(to);
-    setCurrentStep(storedStep + 1);
+    const next = (currentStep ?? 0) + 1;
+    setCurrentStep(next);
+    setStoredStep(next);
   };
 
   const setPhotos = (front: File, side: File) => {
