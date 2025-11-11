@@ -34,10 +34,12 @@ export interface ActiveDiscount {
 type DiscountObjType = Record<"discount", ClaimDiscount>;
 
 class LandingPageService {
-  async claimDiscount(): Promise<DiscountObjType> {
+  async claimDiscount(email: string): Promise<DiscountObjType> {
     const response = await apiClient.post<
       ApiResponse<DiscountObjType> | DiscountObjType
-    >("/discounts/claim");
+    >("/discounts/claim", {
+      email,
+    });
 
     const data = response.data as DiscountObjType;
 

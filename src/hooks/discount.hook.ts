@@ -7,7 +7,7 @@ import { landingPageService } from "../services/landing-page.service";
 
 export const useClaimDiscount = () => {
   return useMutation({
-    mutationFn: () => landingPageService.claimDiscount(),
+    mutationFn: (email: string) => landingPageService.claimDiscount(email),
     onSuccess: () => {
       showToast.success("You've claimed your discount!", {
         icon: null,
@@ -46,7 +46,7 @@ export const useActiveDiscounts = () => {
       ) {
         return false;
       }
-      
+
       return failureCount < 1;
     },
   });
