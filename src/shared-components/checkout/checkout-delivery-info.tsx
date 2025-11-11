@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { PencilSimpleIcon } from "@phosphor-icons/react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import Button from "../button";
@@ -39,18 +39,20 @@ export default function CheckoutDeliveryInfo({
     formState: { errors, isValid },
   } = useForm<FormValues>({ mode: "onTouched" });
 
-  if (user) {
-    setValue("firstName", (user.firstName as string) || "");
-    setValue("lastName", (user.lastName as string) || "");
-    setValue("email", (user.email as string) || "");
-    setValue("city", (user.city as string) || "");
-    setValue("address", (user.deliveryAddress as string) || "");
-    setValue("phoneNumber", (user.phoneNumber as string) || "");
-    setValue("zipCode", (user.zipCode as string) || "");
-  }
+  useEffect(() => {
+    if (user) {
+      setValue("firstName", user.firstName as string);
+      setValue("lastName", user.lastName as string);
+      setValue("email", user.email as string);
+      setValue("city", user.city as string);
+      setValue("address", user.deliveryAddress as string);
+      setValue("phoneNumber", user.phoneNumber as string);
+      setValue("zipCode", user.zipCode as string);
+    }
+  },[user])
+
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    // setLoading(true);
 
     updateProfile.mutate({
       firstName: data.firstName,
@@ -60,6 +62,8 @@ export default function CheckoutDeliveryInfo({
       city: data.city,
       zipCode: data.zipCode,
     });
+
+    console.log(data);
   };
 
   // Switch to payment info on success

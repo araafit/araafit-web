@@ -1,10 +1,6 @@
 import apiClient from "../lib/axios";
 import { getFirebaseStorage } from "../lib/firebase";
-import {
-  ref,
-  getDownloadURL,
-  uploadBytesResumable,
-} from "firebase/storage";
+import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
 import type { ApiResponse } from "./auth.service";
 
 export interface Measurements {
@@ -58,7 +54,6 @@ export interface UpdateMeasurementsResponse {
   lastUpdated: string;
 }
 
-// Image upload types
 export interface UploadedImageInfo {
   url: string;
   publicId: string;
@@ -69,9 +64,39 @@ export interface UploadMeasurementImagesResponse {
   side: UploadedImageInfo;
 }
 
+export interface MeasurementMe {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  deliveryAddress: string;
+  dateOfBirth: string;
+  isVerified: string;
+  phoneNumber: string | number;
+  city: string;
+  zipCode: string | null;
+  bust: number | null;
+  waist: number | null;
+  hips: number | null;
+  height: number | null;
+  dressSize: number | null;
+  chest: string | null;
+  skinTone: string | null;
+  inseam: string | number | null;
+  shoulder: number | null;
+  size: string | null;
+  gender: string | null;
+  isGuest: boolean;
+  orderCount: number;
+  createdAt: string;
+  updateAt: string;
+  isActive: boolean;
+  blockReason: string | null;
+}
+
 export const measurementsService = {
-  async getMeasurements(): Promise<MeasurementsResponse> {
-    const response = await apiClient.get<ApiResponse<MeasurementsResponse>>(
+  async getMeasurements(): Promise<MeasurementMe> {
+    const response = await apiClient.get<ApiResponse<MeasurementMe>>(
       "/measurements/me"
     );
     return response.data.data;

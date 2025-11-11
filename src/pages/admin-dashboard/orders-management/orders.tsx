@@ -10,6 +10,8 @@ import { useAdminOrders } from "../../../hooks/admin-orders.hooks";
 import { convertApiOrdersToTableFormat } from "../../../utils/admin-orders-utils";
 import Spinner from "../../../shared-components/spinner";
 
+/* --------------------------------------------------------------------------------------------- */
+
 const Orders = () => {
   // Fetch all orders
   const { data: allOrders, isLoading: allOrdersLoading, error: allOrdersError } = useAdminOrders();
@@ -37,7 +39,7 @@ const Orders = () => {
     return (
       <div className="mt-5 h-full bg-white px-4 py-2 relative rounded-md">
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <p className="text-red-600">Failed to load orders. Please try again.</p>
+          <p className="text-red-600">Unable to load orders. Please try again.</p>
         </div>
       </div>
     );
@@ -63,7 +65,7 @@ const Orders = () => {
           >
             {allOrdersLoading ? (
               <div className="flex justify-center items-center h-32">
-                <Spinner size="lg" speed="fast" />
+                <Spinner size="lg" speed="fast" isLoading={allOrdersLoading} arcColor="#9A6C50" />
               </div>
             ) : (
               <DataTable data={allOrdersData} />
@@ -77,7 +79,7 @@ const Orders = () => {
           >
             {pendingLoading ? (
               <div className="flex justify-center items-center h-32">
-                <Spinner size="lg" speed="fast" />
+                <Spinner size="lg" speed="fast" isLoading={pendingLoading} arcColor="#9A6C50" />
               </div>
             ) : (
               <DataTable data={pendingOrdersData} />
@@ -90,7 +92,7 @@ const Orders = () => {
           >
             {approvedLoading ? (
               <div className="flex justify-center items-center h-32">
-                <Spinner size="lg" speed="fast" />
+                <Spinner size="lg" speed="fast" isLoading={approvedLoading} arcColor="#9A6C50" />
               </div>
             ) : (
               <DataTable data={approvedOrdersData} />
@@ -103,7 +105,7 @@ const Orders = () => {
           >
             {packagingLoading ? (
               <div className="flex justify-center items-center h-32">
-                <Spinner size="lg" speed="fast" />
+                <Spinner size="lg" speed="fast" isLoading={packagingLoading} arcColor="#9A6C50" />
               </div>
             ) : (
               <DataTable data={packagingOrdersData} />
@@ -116,7 +118,7 @@ const Orders = () => {
           >
             {outForDeliveryLoading ? (
               <div className="flex justify-center items-center h-32">
-                <Spinner size="lg" speed="fast" />
+                <Spinner size="lg" speed="fast" isLoading={outForDeliveryLoading} arcColor="#9A6C50" />
               </div>
             ) : (
               <DataTable data={outForDeliveryOrdersData} />
@@ -129,7 +131,7 @@ const Orders = () => {
           >
             {deliveredLoading ? (
               <div className="flex justify-center items-center h-32">
-                <Spinner size="lg" speed="fast" />
+                <Spinner size="lg" speed="fast" isLoading={deliveredLoading} arcColor="#9A6C50" />
               </div>
             ) : (
               <DataTable data={deliveredOrdersData} />
@@ -142,7 +144,7 @@ const Orders = () => {
           >
             {completeLoading ? (
               <div className="flex justify-center items-center h-32">
-                <Spinner size="lg" speed="fast" />
+                <Spinner size="lg" speed="fast" isLoading={completeLoading} arcColor="#9A6C50" />
               </div>
             ) : (
               <DataTable data={completeOrdersData} />
@@ -155,7 +157,7 @@ const Orders = () => {
           >
             {cancelledLoading ? (
               <div className="flex justify-center items-center h-32">
-                <Spinner size="lg" speed="fast" />
+                <Spinner size="lg" speed="fast" isLoading={cancelledLoading} arcColor="#9A6C50"  />
               </div>
             ) : (
               <DataTable data={cancelledOrdersData} />

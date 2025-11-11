@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { type AuthTokens, tokenUtils } from "../lib/axios";
+import { type AuthTokens, tokenUtils } from "../lib/utils";
 import { type AdminUser } from "../services/admin-auth.service";
 
 // User interface based on API response

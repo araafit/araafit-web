@@ -6,13 +6,14 @@ import {
   PhotoUpload,
   HeightInput,
 } from "./automated/import-entry";
+import { PickGender } from "./import-entry";
 import { GetMeasuredProvider, useGetMeasured } from "./context/get-measured-context";
 
 /* ----------------------------------------------------------------------- */
 
 const StepContent = () => {
   const { currentStep } = useGetMeasured();
-  console.log("currentStep", currentStep);
+  // console.log("currentStep", currentStep);
 
   // Toggle between SmartCapture (camera) and PhotoUpload (file upload)
   // Change this flag to switch between the two methods
@@ -20,12 +21,14 @@ const StepContent = () => {
 
   switch (currentStep) {
     case 0:
-      return <MeasurementMethod />;
+      return <PickGender />;
     case 1:
-      return usePhotoUpload ? <PhotoUpload /> : <Position />;
+      return <MeasurementMethod />;
     case 2:
-      return usePhotoUpload ? <HeightInput /> : <SmartCapture />;
+      return usePhotoUpload ? <PhotoUpload /> : <Position />;
     case 3:
+      return usePhotoUpload ? <HeightInput /> : <SmartCapture />;
+    case 4:
       return <Confirmation />;
     default:
       return null;

@@ -39,6 +39,7 @@ import {
   GetMeasured,
   ManualMeasurement,
   MeasurementSummary,
+  PickGender,
 } from "./get-measured/import-entry";
 import {
   GuestShopPage,
@@ -49,6 +50,7 @@ import GuestCartPage from "./guest/cart/guest-cart";
 import GuestCartCheckout from "./guest/cart/guest-cart-checkout";
 import PaystackCallback from "./paystack-callback";
 import CheckoutSuccess from "./user-dashboard/cart/checkout/checkout-success";
+import { FabricRequestSummary } from "./guest/guest-shop/fabric-request-summary";
 
 /* ---------------------------------------------------------------- */
 
@@ -82,6 +84,10 @@ const pagesRoutes = createBrowserRouter([
       },
       {
         path: "/get-measured/manual",
+        element: <PickGender />,
+      },
+      {
+        path: "/get-measured/manual/measurement",
         element: <ManualMeasurement />,
       },
       {
@@ -94,9 +100,9 @@ const pagesRoutes = createBrowserRouter([
     path: "shop",
     children: [
       {
-        path:"",
+        path: "",
         element: <GuestShopPage />,
-        index: true
+        index: true,
       },
       {
         path: "dress/:itemName",
@@ -105,6 +111,10 @@ const pagesRoutes = createBrowserRouter([
       {
         path: "fabric/:itemName",
         element: <GuestFabricDetailPage />,
+      },
+       {
+        path: ":fabricId/summary",
+        element: <FabricRequestSummary />,
       },
     ],
   },

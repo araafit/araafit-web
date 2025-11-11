@@ -34,7 +34,7 @@ export function DashboardProfilePage() {
           <Tab
             items={tabItems}
             tabContainerClassName="bg-transparent h-full"
-            tabListClassName="w-full lg:w-[30rem] text-xs lg:text-[0.875rem] text-neutral-700 border border-neutral-100 p-1 lg:p-[0.254rem] bg-transparent rounded-md flex flex-nowrap overflow-x-auto lg:flex-wrap"
+            tabListClassName="w-full md:w-[35rem] text-xs lg:text-[0.875rem] text-neutral-700 border border-neutral-100 p-1 lg:p-[0.254rem] bg-transparent rounded-md flex flex-nowrap overflow-x-auto lg:flex-wrap"
             activeTabClassName="bg-primary-900 text-white rounded-md"
           >
             <ProfileSettings />

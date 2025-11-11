@@ -10,7 +10,14 @@ import {
 } from "../../ui/dialog";
 import { TableButton } from "../../ui/button";
 import { DotsThreeVerticalIcon } from "@phosphor-icons/react";
-import { useBlockCustomer, useUnblockCustomer, useDeleteCustomer } from "../../../hooks/admin-customers.hooks";
+import {
+  useBlockCustomer,
+  useUnblockCustomer,
+  useDeleteCustomer,
+} from "../../../hooks/admin-customers.hooks";
+import Spinner from "../../../shared-components/spinner";
+
+/* ------------------------------------------------------------------------------------------------------ */
 
 function CustomerActions({
   customerId,
@@ -132,6 +139,7 @@ function CustomerActions({
               </div>
             </div>
           )}
+
           <DialogFooter>
             <TableButton
               variant="outline"
@@ -142,13 +150,26 @@ function CustomerActions({
             >
               Cancel
             </TableButton>
-            <TableButton 
+
+            <TableButton
               onClick={handleBlockToggle}
-              disabled={(!isBlocked && !blockReason.trim()) || blockMutation.isPending || unblockMutation.isPending}
+              disabled={
+                (!isBlocked && !blockReason.trim()) ||
+                blockMutation.isPending ||
+                unblockMutation.isPending
+              }
             >
-              {blockMutation.isPending || unblockMutation.isPending 
-                ? "Processing..." 
-                : isBlocked ? "Unblock" : "Block"}
+              <div className="flex items-center justify-center gap-1">
+                {isBlocked ? "Unblock" : "Block"}
+                <Spinner
+                  size="sm"
+                  speed="fast"
+                  arcColor="#ffffff"
+                  isLoading={
+                    blockMutation.isPending || unblockMutation.isPending
+                  }
+                />
+              </div>
             </TableButton>
           </DialogFooter>
         </DialogContent>
@@ -188,8 +209,8 @@ function CustomerActions({
             >
               Cancel
             </TableButton>
-            <TableButton 
-              variant="destructive" 
+            <TableButton
+              variant="destructive"
               onClick={handleDelete}
               disabled={!deleteReason.trim() || deleteMutation.isPending}
             >

@@ -182,6 +182,12 @@ export function DataTable({
     useSensor(TouchSensor, {}),
     useSensor(KeyboardSensor, {})
   );
+
+  // Update local state when prop changes
+  React.useEffect(() => {
+    setData(initialData);
+  }, [initialData]);
+
   // -------------------- Export to Excel --------------------
   function exportToExcel() {
     const worksheet = XLSX.utils.json_to_sheet(
@@ -365,6 +371,7 @@ export function DataTable({
               </Table>
             </DndContext>
           </div>
+
           {(table.getCanPreviousPage() || table.getCanNextPage()) && (
             <div className="flex items-center justify-between">
               <div className="flex justify-between w-full">

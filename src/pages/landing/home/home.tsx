@@ -65,7 +65,7 @@ export function HomePage() {
   useEffect(() => {
     if (
       activeDiscounts.isSuccess &&
-      activeDiscounts.data &&
+      activeDiscounts.data.length >= 1 &&
       activeDiscounts.data[0].eligibility === "first_time_buyers"
     ) {
       setDiscountData(activeDiscounts.data[0]);

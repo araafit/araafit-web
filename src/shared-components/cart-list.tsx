@@ -22,7 +22,7 @@ interface CartEngine {
  *
  * @returns ReactElement
  */
-function CartEngine({ cartData, checkoutLink }: CartEngine) {
+function CartList({ cartData, checkoutLink }: CartEngine) {
   const [itemToRemove, setItemToRemove] = useState<string | null>(null);
   const navigate = useNavigate();
   const updateQuantityMutation = useUpdateQuantity();
@@ -187,4 +187,4 @@ function CartEngine({ cartData, checkoutLink }: CartEngine) {
   );
 }
 
-export default memo(CartEngine);
+export default memo(CartList);

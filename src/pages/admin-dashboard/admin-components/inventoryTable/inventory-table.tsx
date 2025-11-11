@@ -89,6 +89,11 @@ export function DataTable({
     [data]
   );
 
+  // Update local state when prop changes
+    React.useEffect(() => {
+      setData(initialData);
+    }, [initialData]);
+
   const table = useReactTable({
     data,
     columns,

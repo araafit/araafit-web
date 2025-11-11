@@ -3,7 +3,7 @@ import Button from "../../../shared-components/button";
 import { useCart } from "../../../hooks/cart.hooks";
 import shoppingCartImg from "../../../shared-images/shopping-cart.png";
 import { Link } from "react-router-dom";
-import CartEngine from "../../../shared-components/cart-engine";
+import CartEngine from "../../../shared-components/cart-list";
 import Spinner from "../../../shared-components/spinner";
 import { formatPrice } from "../../../utils/format-price";
 
@@ -53,7 +53,9 @@ function GuestCart() {
         <div className="w-full lg:w-[71.875rem] relative p-8 bg-white rounded-md overflow-y-scroll flex items-center justify-center">
           <div className="flex flex-col items-center gap-4 text-center">
             <p className="text-red-600">Error loading cart</p>
-            <p className="text-gray-600">{error?.message || "Please try again later"}</p>
+            <p className="text-gray-600">
+              {error?.message || "Please try again later"}
+            </p>
             <Button
               text="Retry"
               variant="solid"
@@ -76,7 +78,9 @@ function GuestCart() {
             {cart && !cartIsEmpty && (
               <div className="text-right">
                 <p className="text-sm text-gray-600">Total</p>
-                <p className="text-xl font-semibold">₦{formatPrice(cart.total)}</p>
+                <p className="text-xl font-semibold">
+                  ₦{formatPrice(cart.total)}
+                </p>
               </div>
             )}
           </div>
@@ -91,9 +95,12 @@ function GuestCart() {
               <CartEngine
                 cartData={cartItems.map((item) => ({
                   ...item,
-                  image: item.product.images?.[0]?.url || "/placeholder-image.jpg",
+                  image:
+                    item.product.images?.[0]?.url || "/placeholder-image.jpg",
                   name: item.product.name,
-                  description: item.product.description || `${item.product.category} - Size: ${item.size}`,
+                  description:
+                    item.product.description ||
+                    `${item.product.category} - Size: ${item.size}`,
                   cost: item.product.price,
                 }))}
                 checkoutLink="/cart/checkout"

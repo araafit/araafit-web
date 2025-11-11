@@ -5,4 +5,5 @@ export { Confirmation } from "./automated/confirmation";
 export { Position } from "./automated/position";
 export { SmartCapture } from "./automated/smart-capture";
 export { CaptureProcessLoader } from "./automated/capture-process-loader";
+export { PickGender } from "./manual/pick-gender";
 export { ManualMeasurement } from "./manual/manual-measurement";

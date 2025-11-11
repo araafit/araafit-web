@@ -1,6 +1,8 @@
 import { type AdminOrder } from "../services/admin-orders.service";
 import { formatCurrency, formatDate } from "./admin-dashboard-utils";
 
+/* ---------------------------------------------------------------------- */
+
 // Convert API order to table format
 export const convertApiOrderToTableFormat = (apiOrder: AdminOrder) => {
   return {
@@ -50,7 +52,6 @@ export const convertApiOrderToTableFormat = (apiOrder: AdminOrder) => {
 
 // Convert multiple API orders to table format
 export const convertApiOrdersToTableFormat = (apiOrders: AdminOrder[]) => {
-  console.log(apiOrders);
   return apiOrders.map(convertApiOrderToTableFormat);
 };
 

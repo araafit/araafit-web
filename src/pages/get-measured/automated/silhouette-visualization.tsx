@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from "react";
 import type { Landmark } from "../../../services/measurement/types";
 import { pixelHeightFromMask, pixelHeightFromLandmarks } from "../../../services/measurement/utils";
+import { POSITION_OFFSETS } from "../../../services/measurement";
 
 interface SilhouetteVisualizationProps {
   frontPhoto: File;
@@ -30,12 +31,7 @@ export function SilhouetteVisualization({
     pixelToCmRatio: number;
   } | null>(null);
   
-  // Store reference Y positions from front view for consistency
-  const [referenceYPositions, setReferenceYPositions] = useState<{
-    bust: { y: number };
-    waist: { y: number };
-    hip: { y: number };
-  } | null>(null);
+  // No cross-view reuse of Y positions; compute independently per view
 
   useEffect(() => {
     if (frontMask && frontCanvasRef.current) {
@@ -44,7 +40,8 @@ export function SilhouetteVisualization({
         frontPhoto,
         frontMask,
         frontLandmarks,
-        "mask"
+        "mask",
+        true
       );
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -57,11 +54,12 @@ export function SilhouetteVisualization({
         sidePhoto,
         sideMask,
         sideLandmarks,
-        "mask"
+        "mask",
+        false
       );
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sidePhoto, sideMask, sideLandmarks, referenceYPositions]);
+  }, [sidePhoto, sideMask, sideLandmarks]);
 
   // Calculate measurements when data is available
   useEffect(() => {
@@ -92,7 +90,7 @@ export function SilhouetteVisualization({
   };
 
   /**
-   * Extract pose-based torso measurements (same logic as visualization)
+   * Extract pose-based torso measurements (aligned with waist-anchor offsets)
    */
   const getTorsoMeasurementsFromPose = (landmarks: Landmark[], w: number, h: number) => {
     const scale = (lm?: Landmark, width?: number, height?: number) => {
@@ -102,18 +100,12 @@ export function SilhouetteVisualization({
 
     const LShoulder = scale(landmarks[12], w, h);
     const RShoulder = scale(landmarks[11], w, h);
-    const LElbow = scale(landmarks[14], w, h);
-    const RElbow = scale(landmarks[13], w, h);
     const LHip = scale(landmarks[24], w, h);
     const RHip = scale(landmarks[23], w, h);
 
     const shoulderMid = {
       x: (LShoulder.x + RShoulder.x) / 2,
       y: (LShoulder.y + RShoulder.y) / 2,
-    };
-    const elbowMid = {
-      x: (LElbow.x + RElbow.x) / 2,
-      y: (LElbow.y + RElbow.y) / 2,
     };
     const hipMid = {
       x: (LHip.x + RHip.x) / 2,
@@ -124,13 +116,13 @@ export function SilhouetteVisualization({
 
     // Bust position: ~20% down from shoulders to hips
     const bustY = shoulderMid.y + torsoHeight * 0.2;
-    
-    // Waist position: slightly below elbow level (elbow + small offset)
-    const elbowOffset = torsoHeight * 0.2; // 20% of torso height below elbows
-    const waistY = elbowMid.y + elbowOffset;
-    
-    // Hip position: at hip landmarks
-    const hipY = hipMid.y;
+
+    // Waist position: use waist anchor (pelvis) minus torso-relative offset
+    const waistAnchorY = hipMid.y;
+    const waistY = waistAnchorY - torsoHeight * POSITION_OFFSETS.WAIST_UP_TORSO_RATIO;
+
+    // Hip position: waist anchor plus torso-relative offset
+    const hipY = waistAnchorY + torsoHeight * POSITION_OFFSETS.HIP_DOWN_TORSO_RATIO;
 
     // Calculate body width scaling factors based on shoulder-hip ratio
     const shoulderWidth = Math.abs(LShoulder.x - RShoulder.x);
@@ -230,33 +222,16 @@ export function SilhouetteVisualization({
       
       const pixelToCmRatio = heightInCm / pixelHeight;
 
-      // Get measurements using the same logic as the visualization
-      // TEMPORARY: Both front and side using mask-based calculation for testing
-      // Use front landmarks to determine Y positions for consistency
-      const frontMeasurements = computeMeasurementRows(frontMask, frontLandmarks, frontMask.width, frontMask.height);
-      
-      // Store the front Y positions for the side view visualization to use
-      setReferenceYPositions({
-        bust: { y: frontMeasurements.bust.y },
-        waist: { y: frontMeasurements.waist.y },
-        hip: { y: frontMeasurements.hip.y },
-      });
-      
-      // Side view: mask-based but using front landmarks Y positions for consistency
-      const sideMeasurements = computeMeasurementRowsWithYPositions(
-        sideMask, 
-        //sideLandmarks, 
-        sideMask.width, 
-        sideMask.height,
-        frontMeasurements // Use front Y positions
-      );
+      // Compute independently for each view
+      const frontMeasurements = computeMeasurementRows(frontMask, frontLandmarks, frontMask.width, frontMask.height, false);
+      const sideMeasurements = computeMeasurementRows(sideMask, sideLandmarks, sideMask.width, sideMask.height, true);
 
       // Calculate widths and depths in pixels, then convert to cm
       // For bust: use shoulder landmarks + 10% expansion for better accuracy
       const shoulderLeft = frontLandmarks[11]; // Left shoulder
       const shoulderRight = frontLandmarks[12]; // Right shoulder
       const bustWidthFromShoulders = shoulderLeft && shoulderRight 
-        ? Math.abs(shoulderRight.x - shoulderLeft.x) * frontMask.width * pixelToCmRatio
+        ? Math.abs(shoulderRight.x - shoulderLeft.x) * frontMask.width * (1 - POSITION_OFFSETS.BUST_FRONT_SHRINK_RATIO) * pixelToCmRatio
         : (frontMeasurements.bust.right - frontMeasurements.bust.left) * pixelToCmRatio;
       
       const bustWidth = bustWidthFromShoulders;
@@ -323,7 +298,8 @@ export function SilhouetteVisualization({
     mask: ImageData,
     landmarks: Landmark[],
     imgW: number,
-    imgH: number
+    imgH: number,
+    isSideView = false
   ) => {
     // fallback if landmarks missing
     if (!landmarks || landmarks.length === 0) {
@@ -344,10 +320,21 @@ export function SilhouetteVisualization({
       rs = landmarks[12],
       lh = landmarks[23],
       rh = landmarks[24];
-    const shoulderY = Math.round(
-      (((ls?.y ?? 0.2) + (rs?.y ?? 0.2)) / 2) * imgH
+
+    // normalized coordinates
+    const shoulderYNorm = ((ls?.y ?? 0.2) + (rs?.y ?? 0.2)) / 2;
+    const hipYNorm = ((lh?.y ?? 0.7) + (rh?.y ?? 0.7)) / 2;
+    const waistAnchorNorm = hipYNorm;
+    const torsoSpanNorm = Math.max(0.0001, hipYNorm - shoulderYNorm);
+
+    const shoulderY = Math.round(shoulderYNorm * imgH);
+    const hipY = Math.round(hipYNorm * imgH);
+    const bustY = Math.round(
+      (shoulderYNorm + torsoSpanNorm * POSITION_OFFSETS.BUST_DOWN_TORSO_RATIO) * imgH
     );
-    const hipY = Math.round((((lh?.y ?? 0.7) + (rh?.y ?? 0.7)) / 2) * imgH);
+    const waistY = Math.round(
+      (waistAnchorNorm - torsoSpanNorm * POSITION_OFFSETS.WAIST_UP_TORSO_RATIO) * imgH
+    );
 
     // compute left/right at shoulder & hip rows (fallback to landmark x if row bounds unavailable)
     const L_shoulder =
@@ -381,75 +368,30 @@ export function SilhouetteVisualization({
       Math.max(imgW * 0.06, 20)
     );
 
-    // helper to compute "inner" torso width on a row limited to torsoHalfEstimate around centerX
-    const innerWidthAtRow = (y: number) => {
-      if (y < 0 || y >= imgH) return 0;
-      const L = leftBounds[y];
-      const R = rightBounds[y];
-      if (L === -1 || R === -1) return 0;
-      const L_in = Math.max(L, Math.round(centerX - torsoHalfEstimate));
-      const R_in = Math.min(R, Math.round(centerX + torsoHalfEstimate));
-      return Math.max(0, R_in - L_in + 1);
-    };
+    // innerWidthAtRow no longer needed with fixed Y positions
 
-    // --- find bust: widest inner width in a band below shoulders (avoid very top rows) ---
-    const bustStart = Math.max(0, shoulderY);
-    const bustEnd = Math.min(
-      imgH - 1,
-      shoulderY + Math.max(3, Math.round((hipY - shoulderY) * 0.35))
+    // --- bust: use universal torso-relative position ---
+
+    // --- hip: from waist anchor, move down by torso ratio ---
+    const foundHipY = Math.round(
+      (waistAnchorNorm + torsoSpanNorm * POSITION_OFFSETS.HIP_DOWN_TORSO_RATIO) * imgH
     );
-    let bustY = bustStart;
-    let bestBustWidth = -1;
-    for (let y = bustStart; y <= bustEnd; y++) {
-      const w = innerWidthAtRow(y);
-      if (w > bestBustWidth) {
-        bestBustWidth = w;
-        bustY = y;
-      }
-    }
 
-    // --- compute waist: midpoint between bust and hip, 10% closer to bust ---
-    const midpoint = (bustY + hipY) / 2;
-    const offsetTowardBust = (hipY - bustY) * 0.1; // 10% of the bust-hip distance
-    const waistY = Math.round(midpoint + offsetTowardBust); // Shift 10% toward bust
-
-    // --- find hip: widest inner width in band near hip ---
-    const hipStart = Math.max(
-      waistY,
-      hipY - Math.max(3, Math.round((hipY - shoulderY) * 0.15))
-    );
-    const hipEnd = Math.min(
-      imgH - 1,
-      hipY + Math.max(2, Math.round((imgH - hipY) * 0.08))
-    );
-    let foundHipY = hipStart;
-    let bestHipWidth = -1;
-    for (let y = hipStart; y <= hipEnd; y++) {
-      const w = innerWidthAtRow(y);
-      if (w > bestHipWidth) {
-        bestHipWidth = w;
-        foundHipY = y;
-      }
-    }
-
-    // compute left/right bounds for those chosen rows using the center-limited logic
+    // compute left/right bounds per row
     const buildBounds = (y: number) => {
-      const L =
-        leftBounds[y] > -1
-          ? leftBounds[y]
-          : Math.round(centerX - torsoHalfEstimate);
-      const R =
-        rightBounds[y] > -1
-          ? rightBounds[y]
-          : Math.round(centerX + torsoHalfEstimate);
-      const left = Math.max(
-        0,
-        Math.round(Math.max(L, centerX - torsoHalfEstimate))
-      );
-      const right = Math.min(
-        imgW,
-        Math.round(Math.min(R, centerX + torsoHalfEstimate))
-      );
+      const hasRow = leftBounds[y] > -1 && rightBounds[y] > -1;
+      if (isSideView && hasRow) {
+        // side view: use full silhouette width
+        const left = Math.max(0, leftBounds[y]);
+        const right = Math.min(imgW, rightBounds[y]);
+        return { y, left, right };
+      }
+
+      // front view (or missing row bounds): use center-limited torso band to avoid arms
+      const L = hasRow ? leftBounds[y] : Math.round(centerX - torsoHalfEstimate);
+      const R = hasRow ? rightBounds[y] : Math.round(centerX + torsoHalfEstimate);
+      const left = Math.max(0, Math.round(Math.max(L, centerX - torsoHalfEstimate)));
+      const right = Math.min(imgW, Math.round(Math.min(R, centerX + torsoHalfEstimate)));
       return { y, left, right };
     };
 
@@ -460,37 +402,7 @@ export function SilhouetteVisualization({
     };
   };
 
-  /**
-   * Compute measurement rows using provided Y positions (for consistency between views)
-   */
-  const computeMeasurementRowsWithYPositions = (
-    mask: ImageData,
-    //landmarks: Landmark[],
-    imgW: number,
-    imgH: number,
-    referencePositions: { bust: { y: number }; waist: { y: number }; hip: { y: number } }
-  ) => {
-    const { leftBounds, rightBounds } = getRowBoundsFromMask(mask);
-
-    // Use the Y positions from the reference (front view)
-    const bustY = referencePositions.bust.y;
-    const waistY = referencePositions.waist.y;
-    const hipY = referencePositions.hip.y;
-
-    // Helper to get left/right bounds at a specific Y position
-    const getBoundsAtY = (y: number) => {
-      const clampedY = Math.max(0, Math.min(imgH - 1, Math.round(y)));
-      const left = leftBounds[clampedY] > -1 ? leftBounds[clampedY] : 0;
-      const right = rightBounds[clampedY] > -1 ? rightBounds[clampedY] : imgW;
-      return { y: clampedY, left, right };
-    };
-
-    return {
-      bust: getBoundsAtY(bustY),
-      waist: getBoundsAtY(waistY),
-      hip: getBoundsAtY(hipY),
-    };
-  };
+  // removed: computeMeasurementRowsWithYPositions; side must be computed independently
 
   /**
    * Get inner torso bounds at a specific Y level, excluding arms/hands
@@ -562,7 +474,8 @@ export function SilhouetteVisualization({
     photo: File,
     mask: ImageData,
     landmarks?: Landmark[],
-    mode: "pose" | "mask" = "pose"
+    mode: "pose" | "mask" = "pose",
+    isFrontView = false
   ) => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -631,7 +544,7 @@ export function SilhouetteVisualization({
         if (mode === "pose") {
           drawTorsoBounds(ctx, landmarks, mask.width, mask.height);
         } else {
-          drawTorsoBoundsMask(ctx, landmarks, mask, mask.width, mask.height);
+          drawTorsoBoundsMask(ctx, landmarks, mask, mask.width, mask.height, isFrontView);
         }
       }
 
@@ -766,15 +679,13 @@ export function SilhouetteVisualization({
     landmarks: Landmark[],
     mask: ImageData,
     width: number,
-    height: number
+    height: number,
+    isFrontView: boolean
   ) => {
-    // compute data using mask + landmarks, but use reference Y positions if available for side view
-    const levels = referenceYPositions 
-      ? computeMeasurementRowsWithYPositions(mask, /*landmarks*/ width, height, referenceYPositions)
-      : computeMeasurementRows(mask, landmarks, width, height);
+    // compute independently per view
+    const levels = computeMeasurementRows(mask, landmarks, width, height, !isFrontView);
 
-    // For front view, override with more accurate bounds
-    const isFrontView = !referenceYPositions; // Front view doesn't use reference positions
+    // For front view, optional overrides
     if (isFrontView && landmarks[11] && landmarks[12]) {
       // Bust: use shoulder landmarks
       const shoulderLeft = landmarks[11]; // Left shoulder
@@ -782,8 +693,9 @@ export function SilhouetteVisualization({
       const shoulderDistance = Math.abs(shoulderRight.x - shoulderLeft.x) * width;
       
       const centerX = (shoulderLeft.x + shoulderRight.x) / 2 * width;
-      const bustLeft = centerX - shoulderDistance / 2;
-      const bustRight = centerX + shoulderDistance / 2;
+      const halfWidth = (shoulderDistance / 2) * (1 - POSITION_OFFSETS.BUST_FRONT_SHRINK_RATIO);
+      const bustLeft = centerX - halfWidth;
+      const bustRight = centerX + halfWidth;
       
       levels.bust = {
         y: levels.bust.y,

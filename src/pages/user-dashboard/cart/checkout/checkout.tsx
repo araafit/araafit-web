@@ -80,8 +80,6 @@ export function DashboardCartCheckout() {
     );
   }
 
-  console.log(checkoutTab);
-
   return (
     <UserDashboardLayout>
       <div className="h-screen flex flex-col gap-2 relative">
