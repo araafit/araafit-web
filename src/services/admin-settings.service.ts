@@ -42,12 +42,13 @@ export type SizeType =
   | "chest"
   | "shoulder"
   | "inseam"
-  | "size";
+  | "clotheSize";
 
 export interface CreateSizeChartRequest {
   type: SizeType;
   value: number;
   gender: "male" | "female";
+  label?: string;
 }
 
 export interface SizeChartItem {
@@ -62,6 +63,7 @@ export interface UpdateSizeChartRequest {
   value: number;
   gender?: "male" | "female";
   type?: SizeType;
+  label?: string;
 }
 
 export interface SizeChartItemResponse {

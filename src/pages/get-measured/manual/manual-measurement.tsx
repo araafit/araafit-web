@@ -38,7 +38,9 @@ export function ManualMeasurement() {
   console.log(sizeChart);
   const { data: existingMeasurements } = useMeasurements();
   const createMeasurements = useCreateMeasurements();
-  const updateMeasurement = useMeasurementsStore((state) => state.updateMeasurement);
+  const updateMeasurement = useMeasurementsStore(
+    (state) => state.updateMeasurement
+  );
 
   // Local state for selected measurements
   const [selectedValues, setSelectedValues] = useState<
@@ -250,10 +252,12 @@ export function ManualMeasurement() {
             {orderedKeys.map((key) => {
               if (key === "skinTones") {
                 const tones =
-                  ((sizeChart as unknown as Record<
-                    string,
-                    { name: string; hex: string }[]
-                  >)[key] as { name: string; hex: string }[]) || [];
+                  ((
+                    sizeChart as unknown as Record<
+                      string,
+                      { name: string; hex: string }[]
+                    >
+                  )[key] as { name: string; hex: string }[]) || [];
                 return (
                   <div
                     key={key}
@@ -281,17 +285,16 @@ export function ManualMeasurement() {
               }
 
               const items =
-                (sizeChart[key] as { id: string; value: number }[]) || [];
+                (sizeChart[key] as { id: string; value: number; label?: string }[]) || [];
               console.log("items", items);
               console.log("key", key, sizeChart);
-              const label =
-                key === "dressSize"
-                  ? "Dress Size"
-                  : key === "hips"
-                  ? "Hips"
-                  : key === "chest"
-                  ? "Chest"
-                  : key.charAt(0).toUpperCase() + key.slice(1);
+              const label = ["dressSize", "clotheSize"].includes(key)
+                ? "Size"
+                : key === "hips"
+                ? "Hips"
+                : key === "chest"
+                ? "Chest"
+                : key.charAt(0).toUpperCase() + key.slice(1);
 
               return (
                 <div key={key} className="w-full flex flex-col gap-2 md:gap-3">
@@ -303,7 +306,7 @@ export function ManualMeasurement() {
                       <Button
                         key={item.id}
                         type="button"
-                        text={String(item.value)}
+                        text={item.label || String(item.value)}
                         variant="outline"
                         className={`w-full md:w-[58px] h-[36px] md:h-[44px] text-xs md:text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-neutral-700 focus:border-neutral-700 ${
                           selectedValues[key] === item.value
