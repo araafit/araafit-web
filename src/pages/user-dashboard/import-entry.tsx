@@ -1,5 +1,4 @@
 export { DashboardHomePage } from "./home";
-export { DashboardShopPage } from "./shop/shop";
 export { DashboardShopDressDetailPage } from "./shop/dress-item-detail";
 export { DashboardShopFabricDetailPage } from "./shop/fabric-item-detail";
 export { DashboardOrdersPage } from "./orders/orders";

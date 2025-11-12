@@ -138,12 +138,15 @@ export const useCheckoutWithCard = () => {
     mutationFn: (data: CheckoutWithCardRequest) =>
       ordersService.checkoutWithCard(data),
     onSuccess: (data) => {
-      toast.success("Redirecting to payment...");
-      // Redirect to payment URL
-      window.location.href = data.payment.authorizationUrl;
+      toast.success("Redirecting to payment in a moment");
       // Invalidate cart and orders
       queryClient.invalidateQueries({ queryKey: ["cart"] });
       queryClient.invalidateQueries({ queryKey: ["orders"] });
+
+      // Redirect to payment URL
+     setTimeout(() => {
+       window.location.href = data.payment.authorizationUrl;
+     }, 1000);
     },
     onError: (error) => {
       showToast.error(`Checkout failed: ${error.message}`, {

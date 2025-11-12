@@ -8,7 +8,6 @@ import PasswordResetPage from "./user-auth/reset/password-reset-page";
 import Register from "./user-auth/register/register";
 import {
   DashboardHomePage,
-  DashboardShopPage,
   DashboardShopFabricDetailPage,
   DashboardShopDressDetailPage,
   DashboardOrdersPage,
@@ -51,6 +50,13 @@ import GuestCartCheckout from "./guest/cart/guest-cart-checkout";
 import PaystackCallback from "./paystack-callback";
 import CheckoutSuccess from "./user-dashboard/cart/checkout/checkout-success";
 import { FabricRequestSummary } from "./guest/guest-shop/fabric-request-summary";
+import {
+  AllShop,
+  KidsShop,
+  WomenShop,
+  MenShop,
+} from "./user-dashboard/shop/shop-pages-export";
+import ShopLayout from "./user-dashboard/shop/context/shop-layout";
 
 /* ---------------------------------------------------------------- */
 
@@ -112,7 +118,7 @@ const pagesRoutes = createBrowserRouter([
         path: "fabric/:itemName",
         element: <GuestFabricDetailPage />,
       },
-       {
+      {
         path: ":fabricId/summary",
         element: <FabricRequestSummary />,
       },
@@ -177,7 +183,39 @@ const pagesRoutes = createBrowserRouter([
       {
         path: "shop",
         children: [
-          { path: "", element: <DashboardShopPage />, index: true },
+          {
+            path: "all",
+            element: (
+              <ShopLayout>
+                <AllShop />
+              </ShopLayout>
+            ),
+            index: true,
+          },
+          {
+            path: "men",
+            element: (
+              <ShopLayout>
+                <MenShop />
+              </ShopLayout>
+            ),
+          },
+          {
+            path: "women",
+            element: (
+              <ShopLayout>
+                <WomenShop />
+              </ShopLayout>
+            ),
+          },
+          {
+            path: "kids",
+            element: (
+              <ShopLayout>
+                <KidsShop />
+              </ShopLayout>
+            ),
+          },
           {
             path: "dress/:itemName",
             element: <DashboardShopDressDetailPage />,
