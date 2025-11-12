@@ -13,7 +13,7 @@ import {
   type ProgressCallback,
   type MeasurementConfig,
 } from "./types";
-import { MEASUREMENT_ERROR_CODES, CONFIDENCE_THRESHOLDS } from "./config";
+import { MEASUREMENT_ERROR_CODES, CONFIDENCE_THRESHOLDS, POSITION_OFFSETS } from "./config";
 import {
   preprocessImage,
 } from "./utils";
@@ -179,7 +179,7 @@ export class BodySegmentationService {
         { r: 255, g: 255, b: 255, a: 255 }, // foreground color (person)
         { r: 0, g: 0, b: 0, a: 0 }, // background color
         false, // drawContour - disable for cleaner mask
-        0.9 // foregroundThreshold - use higher threshold
+        0.7 // foregroundThreshold - use higher threshold
       );
 
       // Debug: Check a sample of mask pixels to verify it's working correctly
@@ -429,9 +429,9 @@ export class BodySegmentationService {
       // Calculate shoulder and hip Y positions
       const shoulderY = (leftShoulder.y + rightShoulder.y) / 2;
       const hipY = (leftHip.y + rightHip.y) / 2;
-      
-      // Bust is typically 25-35% down from shoulders to hips
-      const bustY = shoulderY + (hipY - shoulderY) * 0.3;
+
+      // Use universal torso-relative offset for bust
+      const bustY = shoulderY + (hipY - shoulderY) * POSITION_OFFSETS.BUST_DOWN_TORSO_RATIO;
       return Math.max(0.1, Math.min(0.9, bustY));
     }
     
@@ -444,24 +444,26 @@ export class BodySegmentationService {
    * Calculate waist measurement position based on torso landmarks
    */
   private _calculateWaistPosition(landmarks: Landmark[], imgH: number): number {
-    console.log("Calculating waist position...", landmarks, imgH);
+    console.log("Calculating waist position (waist anchor offsets)...", landmarks, imgH);
     const leftShoulder = landmarks[11]; // LEFT_SHOULDER
     const rightShoulder = landmarks[12]; // RIGHT_SHOULDER
     const leftHip = landmarks[23]; // LEFT_HIP
     const rightHip = landmarks[24]; // RIGHT_HIP
 
     if (leftShoulder && rightShoulder && leftHip && rightHip) {
-      // Calculate shoulder and hip Y positions
+      // Normalized Y positions
       const shoulderY = (leftShoulder.y + rightShoulder.y) / 2;
       const hipY = (leftHip.y + rightHip.y) / 2;
-      
-      // Waist is typically 60-70% down from shoulders to hips (natural waist)
-      const waistY = shoulderY + (hipY - shoulderY) * 0.65;
+
+      // Waist anchor at pelvis (mid-hip)
+      const waistAnchorY = hipY;
+      const torsoSpan = Math.max(0.0001, hipY - shoulderY);
+
+      const waistY = waistAnchorY - torsoSpan * POSITION_OFFSETS.WAIST_UP_TORSO_RATIO;
       return Math.max(0.2, Math.min(0.8, waistY));
     }
-    
-    console.log("No waist landmarks found, falling back to fixed ratio");
-    // Fallback to fixed ratio
+
+    console.log("No landmarks found for waist/hips; falling back to fixed ratio");
     return 0.6;
   }
 
@@ -469,17 +471,22 @@ export class BodySegmentationService {
    * Calculate hip measurement position based on hip landmarks
    */
   private _calculateHipPosition(landmarks: Landmark[], imgH: number): number {
-    console.log("Calculating hip position...", landmarks, imgH);
+    console.log("Calculating hip position (waist anchor offsets)...", landmarks, imgH);
+    const leftShoulder = landmarks[11]; // LEFT_SHOULDER
+    const rightShoulder = landmarks[12]; // RIGHT_SHOULDER
     const leftHip = landmarks[23]; // LEFT_HIP
     const rightHip = landmarks[24]; // RIGHT_HIP
 
-    if (leftHip && rightHip) {
-      // Use the actual hip landmark position
+    if (leftShoulder && rightShoulder && leftHip && rightHip) {
+      const shoulderY = (leftShoulder.y + rightShoulder.y) / 2;
       const hipY = (leftHip.y + rightHip.y) / 2;
-      return Math.max(0.3, Math.min(0.95, hipY));
+      const waistAnchorY = hipY;
+      const torsoSpan = Math.max(0.0001, hipY - shoulderY);
+
+      const hipRowY = waistAnchorY + torsoSpan * POSITION_OFFSETS.HIP_DOWN_TORSO_RATIO;
+      return Math.max(0.3, Math.min(0.95, hipRowY));
     }
-    
-    // Fallback to fixed ratio
+
     return 0.85;
   }
 

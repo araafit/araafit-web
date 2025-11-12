@@ -8,8 +8,8 @@ export function MeasurementStepperLines({
   // Determine if we're using photo upload (which replaces position step)
   const usePhotoUpload = true; // This should match the flag in get-measured.tsx
   const steps = usePhotoUpload
-    ? ["method", "upload photos", "enter height", "confirmation"]
-    : ["method", "position", "smart capture", "confirmation"];
+    ? ["gender", "method", "upload photos", "enter height", "confirmation"]
+    : ["gender", "method", "position", "smart capture", "confirmation"];
 
   return (
     <div

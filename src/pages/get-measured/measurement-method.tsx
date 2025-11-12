@@ -4,7 +4,7 @@ import { IconArrowLeft } from "@tabler/icons-react";
 import { useGetMeasured } from "./context/get-measured-context";
 import { MeasurementStepperLines } from "./stepper-lines";
 import Button from "../../shared-components/button";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 /* --------------------------------------------------------------------- */
 
 /**
@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
  */
 export function MeasurementMethod() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [method, setMethod] = useState<"manual" | "automated" | undefined>(
     undefined
@@ -36,7 +37,7 @@ export function MeasurementMethod() {
     if (method === "automated") {
       stepTo(currentStep + 1);
     } else {
-      navigate("/get-measured/manual");
+      navigate(`/get-measured/manual/measurement${location.search}`);
     }
   };
 
@@ -45,7 +46,7 @@ export function MeasurementMethod() {
     <div className="flex flex-col gap-8 md:gap-[12rem] relative">
         {/* Back Button */}
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => stepTo(0)}
           className="lg:absolute top-0 left-0 w-10 h-10 bg-white border border-gray-200 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors duration-200 shadow-sm z-10"
           aria-label="Go back"
         >

@@ -37,7 +37,7 @@ export default function TopBar({
       ) : (
         <div className="flex items-center gap-2 lg:gap-6">
           <Link
-            to="/dashboard/profile"
+            to="/dashboard/profile?tab=measurement"
             className="text-primary-500 font-medium text-sm lg:text-base hidden sm:block"
           >
             My Measurements

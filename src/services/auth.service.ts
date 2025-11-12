@@ -16,8 +16,7 @@ export interface VerifyEmailRequest {
 }
 
 export interface VerifyEmailResponse {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [name: string]: any;
+  [name: string]: unknown;
   message: string;
   isSuccess: boolean;
 }
@@ -28,8 +27,7 @@ export interface VerifyOtpRequest {
 }
 
 export interface VerifyOtpResponse {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [name: string]: any;
+  [name: string]: unknown;
   isSuccess: boolean;
   message: string;
 }
@@ -156,15 +154,25 @@ export interface ResetPasswordResponse {
   message: string;
 }
 
+export interface VerifyEmailWithMeasurementsRequest {
+  email: string;
+  measurement: {
+    bust: number;
+    waist: number;
+    hips: number;
+    height: number;
+    dressSize: number;
+    skinTone: string;
+  };
+}
+
 // Auth Service Class
 class AuthService {
   /**
    *  O-auth registration with Google
    */
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async googleAuth(payload?: GoogleAuthRequest): Promise<GoogleAuthResponse> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await apiClient.post<ApiResponse<GoogleAuthResponse>>(
       "/auth/google-auth",
       { payload }
@@ -179,6 +187,19 @@ class AuthService {
   async verifyEmail(data: VerifyEmailRequest): Promise<VerifyEmailResponse> {
     const response = await apiClient.post<VerifyEmailResponse>(
       "/auth/verify-email",
+      data
+    );
+    return response.data;
+  }
+
+  /**
+   * Send OTP to email for verification, including measurement data
+   */
+  async verifyEmailWithMeasurements(
+    data: VerifyEmailWithMeasurementsRequest
+  ): Promise<VerifyEmailResponse> {
+    const response = await apiClient.post<VerifyEmailResponse>(
+      "/auth/verify-email-with-measurements",
       data
     );
     return response.data;

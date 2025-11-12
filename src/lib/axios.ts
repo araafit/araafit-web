@@ -101,6 +101,10 @@ apiClient.interceptors.request.use(
     const guestToken = localStorage.getItem("araafit_guest_token");
     const adminAccessToken = tokenUtils.getAdminAccessToken();
 
+    console.log("adminAccessToken", adminAccessToken);
+    console.log("accessToken", accessToken);
+    console.log("guestToken", guestToken);
+
     // Priority: admin access token > user access token > guest user token
     if (adminAccessToken && !tokenUtils.isTokenExpired(adminAccessToken)) {
       config.headers.Authorization = `Bearer ${adminAccessToken}`;

@@ -11,12 +11,13 @@ import {
   createMeasurementService,
   type MeasurementResult,
 } from "../../../services/measurement";
+import { POSITION_OFFSETS } from "../../../services/measurement";
 import { extractSkinToneFromPhoto } from "../../../services/measurement/skin-tone-extractor";
-//import SilhouetteVisualization from "./silhouette-visualization";
+import SilhouetteVisualization from "./silhouette-visualization";
 import { useCreateMeasurements } from "../../../hooks/measurements.hooks";
 import { useCreateGuestUser } from "../../../hooks/auth.hooks";
 import { useAuthStore } from "../../../stores/auth-store";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import type { Landmark } from "../../../services/measurement/types";
 import {
@@ -30,6 +31,9 @@ export function Confirmation() {
   const { currentStep, stepTo, frontPhoto, sidePhoto, height, resetProgress } =
     useGetMeasured();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const gender = (searchParams.get("gender") || "female").toLowerCase();
+  const isMale = gender === "male";
   const { isAuthenticated, isGuest } = useAuthStore();
   const createMeasurements = useCreateMeasurements();
   const createGuestUser = useCreateGuestUser();
@@ -105,7 +109,8 @@ export function Confirmation() {
     mask: ImageData,
     _landmarks: Landmark[],
     imgW: number,
-    imgH: number
+    imgH: number,
+    isSideView = false
   ) => {
     // fallback if landmarks missing
     if (!_landmarks || _landmarks.length === 0) {
@@ -126,10 +131,21 @@ export function Confirmation() {
       rs = _landmarks[12],
       lh = _landmarks[23],
       rh = _landmarks[24];
-    const shoulderY = Math.round(
-      (((ls?.y ?? 0.2) + (rs?.y ?? 0.2)) / 2) * imgH
+
+    // normalized coordinates
+    const shoulderYNorm = ((ls?.y ?? 0.2) + (rs?.y ?? 0.2)) / 2;
+    const hipYNorm = ((lh?.y ?? 0.7) + (rh?.y ?? 0.7)) / 2;
+    const waistAnchorNorm = hipYNorm; // pelvis/mid-hip as anchor
+    const torsoSpanNorm = Math.max(0.0001, hipYNorm - shoulderYNorm);
+
+    const shoulderY = Math.round(shoulderYNorm * imgH);
+    const hipY = Math.round(hipYNorm * imgH);
+    const bustY = Math.round(
+      (shoulderYNorm + torsoSpanNorm * POSITION_OFFSETS.BUST_DOWN_TORSO_RATIO) * imgH
     );
-    const hipY = Math.round((((lh?.y ?? 0.7) + (rh?.y ?? 0.7)) / 2) * imgH);
+    const waistY = Math.round(
+      (waistAnchorNorm - torsoSpanNorm * POSITION_OFFSETS.WAIST_UP_TORSO_RATIO) * imgH
+    );
 
     // compute left/right at shoulder & hip rows (fallback to landmark x if row bounds unavailable)
     const L_shoulder =
@@ -163,75 +179,27 @@ export function Confirmation() {
       Math.max(imgW * 0.06, 20)
     );
 
-    // helper to compute "inner" torso width on a row limited to torsoHalfEstimate around centerX
-    const innerWidthAtRow = (y: number) => {
-      if (y < 0 || y >= imgH) return 0;
-      const L = leftBounds[y];
-      const R = rightBounds[y];
-      if (L === -1 || R === -1) return 0;
-      const L_in = Math.max(L, Math.round(centerX - torsoHalfEstimate));
-      const R_in = Math.min(R, Math.round(centerX + torsoHalfEstimate));
-      return Math.max(0, R_in - L_in + 1);
-    };
 
-    // --- find bust: widest inner width in a band below shoulders (avoid very top rows) ---
-    const bustStart = Math.max(0, shoulderY);
-    const bustEnd = Math.min(
-      imgH - 1,
-      shoulderY + Math.max(3, Math.round((hipY - shoulderY) * 0.35))
+    // --- hip: from waist anchor, move down by torso ratio ---
+    const foundHipY = Math.round(
+      (waistAnchorNorm + torsoSpanNorm * POSITION_OFFSETS.HIP_DOWN_TORSO_RATIO) * imgH
     );
-    let bustY = bustStart;
-    let bestBustWidth = -1;
-    for (let y = bustStart; y <= bustEnd; y++) {
-      const w = innerWidthAtRow(y);
-      if (w > bestBustWidth) {
-        bestBustWidth = w;
-        bustY = y;
-      }
-    }
 
-    // --- compute waist: midpoint between bust and hip, 10% closer to bust ---
-    const midpoint = (bustY + hipY) / 2;
-    const offsetTowardBust = (hipY - bustY) * 0.1; // 10% of the bust-hip distance
-    const waistY = Math.round(midpoint + offsetTowardBust); // Shift 10% toward bust
-
-    // --- find hip: widest inner width in band near hip ---
-    const hipStart = Math.max(
-      waistY,
-      hipY - Math.max(3, Math.round((hipY - shoulderY) * 0.15))
-    );
-    const hipEnd = Math.min(
-      imgH - 1,
-      hipY + Math.max(2, Math.round((imgH - hipY) * 0.08))
-    );
-    let foundHipY = hipStart;
-    let bestHipWidth = -1;
-    for (let y = hipStart; y <= hipEnd; y++) {
-      const w = innerWidthAtRow(y);
-      if (w > bestHipWidth) {
-        bestHipWidth = w;
-        foundHipY = y;
-      }
-    }
-
-    // compute left/right bounds for those chosen rows using the center-limited logic
+    // compute left/right bounds per row
     const buildBounds = (y: number) => {
-      const L =
-        leftBounds[y] > -1
-          ? leftBounds[y]
-          : Math.round(centerX - torsoHalfEstimate);
-      const R =
-        rightBounds[y] > -1
-          ? rightBounds[y]
-          : Math.round(centerX + torsoHalfEstimate);
-      const left = Math.max(
-        0,
-        Math.round(Math.max(L, centerX - torsoHalfEstimate))
-      );
-      const right = Math.min(
-        imgW,
-        Math.round(Math.min(R, centerX + torsoHalfEstimate))
-      );
+      const hasRow = leftBounds[y] > -1 && rightBounds[y] > -1;
+      if (isSideView && hasRow) {
+        // side view: use full silhouette width
+        const left = Math.max(0, leftBounds[y]);
+        const right = Math.min(imgW, rightBounds[y]);
+        return { y, left, right };
+      }
+
+      // front view (or missing row bounds): use center-limited torso band to avoid arms
+      const L = hasRow ? leftBounds[y] : Math.round(centerX - torsoHalfEstimate);
+      const R = hasRow ? rightBounds[y] : Math.round(centerX + torsoHalfEstimate);
+      const left = Math.max(0, Math.round(Math.max(L, centerX - torsoHalfEstimate)));
+      const right = Math.min(imgW, Math.round(Math.min(R, centerX + torsoHalfEstimate)));
       return { y, left, right };
     };
 
@@ -245,38 +213,7 @@ export function Confirmation() {
   /**
    * Compute measurement rows using provided Y positions (for consistency between views)
    */
-  const computeMeasurementRowsWithYPositions = useCallback((
-    mask: ImageData,
-    _landmarks: Landmark[],
-    imgW: number,
-    imgH: number,
-    referencePositions: {
-      bust: { y: number };
-      waist: { y: number };
-      hip: { y: number };
-    }
-  ) => {
-    const { leftBounds, rightBounds } = getRowBoundsFromMask(mask);
-
-    // Use the Y positions from the reference (front view)
-    const bustY = referencePositions.bust.y;
-    const waistY = referencePositions.waist.y;
-    const hipY = referencePositions.hip.y;
-
-    // Helper to get left/right bounds at a specific Y position
-    const getBoundsAtY = (y: number) => {
-      const clampedY = Math.max(0, Math.min(imgH - 1, Math.round(y)));
-      const left = leftBounds[clampedY] > -1 ? leftBounds[clampedY] : 0;
-      const right = rightBounds[clampedY] > -1 ? rightBounds[clampedY] : imgW;
-      return { y: clampedY, left, right };
-    };
-
-    return {
-      bust: getBoundsAtY(bustY),
-      waist: getBoundsAtY(waistY),
-      hip: getBoundsAtY(hipY),
-    };
-  }, [getRowBoundsFromMask]);
+  // removed: computeMeasurementRowsWithYPositions; side must be computed independently
 
   /**
    * Get inner torso bounds at a specific Y level, excluding arms/hands
@@ -396,15 +333,16 @@ export function Confirmation() {
           frontMask,
           frontLandmarks,
           frontMask.width,
-          frontMask.height
+          frontMask.height,
+          false
         );
-        // Side view: mask-based but using front landmarks Y positions for consistency
-        const sideMeasurements = computeMeasurementRowsWithYPositions(
+        // Side view: compute independently using side landmarks
+        const sideMeasurements = computeMeasurementRows(
           sideMask,
           sideLandmarks,
           sideMask.width,
           sideMask.height,
-          frontMeasurements // Use front Y positions
+          true
         );
 
         // Calculate widths and depths in pixels, then convert to cm
@@ -412,11 +350,8 @@ export function Confirmation() {
         const shoulderRight = frontLandmarks[12];
         const bustWidthFromShoulders =
           shoulderLeft && shoulderRight
-            ? Math.abs(shoulderRight.x - shoulderLeft.x) *
-              frontMask.width *
-              pixelToCmRatio
-            : (frontMeasurements.bust.right - frontMeasurements.bust.left) *
-              pixelToCmRatio;
+            ? Math.abs(shoulderRight.x - shoulderLeft.x) * frontMask.width * (1 - POSITION_OFFSETS.BUST_FRONT_SHRINK_RATIO) * pixelToCmRatio
+            : (frontMeasurements.bust.right - frontMeasurements.bust.left) * pixelToCmRatio;
 
         const bustWidth = bustWidthFromShoulders;
         const bustDepth =
@@ -482,7 +417,7 @@ export function Confirmation() {
         return null;
       }
     },
-    [computeMeasurementRows, computeMeasurementRowsWithYPositions, getInnerTorsoBounds]
+    [computeMeasurementRows, getInnerTorsoBounds]
   );
 
   const processMeasurements = useCallback(async () => {
@@ -704,7 +639,7 @@ export function Confirmation() {
                 </div>
 
                 <div className="space-y-4 md:space-y-6">
-                  {/* Show accurate measurements if available, with comparison */}
+                  Show accurate measurements if available, with comparison
                   {/*{accurateMeasurements && (
                     <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
                       <h4 className="font-medium text-green-800 mb-2">
@@ -716,68 +651,118 @@ export function Confirmation() {
                     </div>
                   )}*/}
 
-                  <div className="flex justify-between items-center py-3 border-b border-neutral-100">
-                    <span className="text-sm md:text-lg text-neutral-700">
-                      Bust (inches)
-                    </span>
-                    <div className="text-right">
-                      <span className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
-                        {accurateMeasurements
-                          ? Math.round(
-                              accurateMeasurements.bust.circumference / 2.54
-                            )
-                          : Math.round(measurements.measurements.bust / 2.54)}
-                      </span>
-                      {/*{accurateMeasurements && (
-                        <div className="text-sm text-green-600">
-                          Enhanced (was{" "}
-                          {Math.round(measurements.measurements.bust / 2.54)})
+                  {isMale ? (
+                    <>
+                      <div className="flex justify-between items-center py-3 border-b border-neutral-100">
+                        <span className="text-sm md:text-lg text-neutral-700">
+                          Chest (inches)
+                        </span>
+                        <div className="text-right">
+                          <span className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
+                            {accurateMeasurements
+                              ? Math.round(
+                                  accurateMeasurements.bust.circumference / 2.54
+                                )
+                              : Math.round(
+                                  measurements.measurements.bust / 2.54
+                                )}
+                          </span>
                         </div>
-                      )}*/}
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between items-center py-3 border-b border-neutral-100">
-                    <span className="text-sm md:text-lg text-neutral-700">
-                      Waist (inches)
-                    </span>
-                    <div className="text-right">
-                      <span className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
-                        {accurateMeasurements
-                          ? Math.round(
-                              accurateMeasurements.waist.circumference / 2.54
-                            )
-                          : Math.round(measurements.measurements.waist / 2.54)}
-                      </span>
-                      {/*{accurateMeasurements && (
-                        <div className="text-sm text-green-600">
-                          Enhanced (was{" "}
-                          {Math.round(measurements.measurements.waist / 2.54)})
+                      </div>
+                      <div className="flex justify-between items-center py-3 border-b border-neutral-100">
+                        <span className="text-sm md:text-lg text-neutral-700">
+                          Waist (inches)
+                        </span>
+                        <div className="text-right">
+                          <span className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
+                            {accurateMeasurements
+                              ? Math.round(
+                                  accurateMeasurements.waist.circumference / 2.54
+                                )
+                              : Math.round(
+                                  measurements.measurements.waist / 2.54
+                                )}
+                          </span>
                         </div>
-                      )}*/}
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between items-center py-3 border-b border-neutral-100">
-                    <span className="text-sm md:text-lg text-neutral-700">
-                      Hip (inches)
-                    </span>
-                    <div className="text-right">
-                      <span className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
-                        {accurateMeasurements
-                          ? Math.round(
-                              accurateMeasurements.hip.circumference / 2.54
-                            )
-                          : Math.round(measurements.measurements.hip / 2.54)}
-                      </span>
-                      {/*{accurateMeasurements && (
-                        <div className="text-sm text-green-600">
-                          Enhanced (was{" "}
-                          {Math.round(measurements.measurements.hip / 2.54)})
+                      </div>
+                      <div className="flex justify-between items-center py-3 border-b border-neutral-100">
+                        <span className="text-sm md:text-lg text-neutral-700">
+                          Shoulder (inches)
+                        </span>
+                        <div className="text-right">
+                          <span className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
+                            {Math.round(
+                              (measurements.measurements.shoulderWidth || 0) /
+                                2.54
+                            )}
+                          </span>
                         </div>
-                      )}*/}
-                    </div>
-                  </div>
+                      </div>
+                      <div className="flex justify-between items-center py-3 border-b border-neutral-100">
+                        <span className="text-sm md:text-lg text-neutral-700">
+                          Inseam (inches)
+                        </span>
+                        <div className="text-right">
+                          <span className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
+                            {Math.round(
+                              (measurements.measurements.inseam || 0) / 2.54
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex justify-between items-center py-3 border-b border-neutral-100">
+                        <span className="text-sm md:text-lg text-neutral-700">
+                          Bust (inches)
+                        </span>
+                        <div className="text-right">
+                          <span className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
+                            {accurateMeasurements
+                              ? Math.round(
+                                  accurateMeasurements.bust.circumference / 2.54
+                                )
+                              : Math.round(
+                                  measurements.measurements.bust / 2.54
+                                )}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center py-3 border-b border-neutral-100">
+                        <span className="text-sm md:text-lg text-neutral-700">
+                          Waist (inches)
+                        </span>
+                        <div className="text-right">
+                          <span className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
+                            {accurateMeasurements
+                              ? Math.round(
+                                  accurateMeasurements.waist.circumference / 2.54
+                                )
+                              : Math.round(
+                                  measurements.measurements.waist / 2.54
+                                )}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center py-3 border-b border-neutral-100">
+                        <span className="text-sm md:text-lg text-neutral-700">
+                          Hip (inches)
+                        </span>
+                        <div className="text-right">
+                          <span className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
+                            {accurateMeasurements
+                              ? Math.round(
+                                  accurateMeasurements.hip.circumference / 2.54
+                                )
+                              : Math.round(
+                                  measurements.measurements.hip / 2.54
+                                )}
+                          </span>
+                        </div>
+                      </div>
+                    </>
+                  )}
 
                   <div className="flex justify-between items-center py-3 border-b border-neutral-100">
                     <span className="text-sm md:text-lg text-neutral-700">Height</span>
@@ -790,12 +775,14 @@ export function Confirmation() {
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center py-3 border-b border-neutral-100">
-                    <span className="text-sm md:text-lg text-neutral-700">Dress Size</span>
-                    <span className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
-                      {measurements.dressSize.us}
-                    </span>
-                  </div>
+                  {!isMale && (
+                    <div className="flex justify-between items-center py-3 border-b border-neutral-100">
+                      <span className="text-sm md:text-lg text-neutral-700">Dress Size</span>
+                      <span className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
+                        {measurements.dressSize.us}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -818,7 +805,7 @@ export function Confirmation() {
               )}
 
               {/* Silhouette Visualization (Debug) */}
-              {/*{frontPhoto && sidePhoto && measurements?.debug && (
+              {frontPhoto && sidePhoto && measurements?.debug && (
                 <SilhouetteVisualization
                   frontPhoto={frontPhoto}
                   sidePhoto={sidePhoto}
@@ -828,7 +815,7 @@ export function Confirmation() {
                   sideLandmarks={measurements.debug.sideLandmarks}
                   heightInCm={measurements.metadata.heightInCm}
                 />
-              )}*/}
+              )}
             </>
           )}
         </div>

@@ -77,6 +77,8 @@ export class MeasurementCalculatorService {
       );
       const inseam = this._calculateInseam(
         analysis.frontLandmarks,
+        analysis.imageWidth,
+        analysis.imageHeight,
         pixelToCmRatio
       );
 
@@ -259,6 +261,8 @@ export class MeasurementCalculatorService {
    */
   private _calculateInseam(
     landmarks: Landmark[],
+    imgW: number,
+    imgH: number,
     pixelToCmRatio: number
   ): number {
     const leftHip = landmarks[PoseLandmarks.LEFT_HIP];
@@ -267,40 +271,40 @@ export class MeasurementCalculatorService {
     const rightAnkle = landmarks[PoseLandmarks.RIGHT_ANKLE];
 
     // Calculate both legs and use the one with better visibility
-    let legLength = 0;
+    let legLengthPx = 0;
     let bestConfidence = 0;
 
     if (leftHip && leftAnkle) {
-      const leftLegLength = calculateDistance(leftHip, leftAnkle);
+      const leftLegPx = distPx(leftHip, leftAnkle, imgW, imgH);
       const leftConfidence = Math.min(
-        leftHip.visibility!,
-        leftAnkle.visibility!
+        leftHip.visibility ?? 1,
+        leftAnkle.visibility ?? 1
       );
 
       if (leftConfidence > bestConfidence) {
-        legLength = leftLegLength;
+        legLengthPx = leftLegPx;
         bestConfidence = leftConfidence;
       }
     }
 
     if (rightHip && rightAnkle) {
-      const rightLegLength = calculateDistance(rightHip, rightAnkle);
+      const rightLegPx = distPx(rightHip, rightAnkle, imgW, imgH);
       const rightConfidence = Math.min(
-        rightHip.visibility!,
-        rightAnkle.visibility!
+        rightHip.visibility ?? 1,
+        rightAnkle.visibility ?? 1
       );
 
       if (rightConfidence > bestConfidence) {
-        legLength = rightLegLength;
+        legLengthPx = rightLegPx;
         bestConfidence = rightConfidence;
       }
     }
 
-    if (legLength === 0) {
+    if (legLengthPx === 0) {
       throw new Error("Could not calculate leg length from landmarks");
     }
 
-    return legLength * pixelToCmRatio;
+    return legLengthPx * pixelToCmRatio;
   }
 
   /**

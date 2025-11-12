@@ -7,6 +7,8 @@ import {
 import Button from "../../../shared-components/button";
 import { useGetMeasured } from "../context/get-measured-context";
 import { MeasurementStepperLines } from "../stepper-lines";
+import { measurementsService } from "../../../services/measurements.service";
+import showToast from "../../../utils/notification";
 
 /* ----------------------------------------------------------- */
 
@@ -15,12 +17,13 @@ interface PhotoUploadProps {
 }
 
 export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
-  const { currentStep, stepTo, setPhotos } = useGetMeasured();
+  const { currentStep, stepTo, setPhotos, setUploaded } = useGetMeasured();
   const [frontPhoto, setFrontPhoto] = useState<File | null>(null);
   const [sidePhoto, setSidePhoto] = useState<File | null>(null);
   const [frontPreview, setFrontPreview] = useState<string | null>(null);
   const [sidePreview, setSidePreview] = useState<string | null>(null);
-  const [dragOver, setDragOver] = useState<"front" | "side" | null>(null);
+  const [dragOver, setDragOver] = useState<'front' | 'side' | null>(null);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
 
   const frontInputRef = useRef<HTMLInputElement>(null);
   const sideInputRef = useRef<HTMLInputElement>(null);
@@ -81,11 +84,31 @@ export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
     }
   };
 
-  const handleContinue = () => {
-    if (frontPhoto && sidePhoto) {
+  const handleContinue = async () => {
+    if (!frontPhoto || !sidePhoto) return;
+
+    try {
+      setIsUploading(true);
+      const toastId = showToast.loading("Processing...");
+
+      //const res = await measurementsService.uploadMeasurementImages(frontPhoto, sidePhoto);
+
+      //setUploaded({ front: res.front, side: res.side });
       setPhotos(frontPhoto, sidePhoto);
       onPhotosUploaded?.(frontPhoto, sidePhoto);
+
+      showToast.dismiss(toastId as unknown as string);
+      //showToast.success("Photos processed successfully");
       stepTo(currentStep + 1);
+    } catch (error: unknown) {
+      let message = "Failed to upload photos. Please try again.";
+      if (typeof error === "object" && error !== null) {
+        const maybeResp = error as { response?: { data?: { message?: string } } };
+        message = maybeResp.response?.data?.message || message;
+      }
+      showToast.error(message);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -284,9 +307,9 @@ export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
         />
 
         <Button
-          text="Continue"
+          text={isUploading ? "Processing..." : "Continue"}
           variant="solid"
-          disabled={!frontPhoto || !sidePhoto}
+          disabled={!frontPhoto || !sidePhoto || isUploading}
           className="w-full md:w-[10rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed"
           onClick={handleContinue}
         />

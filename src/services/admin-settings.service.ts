@@ -33,11 +33,21 @@ export interface UpdateAdminPasswordResponse {
 }
 
 // Types for size chart
-export type SizeType = "bust" | "waist" | "hips" | "dressSize";
+export type SizeType =
+  | "bust"
+  | "waist"
+  | "hips"
+  | "dressSize"
+  | "height"
+  | "chest"
+  | "shoulder"
+  | "inseam"
+  | "size";
 
 export interface CreateSizeChartRequest {
   type: SizeType;
   value: number;
+  gender: "male" | "female";
 }
 
 export interface SizeChartItem {
@@ -45,15 +55,13 @@ export interface SizeChartItem {
   value: number;
 }
 
-export interface SizeChartResponse {
-  bust: SizeChartItem[];
-  waist: SizeChartItem[];
-  hips: SizeChartItem[];
-  dressSize: SizeChartItem[];
-}
+// Be flexible to allow gender-specific keys coming from the API
+export type SizeChartResponse = Record<string, SizeChartItem[]>;
 
 export interface UpdateSizeChartRequest {
   value: number;
+  gender?: "male" | "female";
+  type?: SizeType;
 }
 
 export interface SizeChartItemResponse {
@@ -101,7 +109,9 @@ interface ApiResponse<T> {
 class AdminSettingsService {
   // Admin Profile Management
   async getProfile(): Promise<AdminProfile> {
-    const response = await apiClient.get<ApiResponse<AdminProfile>>("/admin/profile");
+    const response = await apiClient.get<ApiResponse<AdminProfile>>(
+      "/admin/profile"
+    );
     return response.data.data;
   }
 
@@ -126,17 +136,16 @@ class AdminSettingsService {
   // Size Chart Management
   async createSizeChart(
     request: CreateSizeChartRequest
-  ): Promise<SizeChartItemResponse> {
-    const response = await apiClient.post<ApiResponse<SizeChartItemResponse>>(
-      "/size-chart",
-      request
-    );
+  ): Promise<{ gender: "male" | "female" }> {
+    const response = await apiClient.post<
+      ApiResponse<{ gender: "male" | "female" }>
+    >(`/size-chart/${request.gender}`, request);
     return response.data.data;
   }
 
-  async getSizeChart(): Promise<SizeChartResponse> {
+  async getSizeChart(gender?: string): Promise<SizeChartResponse> {
     const response = await apiClient.get<ApiResponse<SizeChartResponse>>(
-      "/size-chart"
+      `/size-chart/${gender}`
     );
     return response.data.data;
   }

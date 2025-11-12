@@ -16,10 +16,12 @@ import Spinner from "../../../shared-components/spinner";
 import Button from "../../../shared-components/button";
 import {
   useVerifyEmail,
+  useVerifyEmailWithMeasurements,
   useVerifyOtp,
   useRegister,
 } from "../../../hooks/auth.hooks";
 import { useAuth } from "../../../hooks/use-auth";
+import { useMeasurementsStore } from "../../../shared-hooks/state-store";
 
 /* ------------------------------------------------------------------------------------- */
 
@@ -70,8 +72,10 @@ export default function Register() {
 
   // Auth mutations
   const verifyEmailMutation = useVerifyEmail();
+  const verifyEmailWithMeasurements = useVerifyEmailWithMeasurements();
   const verifyOtpMutation = useVerifyOtp();
   const registerMutation = useRegister();
+  const measurements = useMeasurementsStore((s) => s.data);
 
   const methods = useForm<FormValues>({
     mode: "onTouched",
@@ -99,7 +103,50 @@ export default function Register() {
         const email = methods.getValues("email");
 
         try {
-          await verifyEmailMutation.mutateAsync({ email });
+          // If we have measurements in store, include them in verification request
+          const parseNumber = (val: string | number | undefined): number => {
+            if (val === undefined || val === null) return 0;
+            if (typeof val === "number") return val;
+            // handle values like "33/34"
+            const part = val.split("/")[0];
+            const n = Number(part.replace(/[^0-9.]/g, ""));
+            return Number.isFinite(n) ? n : 0;
+          };
+          const parseHeightInches = (val: string | number | undefined): number => {
+            if (val === undefined || val === null) return 0;
+            if (typeof val === "number") return val;
+            // Expect formats like 5'3 or 5' 3"
+            const match = val.match(/(\d+)\s*'?[\s]?(?:\s*(\d+)\s*"?)*?/);
+            if (!match) return 0;
+            const feet = Number(match[1] || 0);
+            const inches = Number(match[2] || 0);
+            return feet * 12 + inches;
+          };
+
+          const hasMeasurements =
+            measurements &&
+            (measurements.bust ||
+              measurements.waist ||
+              measurements.hip ||
+              measurements.height ||
+              measurements.dressSize ||
+              measurements.skinTone);
+
+          if (hasMeasurements) {
+            await verifyEmailWithMeasurements.mutateAsync({
+              email,
+              measurement: {
+                bust: parseNumber(measurements.bust),
+                waist: parseNumber(measurements.waist),
+                hips: parseNumber(measurements.hip),
+                height: parseHeightInches(measurements.height),
+                dressSize: parseNumber(measurements.dressSize),
+                skinTone: String(measurements.skinTone || ""),
+              },
+            });
+          } else {
+            await verifyEmailMutation.mutateAsync({ email });
+          }
           setCurrentStep(1);
         } catch (error) {
           console.error("Email verification failed:", error);

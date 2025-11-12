@@ -1,14 +1,20 @@
 import { useState } from "react";
 import Button from "../../../shared-components/button";
 import { maleImage, femaleImage } from "../image-export";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useGetMeasured } from "../context/get-measured-context";
 /* ------------------------------------------------------------ */
 
 export function PickGender() {
-  const [selectedGender, setSelectedGender] = useState<
-    "male" | "female" | null
-  >(null);
   const navigate = useNavigate();
+  const { stepTo } = useGetMeasured();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialGenderParam = searchParams.get("gender");
+  const [selectedGender, setSelectedGender] = useState<"male" | "female" | null>(
+    initialGenderParam === "male" || initialGenderParam === "female"
+      ? (initialGenderParam as "male" | "female")
+      : null
+  );
 
   return (
     <section className="min-h-screen bg-[#F5F5F5] px-0 py-0 md:py-2 md:px-16 overflow-y-scroll relative">
@@ -58,7 +64,7 @@ export function PickGender() {
             text="Back"
             variant="outline"
             className="w-full sm:w-[175px] text-neutral-950 border-neutral-100 mb-5 sm:mb-0"
-            onClick={() => navigate("/get-measured")}
+            onClick={() => navigate(-1)}
           />
 
           <Button
@@ -66,7 +72,13 @@ export function PickGender() {
             variant="solid"
             disabled={selectedGender === null}
             className={`w-full sm:w-[175px] disabled:opacity-10 disabled:cursor-not-allowed`}
-            onClick={() => navigate("/get-measured/manual/measurement")}
+            onClick={() => {
+              if (!selectedGender) return;
+              const params = new URLSearchParams(searchParams);
+              params.set("gender", selectedGender);
+              setSearchParams(params, { replace: true });
+              stepTo(1);
+            }}
           />
         </div>
       </div>

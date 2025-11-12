@@ -369,7 +369,7 @@ const Modal: React.FC<ModalShape> = memo(
         return;
       }
 
-      claimDiscountMutation.mutateAsync();
+      claimDiscountMutation.mutateAsync(discountInput);
       setFieldIsEmpty(false);
     };
 

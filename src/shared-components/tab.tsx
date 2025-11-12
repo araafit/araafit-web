@@ -6,7 +6,7 @@ import { CN } from "../utils/class-merge";
 
 export interface TabShape {
   items: string[];
-  defaultTab?: 0;
+  defaultTab?: number;
   tabContainerClassName?: string;
   tabListClassName?: string;
   tabItemClassName?: string;
@@ -14,13 +14,13 @@ export interface TabShape {
   inactiveClassName?: string;
   containerClassName?: string;
   children?: React.ReactNode;
-  onChange?: (arg1: any) => void;
+  onChange?: (tabLabel: string) => void;
 }
 
 export interface TabItemShape {
   label: string;
   active: boolean;
-  onClick: () => any;
+  onClick: () => void;
   activeClassName?: string;
   inactiveClassName?: string;
   tabItemClassName?: string;
@@ -77,7 +77,7 @@ const Tab = ({
   const [activeTab, setActiveTab] = useState<number>(defaultTab);
 
   const handleTabClick = useCallback(
-    (index: number, tabItem?: string) => {
+    (index: number, tabItem: string) => {
       setActiveTab(index);
       onChange?.(tabItem);
     },

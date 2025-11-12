@@ -16,7 +16,8 @@ import { notificationStyles } from "../style/custom";
 // Query keys
 export const adminSettingsKeys = {
   all: ["admin-settings"] as const,
-  sizeChart: () => [...adminSettingsKeys.all, "size-chart"] as const,
+  sizeChart: (gender?: string) =>
+    [...adminSettingsKeys.all, "size-chart", gender ?? "all"] as const,
   dressStyles: () => [...adminSettingsKeys.all, "dress-styles"] as const,
   dressStyle: (id: string) => [...adminSettingsKeys.dressStyles(), id] as const,
 };
@@ -95,10 +96,10 @@ export const useUpdateAdminPassword = () => {
 };
 
 // Size Chart Hooks
-export const useSizeChart = () => {
+export const useSizeChart = (gender?: string) => {
   return useQuery({
-    queryKey: adminSettingsKeys.sizeChart(),
-    queryFn: () => adminSettingsService.getSizeChart(),
+    queryKey: adminSettingsKeys.sizeChart(gender),
+    queryFn: () => adminSettingsService.getSizeChart(gender),
     retry: (failureCount, error) => {
       const axiosError = error as { response?: { status?: number } };
       if (
@@ -118,9 +119,9 @@ export const useCreateSizeChart = () => {
   return useMutation({
     mutationFn: (request: CreateSizeChartRequest) =>
       adminSettingsService.createSizeChart(request),
-    onSuccess: () => {
+    onSuccess: (data: { gender: "male" | "female" }) => {
       queryClient.invalidateQueries({
-        queryKey: adminSettingsKeys.sizeChart(),
+        queryKey: adminSettingsKeys.sizeChart(data?.gender),
       });
       toast.success("Size chart item created successfully", {
         icon: null,

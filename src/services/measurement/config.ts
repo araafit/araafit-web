@@ -100,6 +100,15 @@ export const BODY_PROPORTIONS = {
   LEG_TO_HEIGHT: 0.5,
 };
 
+// Offsets for deriving measurement rows from the waist anchor (mid-hip) in torso units
+// Values are fractions of the shoulder-to-hip vertical span
+export const POSITION_OFFSETS = {
+  WAIST_UP_TORSO_RATIO: 0.3, // move up from waist anchor to reach natural waist
+  HIP_DOWN_TORSO_RATIO: 0.03,  // move down from waist anchor to reach fullest hip
+  BUST_DOWN_TORSO_RATIO: 0.30, // down from shoulders to bust level (female)
+  BUST_FRONT_SHRINK_RATIO: 0.1, // shrink bust width from shoulder width (front only)
+};
+
 // Error codes for measurement service
 export const MEASUREMENT_ERROR_CODES = {
   INVALID_INPUT: "INVALID_INPUT",
