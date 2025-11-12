@@ -8,7 +8,6 @@ import PasswordResetPage from "./user-auth/reset/password-reset-page";
 import Register from "./user-auth/register/register";
 import {
   DashboardHomePage,
-  DashboardShopPage,
   DashboardShopFabricDetailPage,
   DashboardShopDressDetailPage,
   DashboardOrdersPage,
@@ -52,11 +51,12 @@ import PaystackCallback from "./paystack-callback";
 import CheckoutSuccess from "./user-dashboard/cart/checkout/checkout-success";
 import { FabricRequestSummary } from "./guest/guest-shop/fabric-request-summary";
 import {
+  AllShop,
   KidsShop,
   WomenShop,
   MenShop,
 } from "./user-dashboard/shop/shop-pages-export";
-import { SearchProvider } from "./user-dashboard/shop/context/search-context";
+import ShopLayout from "./user-dashboard/shop/context/shop-layout";
 
 /* ---------------------------------------------------------------- */
 
@@ -183,17 +183,33 @@ const pagesRoutes = createBrowserRouter([
       {
         path: "shop",
         children: [
-          { path: "", element: <DashboardShopPage />, index: true },
+          { path: "", element: ( <ShopLayout>
+                <AllShop />
+              </ShopLayout>), index: true },
           {
             path: "men",
             element: (
-              <SearchProvider>
+              <ShopLayout>
                 <MenShop />
-              </SearchProvider>
+              </ShopLayout>
             ),
           },
-          { path: "women", element: <WomenShop /> },
-          { path: "kids", element: <KidsShop /> },
+          {
+            path: "women",
+            element: (
+              <ShopLayout>
+                <WomenShop />
+              </ShopLayout>
+            ),
+          },
+          {
+            path: "kids",
+            element: (
+              <ShopLayout>
+                <KidsShop />
+              </ShopLayout>
+            ),
+          },
           {
             path: "dress/:itemName",
             element: <DashboardShopDressDetailPage />,
