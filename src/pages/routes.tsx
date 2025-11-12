@@ -183,9 +183,15 @@ const pagesRoutes = createBrowserRouter([
       {
         path: "shop",
         children: [
-          { path: "", element: ( <ShopLayout>
+          {
+            path: "all",
+            element: (
+              <ShopLayout>
                 <AllShop />
-              </ShopLayout>), index: true },
+              </ShopLayout>
+            ),
+            index: true,
+          },
           {
             path: "men",
             element: (
