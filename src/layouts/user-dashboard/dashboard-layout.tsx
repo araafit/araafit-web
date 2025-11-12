@@ -29,7 +29,7 @@ const navMenu = [
     icon: DressIcon,
     isDropDown: true,
     dropdown: [
-      { label: "all", value: "all", link: "/dashboard/shop", icon: null },
+      { label: "all", value: "all", link: "/dashboard/shop/all", icon: null },
       { label: "men", value: "men", link: "/dashboard/shop/men", icon: null },
       {
         label: "women",
@@ -236,7 +236,7 @@ export default function UserDashboardLayout({
                       isDropdownOpen={(isOpen) => {
                         setDropdownOpen(isOpen);
                       }}
-                      className="shadow-none border-none outline-none focus"
+                      className="shadow-none border-none rounded-none outline-none focus"
                       itemClassName="capitalize pl-6 hover:text-primary-500 !hover:bg-none"
                       triggerClassName="`w-full flex flex-col gap-4 p-[0.5rem] transition-colors text-neutral-900 hover:bg-primary-900 hover:text-white"
                     >
@@ -246,7 +246,7 @@ export default function UserDashboardLayout({
                             to={item.link}
                             key={`${item}-${itemIdx}`}
                             className={({ isActive }) =>
-                              `w-full block text-left px-4 py-2 text-sm transition-colors hover:bg-gray-100 hover:text-primary-500 capitalize ${
+                              `w-full block text-left px-4 py-2 text-sm transition-colors hover:bg-gray-100 hover:text-primary-500 capitalize pl-8 ${
                                 isActive
                                   ? "text-primary-500"
                                   : "text-neutral-900"
