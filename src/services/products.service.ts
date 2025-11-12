@@ -10,10 +10,24 @@ export interface ProductImage {
 export interface Product {
   id: string;
   name: string;
-  description: string;
-  price: number;
   category: "dress" | "fabric";
-  quantityInStock: number;
+  description: string;
+  materialType: string;
+  dressSize: number | string | null;
+  weight: number | string | null;
+  thickness: number | string | null;
+  quantityInStock: number | string | null;
+  price: number | string | null;
+  pricePerYard: number | string | null;
+  discountType: number | string | null;
+  discountValue: number | string | null;
+  discountStart: string | null;
+  discountEnd: string | null;
+  totalSize: string | number | null;
+  style: string | null;
+  patternType: string | null;
+  skinToneRecommendation: ["sand", "espresso", "sand", "espresso"];
+  audience: "men" | "women" | "kids";
   images: ProductImage[];
   createdAt: string;
   updatedAt: string;
@@ -37,6 +51,7 @@ export interface ProductsQueryParams {
   category?: "dress" | "fabric";
   page?: number;
   limit?: number;
+  audience?: "men" | "women" | "kids";
   search?: string;
 }
 
@@ -49,16 +64,22 @@ export interface ApiResponse<T> {
 // Service functions
 export const productsService = {
   // Get all products with optional filters
-  async getProducts(params: ProductsQueryParams = {}): Promise<ProductsResponse> {
+  async getProducts(
+    params: ProductsQueryParams = {}
+  ): Promise<ProductsResponse> {
     try {
       const queryString = new URLSearchParams();
-      
+
       if (params.category) queryString.append("category", params.category);
       if (params.page) queryString.append("page", params.page.toString());
       if (params.limit) queryString.append("limit", params.limit.toString());
+      if (params.audience)
+        queryString.append("limit", params.audience.toString());
       if (params.search) queryString.append("search", params.search);
 
-      const url = `/products${queryString.toString() ? `?${queryString.toString()}` : ""}`;
+      const url = `/products${
+        queryString.toString() ? `?${queryString.toString()}` : ""
+      }`;
       const response = await apiClient.get<ApiResponse<ProductsResponse>>(url);
       return response.data.data;
     } catch (error) {
@@ -100,7 +121,9 @@ export const productsService = {
   // Get product by ID
   async getProductById(productId: string): Promise<Product> {
     try {
-      const response = await apiClient.get<ApiResponse<Product>>(`/products/${productId}`);
+      const response = await apiClient.get<ApiResponse<Product>>(
+        `/products/${productId}`
+      );
       return response.data.data;
     } catch (error) {
       console.error(`Error fetching product ${productId}:`, error);
