@@ -18,14 +18,13 @@ export function WomenShop() {
     search: debouncedSearchQuery || undefined,
   });
 
-  const userPage = "shop";
+  const products = productsData?.products || [];
+  const womenProducts = products.filter((item) => item.audience === "women");
 
   // Helper function to generate product link
-  const getProductLink = (product: Product) => {
+  const productLink = (product: Product) => {
     const category = product.category === "dress" ? "dress" : "fabric";
-    return userPage === "shop"
-      ? `/${userPage}/${category}/${product.id}`
-      : `/${userPage}/shop/${category}/${product.id}`;
+    return `/shop/${category}/${product.id}`;
   };
 
   if (isLoading) {
@@ -51,8 +50,6 @@ export function WomenShop() {
     );
   }
 
-  const products = productsData?.products || [];
-
   if (products.length === 0 && !isLoading && !isError) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -72,16 +69,26 @@ export function WomenShop() {
     );
   }
 
+  if (womenProducts.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p className="text-sm text-gray-500">No Women products available</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-4 p-8">
       {products.map((product) => (
         <Card
           key={product.id}
           itemName={product.name}
-          itemCost={product.price}
+          itemCost={product.price ? product.price : ""}
           itemImage={product.images?.[0]?.url || "/placeholder-image.jpg"}
           product={product}
-          link={getProductLink(product)}
+          link={productLink(product)}
         />
       ))}
     </div>
