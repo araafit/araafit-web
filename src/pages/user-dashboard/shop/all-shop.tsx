@@ -1,52 +1,94 @@
-import { CaretRightIcon } from "@phosphor-icons/react";
-import DashboardLayout from "../../../layouts/user-dashboard/dashboard-layout";
-import TopBar from "../top-bar";
-import ShopTab from "../../../shared-components/shop/shop-tab";
-import AllItems from "../../../shared-components/shop/all-items";
-import DressItems from "../../../shared-components/shop/dress-items";
-import FabricItems from "../../../shared-components/shop/fabric-items";
-import { SearchProvider } from "./context/search-context";
+import { useProducts } from "../../../hooks/user-dashboard.hooks";
+import { useSearch } from "./context/search-context";
+import { type Product } from "../../../services/products.service";
+import LoaderView from "../../../layouts/user-dashboard/loader";
+import Card from "../../../shared-components/card";
 
-/* --------------------------------------------------------------------------------- */
-
-const BreadCrumb = () => (
-  <div className="font-inter font-light capitalize flex items-center">
-    <span className="text-primary-900">Araafit</span>
-    <CaretRightIcon className="text-[#979797]" />
-    <span className="text-[#979797]">Shop</span>
-  </div>
-);
+/* ----------------------------------------------------------------------------------- */
 
 /**
- * Dashboard shop page
+ * All shop products.
  *
  * @returns ReactElement
  */
-export function DashboardShopPage() {
-  return (
-    <DashboardLayout>
-      <SearchProvider>
-        <div className="h-screen flex flex-col gap-2 relative">
-          <TopBar title="shop" breadCrumb={<BreadCrumb />} />
+export function AllShop() {
+  const { debouncedSearchQuery } = useSearch();
+  const {
+    data: productsData,
+    isLoading,
+    isError,
+    error,
+  } = useProducts({
+    limit: 20,
+    search: debouncedSearchQuery || undefined,
+  });
 
-          <div className="w-full h-[95%] flex flex-col gap-4 p-2 lg:p-4 mt-0 lg:mt-20 overflow-y-scroll">
-            {/* Shop Tabs */}
-            <div className="size-full bg-white rounded-md">
-              <ShopTab
-                items={["All", "Dresses", "Fabrics"]}
-                tabContainerClassName="bg-transparent h-full"
-                tabListClassName="text-xs lg:text-[0.875rem] text-neutral-700 border border-neutral-100 p-1 lg:p-[0.254rem] bg-white rounded-md flex flex-wrap lg:flex-nowrap"
-                activeTabClassName="bg-primary-900 text-white rounded-md"
-                // onChange={(item) => console.log(item)}
-              >
-                <AllItems userPage="dashboard" />
-                <DressItems userPage="dashboard" />
-                <FabricItems userPage="dashboard" />
-              </ShopTab>
-            </div>
-          </div>
+  const userPage = "shop";
+
+  // Helper function to generate product link
+  const getProductLink = (product: Product) => {
+    const category = product.category === "dress" ? "dress" : "fabric";
+    return userPage === "shop"
+      ? `/${userPage}/${category}/${product.id}`
+      : `/${userPage}/shop/${category}/${product.id}`;
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="flex flex-col items-center gap-4">
+          <LoaderView />
         </div>
-      </SearchProvider>
-    </DashboardLayout>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p className="text-red-600 mb-2">Error loading products</p>
+          <p className="text-gray-600">
+            {error?.message || "Please try again later"}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const products = productsData?.products || [];
+
+  if (products.length === 0 && !isLoading && !isError) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p className="text-gray-600 mb-2">
+            {debouncedSearchQuery
+              ? `No products found for "${debouncedSearchQuery}"`
+              : "No products available"}
+          </p>
+          {debouncedSearchQuery && (
+            <p className="text-sm text-gray-500">
+              Try searching with different keywords
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-4">
+      {products.map((product) => (
+        <Card
+          key={product.id}
+          itemName={product.name}
+          itemCost={product.price}
+          itemImage={product.images?.[0]?.url || "/placeholder-image.jpg"}
+          product={product}
+          link={getProductLink(product)}
+        />
+      ))}
+    </div>
   );
 }
