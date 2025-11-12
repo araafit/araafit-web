@@ -125,6 +125,7 @@ export function DashboardOrderDetailPage() {
   }
 
   const displayInfo = getOrderDisplayInfo(order);
+
   if (!displayInfo) {
     return (
       <UserDashboardLayout>
