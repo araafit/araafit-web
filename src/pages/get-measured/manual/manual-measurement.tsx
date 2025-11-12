@@ -5,12 +5,12 @@ import {
   useSizeChart,
   useCreateMeasurements,
   useMeasurements,
-  useDressSize,
 } from "../../../hooks/measurements.hooks";
 import Spinner from "../../../shared-components/spinner";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import useAuth from "../../../hooks/use-auth";
+import { useMeasurementsStore } from "../../../shared-hooks/state-store";
 
 /* ------------------------------------------------------------- */
 
@@ -38,6 +38,7 @@ export function ManualMeasurement() {
   console.log(sizeChart);
   const { data: existingMeasurements } = useMeasurements();
   const createMeasurements = useCreateMeasurements();
+  const updateMeasurement = useMeasurementsStore((state) => state.updateMeasurement);
 
   // Local state for selected measurements
   const [selectedValues, setSelectedValues] = useState<
@@ -110,8 +111,28 @@ export function ManualMeasurement() {
 
   const saveData = async () => {
     if (!isAuthenticated && !isGuest) {
-      toast.error("Please log in to continue");
-      navigate("/auth/login");
+      // Persist to local store and go to summary for guest/unauthenticated flow
+      const bustVal =
+        (selectedValues["bust"] as number) ??
+        (selectedValues["chest"] as number) ??
+        0;
+      const waistVal = (selectedValues["waist"] as number) ?? 0;
+      const hipsVal = (selectedValues["hips"] as number) ?? 0;
+      const heightVal =
+        typeof selectedValues["height"] === "string"
+          ? (selectedValues["height"] as string)
+          : String(selectedValues["height"] ?? "");
+      const dressSizeVal = (selectedValues["dressSize"] as number) ?? 0;
+      const skinToneVal = (selectedValues["skinTone"] as string) ?? "";
+
+      updateMeasurement("bust", bustVal);
+      updateMeasurement("waist", waistVal);
+      updateMeasurement("hip", hipsVal);
+      updateMeasurement("height", heightVal);
+      updateMeasurement("dressSize", dressSizeVal);
+      updateMeasurement("skinTone", skinToneVal);
+
+      navigate("/get-measured/summary");
       return;
     }
 
@@ -229,7 +250,10 @@ export function ManualMeasurement() {
             {orderedKeys.map((key) => {
               if (key === "skinTones") {
                 const tones =
-                  (sizeChart[key] as { name: string; hex: string }[]) || [];
+                  ((sizeChart as unknown as Record<
+                    string,
+                    { name: string; hex: string }[]
+                  >)[key] as { name: string; hex: string }[]) || [];
                 return (
                   <div
                     key={key}

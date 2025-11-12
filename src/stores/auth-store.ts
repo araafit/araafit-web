@@ -123,6 +123,7 @@ export const useAuthStore = create<AuthStore>()(
           isGuest: true,
           isLoading: false,
         });
+        console.log("guest token set", token);
       },
 
       logout: () => {

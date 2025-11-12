@@ -10,6 +10,7 @@ import {
   type LoginRequest,
   type ForgotPasswordRequest,
   type ResetPasswordRequest,
+  type VerifyEmailWithMeasurementsRequest,
 } from "../services/auth.service";
 import { useAuthStore } from "../stores/auth-store";
 import { tokenUtils } from "../lib/utils";
@@ -111,6 +112,34 @@ export const useVerifyEmail = () => {
   });
 };
 
+// Verify Email With Measurements Mutation
+export const useVerifyEmailWithMeasurements = () => {
+  return useMutation({
+    mutationFn: (data: VerifyEmailWithMeasurementsRequest) =>
+      authService.verifyEmailWithMeasurements(data),
+    onSuccess: (data) => {
+      if (data.data.isSuccess) {
+        showToast.success(
+          data.message || "Sent! Check your email for an OTP code",
+          { icon: null, style: notificationStyles.alertSuccess }
+        );
+      } else {
+        showToast.error(data.message, {
+          icon: null,
+          style: notificationStyles.alertError,
+        });
+      }
+    },
+    onError: (error: any) => {
+      showToast.error(
+        error.response?.data?.message ||
+          "Failed to send verification email with measurements",
+        { icon: null, style: notificationStyles.alertError }
+      );
+    },
+  });
+};
+
 // Verify OTP Mutation
 export const useVerifyOtp = () => {
   return useMutation({
@@ -180,6 +209,7 @@ export const useCreateGuestUser = () => {
   return useMutation({
     mutationFn: (data: GuestUserRequest) => authService.createGuestUser(data),
     onSuccess: (data) => {
+      console.log("guest user data", data);
       setGuestToken(data.token);
       setUser(data.user);
       showToast.success(data.message, {

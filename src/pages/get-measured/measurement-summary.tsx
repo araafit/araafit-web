@@ -7,7 +7,7 @@ import Button from "../../shared-components/button";
 import { PencilSimpleIcon } from "@phosphor-icons/react";
 import { useCreateGuestUser } from "../../hooks/auth.hooks";
 import { useAuth } from "../../hooks/use-auth";
-// import { useMeasurements } from "../../hooks/measurements.hooks";
+import { useUpdateMeasurements } from "../../hooks/measurements.hooks";
 
 /* -------------------------------------------------------------------------- */
 
@@ -35,12 +35,12 @@ export function MeasurementSummary() {
   const selectedMeasurements = useMeasurementsStore((state) => state.data);
   const { isAuthenticated } = useAuth();
   const createGuestUserMutation = useCreateGuestUser();
-  // const { data: existingMeasurements } = useMeasurements();
+  const updateMeasurements = useUpdateMeasurements();
 
   // Function to create guest user with measurements
   const handleContinueAsGuest = async () => {
     setSavedState({ isLoading: true, isSaved: false });
-    
+
     try {
       await createGuestUserMutation.mutateAsync({
         bust: Number(selectedMeasurements.bust || 36),
@@ -50,13 +50,8 @@ export function MeasurementSummary() {
         dressSize: Number(selectedMeasurements.dressSize || 10),
         skinTone: String(selectedMeasurements.skinTone), // You might want to get this from the measurements store
       });
-      
-      setSavedState({ isLoading: false, isSaved: true });
-      
-      // Navigate to shop after successful guest user creation
-      setTimeout(() => {
-        navigate("/shop");
-      }, 1500);
+
+      navigate("/shop");
     } catch (error) {
       console.error("Failed to create guest user:", error);
       setSavedState({ isLoading: false, isSaved: false });
@@ -66,12 +61,41 @@ export function MeasurementSummary() {
   // Function to save measurements for authenticated users
   const handleSaveMeasurements = async () => {
     setSavedState({ isLoading: true, isSaved: false });
-    
-    // Here you would typically save measurements to the user's profile
-    // For now, we'll just simulate a save operation
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    setSavedState({ isLoading: false, isSaved: true });
+    const parseNumber = (val: string | number | undefined): number => {
+      if (val === undefined || val === null) return 0;
+      if (typeof val === "number") return val;
+      const part = val.split("/")[0];
+      const n = Number(part.replace(/[^0-9.]/g, ""));
+      return Number.isFinite(n) ? n : 0;
+    };
+    const parseHeightInches = (val: string | number | undefined): number => {
+      if (val === undefined || val === null) return 0;
+      if (typeof val === "number") return val;
+      const match = val.match(/(\d+)\s*'?[\s]?(?:\s*(\d+)\s*"?)*?/);
+      if (!match) return 0;
+      const feet = Number(match[1] || 0);
+      const inches = Number(match[2] || 0);
+      return feet * 12 + inches;
+    };
+
+    try {
+      await updateMeasurements.mutateAsync({
+        bust: parseNumber(selectedMeasurements.bust),
+        waist: parseNumber(selectedMeasurements.waist),
+        hips: parseNumber(selectedMeasurements.hip),
+        height: parseHeightInches(selectedMeasurements.height),
+        dressSize: parseNumber(selectedMeasurements.dressSize),
+        skinTone: String(selectedMeasurements.skinTone || ""),
+      });
+      setSavedState({ isLoading: false, isSaved: true });
+    } catch (error) {
+      console.error("Failed to update measurements:", error);
+      setSavedState({ isLoading: false, isSaved: false });
+    }
+  };
+
+  const handleCreateFreeAccount = async () => {
+    navigate("/auth/register");
   };
 
   useEffect(() => {
@@ -176,43 +200,54 @@ export function MeasurementSummary() {
           </div>
 
           {/*  */}
-          {!savedState.isSaved ? (
-            <div className="flex items-center justify-end gap-6">
+          <div className="flex items-center justify-end gap-6">
+            {!isAuthenticated && (
               <Button
-                text="Share"
+                text="Continue as guest"
                 variant="outline"
-                className="w-[10rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed border-neutral-100 text-neutral-950"
-              />
-
-              <Button
-                variant="solid"
-                className="w-[10rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed"
-                onClick={isAuthenticated ? handleSaveMeasurements : handleContinueAsGuest}
-                disabled={savedState.isLoading || createGuestUserMutation.isPending}
+                className="min-w-[10rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed border-neutral-100 text-neutral-950"
+                onClick={handleContinueAsGuest}
+                disabled={createGuestUserMutation.isPending}
               >
                 <div className="flex items-center justify-center gap-1">
-                  <span>{isAuthenticated ? "Save" : "Continue"}</span>
-                  <Spinner size="sm" isLoading={savedState.isLoading || createGuestUserMutation.isPending} />
+                  <span>{isAuthenticated ? "Save" : "Continue as guest"}</span>
+                  <Spinner
+                    size="sm"
+                    isLoading={createGuestUserMutation.isPending}
+                  />
                 </div>
               </Button>
-            </div>
-          ) : (
-            <div className="flex items-center justify-end gap-6">
-              <Button
-                text="Continue shopping"
-                variant="clear"
-                className="w-[15rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed border-neutral-100 text-primary-500"
-                onClick={() => navigate("/shop")}
-              />
+            )}
 
-              <Button
-                text={isAuthenticated ? "Go to Dashboard" : "Create a free account"}
-                variant="solid"
-                className="w-[15rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed"
-                onClick={() => navigate(isAuthenticated ? "/dashboard" : "/auth/register")}
-              />
-            </div>
-          )}
+            <Button
+              variant="solid"
+              className="min-w-[10rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed"
+              onClick={
+                isAuthenticated
+                  ? handleSaveMeasurements
+                  : handleCreateFreeAccount
+              }
+              disabled={
+                (isAuthenticated && (savedState.isLoading || updateMeasurements.isPending)) ||
+                (!isAuthenticated && createGuestUserMutation.isPending)
+              }
+            >
+              <div className="flex items-center justify-center gap-1">
+                <span>
+                  {isAuthenticated
+                    ? "Save measurements"
+                    : "Create a free account"}
+                </span>
+                <Spinner
+                  size="sm"
+                  isLoading={
+                    (isAuthenticated && (savedState.isLoading || updateMeasurements.isPending)) ||
+                    (!isAuthenticated && createGuestUserMutation.isPending)
+                  }
+                />
+              </div>
+            </Button>
+          </div>
         </div>
       </div>
     </div>
