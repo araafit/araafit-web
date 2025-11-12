@@ -93,7 +93,7 @@ export const Dropdown: React.FC<Dropdown> = ({
       {isOpen && (
         <div
           className={CN(
-            `mt-2 min-w-[200px] rounded-md bg-white shadow-lg ring-opacity-5 ${
+            `mt-2 w-full rounded-md bg-white shadow-lg ring-opacity-5 ${
               shouldStack ? "absolute z-50" : ""
             } ${align === "right" ? "right-0" : "left-0"}`,
             className
