@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSwitch } from "../shared-hooks/switch";
 //import showToast from "../utils/notification";
@@ -6,7 +6,7 @@ import Button from "./button";
 import Modal from "./modal";
 import { MinusIcon, PlusIcon, TrashSimpleIcon } from "@phosphor-icons/react";
 import { formatPrice } from "../utils/format-price";
-import { useUpdateQuantity, useRemoveFromCart } from "../hooks/cart.hooks";
+import { useUpdateQuantity, useRemoveFromCart, useRemoveManyFromCart } from "../hooks/cart.hooks";
 import type { CartItem } from "../services/cart.service";
 import Spinner from "./spinner";
 
@@ -24,9 +24,11 @@ interface CartEngine {
  */
 function CartList({ cartData, checkoutLink }: CartEngine) {
   const [itemToRemove, setItemToRemove] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Record<string, boolean>>({});
   const navigate = useNavigate();
   const updateQuantityMutation = useUpdateQuantity();
   const removeFromCartMutation = useRemoveFromCart();
+  const removeManyFromCartMutation = useRemoveManyFromCart();
   const { toggleSwitch: toggleModal, switchValue } = useSwitch();
 
   // Initiate item to be removed and trigger modal
@@ -65,6 +67,26 @@ function CartList({ cartData, checkoutLink }: CartEngine) {
     }
   };
 
+  // Handle select/deselect a single item
+  const toggleSelect = (itemId: string) => {
+    setSelectedIds((prev) => ({ ...prev, [itemId]: !prev[itemId] }));
+  };
+
+  const selectedItemIds = useMemo(
+    () => Object.entries(selectedIds).filter(([, v]) => v).map(([k]) => k),
+    [selectedIds]
+  );
+
+  // Bulk delete selected items
+  const removeSelected = () => {
+    if (selectedItemIds.length === 0 || removeManyFromCartMutation.isPending) return;
+    removeManyFromCartMutation.mutate(selectedItemIds, {
+      onSuccess: () => {
+        setSelectedIds({});
+      },
+    });
+  };
+
   const totalPrice = cartData.reduce(
     (total, item) => total + item.product.price * item.quantity,
     0
@@ -72,10 +94,30 @@ function CartList({ cartData, checkoutLink }: CartEngine) {
 
   return (
     <div className="w-full flex flex-col gap-6">
+      {selectedItemIds.length > 0 && (
+        <div className="flex items-center justify-between bg-[#FFF8F8] border border-red-100 rounded-md px-4 py-2">
+          <span className="text-sm text-[#B91C1C]">
+            {selectedItemIds.length} selected
+          </span>
+          <Button
+            text={removeManyFromCartMutation.isPending ? "Deleting..." : "Delete selected"}
+            variant="clear"
+            className="bg-red-600 text-white px-4 py-2 rounded disabled:opacity-50"
+            onClick={removeSelected}
+            disabled={removeManyFromCartMutation.isPending}
+          >
+            <div className="flex items-center gap-2">
+              <TrashSimpleIcon className="size-[16px]" />
+              {removeManyFromCartMutation.isPending && <Spinner size="sm" />}
+            </div>
+          </Button>
+        </div>
+      )}
+
       <div className="flex flex-col gap-4">
         {cartData.map((item, idx) => (
           <div
-            key={idx}
+            key={item.id}
             className="w-full border border-neutral-100 rounded-md py-2 px-4"
           >
             <div className="flex gap-6">
@@ -86,6 +128,9 @@ function CartList({ cartData, checkoutLink }: CartEngine) {
                 placeholder=""
                 title="checkbox"
                 className="self-start"
+                checked={!!selectedIds[item.id]}
+                onChange={() => toggleSelect(item.id)}
+                disabled={removeManyFromCartMutation.isPending}
               />
 
               <img
