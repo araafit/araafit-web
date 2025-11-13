@@ -115,7 +115,7 @@ function CartList({ cartData, checkoutLink }: CartEngine) {
       )}
 
       <div className="flex flex-col gap-4">
-        {cartData.map((item, idx) => (
+        {cartData.map((item) => (
           <div
             key={item.id}
             className="w-full border border-neutral-100 rounded-md py-2 px-4"
