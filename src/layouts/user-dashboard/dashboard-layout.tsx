@@ -9,7 +9,7 @@ import {
   XIcon,
   CaretDownIcon,
 } from "@phosphor-icons/react";
-import { Link, useNavigate, NavLink } from "react-router-dom";
+import { Link, useNavigate, NavLink, useLocation } from "react-router-dom";
 import Modal from "../../shared-components/modal";
 import { useSwitch } from "../../shared-hooks/switch";
 import Button from "../../shared-components/button";
@@ -77,6 +77,7 @@ export default function UserDashboardLayout({
   const { toggleSwitch, switchValue } = useSwitch(false);
   const { data: cart } = useCart();
   const navigate = useNavigate();
+  const location = useLocation();
   const logoutMutation = useLogout();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -214,10 +215,16 @@ export default function UserDashboardLayout({
                 }
 
                 if (item.label.toLowerCase() === "shop") {
+                  const isShopRoute =
+                    location.pathname.startsWith("/dashboard/shop");
                   return (
                     <Dropdown
+                      open={dropdownOpen || isShopRoute}
+                      onOpenChange={(isOpen) => setDropdownOpen(isOpen)}
                       trigger={
-                        <button className="flex items-center justify-between btn">
+                        <button
+                          className={`flex items-center justify-between btn w-full`}
+                        >
                           <div className="w-full flex items-center text-base">
                             {createElement(item.icon ? item.icon : "a", {
                               className: "mr-3 size-[20px]",
@@ -240,7 +247,11 @@ export default function UserDashboardLayout({
                       }}
                       className="shadow-none border-none rounded-none outline-none focus"
                       itemClassName="capitalize pl-6 hover:text-primary-500 !hover:bg-none"
-                      triggerClassName="`w-full flex flex-col gap-4 p-[0.5rem] transition-colors text-neutral-900 hover:bg-primary-900 hover:text-white"
+                      triggerClassName={`w-full flex flex-col gap-4 p-[0.5rem] transition-colors ${
+                        isShopRoute || dropdownOpen
+                          ? "bg-primary-900 text-white"
+                          : "text-neutral-900 hover:bg-primary-900 hover:text-white"
+                      }`}
                     >
                       {item.isDropDown &&
                         item.dropdown.map((item, itemIdx) => (
@@ -254,6 +265,10 @@ export default function UserDashboardLayout({
                                   : "text-neutral-900"
                               }`
                             }
+                            onClick={() => {
+                              // Keep dropdown open on navigation
+                              setDropdownOpen(true);
+                            }}
                           >
                             {item.label}
                           </NavLink>
