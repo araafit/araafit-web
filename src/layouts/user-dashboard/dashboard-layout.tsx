@@ -102,7 +102,7 @@ export default function UserDashboardLayout({
   };
 
   return (
-    <section className="h-screen bg-[#F5F5F5] flex items-start">
+    <section className="h-screen bg-[#F5F5F5] flex items-start overflow-x-hidden">
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-neutral-100 p-4 flex items-center justify-between">
         <Link to="/" className="block">
@@ -302,7 +302,7 @@ export default function UserDashboardLayout({
       </div>
 
       {/* Main Content */}
-      <div className="grow lg:ml-0 pt-16 lg:pt-0 h-screen lg:h-full flex flex-col">
+      <div className="grow lg:ml-0 pt-16 lg:pt-0 h-screen lg:h-full flex flex-col overflow-x-hidden">
         {topBar && <div className="sticky top-0 z-40">{topBar}</div>}
         <div className="grow overflow-y-auto">{children}</div>
       </div>
