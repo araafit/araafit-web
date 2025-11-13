@@ -26,13 +26,13 @@ function ProfileInfo() {
   const [imageUpload] = useState(rtw1);
   const user = useUser();
   const updateProfile = useUpdateProfile();
+  const [editInfo, setEditInfo] = useState(false);
 
   const {
     register,
     formState: { errors, isValid },
     setValue,
     handleSubmit,
-    watch,
   } = useForm<FormValues>({
     mode: "onChange",
     defaultValues: {
@@ -45,9 +45,6 @@ function ProfileInfo() {
       address: "",
     },
   });
-
-  const formData = watch();
-  console.log("Form state:", { formData, isValid, errors });
 
   useEffect(() => {
     if (user) {
@@ -64,11 +61,13 @@ function ProfileInfo() {
       Object.entries(values).forEach(([key, value]) => {
         setValue(key as keyof FormValues, value, { shouldValidate: true });
       });
+
+      setEditInfo(true);
     }
   }, [user, setValue]);
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    console.log("Form submitted with data:", data);
+    // console.log("Form submitted with data:", data);
     updateProfile.mutate({
       firstName: data.firstName,
       lastName: data.lastName,
@@ -86,7 +85,7 @@ function ProfileInfo() {
           Profile Information
         </h5>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 cursor-pointer" onClick={() => setEditInfo(!editInfo)}>
           <PencilSimpleIcon />
 
           <span className="text-sm lg:text-base">Edit Info</span>
@@ -131,7 +130,7 @@ function ProfileInfo() {
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col gap-[1.8125rem]"
       >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-7">
+        <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-7 max-xl:grid-cols-1 gap-4">
           <div className="w-full lg:w-[34rem] flex flex-col gap-2">
             <label htmlFor="" className="w-full text-sm lg:text-[1rem] text-[#676767]">
               First Name
@@ -143,6 +142,7 @@ function ProfileInfo() {
               {...register("firstName", {
                 required: "First name is required",
               })}
+              disabled={editInfo}
             />
 
             {errors.firstName && (
@@ -161,6 +161,7 @@ function ProfileInfo() {
               {...register("lastName", {
                 required: "Last name is required",
               })}
+              disabled={editInfo}
             />
 
             {errors.lastName && (
@@ -169,7 +170,7 @@ function ProfileInfo() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-7">
+        <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-7 max-xl:grid-cols-1 gap-4">
           <div className="w-full lg:w-[34rem] flex flex-col gap-2">
             <label
               htmlFor="email"
@@ -181,9 +182,9 @@ function ProfileInfo() {
             <input
               id="email"
               type="email"
-              className="w-full p-3 lg:p-4 border border-gray-300 outline-none rounded-[6px] bg-gray-50 text-sm lg:text-base"
+              className="w-full p-3 lg:p-4 border border-gray-300 outline-none rounded-[6px] text-sm lg:text-base"
               {...register("email")}
-              readOnly
+              disabled={editInfo}
             />
 
             {errors.email && (
@@ -202,6 +203,7 @@ function ProfileInfo() {
               {...register("phoneNumber", {
                 required: "Phone number is required",
               })}
+              disabled={editInfo}
             />
 
             {errors.phoneNumber && (
@@ -212,7 +214,7 @@ function ProfileInfo() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-7">
+        <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-7 max-xl:grid-cols-1 gap-4">
           <div className="w-full lg:w-[34rem] flex flex-col gap-2">
             <label htmlFor="city" className="w-full text-[1rem] text-[#676767]">
               City/Town
@@ -224,6 +226,7 @@ function ProfileInfo() {
               {...register("city", {
                 required: "City/Town is required",
               })}
+              disabled={editInfo}
             />
 
             {errors.city && (
@@ -243,6 +246,7 @@ function ProfileInfo() {
               type="text"
               className="w-full p-3 lg:p-4 border border-gray-300 outline-none rounded-[6px] text-sm lg:text-base"
               {...register("zipCode")}
+              disabled={editInfo}
             />
 
             {errors.zipCode && (
@@ -266,6 +270,7 @@ function ProfileInfo() {
               required: "City/Town is required",
             })}
             placeholder="Enter your address"
+            disabled={editInfo}
           />
 
           {errors.address && (
@@ -276,9 +281,9 @@ function ProfileInfo() {
         <Button
           type="submit"
           text="Save"
-          className="w-[222px] disabled:bg-neutral-100 text-neutral-300 disabled:cursor-not-allowed"
+          className="w-full max-w-[13rem] text-white disabled:opacity-50 disabled:cursor-not-allowed"
           variant="solid"
-          disabled={!isValid || updateProfile.isPending}
+          disabled={!isValid || editInfo || updateProfile.isPending}
         />
       </form>
     </div>
