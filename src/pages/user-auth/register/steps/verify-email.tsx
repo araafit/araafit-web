@@ -1,6 +1,7 @@
-import { useRef, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { useFormContext } from "react-hook-form";
 import type { FormValues } from "../register";
+import { useResendOtp } from "../../../../hooks/auth.hooks";
 
 /* --------------------------------------------------------- */
 
@@ -11,6 +12,8 @@ import type { FormValues } from "../register";
  */
 export default function VerifyEmail() {
   const inputRefs = useRef<null | HTMLInputElement[]>([]);
+  const [cooldown, setCooldown] = useState<number>(0); // seconds
+  const resendOtp = useResendOtp();
 
   const {
     getValues,
@@ -21,6 +24,13 @@ export default function VerifyEmail() {
   } = useFormContext<FormValues>();
 
   const codeValues = getValues("verificationCode");
+  const email = getValues("email");
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setInterval(() => setCooldown((s) => (s > 0 ? s - 1 : 0)), 1000);
+    return () => clearInterval(t);
+  }, [cooldown]);
 
   const handleInputChange = (inputValue: string, idx: number) => {
     // Only allow single digits
@@ -106,6 +116,16 @@ export default function VerifyEmail() {
     return inValid ? "Please enter all 6 digits" : true;
   };
 
+  const handleResend = async () => {
+    if (cooldown > 0 || !email) return;
+    try {
+      await resendOtp.mutateAsync({ email });
+      setCooldown(30); // 30s cooldown
+    } catch {
+      // handled by hook
+    }
+  };
+
   return (
     <div className="w-full flex flex-col gap-6">
       <div className="w-full">
@@ -141,9 +161,21 @@ export default function VerifyEmail() {
         )}
       </div>
 
-      <p className="text-center">
-        Didn’t receive code? <span className="text-primary-500 cursor-pointer" onClick={() => console.log("Resend")}>Resend</span>
-      </p>
+      <div className="text-center">
+        <span>Didn’t receive code? </span>
+        <button
+          type="button"
+          onClick={handleResend}
+          disabled={cooldown > 0 || resendOtp.isPending}
+          className={`${
+            cooldown > 0 || resendOtp.isPending
+              ? "text-neutral-400 cursor-not-allowed"
+              : "text-primary-500"
+          } underline`}
+        >
+          {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend"}
+        </button>
+      </div>
     </div>
   );
 }

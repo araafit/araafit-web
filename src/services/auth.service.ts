@@ -154,6 +154,9 @@ export interface ResetPasswordResponse {
   message: string;
 }
 
+export interface ResendOtpRequest {
+  email: string;
+}
 export interface VerifyEmailWithMeasurementsRequest {
   email: string;
   measurement: {
@@ -216,6 +219,16 @@ class AuthService {
     return response.data;
   }
 
+  /**
+   * Resend OTP to email
+   */
+  async resendOtp(data: ResendOtpRequest): Promise<VerifyEmailResponse> {
+    const response = await apiClient.post<VerifyEmailResponse>(
+      "/auth/resend-otp",
+      data
+    );
+    return response.data;
+  }
   /**
    * Register a new user
    */
