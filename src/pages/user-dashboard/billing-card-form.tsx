@@ -31,6 +31,7 @@ export interface BillingCardFormProps {
 export default function BillingCardForm({
   checkoutInfo,
 }: BillingCardFormProps) {
+  console.log("checkoutInfo", checkoutInfo);
   const tokenizeCardMutation = useTokenizeCard();
   const checkoutWithCardMutation = useCheckoutWithCard();
   const {

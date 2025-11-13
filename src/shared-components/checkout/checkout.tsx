@@ -135,7 +135,7 @@ function CartCheckout() {
           onContinue={() => setCheckoutTab("payment-detail")}
         />
       ) : (
-        <CheckoutPaymentInfo redirectionLink="/shop" />
+        <CheckoutPaymentInfo redirectionLink={window.location.origin + "/shop"} />
       )}
     </div>
   );

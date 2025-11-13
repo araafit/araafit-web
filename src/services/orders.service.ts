@@ -196,7 +196,11 @@ export const ordersService = {
   // Checkout with card (combines cart checkout with new card)
   async checkoutWithCard(data: CheckoutWithCardRequest): Promise<CheckoutWithCardResponse> {
     try {
-      const response = await apiClient.post<ApiResponse<CheckoutWithCardResponse>>("/orders/checkout-with-card", data);
+      const response = await apiClient.post<ApiResponse<CheckoutWithCardResponse>>(
+        "/orders/checkout-with-card",
+        data,
+        { timeout: 120000 } // 2 minutes
+      );
       return response.data.data;
     } catch (error) {
       console.error("Error during checkout with card:", error);
