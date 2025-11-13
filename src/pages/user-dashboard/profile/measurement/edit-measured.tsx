@@ -3,7 +3,11 @@ import Button from "../../../../shared-components/button";
 import { ArrowLeftIcon } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { useMeasurements, useSizeChart, useUpdateMeasurements } from "../../../../hooks/measurements.hooks";
+import {
+  useAuthenticatedSizeChart,
+  useMeasurements,
+  useUpdateMeasurements,
+} from "../../../../hooks/measurements.hooks";
 
 /* ------------------------------------------------------------------------------------------------- */
 
@@ -34,8 +38,10 @@ const heightOptions = [
  */
 export function DashboardEditMeasurementPage() {
   const navigate = useNavigate();
-  const { data: currentMeasurements, isLoading: measurementsLoading } = useMeasurements();
-  const { data: sizeChart, isLoading: sizeChartLoading } = useSizeChart();
+  const { data: currentMeasurements, isLoading: measurementsLoading } =
+    useMeasurements();
+  const { data: sizeChart, isLoading: sizeChartLoading } =
+    useAuthenticatedSizeChart();
   const updateMeasurements = useUpdateMeasurements();
 
   const [selectedValues, setSelectedValues] = useState({
@@ -51,7 +57,7 @@ export function DashboardEditMeasurementPage() {
   useEffect(() => {
     if (currentMeasurements) {
       setSelectedValues({
-        bust: currentMeasurements.bust as  number,
+        bust: currentMeasurements.bust as number,
         waist: currentMeasurements.waist as number,
         hips: currentMeasurements.hips as number,
         height: currentMeasurements.height as number,
@@ -61,8 +67,11 @@ export function DashboardEditMeasurementPage() {
     }
   }, [currentMeasurements]);
 
-  const handleValueSelect = (type: keyof typeof selectedValues, value: number | string) => {
-    setSelectedValues(prev => ({
+  const handleValueSelect = (
+    type: keyof typeof selectedValues,
+    value: number | string
+  ) => {
+    setSelectedValues((prev) => ({
       ...prev,
       [type]: value,
     }));
@@ -112,7 +121,9 @@ export function DashboardEditMeasurementPage() {
           <div className="w-full flex flex-col gap-4">
             {/* Bust */}
             <div className="w-full flex flex-col gap-3">
-              <span className="font-medium capitalize text-[#1C1C1C]">Bust:</span>
+              <span className="font-medium capitalize text-[#1C1C1C]">
+                Bust:
+              </span>
               <div className="flex items-center justify-between gap-4 flex-wrap">
                 {sizeChart?.bust?.map((item) => (
                   <Button
@@ -121,7 +132,9 @@ export function DashboardEditMeasurementPage() {
                     text={String(item.value)}
                     variant="outline"
                     className={`w-[58px] h-[44px] text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-neutral-700 focus:border-neutral-700 ${
-                      selectedValues.bust === item.value ? "border-neutral-700 bg-neutral-100" : ""
+                      selectedValues.bust === item.value
+                        ? "border-neutral-700 bg-neutral-100"
+                        : ""
                     }`}
                     onClick={() => handleValueSelect("bust", item.value)}
                   />
@@ -131,7 +144,9 @@ export function DashboardEditMeasurementPage() {
 
             {/* Waist */}
             <div className="w-full flex flex-col gap-3">
-              <span className="font-medium capitalize text-[#1C1C1C]">Waist:</span>
+              <span className="font-medium capitalize text-[#1C1C1C]">
+                Waist:
+              </span>
               <div className="flex items-center justify-between gap-4 flex-wrap">
                 {sizeChart?.waist?.map((item) => (
                   <Button
@@ -140,7 +155,9 @@ export function DashboardEditMeasurementPage() {
                     text={String(item.value)}
                     variant="outline"
                     className={`w-[58px] h-[44px] text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-neutral-700 focus:border-neutral-700 ${
-                      selectedValues.waist === item.value ? "border-neutral-700 bg-neutral-100" : ""
+                      selectedValues.waist === item.value
+                        ? "border-neutral-700 bg-neutral-100"
+                        : ""
                     }`}
                     onClick={() => handleValueSelect("waist", item.value)}
                   />
@@ -150,7 +167,9 @@ export function DashboardEditMeasurementPage() {
 
             {/* Hips */}
             <div className="w-full flex flex-col gap-3">
-              <span className="font-medium capitalize text-[#1C1C1C]">Hips:</span>
+              <span className="font-medium capitalize text-[#1C1C1C]">
+                Hips:
+              </span>
               <div className="flex items-center justify-between gap-4 flex-wrap">
                 {sizeChart?.hips?.map((item) => (
                   <Button
@@ -159,7 +178,9 @@ export function DashboardEditMeasurementPage() {
                     text={String(item.value)}
                     variant="outline"
                     className={`w-[58px] h-[44px] text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-neutral-700 focus:border-neutral-700 ${
-                      selectedValues.hips === item.value ? "border-neutral-700 bg-neutral-100" : ""
+                      selectedValues.hips === item.value
+                        ? "border-neutral-700 bg-neutral-100"
+                        : ""
                     }`}
                     onClick={() => handleValueSelect("hips", item.value)}
                   />
@@ -169,7 +190,9 @@ export function DashboardEditMeasurementPage() {
 
             {/* Height */}
             <div className="w-full flex flex-col gap-3">
-              <span className="font-medium capitalize text-[#1C1C1C]">Height:</span>
+              <span className="font-medium capitalize text-[#1C1C1C]">
+                Height:
+              </span>
               <div className="flex items-center justify-between gap-4 flex-wrap">
                 {heightOptions?.map((option) => (
                   <Button
@@ -178,7 +201,9 @@ export function DashboardEditMeasurementPage() {
                     text={option.label}
                     variant="outline"
                     className={`w-[58px] h-[44px] text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-neutral-700 focus:border-neutral-700 ${
-                      selectedValues.height === option.value ? "border-neutral-700 bg-neutral-100" : ""
+                      selectedValues.height === option.value
+                        ? "border-neutral-700 bg-neutral-100"
+                        : ""
                     }`}
                     onClick={() => handleValueSelect("height", option.value)}
                   />
@@ -188,7 +213,9 @@ export function DashboardEditMeasurementPage() {
 
             {/* Dress Size */}
             <div className="w-full flex flex-col gap-3">
-              <span className="font-medium capitalize text-[#1C1C1C]">Dress Size:</span>
+              <span className="font-medium capitalize text-[#1C1C1C]">
+                Dress Size:
+              </span>
               <div className="flex items-center justify-between gap-4 flex-wrap">
                 {sizeChart?.dressSize?.map((item) => (
                   <Button
@@ -197,7 +224,9 @@ export function DashboardEditMeasurementPage() {
                     text={String(item.value)}
                     variant="outline"
                     className={`w-[58px] h-[44px] text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-neutral-700 focus:border-neutral-700 ${
-                      selectedValues.dressSize === item.value ? "border-neutral-700 bg-neutral-100" : ""
+                      selectedValues.dressSize === item.value
+                        ? "border-neutral-700 bg-neutral-100"
+                        : ""
                     }`}
                     onClick={() => handleValueSelect("dressSize", item.value)}
                   />
@@ -207,14 +236,18 @@ export function DashboardEditMeasurementPage() {
 
             {/* Skin Tone */}
             <div className="w-full flex flex-col gap-3">
-              <span className="font-medium capitalize text-[#1C1C1C]">Skin Tone:</span>
+              <span className="font-medium capitalize text-[#1C1C1C]">
+                Skin Tone:
+              </span>
               <div className="flex items-center justify-between gap-4 flex-wrap">
                 {skinToneOptions?.map((tone) => (
                   <Button
                     key={tone.name}
                     style={{ backgroundColor: tone.color }}
                     className={`w-[58px] h-[44px] rounded-md border hover:border-neutral-700 focus:border-neutral-700 cursor-pointer ${
-                      selectedValues.skinTone === tone.name ? "border-neutral-700 ring-2 ring-neutral-700" : "border-gray-300"
+                      selectedValues.skinTone === tone.name
+                        ? "border-neutral-700 ring-2 ring-neutral-700"
+                        : "border-gray-300"
                     }`}
                     onClick={() => handleValueSelect("skinTone", tone.name)}
                   />

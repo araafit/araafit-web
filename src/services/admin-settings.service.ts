@@ -152,6 +152,13 @@ class AdminSettingsService {
     return response.data.data;
   }
 
+  async getMySizeChart(): Promise<SizeChartResponse> {
+    const response = await apiClient.get<ApiResponse<SizeChartResponse>>(
+      `/size-chart/me`
+    );
+    return response.data.data;
+  }
+
   async updateSizeChart(
     id: string,
     request: UpdateSizeChartRequest
