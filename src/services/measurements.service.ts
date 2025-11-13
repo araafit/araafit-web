@@ -123,7 +123,7 @@ export const measurementsService = {
   ): Promise<UpdateMeasurementsResponse> {
     const response = await apiClient.patch<
       ApiResponse<UpdateMeasurementsResponse>
-    >("/measurements", data);
+    >("/measurements/measurement", data);
     return response.data.data;
   },
 

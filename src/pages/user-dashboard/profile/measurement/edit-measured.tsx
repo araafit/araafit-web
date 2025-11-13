@@ -8,6 +8,7 @@ import {
   useMeasurements,
   useUpdateMeasurements,
 } from "../../../../hooks/measurements.hooks";
+import Spinner from "../../../../shared-components/spinner";
 
 /* ------------------------------------------------------------------------------------------------- */
 
@@ -88,7 +89,7 @@ export function DashboardEditMeasurementPage() {
   if (measurementsLoading || sizeChartLoading) {
     return (
       <UserDashboardLayout>
-        <div className="h-screen bg-white py-5 px-8 rounded-md flex flex-col items-center justify-center gap-6">
+        <div className="min-h-screen bg-white py-5 px-8 rounded-md flex flex-col items-center justify-center gap-6 overflow-y-auto">
           <div className="flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
             <span className="ml-2">Loading measurements...</span>
@@ -100,17 +101,17 @@ export function DashboardEditMeasurementPage() {
 
   return (
     <UserDashboardLayout>
-      <div className="h-screen bg-white py-5 px-8 rounded-md flex flex-col items-center justify-center gap-6 relative">
+      <div className="min-h-screen bg-white py-5 px-8 rounded-md flex flex-col items-center gap-6 relative overflow-y-auto">
         <Button
           type="button"
           variant="clear"
-          className="absolute top-[32px] left-[200px] w-[40px] h-[40px] rounded-md border border-[#E8E8E8] flex flex-col items-center justify-center bg-white text-neutral-800"
+          className="absolute top-[32px] left-4 lg:left-[200px] w-[40px] h-[40px] rounded-md border border-[#E8E8E8] flex flex-col items-center justify-center bg-white text-neutral-800 z-10"
           onClick={() => navigate("/dashboard/profile")}
         >
           <ArrowLeftIcon size={50} className=" text-neutral-800" />
         </Button>
 
-        <div className="w-[32.5rem] flex flex-col gap-4">
+        <div className="w-full max-w-[32.5rem] flex flex-col gap-4">
           <div className="flex flex-col items-center gap-4">
             <h5 className="text-[2rem] font-semibold">Edit Measurement</h5>
             <p className="text-neutral-500 font-light text-center">
@@ -221,7 +222,7 @@ export function DashboardEditMeasurementPage() {
                   <Button
                     key={item.id}
                     type="button"
-                    text={String(item.value)}
+                    text={String(item.label ?? item.value)}
                     variant="outline"
                     className={`w-[58px] h-[44px] text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-neutral-700 focus:border-neutral-700 ${
                       selectedValues.dressSize === item.value
@@ -261,7 +262,20 @@ export function DashboardEditMeasurementPage() {
               variant="solid"
               onClick={handleUpdate}
               disabled={updateMeasurements.isPending}
-            />
+            >
+              <div className="flex items-center justify-center gap-1">
+                {" "}
+                {updateMeasurements.isPending ? (
+                  <Spinner
+                    size="sm"
+                    speed="fast"
+                    isLoading={updateMeasurements.isPending}
+                  />
+                ) : (
+                  "Update"
+                )}
+              </div>
+            </Button>
           </div>
         </div>
       </div>

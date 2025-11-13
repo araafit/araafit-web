@@ -54,6 +54,7 @@ export interface CreateSizeChartRequest {
 export interface SizeChartItem {
   id: string;
   value: number;
+  label?: string;
 }
 
 // Be flexible to allow gender-specific keys coming from the API
