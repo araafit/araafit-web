@@ -223,7 +223,7 @@ export default function UserDashboardLayout({
                       onOpenChange={(isOpen) => setDropdownOpen(isOpen)}
                       trigger={
                         <button
-                          className={`flex items-center justify-between btn w-full`}
+                          className={`flex items-center justify-between btn w-fullgi`}
                         >
                           <div className="w-full flex items-center text-base">
                             {createElement(item.icon ? item.icon : "a", {

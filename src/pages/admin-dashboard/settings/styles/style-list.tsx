@@ -1,3 +1,4 @@
+import React from "react";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -10,7 +11,6 @@ import {
   Drawer,
   DrawerClose,
   DrawerContent,
-  DrawerDescription,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
@@ -26,6 +26,7 @@ import {
 import Button from "../../../../shared-components/button";
 import emptyFolder from "../../images/empty 1.png";
 import { useDeleteDressStyle } from "../../../../hooks/admin-settings.hooks";
+import Select from "../../../../shared-components/select";
 
 /* --------------------------------------------------------------------------- */
 
@@ -91,6 +92,93 @@ export default function StylesList({
       </DialogContent>
     </Dialog>
   );
+
+  const QuickViewContent: React.FC<{ style: DressStyle }> = ({ style }) => {
+    const [selectedDressStyle, setSelectedDressStyle] = React.useState(
+      style.dressStyle
+    );
+    const [selectedDressSize, setSelectedDressSize] = React.useState(
+      String(style.dressSize ?? "")
+    );
+    const [yardEstimate, setYardEstimate] = React.useState(
+      String(style.yardEstimate ?? "")
+    );
+
+    const sizeOptions = [6, 8, 10, 12, 14, 16, 18, 20].map((n) => ({
+      label: String(n),
+      value: String(n),
+    }));
+
+    return (
+      <DrawerContent className="bg-white rounded-t-xl w-[500px] h-[52.75rem] flex flex-col">
+        {/* Header */}
+        <DrawerHeader className="flex items-center gap-3 pb-3">
+          <DrawerClose>
+            <div className="border h-10 w-10 rounded cursor-pointer border-[#E8E8E8] flex items-center justify-center">
+              <ArrowLeftIcon />
+            </div>
+          </DrawerClose>
+          <DrawerTitle className="text-lg font-semibold text-[#1C1C1C]">
+            View Style
+          </DrawerTitle>
+        </DrawerHeader>
+
+        {/* Body */}
+        <div className="p-6 flex-1 overflow-y-auto space-y-6">
+          {/* Top images (quick preview) */}
+          <div className="grid grid-cols-2 gap-4">
+            {(style.images?.slice(0, 2) || []).map((image, idx) => (
+              <img
+                key={image.id ?? idx}
+                src={image.url || emptyFolder}
+                alt={`${style.dressStyle} ${idx + 1}`}
+                className="w-full h-40 object-cover rounded-lg border border-[#D0D5DD]"
+              />
+            ))}
+          </div>
+
+          {/* Dress Style */}
+          <div className="space-y-2">
+            <label className="text-sm text-[#676767]">Dress Style</label>
+            <Select
+              options={[{ label: selectedDressStyle, value: selectedDressStyle }]}
+              value={selectedDressStyle}
+              onChange={setSelectedDressStyle}
+              selectClassName="h-12 px-3"
+              selectedOptionClassName="text-[#1C1C1C]"
+            />
+          </div>
+
+          {/* Dress Size */}
+          <div className="space-y-2">
+            <label className="text-sm text-[#676767]">Dress Size</label>
+            <Select
+              options={sizeOptions}
+              value={selectedDressSize}
+              onChange={setSelectedDressSize}
+              selectClassName="h-12 px-3"
+              selectedOptionClassName="text-[#1C1C1C]"
+            />
+          </div>
+
+          {/* Yard Estimate */}
+          <div className="space-y-2">
+            <label className="text-sm text-[#676767]">
+              Yard Estimate (based on measurement & style)
+            </label>
+            <input
+              type="number"
+              step="0.5"
+              min="0"
+              value={yardEstimate}
+              onChange={(e) => setYardEstimate(e.target.value)}
+              className="w-full h-12 border border-[#D0D5DD] rounded-lg px-3 text-sm"
+            />
+          </div>
+        </div>
+      </DrawerContent>
+    );
+  };
 
   if (isLoading) {
     return (
@@ -262,37 +350,7 @@ export default function StylesList({
                     <ArrowRightIcon size={14} />
                   </button>
                 </DrawerTrigger>
-
-                <DrawerContent className="p-6 bg-white rounded-t-xl max-h-[80vh]">
-                  <DrawerHeader>
-                    <DrawerTitle className="text-xl">
-                      {style.dressStyle}
-                    </DrawerTitle>
-                    <DrawerDescription className="text-base">
-                      Size:{" "}
-                      <span className="font-medium">{style.dressSize}</span> |
-                      Yard Estimate:{" "}
-                      <span className="font-medium">
-                        {style.yardEstimate} yards
-                      </span>
-                    </DrawerDescription>
-                  </DrawerHeader>
-
-                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto">
-                    {style.images.map((image, idx) => (
-                      <div key={image.id} className="relative group">
-                        <img
-                          src={image.url}
-                          alt={`${style.dressStyle} ${idx + 1}`}
-                          className="w-full h-60 object-cover rounded-lg border border-[#D0D5DD] group-hover:shadow-md transition-shadow"
-                        />
-                        <div className="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
-                          {idx + 1} of {style.images.length}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </DrawerContent>
+                <QuickViewContent style={style} />
               </Drawer>
             </div>
           </div>
