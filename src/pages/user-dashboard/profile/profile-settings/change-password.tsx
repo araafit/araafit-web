@@ -32,6 +32,7 @@ export default function ChangePassword() {
   } = useForm<ChangePassword>();
   const updatePassword = useUpdatePassword();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onSubmit: SubmitHandler<ChangePassword> = (data: any) => {
     updatePassword.mutate({
       currentPassword: String(data.currentPassword),
