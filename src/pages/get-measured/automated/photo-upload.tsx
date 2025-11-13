@@ -7,7 +7,6 @@ import {
 import Button from "../../../shared-components/button";
 import { useGetMeasured } from "../context/get-measured-context";
 import { MeasurementStepperLines } from "../stepper-lines";
-import { measurementsService } from "../../../services/measurements.service";
 import showToast from "../../../utils/notification";
 
 /* ----------------------------------------------------------- */
@@ -17,7 +16,7 @@ interface PhotoUploadProps {
 }
 
 export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
-  const { currentStep, stepTo, setPhotos, setUploaded } = useGetMeasured();
+  const { currentStep, stepTo, setPhotos } = useGetMeasured();
   const [frontPhoto, setFrontPhoto] = useState<File | null>(null);
   const [sidePhoto, setSidePhoto] = useState<File | null>(null);
   const [frontPreview, setFrontPreview] = useState<string | null>(null);

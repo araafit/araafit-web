@@ -112,7 +112,9 @@ export default function Register() {
             const n = Number(part.replace(/[^0-9.]/g, ""));
             return Number.isFinite(n) ? n : 0;
           };
-          const parseHeightInches = (val: string | number | undefined): number => {
+          const parseHeightInches = (
+            val: string | number | undefined
+          ): number => {
             if (val === undefined || val === null) return 0;
             if (typeof val === "number") return val;
             // Expect formats like 5'3 or 5' 3"
@@ -167,7 +169,10 @@ export default function Register() {
           const response = await verifyOtpMutation.mutateAsync({ email, otp });
 
           // Invalid or expired OTP
-          if (response && !response.data.isSuccess) {
+          if (
+            response &&
+            !(response.data as { isSuccess: boolean })?.isSuccess
+          ) {
             setCurrentStep(1);
             return;
           }

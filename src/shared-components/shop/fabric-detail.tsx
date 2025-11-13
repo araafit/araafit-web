@@ -116,10 +116,10 @@ export function FabricDetail() {
                   {product.description}
                 </p>
                 <span className="font-semibold text-neutral-900 font-lora">
-                  ₦{formatPrice(product.price)}/yd
+                  ₦{formatPrice(Number(product.price ?? 0))}/yd
                 </span>
                 <span className="text-sm text-neutral-600">
-                  Total: ₦{formatPrice(product.price * selectedYards)} (
+                  Total: ₦{formatPrice(Number(product.price ?? 0) * selectedYards)} (
                   {selectedYards} yards)
                 </span>
               </div>
