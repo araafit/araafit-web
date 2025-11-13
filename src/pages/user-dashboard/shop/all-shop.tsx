@@ -3,6 +3,7 @@ import { useSearch } from "./context/search-context";
 import { type Product } from "../../../services/products.service";
 import LoaderView from "../../../layouts/user-dashboard/loader";
 import Card from "../../../shared-components/card";
+import useAuth from "../../../hooks/use-auth";
 
 /* ----------------------------------------------------------------------------------- */
 
@@ -22,10 +23,11 @@ export function AllShop() {
     limit: 20,
     search: debouncedSearchQuery || undefined,
   });
+  const { isAuthenticated } = useAuth();
 
   const products = productsData?.products || [];
 
-  const userPage = "shop";
+  const userPage = isAuthenticated ? "dashboard" : "shop";
 
   // Helper function to generate product link
   const getProductLink = (product: Product) => {

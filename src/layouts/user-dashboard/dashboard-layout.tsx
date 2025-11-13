@@ -69,8 +69,10 @@ const navMenu = [
  */
 export default function UserDashboardLayout({
   children,
+  topBar,
 }: {
   children: React.ReactElement;
+  topBar?: React.ReactNode;
 }) {
   const { toggleSwitch, switchValue } = useSwitch(false);
   const { data: cart } = useCart();
@@ -139,7 +141,7 @@ export default function UserDashboardLayout({
         transition-transform duration-300 ease-in-out
       `}
       >
-        <div className="w-full h-[90%] flex flex-col justify-between">
+        <div className="w-full h-full flex flex-col justify-between">
           <div>
             {/* Desktop Logo */}
             <Link to="/" className="hidden lg:block w-full mb-7">
@@ -168,7 +170,7 @@ export default function UserDashboardLayout({
                       }
                     >
                       <div className="w-full flex items-center text-base">
-                        <span className="uppercase mr-3 size-[20px] text-[10px] border border-primary-50 p-1 rounded-full flex items-center justify-center">
+                        <span className="uppercase mr-3 size-[20px] text-[10px] border border-primary-200 p-1 rounded-full flex items-center justify-center">
                           en
                         </span>
 
@@ -196,7 +198,7 @@ export default function UserDashboardLayout({
                       <div className="flex items-center justify-between">
                         <div className="w-full flex items-center text-base">
                           {createElement(item.icon ? item.icon : "a", {
-                            className: "mr-3",
+                            className: "mr-3 size-[20px]",
                           })}
                           <span className="capitalize text-sm">
                             {item.label}
@@ -218,7 +220,7 @@ export default function UserDashboardLayout({
                         <button className="flex items-center justify-between btn">
                           <div className="w-full flex items-center text-base">
                             {createElement(item.icon ? item.icon : "a", {
-                              className: "mr-3",
+                              className: "mr-3 size-[20px]",
                             })}
                             <span className="capitalize text-sm">
                               {item.label}
@@ -276,7 +278,7 @@ export default function UserDashboardLayout({
                   >
                     <div className="w-full flex items-center text-base">
                       {createElement(item.icon ? item.icon : "a", {
-                        className: "mr-3",
+                        className: "mr-3 size-[20px]",
                       })}
                       <span className="capitalize text-sm">{item.label}</span>
                     </div>
@@ -300,7 +302,10 @@ export default function UserDashboardLayout({
       </div>
 
       {/* Main Content */}
-      <div className="grow lg:ml-0 pt-16 lg:pt-0">{children}</div>
+      <div className="grow lg:ml-0 pt-16 lg:pt-0 h-screen lg:h-full flex flex-col">
+        {topBar && <div className="sticky top-0 z-40">{topBar}</div>}
+        <div className="grow overflow-y-auto">{children}</div>
+      </div>
 
       {/* Logout redirection modal */}
       <Modal

@@ -124,7 +124,7 @@ export function DashboardHomePage() {
     orderId: `cart-${product.id}`,
     name: product.name,
     description: product.description,
-    cost: product.price,
+    cost: product.price ?? 0,
     image: product.images?.[0]?.url || shoppingBagIcon,
     count: 1,
   });
@@ -170,13 +170,11 @@ export function DashboardHomePage() {
   }
 
   return (
-    <UserDashboardLayout>
-      <div className="h-screen">
-        <div className="flex flex-col gap-2 relative">
-          <TopBar title={title} breadCrumb={<BreadCrumb />} />
-        </div>
-
-        <div className="w-full h-[95%] flex flex-col gap-4 p-2 lg:p-4 mt-16 lg:mt-20 overflow-y-scroll">
+    <UserDashboardLayout
+      topBar={<TopBar title={title} breadCrumb={<BreadCrumb />} />}
+    >
+      <div className="mt-20">
+        <div className="w-full flex flex-col gap-4 p-2 lg:p-4">
           <div className="w-full bg-white mt-5 rounded-sm p-2 lg:p-4 flex flex-col gap-4 lg:gap-6">
             <div className="flex items-center justify-between">
               <h2 className="font-semibold text-xl lg:text-[28px] capitalize">
@@ -260,7 +258,7 @@ export function DashboardHomePage() {
                 <Card
                   key={product.id}
                   itemName={product.name}
-                  itemCost={product.price}
+                  itemCost={product.price ?? 0}
                   itemImage={product.images?.[0]?.url || shoppingBagIcon}
                   link={`/dashboard/shop/dress/${product.id}`}
                   product={product}
@@ -288,7 +286,7 @@ export function DashboardHomePage() {
                 <Card
                   key={product.id}
                   itemName={product.name}
-                  itemCost={product.price}
+                  itemCost={product.price ?? 0}
                   itemImage={product.images?.[0]?.url || shoppingBagIcon}
                   link={`/dashboard/shop/fabric/${product.id}`}
                   product={product}
