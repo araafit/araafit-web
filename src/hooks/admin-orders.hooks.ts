@@ -111,6 +111,13 @@ export const useUpdateOrderStatus = () => {
     onSuccess: (_, variables) => {
       // Invalidate and refetch orders
       queryClient.invalidateQueries({ queryKey: adminOrdersKeys.lists() });
+      // Invalidate specific order detail and any detail lists
+      if (variables?.orderId) {
+        queryClient.invalidateQueries({
+          queryKey: adminOrdersKeys.detail(variables.orderId),
+        });
+      }
+      queryClient.invalidateQueries({ queryKey: adminOrdersKeys.details() });
       // Also invalidate dashboard metrics since order status affects counts
       queryClient.invalidateQueries({ queryKey: ["admin-dashboard"] });
       toast.success(`Order status updated to ${variables.data.status}`);

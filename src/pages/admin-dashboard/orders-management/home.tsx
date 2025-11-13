@@ -94,7 +94,7 @@ export function AdminDashboardOrders() {
               </TabsList>
 
               <div className="flex items-center gap-2">
-                <DropdownMenu>
+                {/*<DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <TableButton
                       variant="outline"
@@ -116,13 +116,13 @@ export function AdminDashboardOrders() {
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
-                </DropdownMenu>
+                </DropdownMenu>*/}
 
-                <Button
+                {/*<Button
                   text="Save"
                   variant="solid"
                   className=" text-white w-24 h-11 shadow-sm"
-                />
+                />*/}
               </div>
             </section>
 

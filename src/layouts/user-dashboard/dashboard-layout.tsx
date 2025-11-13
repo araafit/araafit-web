@@ -289,7 +289,7 @@ export default function UserDashboardLayout({
           </div>
 
           <div
-            className="text-[0.875rem] flex items-center gap-[0.75rem] text-neutral-900 border-t-2 border-neutral-100 p-[0.5rem] hover:bg-primary-900 hover:text-white cursor-pointer"
+            className="text-[0.875rem] flex items-center gap-[0.75rem] text-neutral-900 border-t-2 border-neutral-100 p-[0.5rem] pb-4 hover:bg-primary-900 hover:text-white cursor-pointer"
             onClick={() => {
               toggleSwitch();
               closeMobileMenu();
