@@ -110,6 +110,7 @@ export const useUpdateOrderStatus = () => {
     }) => adminOrdersService.updateOrderStatus(orderId, data),
     onSuccess: (_, variables) => {
       // Invalidate and refetch orders
+      queryClient.invalidateQueries({ queryKey: adminOrdersKeys.all });
       queryClient.invalidateQueries({ queryKey: adminOrdersKeys.lists() });
       // Invalidate specific order detail and any detail lists
       if (variables?.orderId) {

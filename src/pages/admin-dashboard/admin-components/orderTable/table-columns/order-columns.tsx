@@ -1,4 +1,5 @@
 import type { ColumnDef, Row } from "@tanstack/react-table";
+import React from "react";
 import { useUpdateOrderStatus } from "../../../../../hooks/admin-orders.hooks";
 import { Checkbox } from "../../../../ui/checkbox";
 import type { schema } from "../../overViewTable/schema/schema";
@@ -47,9 +48,10 @@ const ActionComponent: React.FC<{ row: Row<z.infer<typeof schema>> }> = ({
   row,
 }) => {
   const updateOrderStatusMutation = useUpdateOrderStatus();
+  const [open, setOpen] = React.useState(false);
 
   return (
-    <Drawer>
+    <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger
         className="text-[#9A6C50]"
         onClick={(e) => e.stopPropagation()}
@@ -117,10 +119,18 @@ const ActionComponent: React.FC<{ row: Row<z.infer<typeof schema>> }> = ({
                       onClick={(e) => {
                         e.stopPropagation();
 
-                        updateOrderStatusMutation.mutate({
-                          orderId: row.original.orderId,
-                          data: { status: status.status.toLowerCase() },
-                        });
+                        updateOrderStatusMutation.mutate(
+                          {
+                            orderId: row.original.orderId,
+                            data: { status: status.status.toLowerCase() },
+                          },
+                          {
+                            onSuccess: () => {
+                              // Close the drawer after a successful update
+                              setOpen(false);
+                            },
+                          }
+                        );
                       }}
                     >
                       {status.status}
