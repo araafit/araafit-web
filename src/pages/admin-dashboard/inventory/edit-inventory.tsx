@@ -2,7 +2,6 @@ import {
   CaretRightIcon,
   CloudArrowUpIcon,
   TrashSimpleIcon,
-  XIcon,
 } from "@phosphor-icons/react";
 import TopBar from "../admin-components/top-bar/top-bar";
 import AdminDashboardLayout from "../../../layouts/admin-dashboard/dashboard-layout";
@@ -10,17 +9,14 @@ import Button from "../../../shared-components/button";
 import NotificationBell from "../admin-components/top-bar/notification-bell";
 import { useState, useEffect } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import { useUpdateProduct, useProduct } from "../../../hooks/admin-inventory.hooks";
-import { useNavigate, useParams } from "react-router-dom";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../../ui/dropdown-menu";
-import { TableButton } from "../../ui/button";
+  useUpdateProduct,
+  useProduct,
+} from "../../../hooks/admin-inventory.hooks";
+import { useNavigate, useParams } from "react-router-dom";
+// import { TableButton } from "../../ui/button";
 import { Switch } from "../../ui/switch";
-import { CaretDownIcon } from "@phosphor-icons/react";
+// import { CaretDownIcon } from "@phosphor-icons/react";
 import {
   Select,
   SelectLabel,
@@ -31,13 +27,15 @@ import {
   SelectItem,
 } from "../../ui/select";
 import Spinner from "../../../shared-components/spinner";
+import { SkinToneSelectField } from "./skin-tone-selection-field";
 
 const skinTone = ["Porcelin", "Ivory", "Sand", "Espresso", "Chestnut", "Honey"];
-  //const categories = ["dress", "fabric"];
-  //const discountTypes = ["percentage", "fixed"];
+//const categories = ["dress", "fabric"];
+//const discountTypes = ["percentage", "fixed"];
 
 interface ProductFormData {
   name: string;
+  audience: "men" | "women" | "kids";
   category: "dress" | "fabric";
   description: string;
   materialType: string;
@@ -63,7 +61,11 @@ export function AdminDashboardEditInventory() {
   const { inventoryId } = useParams<{ inventoryId: string }>();
   const navigate = useNavigate();
   const updateProductMutation = useUpdateProduct();
-  const { data: product, isLoading: isLoadingProduct, error: productError } = useProduct(inventoryId || "");
+  const {
+    data: product,
+    isLoading: isLoadingProduct,
+    error: productError,
+  } = useProduct(inventoryId || "");
 
   const [images, setImages] = useState<ImageState[]>([]);
   const [discountsEnabled, setDiscountsEnabled] = useState(false);
@@ -74,6 +76,7 @@ export function AdminDashboardEditInventory() {
     handleSubmit,
     watch,
     reset,
+    control,
     formState: { errors },
   } = useForm<ProductFormData>({
     mode: "all",
@@ -94,6 +97,7 @@ export function AdminDashboardEditInventory() {
       reset({
         name: product.name,
         category: product.category,
+        audience: product.audience,
         description: product.description || "",
         materialType: product.materialType || "",
         dressSize: product.dressSize || "",
@@ -101,16 +105,17 @@ export function AdminDashboardEditInventory() {
         thickness: product.thickness || "",
         quantityInStock: product.quantityInStock || 0,
         price: product.price || 0,
-        discountType: (product.discountType as "percentage" | "fixed") || "percentage",
+        discountType:
+          (product.discountType as "percentage" | "fixed") || "percentage",
         discountValue: product.discountValue || 0,
-        discountStart: product.discountStart?.split('T')[0] || "",
-        discountEnd: product.discountEnd?.split('T')[0] || "",
+        discountStart: product.discountStart?.split("T")[0] || "",
+        discountEnd: product.discountEnd?.split("T")[0] || "",
       });
 
       // Set other state
       setSelectedTone(product.skinToneRecommendation || []);
       setDiscountsEnabled(!!product.discountType);
-      
+
       // Set existing images
       setImages(
         product.images.map((img, index) => ({
@@ -140,27 +145,29 @@ export function AdminDashboardEditInventory() {
     setImages((prev) => prev.filter((img) => img.id !== imageId));
   };
 
-  const toggleTone = (tone: string) => {
-    setSelectedTone((prev) =>
-      prev.includes(tone) ? prev.filter((s) => s !== tone) : [...prev, tone]
-    );
-  };
+  // const toggleTone = (tone: string) => {
+  //   setSelectedTone((prev) =>
+  //     prev.includes(tone) ? prev.filter((s) => s !== tone) : [...prev, tone]
+  //   );
+  // };
 
-  const removeTone = (tone: string) => {
-    setSelectedTone((prev) => prev.filter((s) => s !== tone));
-  };
+  // const removeTone = (tone: string) => {
+  //   setSelectedTone((prev) => prev.filter((s) => s !== tone));
+  // };
 
   const onSubmit: SubmitHandler<ProductFormData> = async (data) => {
-    console.log("submitting..", data);
     if (!inventoryId) return;
 
     try {
       // Only include new files in the update
-      const newFiles = images.filter(img => !img.isExisting && img.file).map(img => img.file!);
-      
+      const newFiles = images
+        .filter((img) => !img.isExisting && img.file)
+        .map((img) => img.file!);
+
       await updateProductMutation.mutateAsync({
         productId: inventoryId,
         data: {
+          audience: data.audience,
           files: newFiles.length > 0 ? newFiles : undefined,
           name: data.name,
           description: data.description,
@@ -240,7 +247,9 @@ export function AdminDashboardEditInventory() {
               <>
                 <NotificationBell />
                 <Button
-                  text={updateProductMutation.isPending ? "Updating..." : "Update"}
+                  text={
+                    updateProductMutation.isPending ? "Updating..." : "Update"
+                  }
                   variant="solid"
                   disabled={updateProductMutation.isPending}
                   onClick={handleSubmit(onSubmit)}
@@ -250,15 +259,17 @@ export function AdminDashboardEditInventory() {
             }
           />
         </div>
-        
+
         <div className="w-full flex flex-col p-4 mt-20 overflow-y-scroll px-10">
           <div>
-            <h2 className="font-semibold text-[28px]">Edit {product.category === "dress" ? "Dress" : "Fabric"}</h2>
+            <h2 className="font-semibold text-[28px]">
+              Edit {product.category === "dress" ? "Dress" : "Fabric"}
+            </h2>
             <span className="capitalize text-[#5D5D5D] font-light cursor-pointer text-sm font-inter">
               Edit and update your stunning {product.category} here.
             </span>
           </div>
-          
+
           <section className="flex justify-between gap-10 mt-8">
             <div className="w-full max-w-[448px] relative">
               {/* Upload Box */}
@@ -323,6 +334,7 @@ export function AdminDashboardEditInventory() {
                       <button
                         onClick={() => handleDeleteImage(image.id)}
                         className="absolute bottom-2 right-2 rounded-full p-1"
+                        title="Delete icon"
                       >
                         <TrashSimpleIcon className="text-red-500" size={24} />
                       </button>
@@ -331,7 +343,7 @@ export function AdminDashboardEditInventory() {
                 </div>
               )}
             </div>
-            
+
             {/* Information section */}
             <div className="flex-1 max-w-[654px]">
               {/* General Information */}
@@ -401,7 +413,9 @@ export function AdminDashboardEditInventory() {
 
               {/* Product Information */}
               <div className="bg-white rounded-[6px] py-6 px-4 mt-4">
-                <h4 className="font-semibold">{watchCategory === "dress" ? "Dress" : "Fabric"} Information</h4>
+                <h4 className="font-semibold">
+                  {watchCategory === "dress" ? "Dress" : "Fabric"} Information
+                </h4>
                 <div className="flex gap-4 items-center mt-4">
                   <div className="w-[303px]">
                     <label
@@ -423,7 +437,8 @@ export function AdminDashboardEditInventory() {
                         htmlFor="dressSize"
                         className="block text-[#4F4F4F] font-light text-sm"
                       >
-                        General {watchCategory === "dress" ? "Dress" : "Fabric"} Size
+                        General {watchCategory === "dress" ? "Dress" : "Fabric"}{" "}
+                        Size
                       </label>
                       <SelectTrigger className="w-full h-14 border border-[#D0D5DD] text-[#676767] text-sm bg-white flex items-center justify-between px-3">
                         <SelectValue placeholder="Select a size" />
@@ -472,72 +487,17 @@ export function AdminDashboardEditInventory() {
               </div>
 
               {/* Skin Tone Recommendation */}
+             {/* skin tone Info */}
               <div className="bg-white rounded-[6px] py-6 px-4 mt-4">
                 <h4 className="font-semibold">Skin Tone Recommendation</h4>
                 <div className="flex gap-4 items-center mt-4">
-                  <div className="w-full">
-                    <DropdownMenu>
-                      <label
-                        htmlFor="skinTone"
-                        className="block text-[#4F4F4F] font-light text-sm"
-                      >
-                        Skin Tone
-                      </label>
-
-                      <DropdownMenuTrigger asChild>
-                        <TableButton
-                          variant="outline"
-                          size="sm"
-                          className="w-full min-h-14 border border-[#D0D5DD] text-[#676767] text-sm bg-white flex items-center justify-between px-3"
-                        >
-                          <div className="flex flex-wrap gap-2">
-                            {selectedTone.length > 0 ? (
-                              selectedTone.map((tone) => (
-                                <span
-                                  key={tone}
-                                  className="flex items-center gap-1 border border-[#E7E7E7] p-2 rounded-[4px] text-sm"
-                                >
-                                  {tone}
-                                  <XIcon
-                                    size={16}
-                                    className="text-red-500 cursor-pointer"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      removeTone(tone);
-                                    }}
-                                  />
-                                </span>
-                              ))
-                            ) : (
-                              <span className="text-[#9A9A9A] font-light">
-                                Skin Tone
-                              </span>
-                            )}
-                          </div>
-
-                          <CaretDownIcon
-                            className="text-[#676767] ml-auto"
-                            size={20}
-                          />
-                        </TableButton>
-                      </DropdownMenuTrigger>
-
-                      <DropdownMenuContent className="w-52 flex flex-col items-start gap-2 p-3">
-                        {skinTone.map((tone) => (
-                          <DropdownMenuItem
-                            key={tone}
-                            onClick={() => toggleTone(tone)}
-                            className={`cursor-pointer w-full px-2 py-1 rounded-md ${
-                              selectedTone.includes(tone)
-                                ? "bg-[#9A6C50] text-white"
-                                : ""
-                            }`}
-                          >
-                            {tone}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                  <div className="w-full ">
+                    <SkinToneSelectField
+                      name="skinTone"
+                      label="Skin Tone"
+                      options={skinTone}
+                      control={control}
+                    />
                   </div>
                 </div>
               </div>
