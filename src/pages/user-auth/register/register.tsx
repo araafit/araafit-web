@@ -99,6 +99,7 @@ export default function Register() {
     // Step 1: Verify email
     if (currentStep === 0) {
       const emailValid = await methods.trigger("email");
+
       if (emailValid) {
         const email = methods.getValues("email");
 
@@ -112,6 +113,7 @@ export default function Register() {
             const n = Number(part.replace(/[^0-9.]/g, ""));
             return Number.isFinite(n) ? n : 0;
           };
+
           const parseHeightInches = (
             val: string | number | undefined
           ): number => {
@@ -196,13 +198,15 @@ export default function Register() {
       if (detailsValid) {
         setCurrentStep(3);
       }
-    } else {
-      // Step 4: Final registration
+    }
 
+    // Step 4: Final registration
+    if (currentStep === 3) {
       const passwordValid = await methods.trigger([
         "password",
         "confirmPassword",
       ]);
+
       if (passwordValid) {
         methods.handleSubmit(onSubmit)();
       }
@@ -254,13 +258,18 @@ export default function Register() {
               type="submit"
               onClick={onNext}
               className={`w-full text-white px-5 py-3 rounded-md ${
-                !methods.formState.isValid ? "bg-neutral-50" : "bg-primary-500"
-              } capitalize disabled:opacity-70`}
-              disabled={
                 !methods.formState.isValid ||
                 verifyEmailMutation.isPending ||
                 verifyOtpMutation.isPending ||
                 registerMutation.isPending
+                  ? "disabled:opacity-50 disabled:cursor-not-allowed"
+                  : "opacity-100"
+              } capitalize bg-primary-500`}
+              disabled={
+                verifyEmailMutation.isPending ||
+                verifyOtpMutation.isPending ||
+                registerMutation.isPending ||
+                verifyEmailWithMeasurements.isPending
               }
             >
               {currentStep === formSteps.length - 1 ? (
@@ -272,6 +281,7 @@ export default function Register() {
                   >
                     Submit
                   </span>
+
                   <Spinner
                     size="md"
                     speed="fast"
@@ -297,9 +307,11 @@ export default function Register() {
                     speed="fast"
                     isLoading={
                       verifyEmailMutation.isPending ||
-                      verifyOtpMutation.isPending
+                      verifyOtpMutation.isPending ||
+                      registerMutation.isPending ||
+                      verifyEmailWithMeasurements.isPending
                     }
-                    arcColor="#9A6C50"
+                    arcColor="#ffff"
                     className="ml-1"
                   />
                 </div>
