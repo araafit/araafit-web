@@ -23,7 +23,6 @@ import {
 import { ArrowLeftIcon } from "@phosphor-icons/react";
 import { orderStatuses } from "../../_data/_overview";
 import { useAdminOrder } from "../../../../hooks/admin-orders.hooks";
-import { useEffect, useState } from "react";
 import type { AdminOrder } from "../../../../services/admin-orders.service";
 /* ------------------------------------------------------------------------------------------------ */
 
@@ -59,14 +58,10 @@ export function OverviewTable() {
   }
 
   const ViewMoreDrawer = ({ orderId }: { orderId: string }) => {
-
-    const { isLoading, isError, error, isSuccess, data, refetch } = useAdminOrder(
-      orderId
-    );
+    const { isLoading, isSuccess, data, refetch } =
+      useAdminOrder(orderId);
 
     const orderData = data ? data : ({} as AdminOrder);
-
-    console.log(orderId);
 
     const customerName = orderData.user
       ? `${orderData.user.firstName} ${orderData.user.lastName}`
@@ -82,11 +77,14 @@ export function OverviewTable() {
           View details
         </DrawerTrigger>
 
-        <DrawerContent className="w-[38.313rem] p-4" aria-describedby="order-management-detail">
+        <DrawerContent
+          className="w-[38.313rem] p-4"
+          aria-describedby="order-management-detail"
+        >
           <DrawerHeader>
-            {isLoading ? (
+            {isSuccess && !data ? (
               <div className="flex items-center justify-center">
-                <span className="text-neutral-300">Loading ...</span>
+                <span className="text-neutral-300">...</span>
               </div>
             ) : (
               <div className="flex items-center gap-4">
@@ -120,8 +118,8 @@ export function OverviewTable() {
             )}
           </DrawerHeader>
 
-          {isLoading && !data ? (
-            <div className="flex items-center justify-center">
+          {isLoading && (
+            <div className="size-full flex items-center justify-center">
               <Spinner
                 isLoading={isLoading}
                 size="md"
@@ -129,7 +127,15 @@ export function OverviewTable() {
                 arcColor="#9A6C50"
               />
             </div>
-          ) : (
+          )}
+
+          {isSuccess && !data && (
+            <div className="size-full">
+              <p className="text-neutral-300 font-medium">No order detail</p>
+            </div>
+          )}
+
+          {isSuccess && data && (
             <div className="w-full flex flex-col items-center gap-4 divide-y divide-neutral-200 overflow-y-scroll pb-2">
               {/* Order information */}
               <div className="w-full py-[12px] px-4 flex flex-col justify-center gap-4">
