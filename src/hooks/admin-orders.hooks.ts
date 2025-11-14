@@ -23,7 +23,7 @@ export const adminOrdersKeys = {
 // Get Order query
 export const useAdminOrder = (orderId: string | number) => {
   return useQuery({
-    queryKey: adminOrdersKeys.lists(),
+    queryKey: adminOrdersKeys.detail(orderId.toString()),
     queryFn: () => adminOrdersService.getOrder(orderId),
     enabled: false,
     staleTime: 5 * 60 * 1000,
