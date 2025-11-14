@@ -15,11 +15,11 @@ export function DashboardShopFabricDetailPage() {
     <div className="font-inter font-light capitalize flex items-center">
       <span className="text-primary-900">Araafit</span>
       <CaretRightIcon className="text-[#979797]" />
-      <Link to="/dashboard/shop/" className="text-primary-900">
+      <Link to="/dashboard/shop/all" className="text-primary-900">
         Shop
       </Link>
       <CaretRightIcon className="text-[#979797]" />
-      <Link to="/dashboard/shop/dress" className="text-primary-900">
+      <Link to="/dashboard/shop/women?tab=fabric" className="text-primary-900">
         Fabrics
       </Link>
       <CaretRightIcon className="text-[#979797]" />
