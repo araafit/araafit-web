@@ -99,7 +99,7 @@ export function OverviewTable() {
                 </DrawerTitle>
 
                 {(() => {
-                  const status = "pending";
+                  const status = orderData.status;
                   const style = orderStatuses.find((s) => s.status === status);
 
                   return (
