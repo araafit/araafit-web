@@ -12,7 +12,19 @@ import {
   formatDate,
 } from "../../../../utils/admin-dashboard-utils";
 import Spinner from "../../../../shared-components/spinner";
-
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "../../../ui/drawer";
+import { ArrowLeftIcon } from "@phosphor-icons/react";
+import { orderStatuses } from "../../_data/_overview";
+import { useAdminOrder } from "../../../../hooks/admin-orders.hooks";
+import { useEffect, useState } from "react";
+import type { AdminOrder } from "../../../../services/admin-orders.service";
 /* ------------------------------------------------------------------------------------------------ */
 
 export function OverviewTable() {
@@ -21,6 +33,8 @@ export function OverviewTable() {
     isLoading,
     error,
   } = useAdminRecentActivities();
+
+  const activities = recentActivities?.recentActivities || [];
 
   if (isLoading) {
     return (
@@ -44,7 +58,229 @@ export function OverviewTable() {
     );
   }
 
-  const activities = recentActivities?.recentActivities || [];
+  const ViewMoreDrawer = ({ orderId }: { orderId: string }) => {
+
+    const { isLoading, isError, error, isSuccess, data, refetch } = useAdminOrder(
+      orderId
+    );
+
+    const orderData = data ? data : ({} as AdminOrder);
+
+    console.log(orderId);
+
+    const customerName = orderData.user
+      ? `${orderData.user.firstName} ${orderData.user.lastName}`
+      : "...";
+
+    return (
+      <Drawer>
+        <DrawerTrigger
+          className="text-[#9A6C50] hover:text-[#7A5C40] transition-colors"
+          onClick={() => refetch()}
+          aria-describedby="order-management-trigger"
+        >
+          View details
+        </DrawerTrigger>
+
+        <DrawerContent className="w-[38.313rem] p-4" aria-describedby="order-management-detail">
+          <DrawerHeader>
+            {isLoading ? (
+              <div className="flex items-center justify-center">
+                <span className="text-neutral-300">Loading ...</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-4">
+                <DrawerClose>
+                  <div className="border h-10 w-10 rounded cursor-pointer border-[#E8E8E8] flex items-center justify-center">
+                    <ArrowLeftIcon />
+                  </div>
+                </DrawerClose>
+
+                <DrawerTitle className="font-inter text-[#494949] font-medium">
+                  Order ID: {data?.id.substring(0, 6)} ...
+                </DrawerTitle>
+
+                {(() => {
+                  const status = "pending";
+                  const style = orderStatuses.find((s) => s.status === status);
+
+                  return (
+                    <div
+                      className={`px-2 py-1 text-xs rounded-full w-fit ${
+                        style
+                          ? `${style.bgColor} ${style.textColor}`
+                          : "bg-gray-100 text-gray-600"
+                      }`}
+                    >
+                      {status}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+          </DrawerHeader>
+
+          {isLoading && !data ? (
+            <div className="flex items-center justify-center">
+              <Spinner
+                isLoading={isLoading}
+                size="md"
+                speed="fast"
+                arcColor="#9A6C50"
+              />
+            </div>
+          ) : (
+            <div className="w-full flex flex-col items-center gap-4 divide-y divide-neutral-200 overflow-y-scroll pb-2">
+              {/* Order information */}
+              <div className="w-full py-[12px] px-4 flex flex-col justify-center gap-4">
+                <h3 className="w-full text-neutral-700 font-inter font-medium">
+                  Order Information
+                </h3>
+
+                <div className="w-full flex items-center justify-between">
+                  <span className="text-neutral-400 text-[14px] font-light">
+                    Order Date & Time:
+                  </span>
+                  <span className="text-neutral-600 text-[14px] font-medium">
+                    {orderData.createdAt}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-neutral-400 text-[14px] font-light">
+                    Dress:
+                  </span>
+                  {/* <span className="text-neutral-600 text-[14px] font-medium">{orderData.}</span> */}
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-neutral-400 text-[14px] font-light">
+                    Dress Size:
+                  </span>
+                  <span className="text-neutral-600 text-[14px] font-medium">
+                    Yellow & Black
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-neutral-400 text-[14px] font-light">
+                    Quantity:
+                  </span>
+                  <span className="text-neutral-600 text-[14px] font-medium">
+                    2
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-neutral-400 text-[14px] font-light">
+                    Amount:
+                  </span>
+                  <span className="text-neutral-600 text-[14px] font-medium">
+                    ₦200,000.00
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-neutral-400 text-[14px] font-light">
+                    Payment Method:
+                  </span>
+                  <span className="text-neutral-600 text-[14px] font-medium">
+                    Card
+                  </span>
+                </div>
+              </div>
+
+              {/* Delivery information */}
+              <div className="w-full py-[12px] px-4 flex flex-col justify-center gap-4">
+                <h3 className="w-full text-neutral-700 font-inter font-medium">
+                  Delivery Information
+                </h3>
+
+                <div className="w-full flex items-center justify-between">
+                  <span className="text-neutral-400 text-[14px] font-light">
+                    Delivery Date & Time:
+                  </span>
+                  <span className="text-neutral-600 text-[14px] font-medium">
+                    {orderData.deliveryDate ? orderData.deliveryDate : "..."}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-neutral-400 text-[14px] font-light">
+                    Customer Name
+                  </span>
+                  <span className="text-neutral-600 text-[14px] font-medium">
+                    {customerName}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-neutral-400 text-[14px] font-light">
+                    Email:
+                  </span>
+                  <span className="text-neutral-600 text-[14px] font-medium">
+                    {orderData.user ? orderData.user.email : "..."}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-neutral-400 text-[14px] font-light">
+                    Address:
+                  </span>
+                  <span className="text-neutral-600 text-[14px] font-medium">
+                    {orderData.user ? orderData.user.deliveryAddress : "..."}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-neutral-400 text-[14px] font-light">
+                    City:
+                  </span>
+                  <span className="text-neutral-600 text-[14px] font-medium">
+                    {orderData.user ? orderData.user.email : "..."}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-neutral-400 text-[14px] font-light">
+                    Phone:
+                  </span>
+                  <span className="text-neutral-600 text-[14px] font-medium">
+                    {orderData.user ? orderData.user.phoneNumber : "..."}
+                  </span>
+                </div>
+              </div>
+
+              {/* Rider information */}
+              <div className="w-full py-[12px] px-4 flex flex-col justify-center gap-4">
+                <h3 className="w-full text-neutral-700 font-inter font-medium">
+                  Rider Information
+                </h3>
+
+                <div className="w-full flex items-center justify-between">
+                  <span className="text-neutral-400 text-[14px] font-light">
+                    Rider’s Name:
+                  </span>
+                  <span className="text-neutral-600 text-[14px] font-medium">
+                    {orderData.rider ? orderData.rider.name : "..."}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-neutral-400 text-[14px] font-light">
+                    Rider’s Phone Number:
+                  </span>
+                  <span className="text-neutral-600 text-[14px] font-medium">
+                    {orderData.rider ? orderData.rider.phone : "..."}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+        </DrawerContent>
+      </Drawer>
+    );
+  };
 
   return (
     <div>
@@ -53,7 +289,7 @@ export function OverviewTable() {
           No recent activity yet.
         </span>
       ) : (
-        <div className="overflow-hidden border border-[#EAECF0]   bg-white shadow-[0px_2px_4px_-2px_#1018280F,0px_4px_8px_-2px_#1018281A] rounded-lg">
+        <div className="overflow-hidden border border-[#EAECF0] bg-white shadow-[0px_2px_4px_-2px_#1018280F,0px_4px_8px_-2px_#1018281A] rounded-lg">
           <Table>
             <TableHeader className="!border-b-0">
               <TableRow className="!border-0 h-11 text-[#3D3D3D]">
@@ -91,14 +327,7 @@ export function OverviewTable() {
                     {formatDate(activity.dateTime)}
                   </TableCell>
                   <TableCell className="tt">
-                    <button
-                      onClick={() =>
-                        window.open(`/admin-dashboard${activity.detailsUrl}`)
-                      }
-                      className="text-[#9A6C50] hover:text-[#7A5C40] transition-colors"
-                    >
-                      View Details
-                    </button>
+                    <ViewMoreDrawer orderId={activity.id} />
                   </TableCell>
                 </TableRow>
               ))}
