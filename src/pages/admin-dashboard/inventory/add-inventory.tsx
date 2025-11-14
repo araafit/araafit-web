@@ -101,7 +101,7 @@ export function AdminDashboardUploadInventory() {
     const payload = {
       files: contributorPhotos,
       name: data.name,
-      ageGroup: data.audience,
+      audience: data.audience,
       category: data.category,
       description: data.description,
       materialType: data.materialType,
