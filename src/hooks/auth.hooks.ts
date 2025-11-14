@@ -92,17 +92,15 @@ export const useVerifyEmail = () => {
   return useMutation({
     mutationFn: (data: VerifyEmailRequest) => authService.verifyEmail(data),
     onSuccess: (data) => {
-      const ok = (data as any)?.isSuccess || (data as any)?.data?.isSuccess;
+      const ok = data.isSuccess
+
       if (ok) {
         showToast.success(
           (data as any)?.message || "Sent! Check your email for an OTP code",
           { icon: null, style: notificationStyles.alertSuccess }
         );
       } else {
-        showToast.error((data as any)?.message, {
-          icon: null,
-          style: notificationStyles.alertError,
-        });
+        throw Error("Failed to verify Email");
       }
     },
     onError: (error: any) => {
@@ -120,23 +118,24 @@ export const useVerifyEmailWithMeasurements = () => {
     mutationFn: (data: VerifyEmailWithMeasurementsRequest) =>
       authService.verifyEmailWithMeasurements(data),
     onSuccess: (data) => {
-      const ok = (data as any)?.isSuccess || (data as any)?.data?.isSuccess;
+      const ok = data.isSuccess;
+
       if (ok) {
         showToast.success(
           (data as any)?.message || "Sent! Check your email for an OTP code",
           { icon: null, style: notificationStyles.alertSuccess }
         );
       } else {
-        showToast.error((data as any)?.message, {
-          icon: null,
-          style: notificationStyles.alertError,
-        });
+
+        throw Error("Failed to verify Email");
       }
     },
     onError: (error: any) => {
+      console.log("Email verification error:", error);
+
       showToast.error(
         error.response?.data?.message ||
-          "Failed to send verification email with measurements",
+          "Failed to verify email with measurements",
         { icon: null, style: notificationStyles.alertError }
       );
     },
@@ -221,6 +220,7 @@ export const useRegister = () => {
         expires_in: data.expires_in,
         token_type: data.token_type,
       });
+
       setUser(data.user);
 
       // Cache the user profile
