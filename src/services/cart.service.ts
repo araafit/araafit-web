@@ -121,6 +121,20 @@ export const cartService = {
     }
   },
 
+  // Remove many items from cart
+  async removeMany(request: { itemIds: string[] }): Promise<Cart> {
+    try {
+      const response = await apiClient.delete<ApiResponse<Cart>>(
+        `/cart/remove-many`,
+        { data: request }
+      );
+      return response.data.data;
+    } catch (error) {
+      console.error(`Error removing multiple items from cart:`, error);
+      throw error;
+    }
+  },
+
   // Clear cart
   async clearCart(): Promise<{ message: string }> {
     try {

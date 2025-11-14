@@ -7,6 +7,7 @@ import {
 } from "../services/measurements.service";
 import { adminSettingsService } from "../services/admin-settings.service";
 import { dressSizeApi } from "../services/dress-size.api";
+import useAuth from "./use-auth";
 // import { useAuthStore } from "../stores/auth-store";
 
 /* ----------------------------------------------------------------------------- */
@@ -18,6 +19,7 @@ export const measurementsKeys = {
   summary: () => [...measurementsKeys.all, "summary"] as const,
   sizeChart: (gender?: string) => ["size-chart", gender ?? "all"] as const,
   dressSize: (gender?: string) => ["dress-size", gender ?? "all"] as const,
+  mySizeChart: () => [...measurementsKeys.all, "my-size-chart"] as const,
 } as const;
 
 // Get user measurements
@@ -46,6 +48,16 @@ export const useSizeChart = (gender?: string) => {
     queryKey: measurementsKeys.sizeChart(gender),
     queryFn: () => adminSettingsService.getSizeChart(gender),
     staleTime: 30 * 60 * 1000, // 30 minutes - size chart changes rarely
+  });
+};
+
+export const useAuthenticatedSizeChart = () => {
+  const { isAuthenticated } = useAuth();
+  return useQuery({
+    queryKey: measurementsKeys.mySizeChart(),
+    queryFn: () => adminSettingsService.getMySizeChart(),
+    staleTime: 30 * 60 * 1000, // 30 minutes - size chart changes rarely
+    enabled: isAuthenticated,
   });
 };
 

@@ -31,22 +31,28 @@ function GuestPageLayout({ children }: { children: React.ReactElement }) {
       <div className="bg-white py-2 px-32 flex items-center justify-center gap-2">
         <div className="w-[75rem] h-[4.5625rem] flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <img src="logo/logo.png" alt="" className="w-[5.625rem]" />
+            <Link to="/">
+              <img src="logo/logo.png" alt="" className="w-[5.625rem]" />
+            </Link>
             <Link
               to="/shop"
-              className={`p-8 ${location.pathname === "/shop" ? "text-[#9A6C50]" : ""}`}
+              className={`p-8 ${
+                location.pathname === "/shop" ? "text-[#9A6C50]" : ""
+              }`}
             >
               Shop
             </Link>
             <Link
               to="/cart"
-              className={`p-8 flex items-center gap-2 ${location.pathname === "/cart" ? "text-[#9A6C50]" : ""}`}
+              className={`p-8 flex items-center gap-2 ${
+                location.pathname === "/cart" ? "text-[#9A6C50]" : ""
+              }`}
             >
               <span>Cart</span>
               {isSuccess && (
-              <span className="bg-primary-50 p-[2px] px-[10px] rounded-full h-[1.3rem] text-[12px]">
-                {cartLength}
-              </span>
+                <span className="bg-primary-50 p-[2px] px-[10px] rounded-full h-[1.3rem] text-[12px]">
+                  {cartLength}
+                </span>
               )}
             </Link>
           </div>

@@ -117,6 +117,27 @@ export const useRemoveFromCart = () => {
   });
 };
 
+// Hook for removing many items from cart
+export const useRemoveManyFromCart = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (itemIds: string[]) => cartService.removeMany({ itemIds }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+      queryClient.invalidateQueries({ queryKey: ["cart-items"] });
+      toast.success("Selected items removed from cart!", {
+        icon: null,
+        style: notificationStyles.alertSuccess,
+      });
+    },
+    onError: (error) => {
+      console.error("Failed to remove selected items:", error);
+      toast.error("Failed to remove selected items", { icon: null });
+    },
+  });
+};
+
 // Hook for clearing cart
 export const useClearCart = () => {
   const queryClient = useQueryClient();

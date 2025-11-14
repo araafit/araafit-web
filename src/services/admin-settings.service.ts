@@ -54,6 +54,7 @@ export interface CreateSizeChartRequest {
 export interface SizeChartItem {
   id: string;
   value: number;
+  label?: string;
 }
 
 // Be flexible to allow gender-specific keys coming from the API
@@ -148,6 +149,13 @@ class AdminSettingsService {
   async getSizeChart(gender?: string): Promise<SizeChartResponse> {
     const response = await apiClient.get<ApiResponse<SizeChartResponse>>(
       `/size-chart/${gender}`
+    );
+    return response.data.data;
+  }
+
+  async getMySizeChart(): Promise<SizeChartResponse> {
+    const response = await apiClient.get<ApiResponse<SizeChartResponse>>(
+      `/size-chart/me`
     );
     return response.data.data;
   }

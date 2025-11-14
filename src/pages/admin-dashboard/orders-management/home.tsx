@@ -1,16 +1,6 @@
 import { CaretRightIcon } from "@phosphor-icons/react";
 import TopBar from "../admin-components/top-bar/top-bar";
 import AdminDashboardLayout from "../../../layouts/admin-dashboard/dashboard-layout";
-import { orderStatuses } from "../_data/_overview";
-import { TableButton } from "../../ui/button";
-import { CaretDownIcon } from "@phosphor-icons/react";
-import Button from "../../../shared-components/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../../ui/dropdown-menu";
 import Overview from "../admin-components/top-overview-items";
 import NotificationBell from "../admin-components/top-bar/notification-bell";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
@@ -94,7 +84,7 @@ export function AdminDashboardOrders() {
               </TabsList>
 
               <div className="flex items-center gap-2">
-                <DropdownMenu>
+                {/*<DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <TableButton
                       variant="outline"
@@ -116,13 +106,13 @@ export function AdminDashboardOrders() {
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
-                </DropdownMenu>
+                </DropdownMenu>*/}
 
-                <Button
+                {/*<Button
                   text="Save"
                   variant="solid"
                   className=" text-white w-24 h-11 shadow-sm"
-                />
+                />*/}
               </div>
             </section>
 

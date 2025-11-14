@@ -9,7 +9,7 @@ import {
   XIcon,
   CaretDownIcon,
 } from "@phosphor-icons/react";
-import { Link, useNavigate, NavLink } from "react-router-dom";
+import { Link, useNavigate, NavLink, useLocation } from "react-router-dom";
 import Modal from "../../shared-components/modal";
 import { useSwitch } from "../../shared-hooks/switch";
 import Button from "../../shared-components/button";
@@ -77,6 +77,7 @@ export default function UserDashboardLayout({
   const { toggleSwitch, switchValue } = useSwitch(false);
   const { data: cart } = useCart();
   const navigate = useNavigate();
+  const location = useLocation();
   const logoutMutation = useLogout();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -102,7 +103,7 @@ export default function UserDashboardLayout({
   };
 
   return (
-    <section className="h-screen bg-[#F5F5F5] flex items-start">
+    <section className="h-screen bg-[#F5F5F5] flex items-start overflow-x-hidden">
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-neutral-100 p-4 flex items-center justify-between">
         <Link to="/" className="block">
@@ -214,10 +215,16 @@ export default function UserDashboardLayout({
                 }
 
                 if (item.label.toLowerCase() === "shop") {
+                  const isShopRoute =
+                    location.pathname.startsWith("/dashboard/shop");
                   return (
                     <Dropdown
+                      open={dropdownOpen || isShopRoute}
+                      onOpenChange={(isOpen) => setDropdownOpen(isOpen)}
                       trigger={
-                        <button className="flex items-center justify-between btn">
+                        <button
+                          className={`flex items-center justify-between btn w-fullgi`}
+                        >
                           <div className="w-full flex items-center text-base">
                             {createElement(item.icon ? item.icon : "a", {
                               className: "mr-3 size-[20px]",
@@ -240,7 +247,11 @@ export default function UserDashboardLayout({
                       }}
                       className="shadow-none border-none rounded-none outline-none focus"
                       itemClassName="capitalize pl-6 hover:text-primary-500 !hover:bg-none"
-                      triggerClassName="`w-full flex flex-col gap-4 p-[0.5rem] transition-colors text-neutral-900 hover:bg-primary-900 hover:text-white"
+                      triggerClassName={`w-full flex flex-col gap-4 p-[0.5rem] transition-colors ${
+                        isShopRoute || dropdownOpen
+                          ? "bg-primary-900 text-white"
+                          : "text-neutral-900 hover:bg-primary-900 hover:text-white"
+                      }`}
                     >
                       {item.isDropDown &&
                         item.dropdown.map((item, itemIdx) => (
@@ -254,6 +265,10 @@ export default function UserDashboardLayout({
                                   : "text-neutral-900"
                               }`
                             }
+                            onClick={() => {
+                              // Keep dropdown open on navigation
+                              setDropdownOpen(true);
+                            }}
                           >
                             {item.label}
                           </NavLink>
@@ -289,7 +304,7 @@ export default function UserDashboardLayout({
           </div>
 
           <div
-            className="text-[0.875rem] flex items-center gap-[0.75rem] text-neutral-900 border-t-2 border-neutral-100 p-[0.5rem] hover:bg-primary-900 hover:text-white cursor-pointer"
+            className="text-[0.875rem] flex items-center gap-[0.75rem] text-neutral-900 border-t-2 border-neutral-100 p-[0.5rem] pb-4 hover:bg-primary-900 hover:text-white cursor-pointer"
             onClick={() => {
               toggleSwitch();
               closeMobileMenu();
@@ -302,7 +317,7 @@ export default function UserDashboardLayout({
       </div>
 
       {/* Main Content */}
-      <div className="grow lg:ml-0 pt-16 lg:pt-0 h-screen lg:h-full flex flex-col">
+      <div className="grow lg:ml-0 pt-16 lg:pt-0 h-screen lg:h-full flex flex-col overflow-x-hidden">
         {topBar && <div className="sticky top-0 z-40">{topBar}</div>}
         <div className="grow overflow-y-auto">{children}</div>
       </div>
