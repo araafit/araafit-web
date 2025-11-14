@@ -188,11 +188,11 @@ class AuthService {
    * Send OTP to email for verification
    */
   async verifyEmail(data: VerifyEmailRequest): Promise<VerifyEmailResponse> {
-    const response = await apiClient.post<VerifyEmailResponse>(
+    const response = await apiClient.post<ApiResponse<VerifyEmailResponse>>(
       "/auth/verify-email",
       data
     );
-    return response.data;
+    return response.data.data;
   }
 
   /**
@@ -201,11 +201,12 @@ class AuthService {
   async verifyEmailWithMeasurements(
     data: VerifyEmailWithMeasurementsRequest
   ): Promise<VerifyEmailResponse> {
-    const response = await apiClient.post<VerifyEmailResponse>(
+    const response = await apiClient.post<ApiResponse<VerifyEmailResponse>>(
       "/auth/verify-email-with-measurements",
       data
     );
-    return response.data;
+
+    return response.data.data;
   }
 
   /**
@@ -233,11 +234,11 @@ class AuthService {
    * Register a new user
    */
   async register(data: RegisterRequest): Promise<RegisterResponse> {
-    const response = await apiClient.post<RegisterResponse>(
+    const response = await apiClient.post<ApiResponse<RegisterResponse>>(
       "/auth/register",
       data
     );
-    return response.data;
+    return response.data.data;
   }
 
   /**
