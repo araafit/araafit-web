@@ -252,9 +252,7 @@ export function AdminDashboardOverview() {
               <div className="flex items-center justify-between w-full">
                 <h2 className="font-medium text-[28px] capitalize">
                   Tailoring Requests{" "}
-                  {metrics && metrics?.mostRecentRequest !== null
-                    ? `(${metrics?.mostRecentRequest})`
-                    : ""}
+                  ({metrics && metrics?.newRequests})
                 </h2>
                 <Link
                   to="/admin-dashboard/order-management"
