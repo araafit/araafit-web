@@ -137,6 +137,8 @@ export function AdminDashboardUploadInventory() {
     </div>
   );
 
+  console.log(selectedAudience);
+
   const SkinToneSelectField: React.FC<{
     name: "skinTone";
     label: string;
@@ -385,7 +387,7 @@ export function AdminDashboardUploadInventory() {
                       type="radio"
                       id="for-women"
                       className="hidden"
-                      value="female"
+                      value="women"
                       {...register("audience")}
                     />
                     <div
