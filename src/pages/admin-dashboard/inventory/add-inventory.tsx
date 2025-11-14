@@ -137,8 +137,6 @@ export function AdminDashboardUploadInventory() {
     </div>
   );
 
-  console.log(selectedAudience);
-
   const SkinToneSelectField: React.FC<{
     name: "skinTone";
     label: string;
