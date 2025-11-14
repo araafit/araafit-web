@@ -25,7 +25,7 @@ export function MenShop() {
   // Helper function to generate product link
   const productLink = (product: Product) => {
     const category = product.category === "dress" ? "dress" : "fabric";
-    return `/shop/${category}/${product.id}`;
+    return `/dashboard/shop/${category}/${product.id}`;
   };
 
   if (isLoading) {
