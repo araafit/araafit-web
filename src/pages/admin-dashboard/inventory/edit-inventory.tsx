@@ -28,6 +28,9 @@ import {
 } from "../../ui/select";
 import Spinner from "../../../shared-components/spinner";
 import { SkinToneSelectField } from "./skin-tone-selection-field";
+import { GenderRadio } from "./gender-radio";
+
+/* -------------------------------------------------------------------------------- */
 
 const skinTone = ["Porcelin", "Ivory", "Sand", "Espresso", "Chestnut", "Honey"];
 //const categories = ["dress", "fabric"];
@@ -42,6 +45,7 @@ interface ProductFormData {
   dressSize: string;
   weight: number;
   thickness: string;
+  skinTone: string[];
   quantityInStock: number;
   price: number;
   discountType: "percentage" | "fixed";
@@ -344,8 +348,39 @@ export function AdminDashboardEditInventory() {
               )}
             </div>
 
-            {/* Information section */}
+            {/* ----- Inventory fields ----- */}
             <div className="flex-1 max-w-[654px]">
+              {/* Gender selection */}
+              <div className="w-full bg-white rounded-[6px] py-6 px-4 mb-4">
+                <h2 className="mb-4 text-[1.4rem] font-semibold">
+                  Who Is This For?
+                </h2>
+
+                <div className="flex items-center gap-12">
+                  <GenderRadio
+                    fieldId="for-men"
+                    fieldValue="men"
+                    fieldLabel="For Men"
+                    registerField={register}
+                    fieldWatch={watch}
+                  />
+                  <GenderRadio
+                    fieldId="for-women"
+                    fieldValue="women"
+                    fieldLabel="For Women"
+                    registerField={register}
+                    fieldWatch={watch}
+                  />
+                  <GenderRadio
+                    fieldId="for-kids"
+                    fieldValue="kids"
+                    fieldLabel="For Kids"
+                    registerField={register}
+                    fieldWatch={watch}
+                  />
+                </div>
+              </div>
+
               {/* General Information */}
               <div className="bg-white rounded-[6px] py-6 px-4">
                 <h4 className="font-semibold">General Information</h4>
@@ -487,7 +522,7 @@ export function AdminDashboardEditInventory() {
               </div>
 
               {/* Skin Tone Recommendation */}
-             {/* skin tone Info */}
+              {/* skin tone Info */}
               <div className="bg-white rounded-[6px] py-6 px-4 mt-4">
                 <h4 className="font-semibold">Skin Tone Recommendation</h4>
                 <div className="flex gap-4 items-center mt-4">
