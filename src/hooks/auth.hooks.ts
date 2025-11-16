@@ -91,7 +91,7 @@ export const useVerifyEmail = () => {
   return useMutation({
     mutationFn: (data: VerifyEmailRequest) => authService.verifyEmail(data),
     onSuccess: (data) => {
-      if (data.data.isSuccess) {
+      if (data.isSuccess) {
         showToast.success(
           data.message || "Sent! Check your email for an OTP code",
           { icon: null, style: notificationStyles.alertSuccess }
@@ -118,7 +118,7 @@ export const useVerifyEmailWithMeasurements = () => {
     mutationFn: (data: VerifyEmailWithMeasurementsRequest) =>
       authService.verifyEmailWithMeasurements(data),
     onSuccess: (data) => {
-      if (data.data.isSuccess) {
+      if (data.isSuccess) {
         showToast.success(
           data.message || "Sent! Check your email for an OTP code",
           { icon: null, style: notificationStyles.alertSuccess }
@@ -145,7 +145,7 @@ export const useVerifyOtp = () => {
   return useMutation({
     mutationFn: (data: VerifyOtpRequest) => authService.verifyOtp(data),
     onSuccess: (data) => {
-      if (data.data.isSuccess) {
+      if (data.isSuccess) {
         showToast.success(data.message, {
           icon: null,
           style: notificationStyles.alertSuccess,
