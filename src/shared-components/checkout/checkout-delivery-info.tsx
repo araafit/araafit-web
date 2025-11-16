@@ -41,13 +41,23 @@ export default function CheckoutDeliveryInfo({
 
   useEffect(() => {
     if (user) {
-      setValue("firstName", user.firstName as string);
-      setValue("lastName", user.lastName as string);
-      setValue("email", user.email as string);
-      setValue("city", user.city as string);
-      setValue("address", user.deliveryAddress as string);
-      setValue("phoneNumber", user.phoneNumber as string);
-      setValue("zipCode", user.zipCode as string);
+      setValue("firstName", (user.firstName ?? "") as string);
+      setValue("lastName", (user.lastName ?? "") as string);
+      setValue("email", (user.email ?? "") as string);
+      setValue("city", (user.city ?? "") as string);
+      setValue("address", (user.deliveryAddress ?? "") as string);
+      setValue("phoneNumber", (user.phoneNumber ?? "") as string);
+      setValue("zipCode", (user.zipCode ?? "") as string);
+
+      // If any critical field is missing, allow editing by default
+      const missingCriticalField =
+        !user.firstName || !user.lastName || !user.phoneNumber || !user.deliveryAddress || !user.city;
+      if (missingCriticalField) {
+        setEditInfo(true);
+      }
+    } else {
+      // No user available (e.g., guest flow) → enable editing
+      setEditInfo(true);
     }
   }, [user]);
 
@@ -59,15 +69,21 @@ export default function CheckoutDeliveryInfo({
       return;
     }
 
-    // User exists and edits were made, update profile
-    updateProfile.mutate({
-      firstName: data.firstName,
-      lastName: data.lastName,
-      phoneNumber: data.phoneNumber,
-      deliveryAddress: data.address,
-      city: data.city,
-      zipCode: data.zipCode,
-    });
+    // If there's a user and edits were made, update profile
+    if (user) {
+      updateProfile.mutate({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phoneNumber: data.phoneNumber,
+        deliveryAddress: data.address,
+        city: data.city,
+        zipCode: data.zipCode,
+      });
+      return;
+    }
+
+    // No user available (guest or not loaded) → proceed without profile update
+    onContinue();
   };
 
   // Switch to payment info on success

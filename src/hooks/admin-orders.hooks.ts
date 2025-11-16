@@ -20,6 +20,32 @@ export const adminOrdersKeys = {
   detail: (id: string) => [...adminOrdersKeys.details(), id] as const,
 };
 
+// Get Order query
+export const useAdminOrder = (orderId: string | number) => {
+  return useQuery({
+    queryKey: adminOrdersKeys.detail(orderId.toString()),
+    queryFn: () => adminOrdersService.getOrder(orderId),
+    enabled: false,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    retry: (failureCount, error: unknown) => {
+      // Don't retry on 401/403 errors
+      const axiosError = error as { response?: { status?: number } };
+
+      if (
+        axiosError?.response?.status === 401 ||
+        axiosError?.response?.status === 403
+      ) {
+        return false;
+      }
+
+      // Retry once for other errors
+      return failureCount < 1;
+    },
+  });
+};
+
 // Get Orders Query
 export const useAdminOrders = (params: GetOrdersParams = {}) => {
   return useQuery({
@@ -110,7 +136,15 @@ export const useUpdateOrderStatus = () => {
     }) => adminOrdersService.updateOrderStatus(orderId, data),
     onSuccess: (_, variables) => {
       // Invalidate and refetch orders
+      queryClient.invalidateQueries({ queryKey: adminOrdersKeys.all });
       queryClient.invalidateQueries({ queryKey: adminOrdersKeys.lists() });
+      // Invalidate specific order detail and any detail lists
+      if (variables?.orderId) {
+        queryClient.invalidateQueries({
+          queryKey: adminOrdersKeys.detail(variables.orderId),
+        });
+      }
+      queryClient.invalidateQueries({ queryKey: adminOrdersKeys.details() });
       // Also invalidate dashboard metrics since order status affects counts
       queryClient.invalidateQueries({ queryKey: ["admin-dashboard"] });
       toast.success(`Order status updated to ${variables.data.status}`);

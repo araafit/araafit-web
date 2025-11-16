@@ -114,7 +114,7 @@ export function DressDetail() {
                   {product.description}
                 </p>
                 <span className="font-semibold text-neutral-900">
-                  ₦{formatPrice(product.price)}
+                  ₦{formatPrice(Number(product.price ?? 0))}
                 </span>
               </div>
 

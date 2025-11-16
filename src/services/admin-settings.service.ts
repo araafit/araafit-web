@@ -42,17 +42,19 @@ export type SizeType =
   | "chest"
   | "shoulder"
   | "inseam"
-  | "size";
+  | "clotheSize";
 
 export interface CreateSizeChartRequest {
   type: SizeType;
   value: number;
   gender: "male" | "female";
+  label?: string;
 }
 
 export interface SizeChartItem {
   id: string;
   value: number;
+  label?: string;
 }
 
 // Be flexible to allow gender-specific keys coming from the API
@@ -62,6 +64,7 @@ export interface UpdateSizeChartRequest {
   value: number;
   gender?: "male" | "female";
   type?: SizeType;
+  label?: string;
 }
 
 export interface SizeChartItemResponse {
@@ -146,6 +149,13 @@ class AdminSettingsService {
   async getSizeChart(gender?: string): Promise<SizeChartResponse> {
     const response = await apiClient.get<ApiResponse<SizeChartResponse>>(
       `/size-chart/${gender}`
+    );
+    return response.data.data;
+  }
+
+  async getMySizeChart(): Promise<SizeChartResponse> {
+    const response = await apiClient.get<ApiResponse<SizeChartResponse>>(
+      `/size-chart/me`
     );
     return response.data.data;
   }

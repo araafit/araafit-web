@@ -4,9 +4,22 @@ import type { ApiResponse } from "./admin-auth.service";
 // Types for Admin Orders
 export interface OrderUser {
   id: string;
+  email: string;
   firstName: string;
   lastName: string;
-  email: string;
+  deliveryAddress: string;
+  dateOfBirth: string;
+  password: string | null;
+  isVerified: boolean;
+  phoneNumber: string | null;
+  city: string | null;
+  zipCode: string | null;
+  dressSize: string | null;
+  skinTone: string | null;
+  isGuest: boolean;
+  createdAt: string; // or Date
+  isActive: boolean;
+  blockReason: string | null;
 }
 
 export interface OrderRider {
@@ -19,7 +32,25 @@ export interface OrderRider {
 export interface OrderProduct {
   id: string;
   name: string;
-  price: number;
+  category: string;
+  description: string;
+  materialType: string;
+  dressSize: string;
+  weight: string;
+  thickness: string;
+  quantityInStock: number;
+  price: string;
+  pricePerYard: string | null;
+  discountType: "percent" | "fixed" | null;
+  discountValue: string | null;
+  discountStart: string | null;
+  discountEnd: string | null;
+  totalSize: string | null;
+  style: string | null;
+  patternType: string | null;
+  skinToneRecommendation: string[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface OrderItem {
@@ -73,6 +104,15 @@ export interface UpdateOrderStatusResponse {
 
 // Admin Orders Service Class
 class AdminOrdersService {
+  /**
+   * Get order
+   */
+  async getOrder(orderId: string | number): Promise<AdminOrder> {
+    const response = await apiClient.get<ApiResponse<AdminOrder>>(`orders/admin/` + orderId);
+
+    return response.data.data;
+  }
+
   /**
    * Get orders with optional status filter
    */

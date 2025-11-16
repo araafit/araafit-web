@@ -11,6 +11,7 @@ import {
   type ForgotPasswordRequest,
   type ResetPasswordRequest,
   type VerifyEmailWithMeasurementsRequest,
+  type ResendOtpRequest,
 } from "../services/auth.service";
 import { useAuthStore } from "../stores/auth-store";
 import { tokenUtils } from "../lib/utils";
@@ -93,14 +94,11 @@ export const useVerifyEmail = () => {
     onSuccess: (data) => {
       if (data.isSuccess) {
         showToast.success(
-          data.message || "Sent! Check your email for an OTP code",
+          (data as any)?.message || "Sent! Check your email for an OTP code",
           { icon: null, style: notificationStyles.alertSuccess }
         );
       } else {
-        showToast.error(data.message, {
-          icon: null,
-          style: notificationStyles.alertError,
-        });
+        throw Error("Failed to verify Email");
       }
     },
     onError: (error: any) => {
@@ -120,20 +118,20 @@ export const useVerifyEmailWithMeasurements = () => {
     onSuccess: (data) => {
       if (data.isSuccess) {
         showToast.success(
-          data.message || "Sent! Check your email for an OTP code",
+          (data as any)?.message || "Sent! Check your email for an OTP code",
           { icon: null, style: notificationStyles.alertSuccess }
         );
       } else {
-        showToast.error(data.message, {
-          icon: null,
-          style: notificationStyles.alertError,
-        });
+
+        throw Error("Failed to verify Email");
       }
     },
     onError: (error: any) => {
+      console.log("Email verification error:", error);
+
       showToast.error(
         error.response?.data?.message ||
-          "Failed to send verification email with measurements",
+          "Failed to verify email with measurements",
         { icon: null, style: notificationStyles.alertError }
       );
     },
@@ -152,15 +150,50 @@ export const useVerifyOtp = () => {
           duration: 10000,
         });
       } else {
-        showToast.error(data.message || "OTP is expired or invalid", {
+        showToast.error(
+          (data as any)?.message || "OTP is expired or invalid",
+          {
           icon: null,
           style: notificationStyles.alertError,
           duration: 10000,
-        });
+          }
+        );
       }
     },
     onError: (error: any) => {
       showToast.error(error.response?.data?.message || "Failed to verify OTP", {
+        icon: null,
+        style: notificationStyles.alertError,
+      });
+    },
+  });
+};
+
+// Resend OTP Mutation
+export const useResendOtp = () => {
+  return useMutation({
+    mutationFn: (data: ResendOtpRequest) => authService.resendOtp(data),
+    onSuccess: (data) => {
+      // API may return either { isSuccess, message } or wrapped in data
+      const ok = data.isSuccess;
+
+      if (ok) {
+        showToast.success("OTP resent. Check your email.", {
+          icon: null,
+          style: notificationStyles.alertSuccess,
+        });
+      } else {
+        showToast.error(
+          (data as any)?.message || "Failed to resend OTP",
+          {
+            icon: null,
+            style: notificationStyles.alertError,
+          }
+        );
+      }
+    },
+    onError: (error: any) => {
+      showToast.error(error.response?.data?.message || "Failed to resend OTP", {
         icon: null,
         style: notificationStyles.alertError,
       });
@@ -183,6 +216,7 @@ export const useRegister = () => {
         expires_in: data.expires_in,
         token_type: data.token_type,
       });
+
       setUser(data.user);
 
       // Cache the user profile

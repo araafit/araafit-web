@@ -75,7 +75,7 @@ export default function AllItems({
         <Card
           key={product.id}
           itemName={product.name}
-          itemCost={product.price}
+          itemCost={product.price ?? 0}
           itemImage={product.images?.[0]?.url || "/placeholder-image.jpg"}
           product={product}
           link={getProductLink(product)}

@@ -25,14 +25,10 @@ export function AllShop() {
 
   const products = productsData?.products || [];
 
-  const userPage = "shop";
-
   // Helper function to generate product link
   const getProductLink = (product: Product) => {
     const category = product.category === "dress" ? "dress" : "fabric";
-    return userPage === "shop"
-      ? `/${userPage}/${category}/${product.id}`
-      : `/${userPage}/shop/${category}/${product.id}`;
+    return `/dashboard/shop/${category}/${product.id}`;
   };
 
   if (isLoading) {
@@ -93,7 +89,7 @@ export function AllShop() {
         <Card
           key={product.id}
           itemName={product.name}
-          itemCost={product.price? product.price : ""}
+          itemCost={product.price ? product.price : ""}
           itemImage={product.images?.[0]?.url || "/placeholder-image.jpg"}
           product={product}
           link={getProductLink(product)}

@@ -116,7 +116,9 @@ export default function CheckoutPaymentInfo({
         onClose={toggleSwitch}
         containerClassName="w-full max-w-[26rem]"
       >
-        <BillingCardForm />
+        <BillingCardForm
+          checkoutInfo={{ callbackUrl: redirectionLink ?? "" }}
+        />
       </Modal>
 
       {/* Completed payment modal */}

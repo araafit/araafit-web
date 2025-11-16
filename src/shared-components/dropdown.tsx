@@ -19,6 +19,9 @@ interface Dropdown {
   align?: "left" | "right";
   shouldStack?: boolean;
   isDropdownOpen?: (isOpen: boolean) => void;
+  open?: boolean;
+  defaultOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
   className?: string;
   itemClassName?: string;
   triggerClassName?: string;
@@ -32,14 +35,28 @@ export const Dropdown: React.FC<Dropdown> = ({
   align,
   shouldStack,
   isDropdownOpen,
+  open,
+  defaultOpen,
+  onOpenChange,
   className,
   itemClassName,
   triggerClassName,
   children,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const isControlled = typeof open === "boolean";
+  const [uncontrolledOpen, setUncontrolledOpen] = useState<boolean>(!!defaultOpen);
+  const isOpen = isControlled ? (open as boolean) : uncontrolledOpen;
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [focusedIndex, setFocusedIndex] = useState(-1);
+
+  const setOpen = (next: boolean) => {
+    if (isControlled) {
+      onOpenChange?.(next);
+    } else {
+      setUncontrolledOpen(next);
+      onOpenChange?.(next);
+    }
+  };
 
   // Close dropdown when clicked outside
   useEffect(() => {
@@ -48,7 +65,7 @@ export const Dropdown: React.FC<Dropdown> = ({
         dropdownRef.current &&
         !dropdownRef.current.contains(event.target as Node)
       ) {
-        setIsOpen(false);
+        setOpen(false);
         setFocusedIndex(-1);
       }
     };
@@ -83,7 +100,7 @@ export const Dropdown: React.FC<Dropdown> = ({
     <div className="relative inline-block" ref={dropdownRef}>
       {/* Trigger */}
       <div
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => setOpen(!isOpen)}
         className={CN("w-full", triggerClassName)}
       >
         {trigger}

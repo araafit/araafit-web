@@ -34,7 +34,7 @@ const API_BASE_URL =
 // Create axios instance
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 60000,
   headers: {
     "Content-Type": "application/json",
   },
@@ -101,10 +101,6 @@ apiClient.interceptors.request.use(
     const guestToken = localStorage.getItem("araafit_guest_token");
     const adminAccessToken = tokenUtils.getAdminAccessToken();
 
-    console.log("adminAccessToken", adminAccessToken);
-    console.log("accessToken", accessToken);
-    console.log("guestToken", guestToken);
-
     // Priority: admin access token > user access token > guest user token
     if (adminAccessToken && !tokenUtils.isTokenExpired(adminAccessToken)) {
       config.headers.Authorization = `Bearer ${adminAccessToken}`;
@@ -156,7 +152,7 @@ apiClient.interceptors.response.use(
       }
 
       if (refreshAttempts >= MAX_REFRESH_ATTEMPTS) {
-        console.log("Max refresh attempts exceeded. Logging out...");
+        // console.log("Max refresh attempts exceeded. Logging out...");
 
         // reset for next session
         refreshAttempts = 0;
@@ -170,7 +166,7 @@ apiClient.interceptors.response.use(
       // ADMIN REFRESH LOGIC
       if (currentPath.includes("/admin-dashboard/")) {
         if (!adminRefreshToken || adminRefreshToken === "undefined") {
-          console.log("No admin refresh token, redirecting to login");
+          // console.log("No admin refresh token, redirecting to login");
 
           isRefreshing = false;
           refreshAttempts = 0;
@@ -178,9 +174,9 @@ apiClient.interceptors.response.use(
           return Promise.reject(error);
         }
 
-        console.log(
-          `Admin refresh attempt ${refreshAttempts}/${MAX_REFRESH_ATTEMPTS}`
-        );
+        // console.log(
+        //   `Admin refresh attempt ${refreshAttempts}/${MAX_REFRESH_ATTEMPTS}`
+        // );
         try {
           const response = await axios.post(`${API_BASE_URL}/admin/refresh`, {
             refresh_token: adminRefreshToken,
@@ -199,11 +195,11 @@ apiClient.interceptors.response.use(
 
           return apiClient(originalRequest);
         } catch (refreshError: any) {
-          console.log("Admin token refresh failed");
+          // console.log("Admin token refresh failed");
 
           // Check if refresh itself returned 401 (refresh token expired)
           if (refreshError.response?.status === 401) {
-            console.log("Admin refresh token expired, logging out");
+            // console.log("Admin refresh token expired, logging out");
             processQueue(refreshError, null);
             handleLogout("admin");
             return Promise.reject(refreshError);
@@ -222,16 +218,16 @@ apiClient.interceptors.response.use(
         currentPath.includes("/dashboard/")
       ) {
         if (!refreshToken || refreshToken === "undefined") {
-          console.log("No user refresh token, redirecting to login");
+          // console.log("No user refresh token, redirecting to login");
           isRefreshing = false;
           refreshAttempts = 0;
           handleLogout("user");
           return Promise.reject(error);
         }
 
-        console.log(
-          `User refresh attempt ${refreshAttempts}/${MAX_REFRESH_ATTEMPTS}`
-        );
+        // console.log(
+        //   `User refresh attempt ${refreshAttempts}/${MAX_REFRESH_ATTEMPTS}`
+        // );
         try {
           const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
             refresh_token: refreshToken,
@@ -253,11 +249,11 @@ apiClient.interceptors.response.use(
 
           return apiClient(originalRequest);
         } catch (refreshError: any) {
-          console.log("User token refresh failed");
+          // console.log("User token refresh failed");
 
           // Check if refresh itself returned 401 (refresh token expired)
           if (refreshError.response?.status === 401) {
-            console.log("User refresh token expired, logging out");
+            // console.log("User refresh token expired, logging out");
             processQueue(refreshError, null);
             handleLogout("user");
             return Promise.reject(refreshError);
@@ -273,7 +269,7 @@ apiClient.interceptors.response.use(
 
       // GUEST TOKEN LOGIC
       if (guestToken && !refreshToken) {
-        console.log("Guest session expired");
+        // console.log("Guest session expired");
         isRefreshing = false;
         refreshAttempts = 0;
         handleLogout("guest");

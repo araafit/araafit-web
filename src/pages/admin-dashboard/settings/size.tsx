@@ -42,6 +42,12 @@ export default function SizeTabs() {
     "female"
   );
   const [editType, setEditType] = useState<SizeType | "">("");
+  const [addSizeLabel, setAddSizeLabel] = useState<
+    "XS" | "S" | "M" | "L" | "XL" | "XXL" | "XXXL" | ""
+  >("");
+  const [editSizeLabel, setEditSizeLabel] = useState<
+    "XS" | "S" | "M" | "L" | "XL" | "XXL" | "XXXL" | ""
+  >("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
@@ -61,16 +67,21 @@ export default function SizeTabs() {
 
   const handleAdd = async () => {
     if (!addChartType || !addNewValue || !addGender) return;
+    if (addChartType === "clotheSize" && !addSizeLabel) return;
 
     try {
       await createSizeChartMutation.mutateAsync({
         type: addChartType,
         value: Number(addNewValue),
         gender: addGender,
+        label: ["clotheSize", "dressSize"].includes(addChartType)
+          ? addSizeLabel
+          : undefined,
       });
       setAddChartType("");
       setAddNewValue("");
       setAddGender("");
+      setAddSizeLabel("");
       setIsAddDialogOpen(false);
     } catch {
       // Error handled in hook
@@ -87,6 +98,9 @@ export default function SizeTabs() {
           value: Number(newValue),
           gender: editGender || undefined,
           type: (editType as SizeType) || undefined,
+          label: ["clotheSize", "dressSize"].includes(editType)
+            ? editSizeLabel || undefined
+            : undefined,
         },
       });
 
@@ -94,6 +108,7 @@ export default function SizeTabs() {
       setNewValue("");
       setEditGender("");
       setEditType("");
+      setEditSizeLabel("");
       setIsEditDialogOpen(false);
     } catch {
       // Error handled in hook
@@ -126,7 +141,7 @@ export default function SizeTabs() {
     { value: "shoulder", label: "Shoulder" },
     { value: "waist", label: "Waist" },
     { value: "inseam", label: "Inseam" },
-    { value: "size", label: "Size" },
+    { value: "clotheSize", label: "Size" },
     { value: "height", label: "Height" },
   ];
 
@@ -193,20 +208,22 @@ export default function SizeTabs() {
 
                 {/* Sizes */}
                 <div className="flex gap-2 flex-wrap mt-2">
-                  {values.map((item: { id: string; value: number }) => (
-                    <div
-                      key={item.id}
-                      className="relative group w-16 h-10 flex items-center justify-center border border-[#D0D5DD] rounded-md text-sm text-[#1C1C1C] bg-white hover:bg-gray-50 cursor-pointer"
-                      onClick={() =>
-                        openEditDialog(item.id, item.value, gender, label)
-                      }
-                    >
-                      {item.value}
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-gray-900 bg-opacity-75 rounded-md transition-opacity">
-                        <PencilSimpleIcon size={12} className="text-white" />
+                  {values.map(
+                    (item: { id: string; value: number; label?: string }) => (
+                      <div
+                        key={item.id}
+                        className="relative group w-16 h-10 flex items-center justify-center border border-[#D0D5DD] rounded-md text-sm text-[#1C1C1C] bg-white hover:bg-gray-50 cursor-pointer"
+                        onClick={() =>
+                          openEditDialog(item.id, item.value, gender, label)
+                        }
+                      >
+                        {item.label || item.value}
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-gray-900 bg-opacity-75 rounded-md transition-opacity">
+                          <PencilSimpleIcon size={12} className="text-white" />
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  )}
                 </div>
               </div>
             );
@@ -288,6 +305,40 @@ export default function SizeTabs() {
                     </SelectContent>
                   </Select>
                 </div>
+                {/* Size Label (only for type=size) */}
+                {["clotheSize", "dressSize"].includes(addChartType) && (
+                  <div className="space-y-1">
+                    <label className="text-sm text-[#676767]">Label</label>
+                    <Select
+                      value={addSizeLabel}
+                      onValueChange={(value) =>
+                        setAddSizeLabel(
+                          value as
+                            | "XS"
+                            | "S"
+                            | "M"
+                            | "L"
+                            | "XL"
+                            | "XXL"
+                            | "XXXL"
+                        )
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select label" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {["XS", "S", "M", "L", "XL", "XXL", "XXXL"].map(
+                          (lbl) => (
+                            <SelectItem key={lbl} value={lbl}>
+                              {lbl}
+                            </SelectItem>
+                          )
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
                 {/* New Value */}
                 <div className="space-y-1">
@@ -406,6 +457,31 @@ export default function SizeTabs() {
                   </SelectContent>
                 </Select>
               </div>
+              {/* Size Label (only for type=size) */}
+              {["clotheSize", "dressSize"].includes(editType) && (
+                <div className="space-y-1">
+                  <label className="text-sm text-[#676767]">Label</label>
+                  <Select
+                    value={editSizeLabel}
+                    onValueChange={(value) =>
+                      setEditSizeLabel(
+                        value as "XS" | "S" | "M" | "L" | "XL" | "XXL" | "XXXL"
+                      )
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select label" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {["XS", "S", "M", "L", "XL", "XXL", "XXXL"].map((lbl) => (
+                        <SelectItem key={lbl} value={lbl}>
+                          {lbl}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               {/* New Value */}
               <div className="space-y-1">
                 <label className="text-sm text-[#676767]">New Value</label>
@@ -434,7 +510,11 @@ export default function SizeTabs() {
                 variant="solid"
                 className="text-white flex-1 bg-[#9A6C50]"
                 onClick={handleEdit}
-                disabled={!newValue || updateSizeChartMutation.isPending}
+                disabled={
+                  !newValue ||
+                  updateSizeChartMutation.isPending ||
+                  (editType === "clotheSize" && !editSizeLabel)
+                }
               />
             </DialogFooter>
           </DialogContent>

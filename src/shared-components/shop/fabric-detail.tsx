@@ -1,11 +1,15 @@
 import { Link, useParams } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useProduct } from "../../hooks/user-dashboard.hooks";
 import Button from "../button";
 import { WarningIcon, ArrowRightIcon } from "@phosphor-icons/react";
 import { formatPrice } from "../../utils/format-price";
 import LoaderView from "../../layouts/user-dashboard/loader";
 import { useNavigate } from "react-router-dom";
+import { useMeasurements } from "../../hooks/measurements.hooks";
+
+// Available fabric sizes (numeric)
+const FABRIC_SIZES = [6, 8, 10, 12, 14, 16, 18, 20] as const;
 
 /* --------------------------------------------------------- */
 
@@ -16,13 +20,33 @@ export function FabricDetail() {
   const productId = itemName || "";
 
   const { data: product, isLoading, isError, error } = useProduct(productId);
+  const { data: measurementMe } = useMeasurements();
 
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
   const [selectedYards, setSelectedYards] = useState(3);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [noRefundAccepted, setNoRefundAccepted] = useState(false);
+  const [autoSelectedSize, setAutoSelectedSize] = useState(false);
 
-  const measurement = [6, 8, 10, 12, 14, 16, 18, 20];
+  // Auto-select size from saved measurements if available and matches fabric sizes
+  useEffect(() => {
+    if (!selectedSize && measurementMe) {
+      let derivedSize: number | null = null;
+      if (typeof measurementMe.dressSize === "number" && !Number.isNaN(measurementMe.dressSize)) {
+        derivedSize = measurementMe.dressSize;
+      } else if (measurementMe.size) {
+        const parsed = parseInt(String(measurementMe.size), 10);
+        if (!Number.isNaN(parsed)) {
+          derivedSize = parsed;
+        }
+      }
+
+      if (derivedSize && (FABRIC_SIZES as readonly number[]).includes(derivedSize)) {
+        setSelectedSize(String(derivedSize));
+        setAutoSelectedSize(true);
+      }
+    }
+  }, [measurementMe, selectedSize]);
 
   if (isLoading) {
     return (
@@ -116,10 +140,10 @@ export function FabricDetail() {
                   {product.description}
                 </p>
                 <span className="font-semibold text-neutral-900 font-lora">
-                  ₦{formatPrice(product.price)}/yd
+                  ₦{formatPrice(Number(product.price ?? 0))}/yd
                 </span>
                 <span className="text-sm text-neutral-600">
-                  Total: ₦{formatPrice(product.price * selectedYards)} (
+                  Total: ₦{formatPrice(Number(product.price ?? 0) * selectedYards)} (
                   {selectedYards} yards)
                 </span>
               </div>
@@ -133,19 +157,21 @@ export function FabricDetail() {
                   </div>
                 </div>
 
-                <div className="bg-[#FFF8EB] rounded-md p-2">
-                  <h5 className="mb-4 font-inter text-[#F59E0B]">
-                    We’ve Got Your Size Covered
-                  </h5>
+                {autoSelectedSize && (
+                  <div className="bg-[#FFF8EB] rounded-md p-2">
+                    <h5 className="mb-4 font-inter text-[#F59E0B]">
+                      We’ve Got Your Size Covered
+                    </h5>
 
-                  <p className="w-full text-[#B47409] font-light">
-                    No need to choose a size—our AI has already selected the
-                    perfect fit for you based on your measurements.
-                  </p>
-                </div>
+                    <p className="w-full text-[#B47409] font-light">
+                      No need to choose a size—our AI has already selected the
+                      perfect fit for you based on your measurements.
+                    </p>
+                  </div>
+                )}
 
                 <div className="w-full flex items-center justify-between">
-                  {measurement.map((item, idx) => (
+                  {(FABRIC_SIZES as readonly number[]).map((item, idx) => (
                     <div
                       key={idx}
                       className={`w-10 h-10 flex items-center justify-center border rounded-md text-sm cursor-pointer transition-colors ${

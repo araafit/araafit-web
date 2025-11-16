@@ -112,9 +112,9 @@ export const measurementsService = {
   async createMeasurements(
     data: CreateMeasurementsRequest
   ): Promise<CreateMeasurementsResponse> {
-    const response = await apiClient.post<
+    const response = await apiClient.patch<
       ApiResponse<CreateMeasurementsResponse>
-    >("/measurements", data);
+    >("/measurements/measurement", data);
     return response.data.data;
   },
 
@@ -123,7 +123,7 @@ export const measurementsService = {
   ): Promise<UpdateMeasurementsResponse> {
     const response = await apiClient.patch<
       ApiResponse<UpdateMeasurementsResponse>
-    >("/measurements", data);
+    >("/measurements/measurement", data);
     return response.data.data;
   },
 

@@ -13,6 +13,7 @@ export interface ProductImage {
 export interface AdminProduct {
   id: string;
   name: string;
+  audience: "men" | "women" | "kids";
   category: "dress" | "fabric";
   description?: string;
   materialType?: string;
@@ -47,6 +48,7 @@ export interface ProductMetrics {
 
 export interface CreateProductRequest {
   files?: File[];
+  audience: "men" | "women" | "kids";
   name: string;
   category: "dress" | "fabric";
   description?: string;
@@ -69,6 +71,7 @@ export interface CreateProductRequest {
 
 export interface UpdateProductRequest {
   files?: File[];
+  audience: "men" | "women" | "kids";
   name?: string;
   description?: string;
   materialType?: string;
@@ -153,6 +156,7 @@ class AdminInventoryService {
     // Add required fields
     formData.append("name", data.name);
     formData.append("category", data.category);
+    formData.append("audience", data.audience);
 
     // Add optional string fields
     const stringFields = [

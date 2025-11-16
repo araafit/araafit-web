@@ -3,6 +3,7 @@ import { fabricRequestService } from "../services/request.service";
 import type { SewingRequest } from "../services/request.service";
 import showToast from "../utils/notification";
 import { notificationStyles } from "../style/custom";
+import useAuth from "./use-auth";
 
 /* --------------------------------------------------------------------- */
 
@@ -21,6 +22,7 @@ export const useGetSawingRequests = () => {
 };
 
 export const useMakeSewingRequest = () => {
+  const { isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -39,7 +41,7 @@ export const useMakeSewingRequest = () => {
       );
 
       setTimeout(() => {
-        window.location.href = "/shop";
+        window.location.href = isAuthenticated ? "/dashboard/shop" : "/shop";
       }, 1000);
     },
     onError: (error) => {

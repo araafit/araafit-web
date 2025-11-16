@@ -24,7 +24,7 @@ export function KidsShop() {
   // Helper function to generate product link
   const productLink = (product: Product) => {
     const category = product.category === "dress" ? "dress" : "fabric";
-    return `/shop/${category}/${product.id}`;
+    return `/dashboard/shop/${category}/${product.id}`;
   };
 
   if (isLoading) {
@@ -80,7 +80,7 @@ export function KidsShop() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-4 p-8">
-      {products.map((product) => (
+      {kidsProducts.map((product) => (
         <Card
           key={product.id}
           itemName={product.name}
