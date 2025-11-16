@@ -5,11 +5,7 @@ import {
   TrashSimpleIcon,
 } from "@phosphor-icons/react";
 import { useState } from "react";
-import {
-  Controller,
-  useForm,
-  type SubmitHandler,
-} from "react-hook-form";
+import { Controller, useForm, type SubmitHandler } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { useCreateProduct } from "../../../hooks/admin-inventory.hooks";
 import AdminDashboardLayout from "../../../layouts/admin-dashboard/dashboard-layout";
@@ -29,6 +25,7 @@ import { Switch } from "../../ui/switch";
 import NotificationBell from "../admin-components/top-bar/notification-bell";
 import TopBar from "../admin-components/top-bar/top-bar";
 import { SkinToneSelectField } from "./skin-tone-selection-field";
+import { GenderRadio } from "./gender-radio";
 
 /* ---------------------------------------------------------------------------------------------------- */
 
@@ -72,11 +69,9 @@ export function AdminDashboardUploadInventory() {
     defaultValues: {
       category: "dress",
       discountType: "percentage",
-      audience:"men"
+      audience: "men",
     },
   });
-
-  const selectedAudience = watch("audience"); // Watch value to style the checked state
 
   const handlePhotosChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -250,11 +245,9 @@ export function AdminDashboardUploadInventory() {
                 </div>
               )}
             </div>
-
-
-
             {/* ----- Inventory fields ----- */}
             <div className="flex-1 max-w-[654px]">
+
               {/* Gender selection */}
               <div className="w-full bg-white rounded-[6px] py-6 px-4 mb-4">
                 <h2 className="mb-4 text-[1.4rem] font-semibold">
@@ -262,92 +255,27 @@ export function AdminDashboardUploadInventory() {
                 </h2>
 
                 <div className="flex items-center gap-12">
-                  <label
-                    htmlFor="for-men"
-                    className="cursor-pointer flex items-center"
-                  >
-                    <input
-                      type="radio"
-                      id="for-men"
-                      className="hidden"
-                      value="men"
-                      {...register("audience")}
-                    />
-                    <div
-                      className={`border rounded-full p-1 flex items-center justify-center ${
-                        selectedAudience === "men"
-                          ? "border-primary-500"
-                          : "border-gray-300"
-                      }`}
-                    >
-                      <div
-                        className={`w-2 h-2 rounded-full ${
-                          selectedAudience === "men"
-                            ? "bg-primary-500"
-                            : "bg-transparent"
-                        }`}
-                      />
-                    </div>
-                    <span className="ml-2 text-sm">For Men</span>
-                  </label>
-
-                  <label
-                    htmlFor="for-women"
-                    className="cursor-pointer flex items-center"
-                  >
-                    <input
-                      type="radio"
-                      id="for-women"
-                      className="hidden"
-                      value="women"
-                      {...register("audience")}
-                    />
-                    <div
-                      className={`border rounded-full p-1 flex items-center justify-center ${
-                        selectedAudience === "women"
-                          ? "border-primary-500"
-                          : "border-gray-300"
-                      }`}
-                    >
-                      <div
-                        className={`w-2 h-2 rounded-full ${
-                          selectedAudience === "women"
-                            ? "bg-primary-500"
-                            : "bg-transparent"
-                        }`}
-                      />
-                    </div>
-                    <span className="ml-2 text-sm">For Women</span>
-                  </label>
-
-                  <label
-                    htmlFor="for-kids"
-                    className="cursor-pointer flex items-center"
-                  >
-                    <input
-                      type="radio"
-                      id="for-kids"
-                      className="hidden"
-                      value="kids"
-                      {...register("audience")}
-                    />
-                    <div
-                      className={`border rounded-full p-1 flex items-center justify-center ${
-                        selectedAudience === "kids"
-                          ? "border-primary-500"
-                          : "border-gray-300"
-                      }`}
-                    >
-                      <div
-                        className={`w-2 h-2 rounded-full ${
-                          selectedAudience === "kids"
-                            ? "bg-primary-500"
-                            : "bg-transparent"
-                        }`}
-                      />
-                    </div>
-                    <span className="ml-2 text-sm">For Kids</span>
-                  </label>
+                  <GenderRadio
+                    fieldId="for-men"
+                    fieldValue="men"
+                    fieldLabel="For Men"
+                    registerField={register}
+                    fieldWatch={watch}
+                  />
+                  <GenderRadio
+                    fieldId="for-women"
+                    fieldValue="women"
+                    fieldLabel="For Women"
+                    registerField={register}
+                    fieldWatch={watch}
+                  />
+                  <GenderRadio
+                    fieldId="for-kids"
+                    fieldValue="kids"
+                    fieldLabel="For Kids"
+                    registerField={register}
+                    fieldWatch={watch}
+                  />
                 </div>
               </div>
 
