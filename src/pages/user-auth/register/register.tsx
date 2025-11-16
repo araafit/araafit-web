@@ -167,7 +167,7 @@ export default function Register() {
           const response = await verifyOtpMutation.mutateAsync({ email, otp });
 
           // Invalid or expired OTP
-          if (response && !response.data.isSuccess) {
+          if (response && !response.isSuccess) {
             setCurrentStep(1);
             return;
           }
