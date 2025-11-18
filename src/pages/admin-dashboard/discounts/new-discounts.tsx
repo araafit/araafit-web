@@ -31,6 +31,7 @@ import type {
 import { toast } from "react-hot-toast";
 import showToast from "../../../utils/notification";
 import { notificationStyles } from "../../../style/custom";
+import { DatePicker } from "../../../shared-components/date-picker/date-picker";
 
 /* -------------------------------------------------------------------------------- */
 
@@ -54,8 +55,8 @@ export const CreateDiscountDrawer: React.FC<CreateDiscountDrawerProps> = ({
   const [value, setValue] = useState<string>("");
   const [eligibility, setEligibility] = useState<string>("");
   const [usageLimit, setUsageLimit] = useState<string>("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [startDate, setStartDate] = useState<Date | undefined>();
+  const [endDate, setEndDate] = useState<Date | undefined>();
 
   const mapEligibilityToApi = (v: string): DiscountEligibility | null => {
     switch (v) {
@@ -124,13 +125,16 @@ export const CreateDiscountDrawer: React.FC<CreateDiscountDrawerProps> = ({
       setValue("");
       setEligibility("");
       setUsageLimit("");
-      setStartDate("");
-      setEndDate("");
+      setStartDate(undefined);
+      setEndDate(undefined);
     } catch (error) {
       // toast handled in hook
       console.error("Create discount failed:", error);
     }
   };
+
+  console.log(startDate, endDate);
+
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="w-[500px] flex flex-col h-[52.75rem]">
@@ -262,7 +266,11 @@ export const CreateDiscountDrawer: React.FC<CreateDiscountDrawerProps> = ({
 
           {/* Start & End Date */}
           <div className="flex gap-4">
-            <div className="flex-1 space-y-2">
+              <DatePicker  label="Start Date"
+        value={startDate}
+        onChange={setStartDate}
+        placeholder="Pick start date"/>
+            {/* <div className="flex-1 space-y-2">
               <label className="font-inter font-light text-[16px] text-[#1C1C1C]">
                 Start Date
               </label>
@@ -273,8 +281,8 @@ export const CreateDiscountDrawer: React.FC<CreateDiscountDrawerProps> = ({
                 onChange={(e) => setStartDate(e.target.value)}
                 className="w-full border border-[#D0D5DD] px-3 py-2 rounded-lg text-sm"
               />
-            </div>
-            <div className="flex-1 space-y-2">
+            </div> */}
+            {/* <div className="flex-1 space-y-2">
               <label className="font-inter font-light text-[16px] text-[#1C1C1C]">
                 End Date
               </label>
@@ -285,7 +293,11 @@ export const CreateDiscountDrawer: React.FC<CreateDiscountDrawerProps> = ({
                 onChange={(e) => setEndDate(e.target.value)}
                 className="w-full border border-[#D0D5DD] px-3 py-2 rounded-lg text-sm"
               />
-            </div>
+            </div> */}
+            <DatePicker  label="End Date"
+        value={endDate}
+        onChange={setEndDate}
+        placeholder="Pick end date"/>
           </div>
         </div>
 

@@ -1,0 +1,63 @@
+/* Custom colors and sizing */
+.rdp {
+  --rdp-accent-color: #9A6C50; /* Selected date background */
+  --rdp-background-color: #f3f4f6; /* Hover background */
+  --rdp-outline: 2px solid #1C1C1C; /* Focus outline */
+  font-family: 'Inter', sans-serif;
+}
+
+/* Selected day */
+.rdp-day_selected {
+  background-color: #1C1C1C;
+  color: white;
+  font-weight: 500;
+}
+
+/* Hover effect */
+.rdp-day:hover:not(.rdp-day_selected) {
+  background-color: #f3f4f6;
+  border-radius: 6px;
+}
+
+/* Today's date */
+.rdp-day_today {
+  font-weight: bold;
+  color: #1C1C1C;
+}
+
+/* Month navigation buttons */
+.rdp-nav_button {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+}
+
+.rdp-nav_button:hover {
+  background-color: #f3f4f6;
+}
+
+/* Month caption */
+.rdp-caption_label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1C1C1C;
+}
+
+/* Weekday headers */
+.rdp-head_cell {
+  font-size: 12px;
+  font-weight: 500;
+  color: #6B7280;
+  text-transform: uppercase;
+}
+
+/* Day cells */
+.rdp-day {
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+/* Disabled dates */
+.rdp-day_disabled {
+  color: #D1D5DB;
+}
