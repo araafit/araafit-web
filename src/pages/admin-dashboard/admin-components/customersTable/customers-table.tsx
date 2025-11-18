@@ -12,8 +12,6 @@ import {
 } from "@dnd-kit/core";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { arrayMove } from "@dnd-kit/sortable";
-
-import type { ColumnDef } from "@tanstack/react-table";
 import {
   type ColumnFiltersState,
   flexRender,
@@ -21,7 +19,6 @@ import {
   getFacetedRowModel,
   getFacetedUniqueValues,
   getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   type SortingState,
   useReactTable,
@@ -38,7 +35,6 @@ import {
   TableRow,
 } from "../../../ui/table";
 import { Tabs, TabsContent } from "../../../ui/tabs";
-import * as XLSX from "xlsx";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,18 +42,20 @@ import {
   DropdownMenuTrigger,
 } from "../../../ui/dropdown-menu";
 import {
-  CaretUpDownIcon,
   MagnifyingGlassIcon,
   FunnelSimpleIcon,
   DownloadSimpleIcon,
 } from "@phosphor-icons/react";
 import EmptyState from "../emptycart";
 import cart from "../../../admin-dashboard/images/emptyCart.png";
+import { tableColumns } from "./table-column";
+import { exportToExcel } from "./export-table";
+import { useCustomers } from "../../../../hooks/admin-customers.hooks";
+import { convertApiCustomersToTableFormat } from "../../../../utils/admin-customers-utils";
+import Spinner from "../../../../shared-components/spinner";
+/* ----------------------------------------------------------------------------------------------- */
 
-import CustomerActions from "../../customers/customer-action";
-import { getCustomerStatusClasses } from "../../../../utils/admin-customers-utils";
-
-const columns: ColumnDef<{
+type DataTable = {
   orderId: string;
   deliveryInformation: {
     name: string;
@@ -65,156 +63,74 @@ const columns: ColumnDef<{
   };
   TotalAmount: number;
   Date: string;
-  status: "Active" | "Blocked" | "Inactive";
-}>[] = [
-  {
-    accessorKey: "deliveryInformation.name",
-    header: () => (
-      <div className="w-full text-center flex items-center justify-start gap-4">
-        Customer Name <CaretUpDownIcon />
-      </div>
-    ),
-    cell: ({ row }) => {
-      const delivery = row.original.deliveryInformation;
-      return (
-        <div className="text-wrap truncate">
-          {delivery ? delivery.name : "N/A"}
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "deliveryInformation.email",
-    header: "Email Address",
-    cell: ({ row }) => {
-      const delivery = row.original.deliveryInformation;
-      return (
-        <div className="text-wrap truncate">
-          {delivery ? delivery.email : "N/A"}
-        </div>
-      );
-    },
-  },
+  status: "Active" | "Blocked";
+};
 
-  {
-    accessorKey: "TotalAmount",
-    header: () => (
-      <div className="flex gap-1 items-center ">
-        Amount (₦)
-        <CaretUpDownIcon />
-      </div>
-    ),
-    cell: ({ row }) => {
-      const amount = Number(row.original.TotalAmount) || 0;
-      return <div className="">₦{amount.toLocaleString()}</div>;
-    },
-  },
-  {
-    accessorKey: "Date",
-    header: () => (
-      <div className="w-full text-center flex items-center justify-start gap-4">
-        Date Ordered <CaretUpDownIcon />
-      </div>
-    ),
-    cell: ({ row }) => {
-      const date = new Date(row.original.Date);
-      return <div>{date.toLocaleDateString()}</div>;
-    },
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => {
-      const status = row.original.status;
-      const statusClasses = getCustomerStatusClasses(status);
-
-      return (
-        <div
-          className={`px-2 py-1 text-xs rounded-full w-fit ${statusClasses.bgColor} ${statusClasses.textColor}`}
-        >
-          {status}
-        </div>
-      );
-    },
-  },
-
-  {
-    id: "actions",
-    cell: ({ row }) => (
-      <CustomerActions
-        customerId={row.original.orderId}
-        isBlocked={
-          row.original.status === "Blocked" ||
-          row.original.status === "Inactive"
-        }
-      />
-    ),
-  },
-];
-
-export function DataTable({
-  data: initialData,
-}: {
-  data: {
-    orderId: string;
-    deliveryInformation: {
-      name: string;
-      email: string;
-    };
-    TotalAmount: number;
-    Date: string;
-    status: "Active" | "Blocked";
-  }[];
-}) {
-  const [data, setData] = React.useState(() => initialData);
-  const [rowSelection, setRowSelection] = React.useState({});
-  const [globalFilter, setGlobalFilter] = React.useState("");
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [pagination, setPagination] = React.useState({
-    pageIndex: 0,
-    pageSize: 10,
-  });
+export function DataTable() {
   const sortableId = React.useId();
   const sensors = useSensors(
     useSensor(MouseSensor, {}),
     useSensor(TouchSensor, {}),
     useSensor(KeyboardSensor, {})
   );
+  const [rowSelection, setRowSelection] = React.useState({});
+  const [globalFilter, setGlobalFilter] = React.useState("");
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({});
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  );
+  const [pageCount, setPageCount] = React.useState(0);
+  const [pagination, setPagination] = React.useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+
+  // Data customers data
+  const {
+    data: customersData,
+    isLoading: customersLoading,
+    isSuccess: customersSuccess,
+    error: customersError,
+  } = useCustomers({ page: pagination.pageIndex + 1, limit: pagination.pageSize });
+
+  const tableData = React.useMemo(() => {
+    return customersData
+      ? convertApiCustomersToTableFormat(customersData.users)
+      : [];
+  }, [customersData]);
+
+   const [data, setData] = React.useState(() => tableData);
 
   // Update local state when prop changes
   React.useEffect(() => {
-    setData(initialData);
-  }, [initialData]);
+    setData(tableData);
+  }, [tableData]);
 
-  // -------------------- Export to Excel --------------------
-  function exportToExcel() {
-    const worksheet = XLSX.utils.json_to_sheet(
-      table.getFilteredRowModel().rows.map((r) => r.original)
-    );
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Orders");
-    XLSX.writeFile(workbook, "orders.xlsx");
-  }
-
+  // Data id
   const dataIds = React.useMemo<UniqueIdentifier[]>(
     () => data?.map(({ orderId }) => orderId) || [],
     [data]
   );
 
+   // Update local state when prop changes
+  React.useEffect(() => {
+   if (customersSuccess) {
+    setPageCount(customersData.total)
+   }
+  }, [customersSuccess]);
+
+  // React table
   const table = useReactTable({
-    data,
-    columns,
+    data: tableData,
+    columns: tableColumns,
     state: {
       sorting,
       columnVisibility,
       rowSelection,
       columnFilters,
-      pagination,
+      pagination
     },
     getRowId: (row) => row.orderId.toString(),
     enableRowSelection: true,
@@ -224,8 +140,9 @@ export function DataTable({
     onColumnVisibilityChange: setColumnVisibility,
     onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
+    manualPagination: true,
+    pageCount: pageCount,
     getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
@@ -240,6 +157,29 @@ export function DataTable({
         return arrayMove(data, oldIndex, newIndex);
       });
     }
+  }
+
+  if (customersLoading) {
+    return (
+      <div className="flex justify-center items-center py-12 bg-white rounded-md w-full">
+        <Spinner
+          size="lg"
+          speed="fast"
+          arcColor="#523531"
+          isLoading={customersLoading}
+        />
+      </div>
+    );
+  }
+
+  if (customersError) {
+    return (
+      <div className="flex items-center justify-between mb-5">
+        <div className="bg-red-50 border border-red-200 rounded-md p-6 w-full">
+          <p className="text-red-600">Failed to load customers</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -267,6 +207,7 @@ export function DataTable({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+
           {/* Search */}
           <div className="relative w-64">
             <input
@@ -281,6 +222,7 @@ export function DataTable({
               size={18}
             />
           </div>
+
           {/* Export */}
           <Button
             type="button"
@@ -292,6 +234,7 @@ export function DataTable({
           />
         </div>
       </div>
+
       <Tabs defaultValue="outline" className="w-full">
         {/*  */}
         <TabsContent
@@ -359,7 +302,7 @@ export function DataTable({
                   ) : (
                     <TableRow>
                       <TableCell
-                        colSpan={columns.length}
+                        colSpan={tableColumns.length}
                         className="h-24 text-center"
                       >
                         <EmptyState
@@ -375,40 +318,41 @@ export function DataTable({
             </DndContext>
           </div>
 
-          {(table.getCanPreviousPage() || table.getCanNextPage()) && (
-            <div className="flex items-center justify-between">
-              <div className="flex justify-between w-full">
-                <div className="flex w-fit items-center justify-center text-sm text-[#1C1C1C]">
-                  Page {table.getState().pagination.pageIndex + 1} of{" "}
-                  {table.getPageCount()}
-                </div>
-                <div className="flex items-center gap-2">
-                  <TableButton
-                    variant="outline"
-                    className="hidden px-2 lg:flex"
-                    onClick={() => table.setPageIndex(0)}
-                    disabled={!table.getCanPreviousPage()}
-                  >
-                    <span>Previous</span>
-                  </TableButton>
+          {/* Table pagination */}
 
-                  <TableButton
-                    variant="outline"
-                    className="hidden px-2 lg:flex"
-                    onClick={() => table.nextPage()}
-                    disabled={!table.getCanNextPage()}
-                  >
-                    <span>Next</span>
-                  </TableButton>
-                </div>
+          <div className="flex items-center justify-between">
+            <div className="flex justify-between w-full">
+              <div className="flex w-fit items-center justify-center text-sm text-[#1C1C1C]">
+                Page {table.getState().pagination.pageIndex + 1} of{" "}
+                {table.getPageCount()}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <TableButton
+                  variant="outline"
+                  className="hidden px-2 lg:flex"
+                  onClick={() => table.previousPage()}
+                  disabled={!table.getCanPreviousPage()}
+                >
+                  <span>Previous</span>
+                </TableButton>
+
+                <TableButton
+                  variant="outline"
+                  className="hidden px-2 lg:flex"
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}
+                >
+                  <span>Next</span>
+                </TableButton>
               </div>
             </div>
-          )}
+          </div>
         </TabsContent>
         {/*  */}
-        <TabsContent value="past-performance">
+        {/* <TabsContent value="past-performance">
           <p>Past Performance content goes here</p>
-        </TabsContent>
+        </TabsContent> */}
       </Tabs>
     </div>
   );
