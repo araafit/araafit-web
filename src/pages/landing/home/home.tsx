@@ -30,6 +30,8 @@ import {
   useActiveDiscounts,
 } from "../../../hooks/discount.hook";
 import type { ActiveDiscount } from "../../../services/landing-page.service";
+import useAuth from "../../../hooks/use-auth";
+import { Link } from "react-router-dom";
 
 /* --------------------------------------------------------------------- */
 
@@ -55,25 +57,37 @@ export function HomePage() {
   const [discountData, setDiscountData] = useState<ActiveDiscount | null>(null);
   const [windowWidth] = useWindowSize();
   const navigate = useNavigate();
-  const activeDiscounts = useActiveDiscounts();
+  const {
+    isError: isActiveDiscountError,
+    error: activeDiscountError,
+    isSuccess: activeDiscountSuccess,
+    data: activeDiscountData,
+  } = useActiveDiscounts();
+  const { isAuthenticated: userIsAuthenticated } = useAuth();
 
-  if (activeDiscounts.isError) {
-    console.log("Error:", activeDiscounts.error);
+  if (isActiveDiscountError) {
+    console.log("Error:", activeDiscountError);
   }
 
-  // Whether 'all_customers', 'first_time_buyers' or 'guest_customers'
+  // Whether 'first_time_buyers' or 'guest_customers'
   useEffect(() => {
-    if (
-      activeDiscounts.isSuccess &&
-      activeDiscounts.data.length >= 1 &&
-      activeDiscounts.data[0].eligibility === "first_time_buyers"
-    ) {
-      setDiscountData(activeDiscounts.data[0]);
+    let timeout: ReturnType<typeof setTimeout>;
+   if (!userIsAuthenticated || isActiveDiscountError) return
 
-      // Show discount modal
-      setTimeout(() => toggleModal(), 5000);
+   if (activeDiscountData && activeDiscountData.length >= 1) {
+    const firstBuyerDiscount = activeDiscountData.filter((item) => item.eligibility === "first_time_buyers");
+
+    if (firstBuyerDiscount.length > 0) {
+      setDiscountData(firstBuyerDiscount[0])
+
+      timeout = setTimeout(() => toggleModal(), 5000)
     }
-  }, [activeDiscounts.isSuccess, activeDiscounts.data]);
+   }
+
+   return () => clearTimeout(timeout)
+  }, [userIsAuthenticated, activeDiscountSuccess, isActiveDiscountError, activeDiscountData, toggleModal]);
+
+  console.log(activeDiscountData);
 
   const redirectToMeasurementPage = () => navigate("/get-measured");
 
@@ -204,17 +218,18 @@ export function HomePage() {
                   ready-to-wear dresses to your body and skin tone, reducing
                   guesswork and making decisions faster than ever.
                 </p>
-                <Button
+                <Link
                   type="button"
-                  variant="solid"
-                  className="w-full max-w-[145px]"
+                  className="w-full h-12 py-3 px-5 max-w-[145px] bg-primary-500 text-white rounded-[0.375rem]"
                   onClick={() => navigate("/shop")}
+                  to="/shop"
+                  
                 >
                   <div className="flex items-center gap-2">
                     <span>Shop now</span>
                     <CaretRightIcon size={20} className="text-white" />
                   </div>
-                </Button>
+                </Link>
               </div>
             </div>
           </section>
@@ -435,7 +450,7 @@ const Modal: React.FC<ModalShape> = memo(
                 >
                   <div className="flex items-center justify-center gap-2">
                     <span>
-                      Claim my {" "}
+                      Claim my{" "}
                       {discountData?.type === "percentage"
                         ? `${Number(discountData.value).toFixed()}%`
                         : ` ₦${Number(discountData?.value).toFixed()}`}{" "}
