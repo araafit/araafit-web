@@ -9,6 +9,15 @@ import {
 } from "../services/admin-orders.service";
 import showToast from "../utils/notification";
 import { notificationStyles } from "../style/custom";
+import { useState } from "react";
+
+/* --------------------------------------------------------------------------------- */
+
+interface BulkUpdateResult {
+  successful: number;
+  failed: number;
+  errors: Array<{ orderId: string; error: string }>;
+}
 
 // Query keys for admin orders
 export const adminOrdersKeys = {
@@ -145,7 +154,6 @@ export const useUpdateOrderStatus = () => {
         });
       }
       queryClient.invalidateQueries({ queryKey: adminOrdersKeys.details() });
-      // Also invalidate dashboard metrics since order status affects counts
       queryClient.invalidateQueries({ queryKey: ["admin-dashboard"] });
       toast.success(`Order status updated to ${variables.data.status}`);
     },
@@ -158,6 +166,86 @@ export const useUpdateOrderStatus = () => {
       );
     },
   });
+};
+
+export const useUpdateBulkOrderStatus = () => {
+  const queryClient = useQueryClient();
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const bulkUpdate = async (
+    orders: Array<{ id: string; status: string }>
+  ): Promise<BulkUpdateResult> => {
+    setIsUpdating(true);
+
+    try {
+      const results = await Promise.allSettled(
+        orders.map((order) =>
+          adminOrdersService.updateOrderStatus(order.id, {
+            status: order.status,
+          })
+        )
+      );
+
+      // Collect errors with context
+      const errors = results.map((result, resultIdx) => {
+        if (result.status === "rejected") {
+          return {
+            orderId: orders[resultIdx].id,
+            error: result.reason?.response?.data?.message || "Unknown error",
+          };
+        }
+        return null;
+      });
+
+      const realErrors = errors.filter(Boolean) as Array<{
+        orderId: string;
+        error: string;
+      }>;
+
+      const successful = results.map(
+        (result) => result.status === "fulfilled"
+      ).length;
+      const failed = realErrors.length;
+
+      // Batch Invalidate only once
+      if (successful > 0) {
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: adminOrdersKeys.all }),
+          queryClient.invalidateQueries({ queryKey: adminOrdersKeys.lists() }),
+          queryClient.invalidateQueries({ queryKey: ["admin-dashboard"] }),
+
+          // Invalidate specific orders that succeeded
+          ...orders.slice(0, successful).map((order) =>
+            queryClient.invalidateQueries({
+              queryKey: adminOrdersKeys.detail(order.id),
+            })
+          ),
+        ]);
+      }
+
+      if (failed === 0) {
+        showToast.success(`All ${successful} orders updated successfully`, {
+          style: notificationStyles.alertSuccess,
+        });
+      } else if (successful === 0) {
+        showToast.error(`All ${failed} orders failed to update`, {
+          style: notificationStyles.alertError,
+        });
+      } else {
+        showToast.warning(`${successful} status updated, ${failed} failed`, {
+          style: notificationStyles.alertWarning,
+          icon: null
+        });
+        console.log(realErrors);
+      }
+
+      return { successful, failed, errors: realErrors };
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  return { bulkUpdate, isUpdating };
 };
 
 export const useApproveOrder = () => {
