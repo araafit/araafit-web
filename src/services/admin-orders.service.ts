@@ -72,6 +72,16 @@ export interface AdminOrder {
   updatedAt?: string;
 }
 
+export interface AdminOrderResponse {
+  data: AdminOrder[],
+  meta: {
+    total: number;
+    page: 1,
+    limit: 10,
+    totalPages: 4
+  }
+}
+
 export interface GetOrdersParams {
   status?: string;
   page?: number;
@@ -116,7 +126,7 @@ class AdminOrdersService {
   /**
    * Get orders with optional status filter
    */
-  async getOrders(params: GetOrdersParams = {}): Promise<AdminOrder[]> {
+  async getOrders(params: GetOrdersParams = {}): Promise<AdminOrderResponse> {
     const queryParams = new URLSearchParams();
 
     if (params.status) {
@@ -129,9 +139,10 @@ class AdminOrdersService {
       queryParams.append("limit", params.limit.toString());
     }
 
-    const response = await apiClient.get<ApiResponse<AdminOrder[]>>(
+    const response = await apiClient.get<ApiResponse<AdminOrderResponse>>(
       `/orders?${queryParams.toString()}`
     );
+
     return response.data.data;
   }
 
