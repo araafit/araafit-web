@@ -38,23 +38,24 @@ import {
   TableRow,
 } from "../../../ui/table";
 import { Tabs, TabsContent } from "../../../ui/tabs";
-
 import { schema } from "../overViewTable/schema/schema";
-
 import EmptyState from "../emptycart";
 import cart from "../../../admin-dashboard/images/emptyCart.png";
-// import { useUpdateOrderStatus } from "../../../../hooks/admin-orders.hooks";
 import { orderTableColumn } from "./table-columns/order-columns";
-
+import { useOrderStatusContext } from "../../orders-management/order-table-context";
+import { type OrderTablesType } from "./table-columns/order-columns";
 /* -------------------------------------------------------------------------------------------------------- */
 
 export function DataTable({
   data: initialData,
+  tableLabel
 }: {
   data: z.infer<typeof schema>[];
+  tableLabel?: OrderTablesType;
 }) {
   // const updateOrderStatusMutation = useUpdateOrderStatus();
-  const columns = orderTableColumn;
+  const { selectedTableRow, setSelectedTableRow } = useOrderStatusContext();
+  // const columns = orderTableColumn;
   const [data, setData] = React.useState(() => initialData);
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -79,9 +80,14 @@ export function DataTable({
     [data]
   );
 
+  // Update table when state is updated with new changes
+  React.useEffect(() => {
+    setData(initialData);
+  }, [initialData]);
+
   const table = useReactTable({
     data,
-    columns,
+    columns: orderTableColumn(tableLabel),
     state: {
       sorting,
       columnVisibility,
@@ -104,6 +110,37 @@ export function DataTable({
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
 
+  // Compare IDs before updating table row selection
+  const selectedRows = table
+    .getSelectedRowModel()
+    .rows.map((row) => row.original);
+  const lastSelectedIdsRef = React.useRef<string[]>([]);
+  React.useEffect(() => {
+    const ids = selectedRows.map((r) => r.orderId);
+    const prev = lastSelectedIdsRef.current;
+    const unchanged =
+      ids.length === prev.length && ids.every((id, i) => id === prev[i]);
+
+    if (!unchanged) {
+      setSelectedTableRow({ request: [], orders: selectedRows });
+      lastSelectedIdsRef.current = ids;
+    }
+  }, [selectedRows, selectedTableRow]);
+
+  // Clear selections when triggered
+  React.useEffect(() => {
+    if (selectedTableRow.shouldClearSelection) {
+      table.resetRowSelection();
+      setSelectedTableRow({
+        request: [],
+        orders: [],
+        shouldClearSelection: false,
+      });
+      lastSelectedIdsRef.current = [];
+    }
+  }, [selectedTableRow.shouldClearSelection, setSelectedTableRow]);
+
+  // Handle table drag and drop
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (active && over && active.id !== over.id) {
@@ -154,6 +191,7 @@ export function DataTable({
                       </TableRow>
                     ))}
                   </TableHeader>
+
                   <TableBody className="bg-muted">
                     {table.getRowModel().rows.map((row, idx) => {
                       const bgClass = row.getIsSelected()
