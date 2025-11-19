@@ -34,14 +34,15 @@ import { RiderDialogContent } from "../rider-info";
 
 /* ------------------------------------------------------------------------------------------------------------ */
 
-// type orderStatus =
-//   | "pending"
-//   | "approved"
-//   | "packaged"
-//   | "out-for-delivery"
-//   | "delivered"
-//   | "complete"
-//   | "canceled";
+export type OrderTablesType =
+  | "all-table"
+  | "pending"
+  | "approved"
+  | "packaged"
+  | "out-for-delivery"
+  | "delivered"
+  | "complete"
+  | "canceled";
 
 // eslint-disable-next-line react-refresh/only-export-components
 const ActionComponent: React.FC<{ row: Row<z.infer<typeof schema>> }> = ({
@@ -316,92 +317,106 @@ const ActionComponent: React.FC<{ row: Row<z.infer<typeof schema>> }> = ({
   );
 };
 
-export const orderTableColumn: ColumnDef<z.infer<typeof schema>>[] = [
-  {
-    id: "select",
-    cell: ({ row }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      </div>
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "orderId",
-    header: "Order ID",
-    cell: ({ row }) => <span>{row.original.orderId}</span>,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "deliveryInformation.name",
-    header: "Customer Name",
-    cell: ({ row }) => {
-      const delivery = row.original.deliveryInformation;
-      return (
-        <div className="text-wrap truncate">
-          {delivery ? delivery.name : "N/A"}
+export const orderTableColumn: (
+  tableLabel?: OrderTablesType
+) => ColumnDef<z.infer<typeof schema>>[] = (tableLabel) => {
+  const column = [
+    {
+      id: "select",
+      cell: ({ row }) => (
+        <div className="flex items-center justify-center">
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label="Select row"
+          />
         </div>
-      );
+      ),
+      enableSorting: false,
+      enableHiding: false,
     },
-  },
-  {
-    accessorKey: "dress",
-    header: "Item Information",
-    cell: ({ row }) => (
-      <div className="">
-        <div>
-          <div className="">{row.original.dress}</div>
+    {
+      accessorKey: "orderId",
+      header: "Order ID",
+      cell: ({ row }) => <span>{row.original.orderId}</span>,
+      enableHiding: false,
+    },
+    {
+      accessorKey: "deliveryInformation.name",
+      header: "Customer Name",
+      cell: ({ row }) => {
+        const delivery = row.original.deliveryInformation;
+        return (
+          <div className="text-wrap truncate">
+            {delivery ? delivery.name : "N/A"}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "dress",
+      header: "Item Information",
+      cell: ({ row }) => (
+        <div className="">
+          <div>
+            <div className="">{row.original.dress}</div>
+          </div>
         </div>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "TotalAmount",
-    header: () => <div className="">Amount (₦)</div>,
-    cell: ({ row }) => {
-      const amount = Number(row.original.TotalAmount) || 0;
-      return <div className="">₦{amount.toLocaleString()}</div>;
+      ),
     },
-  },
-  {
-    accessorKey: "Date",
-    header: () => (
-      <div className="w-full text-center flex items-start justify-start gap-4">
-        Date Ordered <CaretUpDownIcon />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className="">{formatOrderDate(row.original.createdAt || "")}</div>
-    ),
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => {
-      const status = row.original.status;
+    {
+      accessorKey: "TotalAmount",
+      header: () => <div className="">Amount (₦)</div>,
+      cell: ({ row }) => {
+        const amount = Number(row.original.TotalAmount) || 0;
+        return <div className="">₦{amount.toLocaleString()}</div>;
+      },
+    },
+    {
+      accessorKey: "Date",
+      header: () => (
+        <div className="w-full text-center flex items-start justify-start gap-4">
+          Date Ordered <CaretUpDownIcon />
+        </div>
+      ),
+      cell: ({ row }) => (
+        <div className="">{formatOrderDate(row.original.createdAt || "")}</div>
+      ),
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => {
+        const status = row.original.status;
 
-      const style = orderStatuses.find((s) => s.status === status);
+        const style = orderStatuses.find((s) => {
+          return s.status.toLowerCase() === status.toLowerCase();
+        });
 
-      return (
-        <div
-          className={`px-2 py-1 text-xs rounded-full w-fit ${
-            style
-              ? `${style.bgColor} ${style.textColor}`
-              : "bg-gray-100 text-gray-600"
-          }`}
-        >
-          {status}
-        </div>
-      );
+        return (
+          <div
+            className={`px-2 py-1 text-xs rounded-full w-fit ${
+              style
+                ? `${style.bgColor} ${style.textColor}`
+                : "bg-gray-100 text-gray-600"
+            }`}
+          >
+            {status}
+          </div>
+        );
+      },
     },
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => <ActionComponent row={row} />,
-  },
-];
+    {
+      id: "actions",
+      cell: ({ row }) => <ActionComponent row={row} />,
+    },
+  ];
+
+  if (tableLabel !== "all-table") {
+    column.shift();
+  }
+
+  return column;
+};
+
+// orderTableColumn.shift()
