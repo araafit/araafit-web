@@ -122,7 +122,7 @@ export function DataTable({
       ids.length === prev.length && ids.every((id, i) => id === prev[i]);
 
     if (!unchanged) {
-      setSelectedTableRow({ request: [], orders: selectedRows });
+      setSelectedTableRow({ requests: [], orders: selectedRows });
       lastSelectedIdsRef.current = ids;
     }
   }, [selectedRows, selectedTableRow]);
@@ -132,7 +132,7 @@ export function DataTable({
     if (selectedTableRow.shouldClearSelection) {
       table.resetRowSelection();
       setSelectedTableRow({
-        request: [],
+        requests: [],
         orders: [],
         shouldClearSelection: false,
       });
