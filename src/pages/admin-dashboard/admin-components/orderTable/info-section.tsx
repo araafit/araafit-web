@@ -1,5 +1,15 @@
 import React from "react";
 
+/* ------------------------------ */
+
+/**
+ * Drawer info component
+ *
+ * @param title string
+ * @param items: object
+ *
+ * @returns ReactElement
+ */
 const InfoSection = ({
   title,
   items,
@@ -21,7 +31,7 @@ const InfoSection = ({
   );
 
   return (
-    <div>
+    <div className="w-full">
       <h2 className="text-base font-inter font-medium mb-4">{title}</h2>
       <div className="space-y-4">
         {items.map((item, index) => (
