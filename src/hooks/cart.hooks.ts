@@ -10,35 +10,47 @@ import type {
 } from "../services/cart.service";
 import { toast } from "react-hot-toast";
 import { notificationStyles } from "../style/custom";
+import { useAuthStore } from "../stores/auth-store";
 
 /* ------------------------------------------- */
 
 // Hook for fetching cart
 export const useCart = () => {
+  const { isAuthenticated, isGuest, isAdmin } = useAuthStore();
+  const canFetchCart = isAuthenticated && (isGuest || !isAdmin);
+
   return useQuery<Cart, Error>({
     queryKey: ["cart"],
     queryFn: () => cartService.getCart(),
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 5 * 60 * 1000, // 5 minutes
+    enabled: canFetchCart,
   });
 };
 
 // Hook for fetching cart items
 export const useCartItems = () => {
+  const { isAuthenticated, isGuest, isAdmin } = useAuthStore();
+  const canFetchCart = isAuthenticated && (isGuest || !isAdmin);
+
   return useQuery<CartItem[], Error>({
     queryKey: ["cart-items"],
     queryFn: () => cartService.getCartItems(),
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 5 * 60 * 1000, // 5 minutes
+    enabled: canFetchCart,
   });
 };
 
 // Hook for fetching single cart item
 export const useCartItem = (itemId: string) => {
+  const { isAuthenticated, isGuest, isAdmin } = useAuthStore();
+  const canFetchCart = isAuthenticated && (isGuest || !isAdmin);
+
   return useQuery<CartItem, Error>({
     queryKey: ["cart-items", itemId],
     queryFn: () => cartService.getCartItem(itemId),
-    enabled: !!itemId,
+    enabled: !!itemId && canFetchCart,
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 5 * 60 * 1000, // 5 minutes
   });
