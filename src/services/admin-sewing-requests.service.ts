@@ -51,6 +51,16 @@ export interface AdminSewingRequest {
   updatedAt?: string;
 }
 
+export interface AdminSewingRequestResponse {
+  items: AdminSewingRequest[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPage: number;
+  };
+}
+
 export interface GetSewingRequestsParams {
   status?: string;
   page?: number;
@@ -98,15 +108,17 @@ class AdminSewingRequestsService {
    */
   async getSewingRequests(
     params: GetSewingRequestsParams = {}
-  ): Promise<AdminSewingRequest[]> {
+  ): Promise<AdminSewingRequestResponse> {
     const queryParams = new URLSearchParams();
 
     if (params.status) {
       queryParams.append("status", params.status);
     }
+
     if (params.page) {
       queryParams.append("page", params.page.toString());
     }
+
     if (params.limit) {
       queryParams.append("limit", params.limit.toString());
     }
@@ -115,7 +127,7 @@ class AdminSewingRequestsService {
       ? `/sewing-requests?${queryParams.toString()}`
       : "/sewing-requests";
 
-    const response = await apiClient.get<ApiResponse<AdminSewingRequest[]>>(
+    const response = await apiClient.get<ApiResponse<AdminSewingRequestResponse>>(
       endpoint
     );
     return response.data.data;
@@ -180,10 +192,9 @@ class AdminSewingRequestsService {
     requestId: string,
     data: UpdateRequestStatusRequest
   ): Promise<UpdateRequestStatusResponse> {
-    const response = await apiClient.patch<ApiResponse<UpdateRequestStatusResponse>>(
-      `/admin/requests/${requestId}/status`,
-      data
-    );
+    const response = await apiClient.patch<
+      ApiResponse<UpdateRequestStatusResponse>
+    >(`/admin/requests/${requestId}/status`, data);
     return response.data.data;
   }
 }
