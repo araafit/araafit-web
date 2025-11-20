@@ -376,37 +376,88 @@ export const customerActivityArray: CustomerActivity[] = [
 
 export const orderStatuses = [
   {
-    status: "Pending",
+    status: "pending",
+    label: "Pending",
     textColor: "text-[#F59E0B]",
     bgColor: "bg-[#FEF3C7]",
   },
   {
-    status: "Approved",
+    status: "approved",
+    label: "Approved",
     textColor: "text-[#16A34A]",
     bgColor: "bg-[#DCFCE7]",
   },
   {
-    status: "Packaging",
+    status: "packaging",
+    label: "Packaging",
     textColor: "text-[#0EA5E9]",
     bgColor: "bg-[#E0F2FE]",
   },
   {
-    status: "Out for Delivery",
+    status: "out-for-delivery",
+    label: "Out for Delivery",
     textColor: "text-[#2563EB]",
     bgColor: "bg-[#EFF4FF]",
   },
   {
-    status: "Delivered",
+    status: "delivered",
+    label: "Delivered",
     textColor: "text-[#059669]",
     bgColor: "bg-[#ECFDF8]",
   },
   {
-    status: "Complete",
+    status: "completed",
+    label: "Completed",
     textColor: "text-[#475569]",
     bgColor: "bg-[#F1F5F9]",
   },
   {
-    status: "Canceled",
+    status: "canceled",
+    label: "Canceled",
+    textColor: "text-[#DC2626]",
+    bgColor: "bg-[#FEE2E2]",
+  },
+];
+export const sewingRequestStatuses = [
+  {
+    status: "pending",
+    label: "Pending",
+    textColor: "text-[#F59E0B]",
+    bgColor: "bg-[#FEF3C7]",
+  },
+  {
+    status: "approved",
+    label: "Approved",
+    textColor: "text-[#16A34A]",
+    bgColor: "bg-[#DCFCE7]",
+  },
+  {
+    status: "sewing",
+    label: "Sewing",
+    textColor: "text-[#0EA5E9]",
+    bgColor: "bg-[#E0F2FE]",
+  },
+  {
+    status: "out-for-delivery",
+    label: "Out for Delivery",
+    textColor: "text-[#2563EB]",
+    bgColor: "bg-[#EFF4FF]",
+  },
+  {
+    status: "delivered",
+    label: "Delivered",
+    textColor: "text-[#059669]",
+    bgColor: "bg-[#ECFDF8]",
+  },
+  {
+    status: "completed",
+    label: "Completed",
+    textColor: "text-[#475569]",
+    bgColor: "bg-[#F1F5F9]",
+  },
+  {
+    status: "canceled",
+    label: "Canceled",
     textColor: "text-[#DC2626]",
     bgColor: "bg-[#FEE2E2]",
   },
