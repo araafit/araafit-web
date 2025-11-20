@@ -80,9 +80,9 @@ export function DataTable({
   );
 
   // Update table when state has new changes
-    React.useEffect(() => {
-      setData(initialData);
-    }, [initialData]);
+  React.useEffect(() => {
+    setData(initialData);
+  }, [initialData]);
 
   const table = useReactTable({
     data,
@@ -150,6 +150,20 @@ export function DataTable({
     }
   }
 
+  if (table.getRowModel().rows?.length === 0) {
+    return (
+      <div className="w-full flex items-center justify-center">
+        <div className="p-24">
+          <EmptyState
+            image={cart}
+            alt="Empty cart"
+            message="No new requests just yet."
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center justify-between">
       <Tabs defaultValue="outline" className="w-full">
@@ -166,69 +180,58 @@ export function DataTable({
               sensors={sensors}
               id={sortableId}
             >
-              {table.getRowModel().rows?.length ? (
-                <Table className=" ">
-                  <TableHeader className="sticky top-0 z-10 h-11 border-b-0 bg-w">
-                    {table.getHeaderGroups().map((headerGroup) => (
-                      <TableRow
-                        key={headerGroup.id}
-                        className=" border-0 !border-b-0"
-                      >
-                        {headerGroup.headers.map((header) => {
-                          return (
-                            <TableHead key={header.id} colSpan={header.colSpan}>
-                              {header.isPlaceholder
-                                ? null
-                                : flexRender(
-                                    header.column.columnDef.header,
-                                    header.getContext()
-                                  )}
-                            </TableHead>
-                          );
-                        })}
-                      </TableRow>
-                    ))}
-                  </TableHeader>
-                  <TableBody className="bg-muted">
-                    {table.getRowModel().rows.map((row, idx) => {
-                      const bgClass = row.getIsSelected()
-                        ? "bg-muted/50"
-                        : idx % 2 === 0
-                        ? "bg-[#F9FAFB]"
-                        : "bg-white";
+              <Table className=" ">
+                <TableHeader className="sticky top-0 z-10 h-11 border-b-0 bg-w">
+                  {table.getHeaderGroups().map((headerGroup) => (
+                    <TableRow
+                      key={headerGroup.id}
+                      className=" border-0 !border-b-0"
+                    >
+                      {headerGroup.headers.map((header) => {
+                        return (
+                          <TableHead key={header.id} colSpan={header.colSpan}>
+                            {header.isPlaceholder
+                              ? null
+                              : flexRender(
+                                  header.column.columnDef.header,
+                                  header.getContext()
+                                )}
+                          </TableHead>
+                        );
+                      })}
+                    </TableRow>
+                  ))}
+                </TableHeader>
+                <TableBody className="bg-muted">
+                  {table.getRowModel().rows.map((row, idx) => {
+                    const bgClass = row.getIsSelected()
+                      ? "bg-muted/50"
+                      : idx % 2 === 0
+                      ? "bg-[#F9FAFB]"
+                      : "bg-white";
 
-                      return (
-                        <TableRow
-                          key={row.id}
-                          className={`border-0 text-sm font-inter text-[#4F4F4F] transition-colors ${bgClass}`}
-                          onClick={() =>
-                            row.toggleSelected(!row.getIsSelected())
-                          }
-                        >
-                          {row.getVisibleCells().map((cell) => (
-                            <TableCell key={cell.id} className="h-[4.5rem]">
-                              {flexRender(
-                                cell.column.columnDef.cell,
-                                cell.getContext()
-                              )}
-                            </TableCell>
-                          ))}
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              ) : (
-                <div className="p-24">
-                  <EmptyState
-                    image={cart}
-                    alt="Empty cart"
-                    message="No new requests just yet."
-                  />
-                </div>
-              )}
+                    return (
+                      <TableRow
+                        key={row.id}
+                        className={`border-0 text-sm font-inter text-[#4F4F4F] transition-colors ${bgClass}`}
+                        onClick={() => row.toggleSelected(!row.getIsSelected())}
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id} className="h-[4.5rem]">
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
             </DndContext>
           </div>
+          
           {(table.getCanPreviousPage() || table.getCanNextPage()) && (
             <div className="flex items-center justify-between">
               <div className="flex justify-between w-full">
