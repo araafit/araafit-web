@@ -146,16 +146,12 @@ export const useUpdateBulkRequestStatus = () => {
         showToast.success(`All ${successful} orders updated successfully`, {
           style: notificationStyles.alertSuccess,
         });
-      } else if (successful === 0) {
+      }
+      
+      if (successful === 0) {
         showToast.error(`All ${failed} orders failed to update`, {
           style: notificationStyles.alertError,
         });
-      } else {
-        showToast.warning(`${successful} status updated, ${failed} failed`, {
-          style: notificationStyles.alertWarning,
-          icon: null
-        });
-        console.log(realErrors);
       }
 
       return { successful, failed, errors: realErrors };
