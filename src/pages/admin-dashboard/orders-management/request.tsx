@@ -1,4 +1,4 @@
-import { orderStatuses } from "../_data/_overview";
+import { sewingRequestStatuses } from "../_data/_overview";
 import {
   Tabs,
   TabsContent,
@@ -25,8 +25,6 @@ const Requests = () => {
     useAdminSewingRequests({ status: "approved" });
   const { data: sewingRequests, isLoading: sewingLoading } =
     useAdminSewingRequests({ status: "sewing" });
-  const { data: packagingRequests, isLoading: packagingLoading } =
-    useAdminSewingRequests({ status: "packaging" });
   const { data: outForDeliveryRequests, isLoading: outForDeliveryLoading } =
     useAdminSewingRequests({ status: "out_for_delivery" });
   const { data: deliveredRequests, isLoading: deliveredLoading } =
@@ -49,9 +47,6 @@ const Requests = () => {
   const sewingRequestsData = sewingRequests
     ? convertApiSewingRequestsToTableFormat(sewingRequests.items)
     : [];
-  const packagingRequestsData = packagingRequests
-    ? convertApiSewingRequestsToTableFormat(packagingRequests.items)
-    : [];
   const outForDeliveryRequestsData = outForDeliveryRequests
     ? convertApiSewingRequestsToTableFormat(outForDeliveryRequests.items)
     : [];
@@ -64,6 +59,8 @@ const Requests = () => {
   const cancelledRequestsData = cancelledRequests
     ? convertApiSewingRequestsToTableFormat(cancelledRequests.items)
     : [];
+
+    // console.log(sewingRequestsData);
 
   if (allRequestsError) {
     return (
@@ -80,19 +77,19 @@ const Requests = () => {
   return (
     <>
       <div className="mt-5 h-full bg-white px-4 py-2 relative rounded-md">
-        <Tabs defaultValue="All Requests" className="w-full">
+        <Tabs defaultValue="all-requests" className="w-full">
           <div>
             <TabsList className="w-fit h-11 mb-6">
-              <TabsTrigger value="All Requests">All Requests</TabsTrigger>
-              {orderStatuses.map((statusObj) => (
-                <TabsTrigger key={statusObj.status} value={statusObj.status}>
-                  {statusObj.status}
+              <TabsTrigger value="all-requests">All Requests</TabsTrigger>
+              {sewingRequestStatuses.map((statusObj) => (
+                <TabsTrigger key={statusObj.status} value={statusObj.status.toLowerCase()} className="">
+                  {statusObj.label}
                 </TabsTrigger>
               ))}
             </TabsList>
           </div>
           <TabsContent
-            value="All Requests"
+            value="all-requests"
             className="relative flex flex-col gap-4 overflow-auto"
           >
             {allRequestsLoading ? (
@@ -111,7 +108,7 @@ const Requests = () => {
 
           {/* Status-specific tabs */}
           <TabsContent
-            value="Pending"
+            value="pending"
             className="relative flex flex-col gap-4 overflow-auto"
           >
             {pendingLoading ? (
@@ -129,7 +126,7 @@ const Requests = () => {
           </TabsContent>
 
           <TabsContent
-            value="Approved"
+            value="approved"
             className="relative flex flex-col gap-4 overflow-auto"
           >
             {approvedLoading ? (
@@ -147,7 +144,7 @@ const Requests = () => {
           </TabsContent>
 
           <TabsContent
-            value="Sewing"
+            value="sewing"
             className="relative flex flex-col gap-4 overflow-auto"
           >
             {sewingLoading ? (
@@ -165,25 +162,7 @@ const Requests = () => {
           </TabsContent>
 
           <TabsContent
-            value="Packaging"
-            className="relative flex flex-col gap-4 overflow-auto"
-          >
-            {packagingLoading ? (
-              <div className="flex justify-center items-center h-32">
-                <Spinner
-                  size="lg"
-                  speed="fast"
-                  isLoading={packagingLoading}
-                  arcColor="#9A6C50"
-                />
-              </div>
-            ) : (
-              <DataTable data={packagingRequestsData} tableLabel="packaged" />
-            )}
-          </TabsContent>
-
-          <TabsContent
-            value="Out for Delivery"
+            value="out-for-delivery"
             className="relative flex flex-col gap-4 overflow-auto"
           >
             {outForDeliveryLoading ? (
@@ -204,7 +183,7 @@ const Requests = () => {
           </TabsContent>
 
           <TabsContent
-            value="Delivered"
+            value="delivered"
             className="relative flex flex-col gap-4 overflow-auto"
           >
             {deliveredLoading ? (
@@ -222,7 +201,7 @@ const Requests = () => {
           </TabsContent>
 
           <TabsContent
-            value="Complete"
+            value="completed"
             className="relative flex flex-col gap-4 overflow-auto"
           >
             {completeLoading ? (
@@ -240,7 +219,7 @@ const Requests = () => {
           </TabsContent>
 
           <TabsContent
-            value="Canceled"
+            value="canceled"
             className="relative flex flex-col gap-4 overflow-auto"
           >
             {cancelledLoading ? (

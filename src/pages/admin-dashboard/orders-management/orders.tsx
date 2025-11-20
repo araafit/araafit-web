@@ -83,13 +83,13 @@ const Orders = () => {
   return (
     <>
       <div className="mt-5 h-full bg-white px-4 py-2 relative rounded-md">
-          <Tabs defaultValue="All Orders" className="w-full">
+          <Tabs defaultValue="all-orders" className="w-full">
             <div>
               <TabsList className="w-fit h-11 mb-0">
-                <TabsTrigger value="All Orders">All Orders</TabsTrigger>
+                <TabsTrigger value="all-orders">All Orders</TabsTrigger>
                 {orderStatuses.map((statusObj) => (
                   <TabsTrigger key={statusObj.status} value={statusObj.status}>
-                    {statusObj.status}
+                    {statusObj.label}
                   </TabsTrigger>
                 ))}
               </TabsList>
@@ -97,7 +97,7 @@ const Orders = () => {
 
             {/* All orders tab */}
             <TabsContent
-              value="All Orders"
+              value="all-orders"
               className="relative flex flex-col gap-4 overflow-auto"
             >
               {allOrdersLoading ? (
@@ -116,7 +116,7 @@ const Orders = () => {
 
             {/* Pending orders tab */}
             <TabsContent
-              value="Pending"
+              value="pending"
               className="relative flex flex-col gap-4 overflow-auto"
             >
               {pendingLoading ? (
@@ -134,7 +134,7 @@ const Orders = () => {
             </TabsContent>
 
             <TabsContent
-              value="Approved"
+              value="approved"
               className="relative flex flex-col gap-4 overflow-auto"
             >
               {approvedLoading ? (
@@ -152,7 +152,7 @@ const Orders = () => {
             </TabsContent>
 
             <TabsContent
-              value="Packaging"
+              value="packaging"
               className="relative flex flex-col gap-4 overflow-auto"
             >
               {packagingLoading ? (
@@ -170,7 +170,7 @@ const Orders = () => {
             </TabsContent>
 
             <TabsContent
-              value="Out for Delivery"
+              value="out-for-delivery"
               className="relative flex flex-col gap-4 overflow-auto"
             >
               {outForDeliveryLoading ? (
@@ -188,7 +188,7 @@ const Orders = () => {
             </TabsContent>
 
             <TabsContent
-              value="Delivered"
+              value="delivered"
               className="relative flex flex-col gap-4 overflow-auto"
             >
               {deliveredLoading ? (
@@ -206,7 +206,7 @@ const Orders = () => {
             </TabsContent>
 
             <TabsContent
-              value="Complete"
+              value="complete"
               className="relative flex flex-col gap-4 overflow-auto"
             >
               {completeLoading ? (
@@ -224,7 +224,7 @@ const Orders = () => {
             </TabsContent>
 
             <TabsContent
-              value="Canceled"
+              value="canceled"
               className="relative flex flex-col gap-4 overflow-auto"
             >
               {cancelledLoading ? (
