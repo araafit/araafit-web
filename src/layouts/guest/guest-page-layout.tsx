@@ -28,8 +28,8 @@ function GuestPageLayout({ children }: { children: React.ReactElement }) {
 
   return (
     <main className="h-screen bg-[#F5F5F5] flex flex-col gap-6 overflow-y-clip">
-      <div className="bg-white py-2 px-32 flex items-center justify-center gap-2">
-        <div className="w-[75rem] h-[4.5625rem] flex items-center justify-between">
+      <div className="bg-white py-2 px-4 sm:px-6 lg:px-8">
+        <div className="w-full h-[4.5625rem] max-w-screen-2xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-6">
             <Link to="/">
               <img src="logo/logo.png" alt="" className="w-[5.625rem]" />
@@ -96,7 +96,7 @@ function GuestPageLayout({ children }: { children: React.ReactElement }) {
         </div>
       </div>
 
-      <div className="size-full flex items-start justify-center overflow-scroll">
+      <div className="size-full overflow-y-auto">
         {loading ? <Loader /> : children}
       </div>
     </main>
