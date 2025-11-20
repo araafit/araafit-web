@@ -18,8 +18,9 @@ import {
 import { DropdownMenuContent } from "@radix-ui/react-dropdown-menu";
 import { TableButton } from "../../ui/button";
 import { useState } from "react";
-import { useOrderStatusContext, type OrderStatus } from "./order-table-context";
+import { useOrderStatusContext, type OrderItem } from "./order-table-context";
 import { useUpdateBulkOrderStatus } from "../../../hooks/admin-orders.hooks";
+import { useUpdateBulkRequestStatus } from "../../../hooks/admin-sewing-requests.hooks";
 import showToast from "../../../utils/notification";
 import { notificationStyles } from "../../../style/custom";
 
@@ -32,7 +33,7 @@ const tableOrderStatus = [
     value: "approved",
     style: "bg-[#DCFCE7] text-[#16A34A]",
   },
-   {
+  {
     label: "packaging",
     value: "packaging",
     style: "bg-[#E0F2FE] text-[#0EA5E9]",
@@ -69,6 +70,8 @@ export function AdminDashboardOrders() {
   const [orderStatus, setOrderStatus] = useState<null | string>(null);
   const { selectedTableRow, setSelectedTableRow } = useOrderStatusContext();
   const { bulkUpdate, isUpdating } = useUpdateBulkOrderStatus();
+  const { bulkUpdate: bulkSewingStatusUpdate, isUpdating: requestIsUpdating } =
+    useUpdateBulkRequestStatus();
 
   const {
     data: metrics,
@@ -76,7 +79,10 @@ export function AdminDashboardOrders() {
     error: metricsError,
   } = useAdminDashboardMetrics();
 
-  const handleBulkUpdateOnChange = async (orders: OrderStatus[]) => {
+  const handleBulkUpdateOnChange = async (
+    selectedRows: OrderItem[],
+    updateFor: "sewing-request" | "purchase-order"
+  ) => {
     if (!orderStatus) {
       showToast.warning("Please select order status", {
         style: notificationStyles.alertWarning,
@@ -85,28 +91,47 @@ export function AdminDashboardOrders() {
       return;
     }
 
-    if (orders.length === 0) return;
+    if (selectedRows.length === 0) return;
 
-    const orderToUpdate = orders?.map((order) => ({
+    const statusUpdateData = selectedRows?.map((order) => ({
       id: order.orderId,
       status: (orderStatus as string).toLowerCase(),
     }));
 
-    const result = await bulkUpdate(orderToUpdate);
+    if (updateFor === "purchase-order") {
+      const result = await bulkUpdate(statusUpdateData);
+      if (result.errors.length > 0) {
+        console.error("Failed orders:", result.errors);
+        // Could show a modal with error details
+      }
 
-    if (result.errors.length > 0) {
-      console.error("Failed orders:", result.errors);
-      // Could show a modal with error details
+      // Clear selected table rows and reset status dropdown
+      if (result.successful > 0) {
+        setSelectedTableRow({
+          orders: [],
+          requests: [],
+          shouldClearSelection: true,
+        });
+        setOrderStatus(null);
+      }
     }
 
-    // Clear selected table rows and reset status dropdown
-    if (result.successful > 0) {
-      setSelectedTableRow({
-        orders: [],
-        request: [],
-        shouldClearSelection: true,
-      });
-      setOrderStatus(null);
+    if (updateFor === "sewing-request") {
+      const result = await bulkSewingStatusUpdate(statusUpdateData);
+      if (result.errors.length > 0) {
+        console.error("Failed orders:", result.errors);
+        // Could show a modal with error details
+      }
+
+      // Clear selected table rows and reset status dropdown
+      if (result.successful > 0) {
+        setSelectedTableRow({
+          orders: [],
+          requests: [],
+          shouldClearSelection: true,
+        });
+        setOrderStatus(null);
+      }
     }
   };
 
@@ -187,7 +212,10 @@ export function AdminDashboardOrders() {
                   <DropdownMenuTrigger
                     asChild
                     onClick={(e) => e.preventDefault()}
-                    disabled={selectedTableRow.orders?.length === 0}
+                    disabled={
+                      selectedTableRow.orders?.length === 0 &&
+                      selectedTableRow.requests?.length === 0
+                    }
                   >
                     <TableButton
                       variant="outline"
@@ -221,18 +249,25 @@ export function AdminDashboardOrders() {
 
                 <Button
                   variant="solid"
-                  disabled={selectedTableRow.orders?.length === 0}
-                  className="text-white w-32 h-11 shadow-sm disabled:opacity-50"
-                  onClick={() =>
-                    handleBulkUpdateOnChange(
-                      selectedTableRow.orders ? selectedTableRow.orders : []
-                    )
+                  disabled={
+                    selectedTableRow.orders?.length === 0 &&
+                    selectedTableRow.requests?.length === 0
                   }
+                  className="text-white w-32 h-11 shadow-sm disabled:opacity-50"
+                  onClick={() => {
+                    if (selectedTableRow.orders.length > 0) {
+                      handleBulkUpdateOnChange(selectedTableRow.orders, "purchase-order")
+                    }
+
+                    if (selectedTableRow.requests.length > 0) {
+                      handleBulkUpdateOnChange(selectedTableRow.requests, "sewing-request")
+                    }
+                  }}
                 >
                   <div className="flex items-center justify-center gap-2">
                     <span>Save</span>
                     <Spinner
-                      isLoading={isUpdating}
+                      isLoading={isUpdating || requestIsUpdating}
                       speed="fast"
                       size="sm"
                       arcColor="#ffff"

@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 
-export interface OrderStatus {
+export interface OrderItem {
   orderId: string;
   dress: string;
   cost: string | number;
@@ -42,13 +42,13 @@ export interface OrderStatus {
 
 export interface OrderStatusContextType {
   selectedTableRow: {
-    orders: OrderStatus[];
-    request: OrderStatus[];
+    orders: OrderItem[];
+    requests: OrderItem[];
     shouldClearSelection?: boolean;
   };
   setSelectedTableRow: (value: {
-    orders: OrderStatus[];
-    request: OrderStatus[];
+    orders: OrderItem[];
+    requests: OrderItem[];
     shouldClearSelection?: boolean;
   }) => void;
 }

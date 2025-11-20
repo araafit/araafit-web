@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { OrderStatusContext, type OrderStatus } from "./order-table-context";
+import { OrderStatusContext, type OrderItem } from "./order-table-context";
 
 
 /* ------------------------------------------------------------ */
@@ -10,10 +10,10 @@ export const OrderStatusProvider = ({
   children: React.ReactNode;
 }) => {
   const [selectedTableRow, setSelectedTableRow] = useState<{
-    orders: OrderStatus[];
-    request: OrderStatus[];
+    orders: OrderItem[];
+    requests: OrderItem[];
     shouldClearSelection?: boolean;
-  }>({ orders: [], request: [], shouldClearSelection: false});
+  }>({ orders: [], requests: [], shouldClearSelection: false});
 
   return (
     <OrderStatusContext.Provider
