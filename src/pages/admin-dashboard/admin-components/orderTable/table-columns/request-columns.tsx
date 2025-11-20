@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type z from "zod";
 import type { schema } from "../../overViewTable/schema/schema";
-import { orderStatuses } from "../../../_data/_overview";
+import { sewingRequestStatuses } from "../../../_data/_overview";
 import { CaretUpDownIcon } from "@phosphor-icons/react";
 import { ActionCell } from "../requests-action-drawer";
 import { Checkbox } from "../../../../ui/checkbox";
@@ -89,7 +89,7 @@ export const requestTableColumn: (
       cell: ({ row }) => {
         const status = row.original.status;
 
-        const style = orderStatuses.find((s) => s.status.toLowerCase() === status.toLowerCase());
+        const style = sewingRequestStatuses.find((s) => s.status.toLowerCase() === status.toLowerCase());
 
         return (
           <div
