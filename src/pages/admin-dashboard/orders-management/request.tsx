@@ -12,34 +12,66 @@ import Spinner from "../../../shared-components/spinner";
 
 const Requests = () => {
   // Fetch all sewing requests
-  const { data: allRequests, isLoading: allRequestsLoading, error: allRequestsError } = useAdminSewingRequests();
-  
+  const {
+    data: allRequests,
+    isLoading: allRequestsLoading,
+    error: allRequestsError,
+  } = useAdminSewingRequests();
+
   // Fetch requests by status
-  const { data: pendingRequests, isLoading: pendingLoading } = useAdminSewingRequests({ status: "pending" });
-  const { data: approvedRequests, isLoading: approvedLoading } = useAdminSewingRequests({ status: "approved" });
-  const { data: sewingRequests, isLoading: sewingLoading } = useAdminSewingRequests({ status: "sewing" });
-  const { data: packagingRequests, isLoading: packagingLoading } = useAdminSewingRequests({ status: "packaging" });
-  const { data: outForDeliveryRequests, isLoading: outForDeliveryLoading } = useAdminSewingRequests({ status: "out_for_delivery" });
-  const { data: deliveredRequests, isLoading: deliveredLoading } = useAdminSewingRequests({ status: "delivered" });
-  const { data: completeRequests, isLoading: completeLoading } = useAdminSewingRequests({ status: "complete" });
-  const { data: cancelledRequests, isLoading: cancelledLoading } = useAdminSewingRequests({ status: "cancelled" });
+  const { data: pendingRequests, isLoading: pendingLoading } =
+    useAdminSewingRequests({ status: "pending" });
+  const { data: approvedRequests, isLoading: approvedLoading } =
+    useAdminSewingRequests({ status: "approved" });
+  const { data: sewingRequests, isLoading: sewingLoading } =
+    useAdminSewingRequests({ status: "sewing" });
+  const { data: packagingRequests, isLoading: packagingLoading } =
+    useAdminSewingRequests({ status: "packaging" });
+  const { data: outForDeliveryRequests, isLoading: outForDeliveryLoading } =
+    useAdminSewingRequests({ status: "out_for_delivery" });
+  const { data: deliveredRequests, isLoading: deliveredLoading } =
+    useAdminSewingRequests({ status: "delivered" });
+  const { data: completeRequests, isLoading: completeLoading } =
+    useAdminSewingRequests({ status: "complete" });
+  const { data: cancelledRequests, isLoading: cancelledLoading } =
+    useAdminSewingRequests({ status: "cancelled" });
 
   // Convert API data to table format
-  const allRequestsData = allRequests ? convertApiSewingRequestsToTableFormat(allRequests) : [];
-  const pendingRequestsData = pendingRequests ? convertApiSewingRequestsToTableFormat(pendingRequests) : [];
-  const approvedRequestsData = approvedRequests ? convertApiSewingRequestsToTableFormat(approvedRequests) : [];
-  const sewingRequestsData = sewingRequests ? convertApiSewingRequestsToTableFormat(sewingRequests) : [];
-  const packagingRequestsData = packagingRequests ? convertApiSewingRequestsToTableFormat(packagingRequests) : [];
-  const outForDeliveryRequestsData = outForDeliveryRequests ? convertApiSewingRequestsToTableFormat(outForDeliveryRequests) : [];
-  const deliveredRequestsData = deliveredRequests ? convertApiSewingRequestsToTableFormat(deliveredRequests) : [];
-  const completeRequestsData = completeRequests ? convertApiSewingRequestsToTableFormat(completeRequests) : [];
-  const cancelledRequestsData = cancelledRequests ? convertApiSewingRequestsToTableFormat(cancelledRequests) : [];
+  const allRequestsData = allRequests
+    ? convertApiSewingRequestsToTableFormat(allRequests.items)
+    : [];
+  const pendingRequestsData = pendingRequests
+    ? convertApiSewingRequestsToTableFormat(pendingRequests.items)
+    : [];
+  const approvedRequestsData = approvedRequests
+    ? convertApiSewingRequestsToTableFormat(approvedRequests.items)
+    : [];
+  const sewingRequestsData = sewingRequests
+    ? convertApiSewingRequestsToTableFormat(sewingRequests.items)
+    : [];
+  const packagingRequestsData = packagingRequests
+    ? convertApiSewingRequestsToTableFormat(packagingRequests.items)
+    : [];
+  const outForDeliveryRequestsData = outForDeliveryRequests
+    ? convertApiSewingRequestsToTableFormat(outForDeliveryRequests.items)
+    : [];
+  const deliveredRequestsData = deliveredRequests
+    ? convertApiSewingRequestsToTableFormat(deliveredRequests.items)
+    : [];
+  const completeRequestsData = completeRequests
+    ? convertApiSewingRequestsToTableFormat(completeRequests.items)
+    : [];
+  const cancelledRequestsData = cancelledRequests
+    ? convertApiSewingRequestsToTableFormat(cancelledRequests.items)
+    : [];
 
   if (allRequestsError) {
     return (
       <div className="mt-5 h-full bg-white px-4 py-2 relative rounded-md">
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <p className="text-red-600">Failed to load sewing requests. Please try again.</p>
+          <p className="text-red-600">
+            Failed to load sewing requests. Please try again.
+          </p>
         </div>
       </div>
     );
@@ -65,10 +97,15 @@ const Requests = () => {
           >
             {allRequestsLoading ? (
               <div className="flex justify-center items-center h-32">
-                <Spinner size="lg" speed="fast" />
+                <Spinner
+                  size="lg"
+                  speed="fast"
+                  isLoading={allRequestsLoading}
+                  arcColor="#9A6C50"
+                />
               </div>
             ) : (
-              <DataTable data={allRequestsData} />
+              <DataTable data={allRequestsData} tableLabel="all-requests" />
             )}
           </TabsContent>
 
@@ -79,10 +116,15 @@ const Requests = () => {
           >
             {pendingLoading ? (
               <div className="flex justify-center items-center h-32">
-                <Spinner size="lg" speed="fast" />
+                <Spinner
+                  size="lg"
+                  speed="fast"
+                  isLoading={pendingLoading}
+                  arcColor="#9A6C50"
+                />
               </div>
             ) : (
-              <DataTable data={pendingRequestsData} />
+              <DataTable data={pendingRequestsData} tableLabel="pending" />
             )}
           </TabsContent>
 
@@ -92,10 +134,15 @@ const Requests = () => {
           >
             {approvedLoading ? (
               <div className="flex justify-center items-center h-32">
-                <Spinner size="lg" speed="fast" />
+                <Spinner
+                  size="lg"
+                  speed="fast"
+                  isLoading={approvedLoading}
+                  arcColor="#9A6C50"
+                />
               </div>
             ) : (
-              <DataTable data={approvedRequestsData} />
+              <DataTable data={approvedRequestsData} tableLabel="approved" />
             )}
           </TabsContent>
 
@@ -105,10 +152,15 @@ const Requests = () => {
           >
             {sewingLoading ? (
               <div className="flex justify-center items-center h-32">
-                <Spinner size="lg" speed="fast" />
+                <Spinner
+                  size="lg"
+                  speed="fast"
+                  isLoading={sewingLoading}
+                  arcColor="#9A6C50"
+                />
               </div>
             ) : (
-              <DataTable data={sewingRequestsData} />
+              <DataTable data={sewingRequestsData} tableLabel="sewing" />
             )}
           </TabsContent>
 
@@ -118,10 +170,15 @@ const Requests = () => {
           >
             {packagingLoading ? (
               <div className="flex justify-center items-center h-32">
-                <Spinner size="lg" speed="fast" />
+                <Spinner
+                  size="lg"
+                  speed="fast"
+                  isLoading={packagingLoading}
+                  arcColor="#9A6C50"
+                />
               </div>
             ) : (
-              <DataTable data={packagingRequestsData} />
+              <DataTable data={packagingRequestsData} tableLabel="packaged" />
             )}
           </TabsContent>
 
@@ -131,10 +188,18 @@ const Requests = () => {
           >
             {outForDeliveryLoading ? (
               <div className="flex justify-center items-center h-32">
-                <Spinner size="lg" speed="fast" />
+                <Spinner
+                  size="lg"
+                  speed="fast"
+                  isLoading={outForDeliveryLoading}
+                  arcColor="#9A6C50"
+                />
               </div>
             ) : (
-              <DataTable data={outForDeliveryRequestsData} />
+              <DataTable
+                data={outForDeliveryRequestsData}
+                tableLabel="out-for-delivery"
+              />
             )}
           </TabsContent>
 
@@ -144,10 +209,15 @@ const Requests = () => {
           >
             {deliveredLoading ? (
               <div className="flex justify-center items-center h-32">
-                <Spinner size="lg" speed="fast" />
+                <Spinner
+                  size="lg"
+                  speed="fast"
+                  isLoading={deliveredLoading}
+                  arcColor="#9A6C50"
+                />
               </div>
             ) : (
-              <DataTable data={deliveredRequestsData} />
+              <DataTable data={deliveredRequestsData} tableLabel="delivered" />
             )}
           </TabsContent>
 
@@ -157,10 +227,15 @@ const Requests = () => {
           >
             {completeLoading ? (
               <div className="flex justify-center items-center h-32">
-                <Spinner size="lg" speed="fast" />
+                <Spinner
+                  size="lg"
+                  speed="fast"
+                  isLoading={completeLoading}
+                  arcColor="#9A6C50"
+                />
               </div>
             ) : (
-              <DataTable data={completeRequestsData} />
+              <DataTable data={completeRequestsData} tableLabel="complete" />
             )}
           </TabsContent>
 
@@ -170,10 +245,15 @@ const Requests = () => {
           >
             {cancelledLoading ? (
               <div className="flex justify-center items-center h-32">
-                <Spinner size="lg" speed="fast" />
+                <Spinner
+                  size="lg"
+                  speed="fast"
+                  isLoading={cancelledLoading}
+                  arcColor="#9A6C50"
+                />
               </div>
             ) : (
-              <DataTable data={cancelledRequestsData} />
+              <DataTable data={cancelledRequestsData} tableLabel="canceled" />
             )}
           </TabsContent>
         </Tabs>
