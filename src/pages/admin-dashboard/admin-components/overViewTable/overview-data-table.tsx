@@ -73,8 +73,6 @@ export function OverviewTable() {
       (s) => s.status?.toLowerCase() === status?.toLowerCase()
     );
 
-    console.log(isLoading, isSuccess, data);
-
     const orderInformation = useMemo(
       () => (
         <InfoSection

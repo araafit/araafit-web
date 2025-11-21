@@ -15,16 +15,6 @@ import useAuth from "../../hooks/use-auth";
 
 /* -------------------------------------------------------------------- */
 
-// type StoredUser = {
-//   state: {
-//     adminUser: Record<string, string | null>;
-//     isAdmin: boolean;
-//     isUser: boolean;
-//     user: Record<string, string | null>;
-//   };
-//   version: number;
-// };
-
 /**
  * Dashboard home page
  *
@@ -32,7 +22,7 @@ import useAuth from "../../hooks/use-auth";
  */
 export function DashboardHomePage() {
   const {isAuthenticated, user} = useAuth()
-  const { orders, dresses, fabrics, isLoading, isError, error } =
+  const { orders, dresses, fabrics, isLoading, isError } =
     useDashboardData();
   const addToCart = useCartStore((state) => state.addItem);
 
@@ -133,7 +123,6 @@ export function DashboardHomePage() {
     </div>
   );
 
-  // Show loading state
   if (isLoading) {
     return (
       <UserDashboardLayout>
@@ -150,14 +139,15 @@ export function DashboardHomePage() {
       <UserDashboardLayout>
         <div className="h-screen flex items-center justify-center">
           <div className="flex flex-col items-center gap-4 text-center">
-            <p className="text-red-600">Error loading dashboard data</p>
-            <p className="text-gray-600">
+            <p className="text-neutral-400">Unable to load dashboard data</p>
+            {/* <p className="text-gray-600">
               {error?.message || "Please try again later"}
-            </p>
+            </p> */}
             <Button
               text="Retry"
               variant="solid"
               onClick={() => window.location.reload()}
+              className="w-28"
             />
           </div>
         </div>
