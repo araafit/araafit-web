@@ -123,7 +123,7 @@ export function AdminDashboardOrders() {
     selectedRows: OrderItem[],
     updateFor: "sewing-request" | "purchase-order"
   ) => {
-    if (!orderStatus) {
+    if (!dataStatus) {
       showToast.warning("Please select order status", {
         style: notificationStyles.alertWarning,
         icon: null,
@@ -135,7 +135,7 @@ export function AdminDashboardOrders() {
 
     const statusUpdateData = selectedRows?.map((order) => ({
       id: order.orderId,
-      status: (orderStatus as string).toLowerCase(),
+      status: (dataStatus as string).toLowerCase(),
     }));
 
     if (updateFor === "purchase-order") {
@@ -152,7 +152,7 @@ export function AdminDashboardOrders() {
           requests: [],
           shouldClearSelection: true,
         });
-        setOrderStatus(null);
+        setDataStatus(null);
       }
     }
 
@@ -170,7 +170,7 @@ export function AdminDashboardOrders() {
           requests: [],
           shouldClearSelection: true,
         });
-        setOrderStatus(null);
+        setDataStatus(null);
       }
     }
   };
