@@ -87,16 +87,17 @@ export default function Measurements() {
   return (
     <div className="w-full bg-white py-5 px-8 rounded-md flex flex-col items-center gap-6">
       <div className="w-full max-w-[30.125rem]">
-        <div className="flex flex-col items-center gap-4">
+        
+        <div className="flex flex-col items-center gap-4 mb-4">
           <h5 className="text-[2rem] font-semibold">Measurement Summary</h5>
-          {hasCompleteMeasurements && (
+          {hasCompleteMeasurements ? (
             <div className="w-full max-w-[30.125rem] flex justify-end bg-[#F6FEF9] text-[#15803c] text-[14px] border border-[#15803C] p-2 rounded-md mb-3">
               <p>
                 We've successfully capture your measurement and detected your
                 skin tone.
               </p>
             </div>
-          )}
+          ):null}
         </div>
 
         <div className="flex flex-col gap-5">
