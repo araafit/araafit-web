@@ -182,14 +182,15 @@ function ProfileInfo() {
             <input
               id="email"
               type="email"
-              className="w-full p-3 lg:p-4 border border-gray-300 outline-none rounded-[6px] text-sm lg:text-base"
+              className="w-full p-3 lg:p-4 border border-gray-300 outline-none rounded-[6px] text-sm lg:text-base disabled:cursor-not-allowed"
               {...register("email")}
-              disabled={editInfo}
+              disabled
             />
 
-            {errors.email && (
+            {/* {errors.email && (
               <small className="text-red-400">{errors.email.message}</small>
-            )}
+            )} */}
+            <small className="text-xs text-primary-500">Email can't be edited</small>
           </div>
 
           <div className="grow flex flex-col gap-2">
