@@ -26,7 +26,46 @@ import { notificationStyles } from "../../../style/custom";
 
 /* ------------------------------------------------------------------------------------ */
 
-const tableOrderStatus = [
+const ordersTableStatus = [
+  { label: "pending", value: "pending", style: "bg-[#FEF3C7] text-[#D97706]" },
+  {
+    label: "approved",
+    value: "approved",
+    style: "bg-[#DCFCE7] text-[#16A34A]",
+  },
+  {
+    label: "packaging",
+    value: "packaging",
+    style: "bg-[#E0F2FE] text-[#0EA5E9]",
+  },
+  {
+    label: "out-for-delivery",
+    value: "out for delivery",
+    style: "bg-[#EFF4FF] text-[#2563EB]",
+  },
+  {
+    label: "delivered",
+    value: "delivered",
+    style: "bg-[#ECFDF8] text-[#059669]",
+  },
+  {
+    label: "complete",
+    value: "complete",
+    style: "bg-[#F1F5F9] text-[#475569]",
+  },
+  {
+    label: "canceled",
+    value: "canceled",
+    style: "bg-[#FEE2E2] text-[#991B1B]",
+  },
+  // {
+  //   label: "rejected",
+  //   value: "rejected",
+  //   style: "bg-[#FEE2E2] text-[#f10606]",
+  // },
+];
+
+const requestsTableStatus = [
   { label: "pending", value: "pending", style: "bg-[#FEF3C7] text-[#D97706]" },
   {
     label: "approved",
@@ -59,15 +98,16 @@ const tableOrderStatus = [
     value: "canceled",
     style: "bg-[#FEE2E2] text-[#991B1B]",
   },
-  {
-    label: "rejected",
-    value: "rejected",
-    style: "bg-[#FEE2E2] text-[#f10606]",
-  },
+  // {
+  //   label: "rejected",
+  //   value: "rejected",
+  //   style: "bg-[#FEE2E2] text-[#f10606]",
+  // },
 ];
 
 export function AdminDashboardOrders() {
-  const [orderStatus, setOrderStatus] = useState<null | string>(null);
+  const [dataStatus, setDataStatus] = useState<null | string>(null);
+  const [tableTabs, setTableTab] = useState("orders");
   const { selectedTableRow, setSelectedTableRow } = useOrderStatusContext();
   const { bulkUpdate, isUpdating } = useUpdateBulkOrderStatus();
   const { bulkUpdate: bulkSewingStatusUpdate, isUpdating: requestIsUpdating } =
@@ -136,9 +176,32 @@ export function AdminDashboardOrders() {
   };
 
   // Get style of selected order status to show after dropdown selection.
-  const selectedOrderStatusStyle = tableOrderStatus.find(
-    (status) => status.value === orderStatus
+  const selectedOrderStatusStyle = ordersTableStatus.find(
+    (status) => status.value === dataStatus
   );
+
+  const OrdersTableStatusDropdown = () => {
+    return ordersTableStatus.map((status) => (
+      <DropdownMenuItem
+        className={`${status.style} px-2 cursor-pointer text-xs py-1 w-auto  block  rounded-full`}
+        key={status.label}
+        onClick={() => setDataStatus(status.value)}
+      >
+        {status.value}
+      </DropdownMenuItem>
+    ));
+  };
+  const RequestsTableStatusDropdown = () => {
+     return requestsTableStatus.map((status) => (
+      <DropdownMenuItem
+        className={`${status.style} px-2 cursor-pointer text-xs py-1 w-auto  block  rounded-full`}
+        key={status.label}
+        onClick={() => setDataStatus(status.value)}
+      >
+        {status.value}
+      </DropdownMenuItem>
+    ));
+  };
 
   const title = (
     <div className="font-lora text-[#1C1C1C]">Order Management</div>
@@ -200,11 +263,15 @@ export function AdminDashboardOrders() {
           </div>
 
           {/* -------- */}
-          <Tabs defaultValue="orders" className="w-full">
+          <Tabs
+            defaultValue="orders"
+            className="w-full"
+            onValueChange={(value) => setTableTab(value)}
+          >
             <section className="flex items-center justify-between mb-0">
               <TabsList className="w-fit border border-[#E7E7E7] rounded-lg h-11">
                 <TabsTrigger value="orders">Orders</TabsTrigger>
-                <TabsTrigger value="past-performance">Requests</TabsTrigger>
+                <TabsTrigger value="requests">Requests</TabsTrigger>
               </TabsList>
 
               <div className="flex items-center gap-2">
@@ -228,22 +295,14 @@ export function AdminDashboardOrders() {
                           selectedOrderStatusStyle.style
                         } text-xs py-1 w-auto rounded-full px-2`}
                       >
-                        {!orderStatus ? ` Change order status` : orderStatus}
+                        {!dataStatus ? ` Change order status` : dataStatus}
                       </span>
                       <CaretDownIcon className="text-[#676767]" size={20} />
                     </TableButton>
                   </DropdownMenuTrigger>
 
                   <DropdownMenuContent className="w-52 h-full flex flex-col items-start gap-3 p-3 z-20 bg-[#FFFFFF] border border-gray-100 rounded-md mt-2">
-                    {tableOrderStatus.map((status) => (
-                      <DropdownMenuItem
-                        className={`${status.style} px-2 cursor-pointer text-xs py-1 w-auto  block  rounded-full`}
-                        key={status.label}
-                        onClick={() => setOrderStatus(status.value)}
-                      >
-                        {status.value}
-                      </DropdownMenuItem>
-                    ))}
+                    {tableTabs === "orders"? <OrdersTableStatusDropdown />:<RequestsTableStatusDropdown />}
                   </DropdownMenuContent>
                 </DropdownMenu>
 
@@ -256,11 +315,17 @@ export function AdminDashboardOrders() {
                   className="text-white w-32 h-11 shadow-sm disabled:opacity-50"
                   onClick={() => {
                     if (selectedTableRow.orders.length > 0) {
-                      handleBulkUpdateOnChange(selectedTableRow.orders, "purchase-order")
+                      handleBulkUpdateOnChange(
+                        selectedTableRow.orders,
+                        "purchase-order"
+                      );
                     }
 
                     if (selectedTableRow.requests.length > 0) {
-                      handleBulkUpdateOnChange(selectedTableRow.requests, "sewing-request")
+                      handleBulkUpdateOnChange(
+                        selectedTableRow.requests,
+                        "sewing-request"
+                      );
                     }
                   }}
                 >
@@ -284,7 +349,7 @@ export function AdminDashboardOrders() {
               <Orders />
             </TabsContent>
 
-            <TabsContent value="past-performance">
+            <TabsContent value="requests">
               <Requests />
             </TabsContent>
           </Tabs>
