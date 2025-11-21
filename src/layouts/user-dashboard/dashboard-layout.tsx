@@ -342,7 +342,6 @@ export default function UserDashboardLayout({
           />
 
           <Button
-            text="Logout"
             variant="clear"
             disabled={logoutMutation.isPending}
             className="w-full bg-red-600 text-white"
@@ -350,7 +349,7 @@ export default function UserDashboardLayout({
           >
             <div className="flex items-center justify-center gap-2">
               <span>Logout</span>
-              {logoutMutation.isPending && <Spinner size="sm" speed="fast" />}
+              <Spinner size="sm" speed="fast" arcColor="#ffff" isLoading={logoutMutation.isPending} />
             </div>
           </Button>
         </div>

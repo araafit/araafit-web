@@ -66,13 +66,11 @@ export function GuestShopPage() {
   }, [activeDiscountSuccess, isActiveDiscountError, activeDiscountData]);
 
   useEffect(() => {
-    window.onload = () => {
       if (!isAuthenticated) {
         setGuestUser(true);
       } else {
         setGuestUser(false);
       }
-    };
   }, [isAuthenticated]);
 
   return (
