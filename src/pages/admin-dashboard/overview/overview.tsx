@@ -81,10 +81,6 @@ export function AdminDashboardOverview() {
     return;
   };
 
-  // if (approveOrder.isLoading) {
-
-  // }
-
   return (
     <AdminDashboardLayout>
       <div className="h-screen">
@@ -255,7 +251,7 @@ export function AdminDashboardOverview() {
                   {metrics && `(${metrics?.newRequests})`}
                 </h2>
                 <Link
-                  to="/admin-dashboard/order-management"
+                  to="/admin-dashboard/order-management?tab=requests"
                   className="text-[#5D5D5D] "
                 >
                   SEE ALL
