@@ -17,12 +17,13 @@ import {
 } from "../../ui/dropdown-menu";
 import { DropdownMenuContent } from "@radix-ui/react-dropdown-menu";
 import { TableButton } from "../../ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useOrderStatusContext, type OrderItem } from "./order-table-context";
 import { useUpdateBulkOrderStatus } from "../../../hooks/admin-orders.hooks";
 import { useUpdateBulkRequestStatus } from "../../../hooks/admin-sewing-requests.hooks";
 import showToast from "../../../utils/notification";
 import { notificationStyles } from "../../../style/custom";
+import { useSearchParams } from "react-router-dom";
 
 /* ------------------------------------------------------------------------------------ */
 
@@ -106,18 +107,27 @@ const requestsTableStatus = [
 ];
 
 export function AdminDashboardOrders() {
+  const searchParams = useSearchParams();
   const [dataStatus, setDataStatus] = useState<null | string>(null);
   const [tableTabs, setTableTab] = useState("orders");
   const { selectedTableRow, setSelectedTableRow } = useOrderStatusContext();
   const { bulkUpdate, isUpdating } = useUpdateBulkOrderStatus();
   const { bulkUpdate: bulkSewingStatusUpdate, isUpdating: requestIsUpdating } =
     useUpdateBulkRequestStatus();
+  
+  const requestsTabInSearchParam = searchParams[0].get("tab");
 
   const {
     data: metrics,
     isLoading: metricsLoading,
     error: metricsError,
   } = useAdminDashboardMetrics();
+
+  useEffect(() => {
+    if (requestsTabInSearchParam && requestsTabInSearchParam === "requests") {
+      setTableTab("requests")
+    }
+  },[requestsTabInSearchParam])
 
   const handleBulkUpdateOnChange = async (
     selectedRows: OrderItem[],
@@ -264,7 +274,7 @@ export function AdminDashboardOrders() {
 
           {/* -------- */}
           <Tabs
-            defaultValue="orders"
+            defaultValue={tableTabs}
             className="w-full"
             onValueChange={(value) => setTableTab(value)}
           >
