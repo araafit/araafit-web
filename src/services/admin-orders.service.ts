@@ -61,7 +61,7 @@ export interface OrderItem {
 }
 
 export interface AdminOrder {
-  dress: ReactNode;
+  dress: string;
   id: string;
   user: OrderUser;
   rider?: OrderRider;
