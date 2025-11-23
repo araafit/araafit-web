@@ -5,7 +5,7 @@ import Overview from "../admin-components/top-overview-items";
 import NotificationBell from "../admin-components/top-bar/notification-bell";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 import Orders from "./orders";
-import Requests from "./request";
+import Requests from "./requests";
 import { useAdminDashboardMetrics } from "../../../hooks/admin-dashboard.hooks";
 import { convertMetricsToOverviewCards } from "../../../utils/admin-dashboard-utils";
 import Spinner from "../../../shared-components/spinner";
