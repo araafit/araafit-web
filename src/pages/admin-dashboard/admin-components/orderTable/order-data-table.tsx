@@ -46,16 +46,25 @@ import { useOrderStatusContext } from "../../orders-management/order-table-conte
 import { type OrderTablesType } from "./table-columns/order-columns";
 /* -------------------------------------------------------------------------------------------------------- */
 
+interface TablePagination {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages?: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setPagination: any;
+}
+
 export function DataTable({
   data: initialData,
-  tableLabel
+  tableLabel,
+  tablePagination,
 }: {
   data: z.infer<typeof schema>[];
   tableLabel?: OrderTablesType;
+  tablePagination?: TablePagination;
 }) {
-  // const updateOrderStatusMutation = useUpdateOrderStatus();
   const { selectedTableRow, setSelectedTableRow } = useOrderStatusContext();
-  // const columns = orderTableColumn;
   const [data, setData] = React.useState(() => initialData);
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -64,10 +73,8 @@ export function DataTable({
     []
   );
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [pagination, setPagination] = React.useState({
-    pageIndex: 0,
-    pageSize: 10,
-  });
+  const [pageCount, setPageCount] = React.useState(0);
+
   const sortableId = React.useId();
   const sensors = useSensors(
     useSensor(MouseSensor, {}),
@@ -85,6 +92,13 @@ export function DataTable({
     setData(initialData);
   }, [initialData]);
 
+  // Update Pagination state when prop changes
+  React.useEffect(() => {
+    if (tablePagination) {
+      setPageCount(tablePagination.total);
+    }
+  }, [tablePagination]);
+
   const table = useReactTable({
     data,
     columns: orderTableColumn(tableLabel),
@@ -93,7 +107,10 @@ export function DataTable({
       columnVisibility,
       rowSelection,
       columnFilters,
-      pagination,
+      pagination: {
+        pageIndex: tablePagination ? tablePagination.page : 1,
+        pageSize: tablePagination ? tablePagination.limit : 10,
+      },
     },
     getRowId: (row) => row.orderId.toString(),
     enableRowSelection: true,
@@ -101,8 +118,10 @@ export function DataTable({
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
-    onPaginationChange: setPagination,
+    onPaginationChange: tablePagination?.setPagination,
     getCoreRowModel: getCoreRowModel(),
+    manualPagination: true,
+    pageCount: pageCount,
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -232,39 +251,35 @@ export function DataTable({
               )}
             </DndContext>
           </div>
-          {(table.getCanPreviousPage() || table.getCanNextPage()) && (
-            <div className="flex items-center justify-between">
-              <div className="flex justify-between w-full">
-                <div className="flex w-fit items-center justify-center text-sm text-[#1C1C1C]">
-                  Page {table.getState().pagination.pageIndex + 1} of{" "}
-                  {table.getPageCount()}
-                </div>
-                <div className="flex items-center gap-2">
-                  <TableButton
-                    variant="outline"
-                    className="hidden px-2 lg:flex"
-                    onClick={() => table.setPageIndex(0)}
-                    disabled={!table.getCanPreviousPage()}
-                  >
-                    <span>Previous</span>
-                  </TableButton>
+          {/* {(table.getCanPreviousPage() || table.getCanNextPage()) && ( */}
+          <div className="flex items-center justify-between">
+            <div className="flex justify-between w-full">
+              <div className="flex w-fit items-center justify-center text-sm text-[#1C1C1C]">
+                Page {table.getState().pagination.pageIndex} of{" "}
+                {table.getPageCount()}
+              </div>
+              <div className="flex items-center gap-2">
+                <TableButton
+                  variant="outline"
+                  className="hidden px-2 lg:flex"
+                  onClick={() => table.setPageIndex(0)}
+                  disabled={!table.getCanPreviousPage()}
+                >
+                  <span>Previous</span>
+                </TableButton>
 
-                  <TableButton
-                    variant="outline"
-                    className="hidden px-2 lg:flex"
-                    onClick={() => table.nextPage()}
-                    disabled={!table.getCanNextPage()}
-                  >
-                    <span>Next</span>
-                  </TableButton>
-                </div>
+                <TableButton
+                  variant="outline"
+                  className="hidden px-2 lg:flex"
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}
+                >
+                  <span>Next</span>
+                </TableButton>
               </div>
             </div>
-          )}
-        </TabsContent>
-        {/*  */}
-        <TabsContent value="past-performance">
-          <p>Past Performance content goes here</p>
+          </div>
+          {/* )} */}
         </TabsContent>
       </Tabs>
     </div>
