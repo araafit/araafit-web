@@ -60,6 +60,7 @@ export const useAdminOrders = (params: GetOrdersParams = {}) => {
   return useQuery({
     queryKey: adminOrdersKeys.list(params),
     queryFn: () => adminOrdersService.getOrders(params),
+    enabled: params ? true : false,
     staleTime: 2 * 60 * 1000, // 2 minutes
     retry: (failureCount, error: unknown) => {
       // Don't retry on 401/403 errors
