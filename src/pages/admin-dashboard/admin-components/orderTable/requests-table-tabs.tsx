@@ -8,7 +8,7 @@ import { type RequestTablesType } from "./table-columns/request-columns";
 /* -------------------------------------------------------------------------- */
 
 // Fetch Requests By Status
-export const OrderStatusTab = ({
+export const RequestsStatusTab = ({
   status,
   tableLabel,
 }: {
@@ -27,7 +27,7 @@ export const OrderStatusTab = ({
     isSuccess,
   } = useAdminSewingRequests({
     status: status,
-    page: pagination.pageIndex,
+    page: pagination.pageIndex - 1,
     limit: pagination.pageSize,
   });
 
@@ -79,37 +79,37 @@ export const OrderStatusTab = ({
 };
 
 export const AllRequestsTab = () => (
-  <OrderStatusTab tableLabel="all-requests" />
+  <RequestsStatusTab tableLabel="all-requests" />
 );
 
 export const PendingTab = () => (
-  <OrderStatusTab status="pending" tableLabel="pending" />
+  <RequestsStatusTab status="pending" tableLabel="pending" />
 );
 
 export const ApprovedTab = () => (
-  <OrderStatusTab status="approved" tableLabel="approved" />
+  <RequestsStatusTab status="approved" tableLabel="approved" />
 );
 
 export const SewingTab = () => (
-  <OrderStatusTab status="sewing" tableLabel="sewing" />
+  <RequestsStatusTab status="sewing" tableLabel="sewing" />
 );
 
 export const PackagingTab = () => (
-  <OrderStatusTab status="packaging" tableLabel="packaged" />
+  <RequestsStatusTab status="packaging" tableLabel="packaged" />
 );
 
 export const OutForDeliveryTab = () => (
-  <OrderStatusTab status="out_for_delivery" tableLabel="out-for-delivery" />
+  <RequestsStatusTab status="out_for_delivery" tableLabel="out-for-delivery" />
 );
 
 export const DeliveredTab = () => (
-  <OrderStatusTab status="delivered" tableLabel="delivered" />
+  <RequestsStatusTab status="delivered" tableLabel="delivered" />
 );
 
 export const CompletedTab = () => (
-  <OrderStatusTab status="completed" tableLabel="complete" />
+  <RequestsStatusTab status="completed" tableLabel="complete" />
 );
 
 export const CanceledTab = () => (
-  <OrderStatusTab status="canceled" tableLabel="canceled" />
+  <RequestsStatusTab status="canceled" tableLabel="canceled" />
 );

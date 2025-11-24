@@ -73,7 +73,6 @@ export function DataTable({
     []
   );
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [pageCount, setPageCount] = React.useState(0);
 
   const sortableId = React.useId();
   const sensors = useSensors(
@@ -92,13 +91,6 @@ export function DataTable({
     setData(initialData);
   }, [initialData]);
 
-  // Update Pagination state when prop changes
-  React.useEffect(() => {
-    if (tablePagination) {
-      setPageCount(tablePagination.total);
-    }
-  }, [tablePagination]);
-
   const table = useReactTable({
     data,
     columns: orderTableColumn(tableLabel),
@@ -108,7 +100,7 @@ export function DataTable({
       rowSelection,
       columnFilters,
       pagination: {
-        pageIndex: tablePagination ? tablePagination.page : 1,
+        pageIndex: tablePagination ? tablePagination.page : 0,
         pageSize: tablePagination ? tablePagination.limit : 10,
       },
     },
@@ -121,7 +113,7 @@ export function DataTable({
     onPaginationChange: tablePagination?.setPagination,
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
-    pageCount: pageCount,
+    pageCount: tablePagination?.total as number,
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -251,11 +243,11 @@ export function DataTable({
               )}
             </DndContext>
           </div>
-          {/* {(table.getCanPreviousPage() || table.getCanNextPage()) && ( */}
+          {(table.getCanPreviousPage() || table.getCanNextPage()) && (
           <div className="flex items-center justify-between">
             <div className="flex justify-between w-full">
               <div className="flex w-fit items-center justify-center text-sm text-[#1C1C1C]">
-                Page {table.getState().pagination.pageIndex} of{" "}
+                Page {table.getState().pagination.pageIndex + 1} of{" "}
                 {table.getPageCount()}
               </div>
               <div className="flex items-center gap-2">
@@ -279,7 +271,7 @@ export function DataTable({
               </div>
             </div>
           </div>
-          {/* )} */}
+          )}
         </TabsContent>
       </Tabs>
     </div>

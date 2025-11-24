@@ -110,10 +110,10 @@ export function DataTable({
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
-    onPaginationChange: tablePagination?.setPagination,
+    onPaginationChange: tablePagination.setPagination,
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
-    pageCount: tablePagination?.total as number,
+    pageCount: tablePagination.total,
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -151,6 +151,7 @@ export function DataTable({
     }
   }, [selectedTableRow.shouldClearSelection, setSelectedTableRow]);
 
+  // Handle table drag and drop
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (active && over && active.id !== over.id) {
@@ -247,14 +248,14 @@ export function DataTable({
           <div className="flex items-center justify-between">
             <div className="flex justify-between w-full">
               <div className="flex w-fit items-center justify-center text-sm text-[#1C1C1C]">
-                Page {table.getState().pagination.pageIndex} of{" "}
+                Page {table.getState().pagination.pageIndex + 1} of{" "}
                 {table.getPageCount()}
               </div>
               <div className="flex items-center gap-2">
                 <TableButton
                   variant="outline"
                   className="hidden px-2 lg:flex"
-                  onClick={() => table.setPageIndex(0)}
+                  onClick={() => table.previousPage()}
                   disabled={!table.getCanPreviousPage()}
                 >
                   <span>Previous</span>
