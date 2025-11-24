@@ -5,11 +5,8 @@ import {
   TabsList,
   TabsTrigger,
 } from "../../ui/order-management-tab";
-import { DataTable } from "../admin-components/orderTable/order-data-table";
-import { useAdminOrders } from "../../../hooks/admin-orders.hooks";
-import { convertApiOrdersToTableFormat } from "../../../utils/admin-orders-utils";
-import Spinner from "../../../shared-components/spinner";
 import {
+  AllOrdersTab,
   PendingTab,
   ApprovedTab,
   PackagingTab,
@@ -22,30 +19,6 @@ import {
 /* --------------------------------------------------------------------------------------------- */
 
 const Orders = () => {
-  // Fetch all orders
-  const {
-    data: allOrders,
-    isLoading: allOrdersLoading,
-    error: allOrdersError,
-  } = useAdminOrders();
-
-  // Convert API data to table format
-  const allOrdersData = allOrders
-    ? convertApiOrdersToTableFormat(allOrders.data)
-    : [];
-
-  if (allOrdersError) {
-    return (
-      <div className="mt-5 h-full bg-white px-4 py-2 relative rounded-md">
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <p className="text-red-600">
-            Unable to load orders. Please try again.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <>
       <div className="mt-5 h-full bg-white px-4 py-2 relative rounded-md">
@@ -66,18 +39,7 @@ const Orders = () => {
             value="all-orders"
             className="relative flex flex-col gap-4 overflow-auto"
           >
-            {allOrdersLoading ? (
-              <div className="flex justify-center items-center h-32">
-                <Spinner
-                  size="lg"
-                  speed="fast"
-                  isLoading={allOrdersLoading}
-                  arcColor="#9A6C50"
-                />
-              </div>
-            ) : (
-              <DataTable data={allOrdersData} tableLabel="all-table" />
-            )}
+            <AllOrdersTab />
           </TabsContent>
 
           {/* Pending orders tab */}
