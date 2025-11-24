@@ -17,6 +17,7 @@ import Spinner from "../../../shared-components/spinner";
 import { XIcon } from "@phosphor-icons/react";
 import { useLocalStorage } from "../../../shared-hooks/loca-storage";
 import useAuth from "../../../hooks/use-auth";
+import { useCreateGuestUser } from "../../../hooks/auth.hooks";
 
 /* -------------------------------------------------------------------------------- */
 
@@ -32,6 +33,8 @@ type ModalShape = {
  * @returns ReactElement
  */
 export function GuestShopPage() {
+  const { isAuthenticated } = useAuth();
+  const createGuestUser = useCreateGuestUser();
   const { setValue: setGuestUser, storedValue: isGuestUser } = useLocalStorage(
     "IS_ARAAFIT_GUEST_USER",
     false
@@ -44,7 +47,6 @@ export function GuestShopPage() {
     isSuccess: activeDiscountSuccess,
     data: activeDiscountData,
   } = useActiveDiscounts();
-  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     let timeout: ReturnType<typeof setTimeout>;
@@ -66,11 +68,21 @@ export function GuestShopPage() {
   }, [activeDiscountSuccess, isActiveDiscountError, activeDiscountData]);
 
   useEffect(() => {
-      if (!isAuthenticated) {
-        setGuestUser(true);
-      } else {
-        setGuestUser(false);
-      }
+    if (!isAuthenticated) {
+      setGuestUser(true);
+
+      // Create session for guest user
+      createGuestUser.mutateAsync({
+        bust: 0,
+        waist: 0,
+        hips: 0,
+        height: 0,
+        dressSize: 0,
+        skinTone: "",
+      });
+    } else {
+      setGuestUser(false);
+    }
   }, [isAuthenticated]);
 
   return (
@@ -109,10 +121,8 @@ const Modal: React.FC<ModalShape> = memo(
   ({ isOpen, onClose, discountData }) => {
     const [discountInput, setDiscountInput] = useState("");
     const [fieldIsEmpty, setFieldIsEmpty] = useState(false);
-    const {
-      isPending: PendingDiscountClaim,
-      mutateAsync: claimDiscountAsync,
-    } = useClaimDiscount();
+    const { isPending: PendingDiscountClaim, mutateAsync: claimDiscountAsync } =
+      useClaimDiscount();
 
     // Stop scroll
     useEffect(() => {

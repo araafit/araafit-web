@@ -62,7 +62,7 @@ export function FabricRequestSummary() {
         skinTone: measurementData?.skinTone || "",
         size: selectedSize || "",
         dressStyle: selectedStyle || "",
-        yardEstimate: selectedYards || "0",
+        yardEstimate: selectedYards ? Number(selectedYards) : 0,
         noteForTailor: tailorNote,
         gender: measurementData?.gender || "",
         fabricId: params.fabricId || "",
@@ -81,7 +81,7 @@ export function FabricRequestSummary() {
           <div className="w-full flex items-center mb-2 absolute left-5 top-5">
             <div
               className="size-[2.12rem] flex items-center justify-center rounded-md border border-neutral-100 cursor-pointer mr-4"
-              onClick={() => navigate(-1)}
+              onClick={() => navigate(`/dashboard/shop/fabric/${params.fabricId}`)}
             >
               <ArrowLeftIcon />
             </div>
@@ -123,7 +123,7 @@ export function FabricRequestSummary() {
               <div className="w-full flex items-center mb-2">
                 <div
                   className="size-[2.12rem] flex items-center justify-center rounded-md border border-neutral-100 cursor-pointer mr-4"
-                  onClick={() => navigate(-1)}
+                  onClick={() => navigate(`/dashboard/shop/fabric/${params.fabricId}`)}
                 >
                   <ArrowLeftIcon />
                 </div>
@@ -159,44 +159,53 @@ export function FabricRequestSummary() {
               >
                 <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
                   <span className="text-neutral-800 font-medium">Bust</span>
+
                   <span className="font-semibold text-neutral-950">
-                    {measurementData?.bust}
+                     {measurementData?.bust? measurementData.bust : 'N/A'}
                   </span>
                 </div>
                 <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
                   <span className="text-neutral-800 font-medium">Waist</span>
+
                   <span className="font-semibold text-neutral-950">
-                    {measurementData?.waist}
+                    {measurementData?.waist? measurementData.waist : 'N/A'}
                   </span>
                 </div>
+
                 <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
                   <span className="text-neutral-800 font-medium">
                     Hip (inches)
                   </span>
+
                   <span className="font-semibold text-neutral-950">
-                    {measurementData?.hips}
+                   {measurementData?.hips ? measurementData.hips : 'N/A'}
                   </span>
                 </div>
+
                 <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
                   <span className="text-neutral-800 font-medium">Height</span>
                   <span className="font-semibold text-neutral-950">
-                    {measurementData?.height}
+                    {measurementData?.height? measurementData.height : 'N/A'}
                   </span>
                 </div>
+
                 <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
                   <span className="text-neutral-800 font-medium">
                     Dress size
                   </span>
+
                   <span className="font-semibold text-neutral-950">
-                    {measurementData?.dressSize}
+                    {measurementData?.dressSize ? measurementData.dressSize : 'N/A'}
                   </span>
                 </div>
+
                 <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
                   <span className="text-neutral-800 font-medium">
                     Skin Tone
                   </span>
 
-                  <div className="flex items-center gap-1">
+
+                  {measurementData?.skinTone ? ( <div className="flex items-center gap-1">
                     <div
                       className="w-[58px] h-[44px] rounded-md"
                       style={{
@@ -204,7 +213,7 @@ export function FabricRequestSummary() {
                           skinToneObj[measurementData?.skinTone as string],
                       }}
                     />
-                  </div>
+                  </div>):(<span className="font-semibold text-neutral-950">N/A</span>)}
                 </div>
               </div>
             </div>
