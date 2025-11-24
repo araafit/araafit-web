@@ -59,15 +59,11 @@ export function HomePage() {
   const navigate = useNavigate();
   const {
     isError: isActiveDiscountError,
-    error: activeDiscountError,
+    // error: activeDiscountError,
     isSuccess: activeDiscountSuccess,
     data: activeDiscountData,
   } = useActiveDiscounts();
   const { isAuthenticated: userIsAuthenticated } = useAuth();
-
-  if (isActiveDiscountError) {
-    console.log("Error:", activeDiscountError);
-  }
 
   // Whether 'first_time_buyers' or 'guest_customers'
   useEffect(() => {
@@ -86,8 +82,6 @@ export function HomePage() {
 
    return () => clearTimeout(timeout)
   }, [userIsAuthenticated, activeDiscountSuccess, isActiveDiscountError, activeDiscountData, toggleModal]);
-
-  console.log(activeDiscountData);
 
   const redirectToMeasurementPage = () => navigate("/get-measured");
 
