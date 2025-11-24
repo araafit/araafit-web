@@ -122,7 +122,6 @@ export const useVerifyEmailWithMeasurements = () => {
           { icon: null, style: notificationStyles.alertSuccess }
         );
       } else {
-
         throw Error("Failed to verify Email");
       }
     },
@@ -150,14 +149,11 @@ export const useVerifyOtp = () => {
           duration: 10000,
         });
       } else {
-        showToast.error(
-          (data as any)?.message || "OTP is expired or invalid",
-          {
+        showToast.error((data as any)?.message || "OTP is expired or invalid", {
           icon: null,
           style: notificationStyles.alertError,
           duration: 10000,
-          }
-        );
+        });
       }
     },
     onError: (error: any) => {
@@ -183,13 +179,10 @@ export const useResendOtp = () => {
           style: notificationStyles.alertSuccess,
         });
       } else {
-        showToast.error(
-          (data as any)?.message || "Failed to resend OTP",
-          {
-            icon: null,
-            style: notificationStyles.alertError,
-          }
-        );
+        showToast.error((data as any)?.message || "Failed to resend OTP", {
+          icon: null,
+          style: notificationStyles.alertError,
+        });
       }
     },
     onError: (error: any) => {
@@ -222,12 +215,15 @@ export const useRegister = () => {
       // Cache the user profile
       queryClient.setQueryData(authKeys.profile(), data.user);
 
-      showToast.success("Account created successfully. Redirecting to dashboard", {
-        icon: null,
-        style: notificationStyles.alertSuccess,
-      });
+      showToast.success(
+        "Account created successfully. Redirecting to dashboard",
+        {
+          icon: null,
+          style: notificationStyles.alertSuccess,
+        }
+      );
 
-      setTimeout(() => window.location.href = "/dashboard", 1000)
+      setTimeout(() => (window.location.href = "/dashboard"), 1000);
     },
     onError: (error: any) => {
       showToast.error(error.response?.data?.message || "Registration failed", {
@@ -245,7 +241,7 @@ export const useCreateGuestUser = () => {
   return useMutation({
     mutationFn: (data: GuestUserRequest) => authService.createGuestUser(data),
     onSuccess: (data) => {
-      console.log("guest user data", data);
+      console.log("guest user data", data.user.isGuest);
       setGuestToken(data.token);
       setUser(data.user);
       showToast.success(data.message, {
