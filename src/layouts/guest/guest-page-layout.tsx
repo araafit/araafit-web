@@ -29,14 +29,14 @@ function GuestPageLayout({ children }: { children: React.ReactElement }) {
   return (
     <main className="h-screen bg-[#F5F5F5] flex flex-col gap-6 overflow-y-clip">
       <div className="bg-white py-2 px-4 sm:px-6 lg:px-8">
-        <div className="w-full h-[4.5625rem] max-w-screen-2xl mx-auto flex items-center justify-between">
+        <div className="w-full h-auto sm:h-[4.5625rem] max-w-screen-2xl mx-auto flex flex-col sm:flex-row items-center justify-between">
           <div className="flex items-center gap-6">
             <Link to="/">
               <img src="logo/logo.png" alt="" className="w-[5.625rem]" />
             </Link>
             <Link
               to="/shop"
-              className={`p-8 ${
+              className={`p-4 sm:p-8 ${
                 location.pathname === "/shop" ? "text-[#9A6C50]" : ""
               }`}
             >
@@ -44,7 +44,7 @@ function GuestPageLayout({ children }: { children: React.ReactElement }) {
             </Link>
             <Link
               to="/cart"
-              className={`p-8 flex items-center gap-2 ${
+              className={`p-4 sm:p-8 flex items-center gap-2 ${
                 location.pathname === "/cart" ? "text-[#9A6C50]" : ""
               }`}
             >
@@ -75,18 +75,20 @@ function GuestPageLayout({ children }: { children: React.ReactElement }) {
               </div>
             </Button>
           ) : (
-            <div className="flex items-center gap-4">
+            <div className="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-4">
               <Button
                 text="Login"
                 variant="outline"
                 onClick={() => navigate("/auth/login")}
+                className="w-full h-9 sm:h-12 sm:w-auto flex items-center justify-center"
               />
 
               <Button
                 variant="solid"
                 onClick={() => navigate("/auth/register")}
+                className="w-full h-9 sm:h-12 sm:w-auto"
               >
-                <div className="flex items-center gap-1">
+                <div className="size-full flex items-center justify-center gap-1">
                   <span>Create a free account</span>
                   <CaretRightIcon />
                 </div>
