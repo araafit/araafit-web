@@ -159,7 +159,7 @@ export default function UserDashboardLayout({
                   return (
                     <NavLink
                       to={item.link}
-                      key={idx}
+                      key={`${item.label}-${idx}`}
                       end={item.label.toLowerCase() === "home"}
                       onClick={closeMobileMenu}
                       className={({ isActive }) =>
@@ -219,6 +219,7 @@ export default function UserDashboardLayout({
                     location.pathname.startsWith("/dashboard/shop");
                   return (
                     <Dropdown
+                      key={`${item.label}-${idx}`}
                       open={dropdownOpen || isShopRoute}
                       onOpenChange={(isOpen) => setDropdownOpen(isOpen)}
                       trigger={
@@ -257,7 +258,7 @@ export default function UserDashboardLayout({
                         item.dropdown.map((item, itemIdx) => (
                           <NavLink
                             to={item.link}
-                            key={`${item}-${itemIdx}`}
+                           key={`${item.label}-${itemIdx}`}
                             className={({ isActive }) =>
                               `w-full block text-left px-4 py-2 text-sm transition-colors hover:bg-gray-100 hover:text-primary-500 capitalize pl-8 ${
                                 isActive
@@ -280,7 +281,7 @@ export default function UserDashboardLayout({
                 return (
                   <NavLink
                     to={item.link}
-                    key={idx}
+                    key={`${item.label}-${idx}`}
                     end={item.label.toLowerCase() === "home"}
                     onClick={closeMobileMenu}
                     className={({ isActive }) =>
