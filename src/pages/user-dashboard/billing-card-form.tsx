@@ -24,14 +24,13 @@ export interface BillingCardFormProps {
 
 /**
  *
- * @param param0
+ * @param checkoutInfo BillingCardFormProps
  *
  * @returns ReactElement
  */
 export default function BillingCardForm({
   checkoutInfo,
 }: BillingCardFormProps) {
-  console.log("checkoutInfo", checkoutInfo);
   const tokenizeCardMutation = useTokenizeCard();
   const checkoutWithCardMutation = useCheckoutWithCard();
   const {
@@ -103,7 +102,7 @@ export default function BillingCardForm({
         window.location.href = tokenizeResult.authorizationUrl;
       }
     } catch (error) {
-      console.error("Card operation failed:", error);
+      console.error(error);
     }
   };
 

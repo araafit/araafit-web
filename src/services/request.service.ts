@@ -52,7 +52,7 @@ export interface FabricSize {
 export interface SewingRequest extends Measurements {
   size: string;
   dressStyle: string;
-  yardEstimate: string;
+  yardEstimate: string | number;
   noteForTailor: string;
   gender: string;
   fabricId: string;
