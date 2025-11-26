@@ -237,6 +237,7 @@ export function AdminDashboardUploadInventory() {
                       <button
                         onClick={() => handleDeleteImage(idx)}
                         className="absolute bottom-2 right-2 rounded-full p-1 "
+                        title="Trash icon"
                       >
                         <TrashSimpleIcon className="text-red-500" size={24} />
                       </button>
