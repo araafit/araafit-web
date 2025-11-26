@@ -2,10 +2,11 @@ import React from "react";
 
 /* ---------------------------------------------------- */
 
-type UseLocalStorage = {
-  storedValue: any;
-  setValue: (value: any | ((val: any) => void)) => void;
+type UseLocalStorage<T> = {
+  storedValue: T;
+  setValue: (value: T | ((val: T) => T)) => void;
   removeValue: () => void;
+  keyName?: string;
 };
 
 /**
@@ -13,12 +14,12 @@ type UseLocalStorage = {
  *
  * @param key
  * @param initialValue
- * @returns
+ * @returns UseLocalStorage
  */
 export function useLocalStorage<T>(
   key: string,
   initialValue: T
-): UseLocalStorage {
+): UseLocalStorage<T> {
   // Read stored if available or return initial value
   const readValue = (): T => {
     if (typeof window === "undefined") {
@@ -72,5 +73,5 @@ export function useLocalStorage<T>(
     localStorage.removeItem(key);
   };
 
-  return { storedValue, setValue, removeValue };
+  return {keyName: key, storedValue, setValue, removeValue };
 }

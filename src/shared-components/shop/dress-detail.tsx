@@ -17,7 +17,7 @@ export function DressDetail() {
   const { itemName } = useParams<{ itemName: string }>();
   const productId = itemName || "";
 
-  const { data: product, isLoading, isError, error } = useProduct(productId);
+  const { data: product, isLoading, isError } = useProduct(productId);
   const addToCartMutation = useAddToCart();
   const instantCheckoutMutation = useInstantCheckout();
 
@@ -28,10 +28,10 @@ export function DressDetail() {
 
   const handleAddToCart = () => {
     if (!product || !selectedSize) {
-      showToast.error("Select a size before proceeding to checkout.", {
+      showToast.info("Select a size before proceeding to checkout.", {
         icon: null,
         position: "top-center",
-        style: notificationStyles.alertError,
+        style: notificationStyles.alertInfo,
       });
       return;
     }
@@ -46,10 +46,10 @@ export function DressDetail() {
   const handlePayNow = () => {
     // console.log("Pay Now clicked");
     if (!product || !selectedSize) {
-      showToast.error("Select a size before proceeding to checkout.", {
+      showToast.warning("Select a size before proceeding to checkout.", {
         icon: null,
         position: "top-center",
-        style: notificationStyles.alertError,
+        style: notificationStyles.alertWarning,
       });
       return;
     }
@@ -75,8 +75,9 @@ export function DressDetail() {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
-          <p className="text-red-600 mb-2">Error loading dress</p>
-          <p className="text-gray-600">{error?.message || "Dress not found"}</p>
+          <p className="text-neutral-700 mb-3">Unable to load dress</p>
+          {/* <p className="text-gray-600">{error?.message || "Dress not found"}</p> */}
+          <Button text="Retry" variant="solid" className="w-28" />
         </div>
       </div>
     );

@@ -38,23 +38,33 @@ import {
   TableRow,
 } from "../../../ui/table";
 import { Tabs, TabsContent } from "../../../ui/tabs";
-
 import { schema } from "../overViewTable/schema/schema";
-
 import EmptyState from "../emptycart";
 import cart from "../../../admin-dashboard/images/emptyCart.png";
-// import { useUpdateOrderStatus } from "../../../../hooks/admin-orders.hooks";
 import { orderTableColumn } from "./table-columns/order-columns";
-
+import { useOrderStatusContext } from "../../orders-management/order-table-context";
+import { type OrderTablesType } from "./table-columns/order-columns";
 /* -------------------------------------------------------------------------------------------------------- */
+
+interface TablePagination {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages?: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setPagination: any;
+}
 
 export function DataTable({
   data: initialData,
+  tableLabel,
+  tablePagination,
 }: {
   data: z.infer<typeof schema>[];
+  tableLabel?: OrderTablesType;
+  tablePagination?: TablePagination;
 }) {
-  // const updateOrderStatusMutation = useUpdateOrderStatus();
-  const columns = orderTableColumn;
+  const { selectedTableRow, setSelectedTableRow } = useOrderStatusContext();
   const [data, setData] = React.useState(() => initialData);
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -63,10 +73,7 @@ export function DataTable({
     []
   );
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [pagination, setPagination] = React.useState({
-    pageIndex: 0,
-    pageSize: 10,
-  });
+
   const sortableId = React.useId();
   const sensors = useSensors(
     useSensor(MouseSensor, {}),
@@ -79,15 +86,23 @@ export function DataTable({
     [data]
   );
 
+  // Update table when state is updated with new changes
+  React.useEffect(() => {
+    setData(initialData);
+  }, [initialData]);
+
   const table = useReactTable({
     data,
-    columns,
+    columns: orderTableColumn(tableLabel),
     state: {
       sorting,
       columnVisibility,
       rowSelection,
       columnFilters,
-      pagination,
+      pagination: {
+        pageIndex: tablePagination ? tablePagination.page : 0,
+        pageSize: tablePagination ? tablePagination.limit : 10,
+      },
     },
     getRowId: (row) => row.orderId.toString(),
     enableRowSelection: true,
@@ -95,8 +110,10 @@ export function DataTable({
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
-    onPaginationChange: setPagination,
+    onPaginationChange: tablePagination?.setPagination,
     getCoreRowModel: getCoreRowModel(),
+    manualPagination: true,
+    pageCount: tablePagination?.total as number,
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -104,6 +121,37 @@ export function DataTable({
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
 
+  // Compare IDs before updating table row selection
+  const selectedRows = table
+    .getSelectedRowModel()
+    .rows.map((row) => row.original);
+  const lastSelectedIdsRef = React.useRef<string[]>([]);
+  React.useEffect(() => {
+    const ids = selectedRows.map((r) => r.orderId);
+    const prev = lastSelectedIdsRef.current;
+    const unchanged =
+      ids.length === prev.length && ids.every((id, i) => id === prev[i]);
+
+    if (!unchanged) {
+      setSelectedTableRow({ requests: [], orders: selectedRows });
+      lastSelectedIdsRef.current = ids;
+    }
+  }, [selectedRows, selectedTableRow]);
+
+  // Clear selections when triggered
+  React.useEffect(() => {
+    if (selectedTableRow.shouldClearSelection) {
+      table.resetRowSelection();
+      setSelectedTableRow({
+        requests: [],
+        orders: [],
+        shouldClearSelection: false,
+      });
+      lastSelectedIdsRef.current = [];
+    }
+  }, [selectedTableRow.shouldClearSelection, setSelectedTableRow]);
+
+  // Handle table drag and drop
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (active && over && active.id !== over.id) {
@@ -154,6 +202,7 @@ export function DataTable({
                       </TableRow>
                     ))}
                   </TableHeader>
+
                   <TableBody className="bg-muted">
                     {table.getRowModel().rows.map((row, idx) => {
                       const bgClass = row.getIsSelected()
@@ -195,38 +244,34 @@ export function DataTable({
             </DndContext>
           </div>
           {(table.getCanPreviousPage() || table.getCanNextPage()) && (
-            <div className="flex items-center justify-between">
-              <div className="flex justify-between w-full">
-                <div className="flex w-fit items-center justify-center text-sm text-[#1C1C1C]">
-                  Page {table.getState().pagination.pageIndex + 1} of{" "}
-                  {table.getPageCount()}
-                </div>
-                <div className="flex items-center gap-2">
-                  <TableButton
-                    variant="outline"
-                    className="hidden px-2 lg:flex"
-                    onClick={() => table.setPageIndex(0)}
-                    disabled={!table.getCanPreviousPage()}
-                  >
-                    <span>Previous</span>
-                  </TableButton>
+          <div className="flex items-center justify-between">
+            <div className="flex justify-between w-full">
+              <div className="flex w-fit items-center justify-center text-sm text-[#1C1C1C]">
+                Page {table.getState().pagination.pageIndex + 1} of{" "}
+                {table.getPageCount()}
+              </div>
+              <div className="flex items-center gap-2">
+                <TableButton
+                  variant="outline"
+                  className="hidden px-2 lg:flex"
+                  onClick={() => table.setPageIndex(0)}
+                  disabled={!table.getCanPreviousPage()}
+                >
+                  <span>Previous</span>
+                </TableButton>
 
-                  <TableButton
-                    variant="outline"
-                    className="hidden px-2 lg:flex"
-                    onClick={() => table.nextPage()}
-                    disabled={!table.getCanNextPage()}
-                  >
-                    <span>Next</span>
-                  </TableButton>
-                </div>
+                <TableButton
+                  variant="outline"
+                  className="hidden px-2 lg:flex"
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}
+                >
+                  <span>Next</span>
+                </TableButton>
               </div>
             </div>
+          </div>
           )}
-        </TabsContent>
-        {/*  */}
-        <TabsContent value="past-performance">
-          <p>Past Performance content goes here</p>
         </TabsContent>
       </Tabs>
     </div>

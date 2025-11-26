@@ -17,7 +17,7 @@ import { NavLink } from "react-router-dom";
 import Spinner from "../../shared-components/spinner";
 import { useAdminLogout } from "../../hooks/admin-auth.hooks";
 
-/* ------------------------------------------------------ */
+/* ---------------------------------------------------------------------- */
 
 const navMenu = [
   {
@@ -96,7 +96,7 @@ export default function AdminDashboardLayout({
             <div className="flex flex-col gap-4">
               {navMenu.map((item, idx) => (
                 <NavLink
-                  key={idx}
+                  key={`${item.link}-${idx}`}
                   to={item.link}
                   end={item.name.toLowerCase() === "overview"}
                   className={({ isActive }) =>

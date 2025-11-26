@@ -57,8 +57,9 @@ import {
   MenShop,
 } from "./user-dashboard/shop/shop-pages-export";
 import ShopLayout from "./user-dashboard/shop/context/shop-layout";
+import { OrderStatusProvider } from "./admin-dashboard/orders-management/table-status-context-provider";
 
-/* ---------------------------------------------------------------- */
+/* -------------------------------------------------------------------------------------------------------- */
 
 /**
  * Pages route system
@@ -264,7 +265,11 @@ const pagesRoutes = createBrowserRouter([
       },
       {
         path: "order-management",
-        element: <AdminDashboardOrders />,
+        element: (
+          <OrderStatusProvider>
+            <AdminDashboardOrders />
+          </OrderStatusProvider>
+        ),
         index: true,
       },
       {

@@ -13,7 +13,7 @@ import {
   useUpdateProduct,
   useProduct,
 } from "../../../hooks/admin-inventory.hooks";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 // import { TableButton } from "../../ui/button";
 import { Switch } from "../../ui/switch";
 // import { CaretDownIcon } from "@phosphor-icons/react";
@@ -149,16 +149,6 @@ export function AdminDashboardEditInventory() {
     setImages((prev) => prev.filter((img) => img.id !== imageId));
   };
 
-  // const toggleTone = (tone: string) => {
-  //   setSelectedTone((prev) =>
-  //     prev.includes(tone) ? prev.filter((s) => s !== tone) : [...prev, tone]
-  //   );
-  // };
-
-  // const removeTone = (tone: string) => {
-  //   setSelectedTone((prev) => prev.filter((s) => s !== tone));
-  // };
-
   const onSubmit: SubmitHandler<ProductFormData> = async (data) => {
     if (!inventoryId) return;
 
@@ -202,9 +192,9 @@ export function AdminDashboardEditInventory() {
 
   const BreadCrumb = () => (
     <div className="font-inter font-light capitalize flex items-center">
-      <span className="text-primary-900">Araafit</span>
+      <Link to="/admin-dashboard/overview" className="text-primary-900">Araafit</Link>
       <CaretRightIcon className="text-primary-900" />
-      <span className="text-primary-900">Inventory</span>
+      <Link to="/admin-dashboard/inventory" className="text-primary-900">Inventory</Link>
       <CaretRightIcon className="text-[#979797]" />
       <span className="text-[#979797]">{product?.category || "Product"}</span>
     </div>
@@ -215,8 +205,7 @@ export function AdminDashboardEditInventory() {
       <AdminDashboardLayout>
         <div className="h-screen flex items-center justify-center">
           <div className="text-center">
-            <Spinner size="lg" speed="fast" />
-            <p className="mt-4 text-gray-600">Loading product...</p>
+            <Spinner size="lg" speed="fast" isLoading={isLoadingProduct} />
           </div>
         </div>
       </AdminDashboardLayout>
@@ -251,14 +240,21 @@ export function AdminDashboardEditInventory() {
               <>
                 <NotificationBell />
                 <Button
-                  text={
-                    updateProductMutation.isPending ? "Updating..." : "Update"
-                  }
                   variant="solid"
                   disabled={updateProductMutation.isPending}
                   onClick={handleSubmit(onSubmit)}
                   className="text-white shadow-sm w-44"
-                />
+                >
+                  <div className="flex items-center justify-center gap-1">
+                    <span>Update</span>
+                    <Spinner
+                      isLoading={updateProductMutation.isPending}
+                      size="sm"
+                      speed="fast"
+                      arcColor="#ffff"
+                    />
+                  </div>
+                </Button>
               </>
             }
           />

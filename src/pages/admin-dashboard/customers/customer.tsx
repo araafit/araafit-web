@@ -1,39 +1,21 @@
-import React from "react";
 import { CaretRightIcon } from "@phosphor-icons/react";
 import TopBar from "../admin-components/top-bar/top-bar";
 import AdminDashboardLayout from "../../../layouts/admin-dashboard/dashboard-layout";
 import Overview from "../admin-components/top-overview-items";
 import NotificationBell from "../admin-components/top-bar/notification-bell";
 import { DataTable } from "../admin-components/customersTable/customers-table";
-import {
-  useCustomers,
-  useCustomerMetrics,
-} from "../../../hooks/admin-customers.hooks";
-import {
-  convertApiCustomersToTableFormat,
-  convertCustomerMetricsToCards,
-} from "../../../utils/admin-customers-utils";
+import { useCustomerMetrics } from "../../../hooks/admin-customers.hooks";
+import { convertCustomerMetricsToCards } from "../../../utils/admin-customers-utils";
 import Spinner from "../../../shared-components/spinner";
 
 /* -------------------------------------------------------------------------------------------------------------- */
 
 export function AdminDashboardCustomers() {
   const {
-    data: customersData,
-    isLoading: customersLoading,
-    error: customersError,
-  } = useCustomers();
-  const {
     data: metricsData,
     isLoading: metricsLoading,
     error: metricsError,
   } = useCustomerMetrics();
-
-  const tableData = React.useMemo(() => {
-    return customersData
-      ? convertApiCustomersToTableFormat(customersData.users)
-      : [];
-  }, [customersData]);
 
   const overviewCards = metricsData
     ? convertCustomerMetricsToCards(metricsData)
@@ -93,22 +75,7 @@ export function AdminDashboardCustomers() {
 
           {/* -------- */}
           <section className="flex items-center justify-between mb-5">
-            {customersLoading ? (
-              <div className="flex justify-center items-center py-12 bg-white rounded-md w-full">
-                <Spinner
-                  size="lg"
-                  speed="fast"
-                  arcColor="#523531"
-                  isLoading={customersLoading}
-                />
-              </div>
-            ) : customersError ? (
-              <div className="bg-red-50 border border-red-200 rounded-md p-6 w-full">
-                <p className="text-red-600">Failed to load customers</p>
-              </div>
-            ) : (
-              <DataTable data={tableData} />
-            )}
+            <DataTable />
           </section>
         </div>
       </div>

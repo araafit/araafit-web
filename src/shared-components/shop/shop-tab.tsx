@@ -2,7 +2,7 @@
 import React, { useRef, useEffect } from "react";
 import { useState, useCallback, memo, Children } from "react";
 import { CN } from "../../utils/class-merge";
-import Select from "../select";
+// import Select from "../select";
 //import { MagnifyingGlassIcon } from "@phosphor-icons/react";
 import { useShopStore } from "../../shared-hooks/state-store";
 import SearchInput from "../../pages/user-dashboard/shop/components/search-input";
@@ -120,10 +120,10 @@ const ShopTab = ({
     [onChange]
   );
 
-  const options = [
-    { label: "Measurement", value: "measurement" },
-    { label: "Skin tone", value: "skin tone" },
-  ];
+  // const options = [
+  //   { label: "Measurement", value: "measurement" },
+  //   { label: "Skin tone", value: "skin tone" },
+  // ];
 
   return (
     <div
@@ -155,19 +155,8 @@ const ShopTab = ({
 
         <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-6 w-full lg:w-auto">
           <SearchInput />
-          {/*<div className="w-[18.0625rem] flex gap-2 py-[6px] px-3 border border-neutral-100 rounded-md">
-            <MagnifyingGlassIcon size="20px" className="text-neutral-500" />
-            <input
-              type="text"
-              name=""
-              id=""
-              className="outline-none grow"
-              placeholder="Search here"
-              onChange={(e) => handleSearch(e.target.value)}
-            />
-          </div>*/}
 
-          <div className="flex items-center justify-between w-full lg:w-auto">
+          {/* <div className="flex items-center justify-between w-full lg:w-auto">
             <span className="text-neutral-500 whitespace-nowrap text-sm lg:text-base">
               Sort by:
             </span>
@@ -178,7 +167,7 @@ const ShopTab = ({
               onChange={(item) => console.log(item)}
               value="measurement"
             />
-          </div>
+          </div> */}
         </div>
       </div>
 

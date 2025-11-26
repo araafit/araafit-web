@@ -161,7 +161,7 @@ export function ManualMeasurement() {
         // For authenticated users, redirect to dashboard
         if (isAuthenticated) {
           toast.success("Measurements saved successfully!");
-          navigate("/dashboard/profile");
+          navigate("/dashboard/profile?tab=measurement");
         }
       },
     });
@@ -286,8 +286,8 @@ export function ManualMeasurement() {
 
               const items =
                 (sizeChart[key] as { id: string; value: number; label?: string }[]) || [];
-              console.log("items", items);
-              console.log("key", key, sizeChart);
+              // console.log("items", items);
+              // console.log("key", key, sizeChart);
               const label = ["dressSize", "clotheSize"].includes(key)
                 ? "Size"
                 : key === "hips"

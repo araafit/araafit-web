@@ -37,6 +37,7 @@ export const useCustomers = (params?: GetCustomersParams) => {
   return useQuery({
     queryKey: adminCustomersKeys.list(params),
     queryFn: () => adminCustomersService.getCustomers(params),
+    enabled: params ? true : false,
     retry: (failureCount, error) => {
       const axiosError = error as { response?: { status?: number } };
       if (axiosError.response?.status === 401 || axiosError.response?.status === 403) {

@@ -9,6 +9,17 @@ import {
   type UpdateSewingRequestRequest,
   type UpdateRequestStatusRequest,
 } from "../services/admin-sewing-requests.service";
+import { useState } from "react";
+import showToast from "../utils/notification";
+import { notificationStyles } from "../style/custom";
+
+/* -------------------------------------------------------------------------------------------------- */
+
+interface BulkUpdateResult {
+  successful: number;
+  failed: number;
+  errors: Array<{ orderId: string; error: string }>;
+}
 
 // Query keys for admin sewing requests
 export const adminSewingRequestsKeys = {
@@ -74,6 +85,82 @@ export const useUpdateRequestRider = () => {
       toast.error(error.response?.data?.message || "Failed to update rider information");
     },
   });
+};
+
+export const useUpdateBulkRequestStatus = () => {
+  const queryClient = useQueryClient();
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const bulkUpdate = async (
+    orders: Array<{ id: string; status: string }>
+  ): Promise<BulkUpdateResult> => {
+    setIsUpdating(true);
+
+    try {
+      const results = await Promise.allSettled(
+        orders.map((order) =>
+          adminSewingRequestsService.updateRequestStatus(order.id, {
+            status: order.status,
+          })
+        )
+      );
+
+      // Collect errors with context
+      const errors = results.map((result, resultIdx) => {
+        if (result.status === "rejected") {
+          return {
+            orderId: orders[resultIdx].id,
+            error: result.reason?.response?.data?.message || "Unknown error",
+          };
+        }
+        return null;
+      });
+
+      const realErrors = errors.filter(Boolean) as Array<{
+        orderId: string;
+        error: string;
+      }>;
+
+      const successful = results.map(
+        (result) => result.status === "fulfilled"
+      ).length;
+      const failed = realErrors.length;
+
+      // Batch Invalidate only once
+      if (successful > 0) {
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: adminSewingRequestsKeys.all }),
+          queryClient.invalidateQueries({ queryKey: adminSewingRequestsKeys.lists() }),
+          queryClient.invalidateQueries({ queryKey: ["admin-dashboard"] }),
+
+          // Invalidate specific orders that succeeded
+          ...orders.slice(0, successful).map((order) =>
+            queryClient.invalidateQueries({
+              queryKey: adminSewingRequestsKeys.detail(order.id),
+            })
+          ),
+        ]);
+      }
+
+      if (failed === 0) {
+        showToast.success(`All ${successful} orders updated successfully`, {
+          style: notificationStyles.alertSuccess,
+        });
+      }
+      
+      if (successful === 0) {
+        showToast.error(`All ${failed} orders failed to update`, {
+          style: notificationStyles.alertError,
+        });
+      }
+
+      return { successful, failed, errors: realErrors };
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  return { bulkUpdate, isUpdating };
 };
 
 // Update Sewing Request Mutation

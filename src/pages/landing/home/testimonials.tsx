@@ -57,8 +57,6 @@ export default function Testimonials({
     ],
   };
 
-  console.log(activeSlide)
-
   return (
     <Slider className="w-full h-[236px]" {...sliderSettings}>
       {data.map((item, idx) => (

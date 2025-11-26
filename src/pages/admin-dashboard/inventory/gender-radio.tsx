@@ -36,7 +36,7 @@ export const GenderRadio = ({
   const selectedAudience = fieldWatch("audience");
 
   return (
-    <label htmlFor="for-men" className="cursor-pointer flex items-center">
+    <label htmlFor={fieldId} className="cursor-pointer flex items-center">
       <input
         type="radio"
         id={fieldId}
@@ -46,12 +46,12 @@ export const GenderRadio = ({
       />
       <div
         className={`border rounded-full p-1 flex items-center justify-center ${
-          selectedAudience === "men" ? "border-primary-500" : "border-gray-300"
+          selectedAudience === (fieldValue as "men" |"women" |"kids") ? "border-primary-500" : "border-gray-300"
         }`}
       >
         <div
           className={`w-2 h-2 rounded-full ${
-            selectedAudience === "men" ? "bg-primary-500" : "bg-transparent"
+            selectedAudience === (fieldValue as "men" |"women" |"kids") ? "bg-primary-500" : "bg-transparent"
           }`}
         />
       </div>

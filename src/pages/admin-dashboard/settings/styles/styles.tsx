@@ -26,6 +26,7 @@ import {
   SelectValue,
 } from "../../../ui/select";
 import StylesList from "./style-list";
+import Spinner from "../../../../shared-components/spinner";
 
 /* -------------------------------------------------------------------------------------------------------------------- */
 
@@ -178,15 +179,6 @@ export default function StylesTabs() {
             <div className="p-6 flex-1 overflow-y-auto pb-20 space-y-6">
               {/* Upload Section */}
               <div className="h-[298px] w-full px-6 flex flex-row justify-center items-center border border-dashed border-[#D0D5DD] rounded-[12px] bg-white">
-                <input
-                  type="file"
-                  accept="image/png, image/jpg, image/jpeg"
-                  multiple
-                  onChange={handlePhotosChange}
-                  id="file-upload"
-                  style={{ display: "none" }}
-                  disabled={createDressStyleMutation.isPending}
-                />
                 {createDressStyleMutation.isPending ? (
                   <div className="flex items-center gap-2 text-[#9A6C50] font-medium">
                     <span className="relative flex h-5 w-5">
@@ -200,6 +192,15 @@ export default function StylesTabs() {
                     htmlFor="file-upload"
                     className="text-base font-sans mb-2 text-center w-full cursor-pointer"
                   >
+                    <input
+                      type="file"
+                      accept="image/png, image/jpg, image/jpeg"
+                      multiple
+                      onChange={handlePhotosChange}
+                      id="file-upload"
+                      className="hidden"
+                      disabled={createDressStyleMutation.isPending}
+                    />
                     <div className="h-12 w-12 bg-[#F0F2F5] rounded-full flex items-center justify-center mx-auto">
                       <CloudArrowUpIcon className="text-[#475367]" size={32} />
                     </div>
@@ -219,14 +220,13 @@ export default function StylesTabs() {
                       <span className="text-[#5D5D5D]">OR</span>
                       <div className="flex-grow border-t border-[#F0F2F5]"></div>
                     </div>
-                    <Button
-                      text="Browse Files"
-                      variant="solid"
-                      className="text-white shadow-sm w-44"
-                    />
+                    <span className="h-12 py-3 px-5 bg-primary-500 rounded-[0.375rem] text-white shadow-sm w-44">
+                      Browser file
+                    </span>
                   </label>
                 )}
               </div>
+
               {/* Previews */}
               <div className="flex gap-4 flex-wrap mt-4">
                 {contributorPhotos.map((file, idx) => (
@@ -234,9 +234,9 @@ export default function StylesTabs() {
                     key={idx}
                     className="w-[172px] h-[122px] rounded-2xl relative"
                   >
-                    <div className="bg-black opacity-40 rounded-2xl absolute w-full h-full z-10 flex justify-center items-center">
+                    <div className="bg-[#0006] rounded-2xl absolute w-full h-full z-10 flex justify-center items-center">
                       <TrashSimpleIcon
-                        className="z-40 cursor-pointer text-white"
+                        className="z-40 cursor-pointer text-red-800"
                         onClick={() => handleDeleteImage(idx)}
                       />
                     </div>
@@ -315,7 +315,6 @@ export default function StylesTabs() {
             {/* Sticky Footer */}
             <div className="border-t border-[#E8E8E8] bg-white p-4 h-20 flex justify-center items-center sticky bottom-0">
               <Button
-                text={createDressStyleMutation.isPending ? "Adding..." : "Add"}
                 type="button"
                 variant="solid"
                 className="w-full md:max-w-[9.375rem]"
@@ -327,7 +326,17 @@ export default function StylesTabs() {
                   createDressStyleMutation.isPending
                 }
                 onClick={handleAdd}
-              />
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <span>Add</span>
+                  <Spinner
+                    isLoading={createDressStyleMutation.isPending}
+                    speed="fast"
+                    size="sm"
+                    arcColor="#ffff"
+                  />
+                </div>
+              </Button>
             </div>
           </DrawerContent>
         </Drawer>

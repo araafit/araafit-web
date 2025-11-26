@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, {
+  AxiosError,
   type AxiosInstance,
   type AxiosResponse,
   type InternalAxiosRequestConfig,
@@ -278,8 +279,13 @@ apiClient.interceptors.response.use(
     }
 
     // Handle other errors
-    if (error.response && !originalRequest._retry) {
+    if ((error as AxiosError).response && !originalRequest._retry) {
       const { status, data } = error.response;
+
+      // Don't show error to guest users if discount endpoint fails
+      if ((error as AxiosError).response?.config.url === "/discounts/active") {
+        return null
+      }
 
       switch (status) {
         case 400:

@@ -11,19 +11,9 @@ import { useDashboardData } from "../../hooks/user-dashboard.hooks";
 import type { Order } from "../../services/orders.service";
 import type { Product } from "../../services/products.service";
 import LoaderView from "../../layouts/user-dashboard/loader";
-import { useLocalStorage } from "../../shared-hooks/loca-storage";
+import useAuth from "../../hooks/use-auth";
 
 /* -------------------------------------------------------------------- */
-
-type StoredUser = {
-  state: {
-    adminUser: Record<string, string | null>;
-    isAdmin: boolean;
-    isUser: boolean;
-    user: Record<string, string | null>;
-  };
-  version: number;
-};
 
 /**
  * Dashboard home page
@@ -31,14 +21,10 @@ type StoredUser = {
  * @returns ReactElement
  */
 export function DashboardHomePage() {
-  const { orders, dresses, fabrics, isLoading, isError, error } =
+  const {isAuthenticated, user} = useAuth()
+  const { orders, dresses, fabrics, isLoading, isError } =
     useDashboardData();
   const addToCart = useCartStore((state) => state.addItem);
-  const {
-    storedValue: {
-      state: { user: storedUser },
-    },
-  } = useLocalStorage<StoredUser | null>("araafit-auth-storage", null);
 
   const orderItems = orders.data || [];
   const readyToWearDresses = dresses.data || [];
@@ -47,13 +33,13 @@ export function DashboardHomePage() {
 
   const title = (
     <div className="font-lora text-[#979797]">
-      {!storedUser ? (
+      {!isAuthenticated ? (
         <span className="">Welcome</span>
       ) : (
         <div className="font-lora">
           Welcome,{" "}
           <span className="font-lora text-[#1C1C1C]">
-            {storedUser?.firstName}
+            {user?.firstName}
           </span>
         </div>
       )}
@@ -137,7 +123,6 @@ export function DashboardHomePage() {
     </div>
   );
 
-  // Show loading state
   if (isLoading) {
     return (
       <UserDashboardLayout>
@@ -154,14 +139,15 @@ export function DashboardHomePage() {
       <UserDashboardLayout>
         <div className="h-screen flex items-center justify-center">
           <div className="flex flex-col items-center gap-4 text-center">
-            <p className="text-red-600">Error loading dashboard data</p>
-            <p className="text-gray-600">
+            <p className="text-neutral-400">Unable to load dashboard data</p>
+            {/* <p className="text-gray-600">
               {error?.message || "Please try again later"}
-            </p>
+            </p> */}
             <Button
               text="Retry"
               variant="solid"
               onClick={() => window.location.reload()}
+              className="w-28"
             />
           </div>
         </div>

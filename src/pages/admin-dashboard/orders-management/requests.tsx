@@ -1,4 +1,4 @@
-import { orderStatuses } from "../_data/_overview";
+import { sewingRequestStatuses } from "../_data/_overview";
 import {
   Tabs,
   TabsContent,
@@ -6,43 +6,44 @@ import {
   TabsTrigger,
 } from "../../ui/order-management-tab";
 import {
-  AllOrdersTab,
+  AllRequestsTab,
   PendingTab,
   ApprovedTab,
-  PackagingTab,
+  SewingTab,
   OutForDeliveryTab,
   DeliveredTab,
-  CompleteTab,
+  CompletedTab,
   CanceledTab,
-} from "../admin-components/orderTable/order-table-tabs";
+} from "../admin-components/orderTable/requests-table-tabs";
+/* -------------------------------------------------------------------------------------------------------- */
 
-/* --------------------------------------------------------------------------------------------- */
-
-const Orders = () => {
+const Requests = () => {
   return (
     <>
       <div className="mt-5 h-full bg-white px-4 py-2 relative rounded-md">
-        <Tabs defaultValue="all-orders" className="w-full">
+        <Tabs defaultValue="all-requests" className="w-full">
           <div>
-            <TabsList className="w-fit h-11 mb-0">
-              <TabsTrigger value="all-orders">All Orders</TabsTrigger>
-              {orderStatuses.map((statusObj) => (
-                <TabsTrigger key={statusObj.status} value={statusObj.status}>
+            <TabsList className="w-fit h-11 mb-6">
+              <TabsTrigger value="all-requests">All Requests</TabsTrigger>
+              {sewingRequestStatuses.map((statusObj) => (
+                <TabsTrigger
+                  key={statusObj.status}
+                  value={statusObj.status.toLowerCase()}
+                  className=""
+                >
                   {statusObj.label}
                 </TabsTrigger>
               ))}
             </TabsList>
           </div>
-
-          {/* All orders tab */}
           <TabsContent
-            value="all-orders"
+            value="all-requests"
             className="relative flex flex-col gap-4 overflow-auto"
           >
-            <AllOrdersTab />
+            <AllRequestsTab />
           </TabsContent>
 
-          {/* Pending orders tab */}
+          {/* Status-specific tabs */}
           <TabsContent
             value="pending"
             className="relative flex flex-col gap-4 overflow-auto"
@@ -58,10 +59,10 @@ const Orders = () => {
           </TabsContent>
 
           <TabsContent
-            value="packaging"
+            value="sewing"
             className="relative flex flex-col gap-4 overflow-auto"
           >
-            <PackagingTab />
+            <SewingTab />
           </TabsContent>
 
           <TabsContent
@@ -79,10 +80,10 @@ const Orders = () => {
           </TabsContent>
 
           <TabsContent
-            value="complete"
+            value="completed"
             className="relative flex flex-col gap-4 overflow-auto"
           >
-            <CompleteTab />
+            <CompletedTab />
           </TabsContent>
 
           <TabsContent
@@ -97,4 +98,4 @@ const Orders = () => {
   );
 };
 
-export default Orders;
+export default Requests;

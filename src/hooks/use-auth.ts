@@ -39,10 +39,10 @@ export const useAuth = () => {
 
   // Update user when profile data changes (only for regular users, not admins)
   useEffect(() => {
-    if (profileData && isAuthenticated && !isAdmin) {
+    if (profileData && isAuthenticated && !isAdmin && !isGuest) {
       setUser(profileData);
     }
-  }, [profileData, isAuthenticated, isAdmin, setUser]);
+  }, [profileData, isAuthenticated, isAdmin, isGuest, setUser]);
 
   // Handle profile fetch errors
   useEffect(() => {
