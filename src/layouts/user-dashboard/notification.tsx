@@ -1,5 +1,13 @@
 import { CheckIcon, XIcon } from "@phosphor-icons/react";
 import { CN } from "../../utils/class-merge";
+import type {
+  NotificationResponse,
+  PurchaseMetadata,
+  CartMetadata,
+} from "../../services/notification.service";
+import Spinner from "../../shared-components/spinner";
+import { useMutationState } from "@tanstack/react-query";
+import { userNotificationsKeys } from "../../hooks/notification.hook";
 
 /* ------------------------------------------------ */
 
@@ -20,8 +28,17 @@ export const UserNotification = ({
   removeNotification: (id: string) => void;
   toggleNotification: (id: string) => void;
   expandedId: null | number;
-  data?: any
+  data: NotificationResponse | undefined;
 }) => {
+  // const deleteMutation = useMutationState({
+  //   filters: { mutationKey: userNotificationsKeys.remove("delete54321") }
+  // });
+  const updateMutation = useMutationState({
+    filters: { mutationKey: userNotificationsKeys.update("update54321") },
+  });
+
+  // const deletionState = deleteMutation[deleteMutation.length - 1];
+  const updateState = updateMutation[updateMutation.length - 1];
 
   const getNotificationIcon = (type) => {
     switch (type) {
@@ -71,13 +88,17 @@ export const UserNotification = ({
     }).format(parseFloat(amount));
   };
 
+  if (!notifications) {
+    return null;
+  }
+
   const NotificationList = () => {
-    return notifications.map((notification) => (
+    return notifications.data.map((notification) => (
       <div
         key={notification.id}
-        className={`border-2 rounded-xl transition-all duration-300 ${getNotificationColor(
+        className={`rounded-xl transition-all duration-300 ${getNotificationColor(
           notification.type
-        )} ${!notification.isRead ? "border-l-4" : ""}`}
+        )} ${!notification.isRead ? "border-l-2" : ""}`}
       >
         {/* Notification Header */}
         <div
@@ -88,14 +109,18 @@ export const UserNotification = ({
 
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
-              <h3 className="font-semibold text-sm">{notification.title}</h3>
+              <h3 className="font-semibold text-sm font-inter">
+                {notification.title}
+              </h3>
               <span className="text-xs opacity-70 whitespace-nowrap">
                 {formatDate(notification.createdAt)}
               </span>
             </div>
             <p
               className={`text-sm mt-1 ${
-                expandedId === notification.id ? "" : "line-clamp-2"
+                (expandedId as unknown as string) === notification.id
+                  ? ""
+                  : "line-clamp-2"
               }`}
             >
               {notification.message}
@@ -110,12 +135,15 @@ export const UserNotification = ({
             }}
             className="p-1 hover:bg-white/50 rounded-full transition-colors"
           >
-            <XIcon className="w-4 h-4" />
+            <div className="flex items-center gap-1">
+              <XIcon className="w-4 h-4" />
+              {/* <Spinner isLoading={deletionState?.status === "pending"} size="sm" speed="fast" circleColor="#1e40af" arcColor="#e5e5e5" /> */}
+            </div>
           </button>
         </div>
 
         {/* Expanded detail */}
-        {expandedId === notification.id && (
+        {(expandedId as unknown as string) === notification.id && (
           <div className="px-4 pb-4 border-t border-current/20 pt-3 mt-2">
             <div className="bg-white/50 rounded-lg p-3 space-y-3">
               {notification.type === "PURCHASE" && (
@@ -123,13 +151,18 @@ export const UserNotification = ({
                   <div className="flex justify-between text-sm">
                     <span className="font-medium">Order ID:</span>
                     <span className="font-mono text-xs">
-                      {notification.metadata.orderId.substring(0, 8)}...
+                      {(
+                        notification.metadata as PurchaseMetadata
+                      ).requestId?.substring(0, 8)}
+                      ...
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="font-medium">Total Amount:</span>
                     <span className="font-bold">
-                      {formatAmount(notification.metadata.totalAmount)}
+                      {formatAmount(
+                        (notification.metadata as PurchaseMetadata).totalAmount
+                      )}
                     </span>
                   </div>
                 </>
@@ -139,33 +172,35 @@ export const UserNotification = ({
                 <>
                   <div className="flex justify-between text-sm">
                     <span className="font-medium">Quantity:</span>
-                    <span>{notification.metadata.quantity}</span>
+                    <span>
+                      {(notification.metadata as CartMetadata).quantity}
+                    </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="font-medium">Size:</span>
                     <span className="font-bold">
-                      {notification.metadata.size}
+                      {(notification.metadata as CartMetadata).size}
                     </span>
                   </div>
                 </>
               )}
 
-              {notification.type === "DELIVERY" && (
+              {/* {notification.type === "DELIVERY" && (
                 <>
                   <div className="flex justify-between text-sm">
                     <span className="font-medium">Order ID:</span>
                     <span className="font-mono text-xs">
-                      {notification.metadata.orderId.substring(0, 8)}...
+                      {(notification.metadata as PurchaseMetadata).orderId.substring(0, 8)}...
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="font-medium">Est. Delivery:</span>
                     <span className="font-bold">
-                      {notification.metadata.estimatedDelivery}
+                      {(notification.metadata as any).estimatedDelivery}
                     </span>
                   </div>
                 </>
-              )}
+              )} */}
 
               {!notification.isRead && (
                 <button
@@ -174,6 +209,13 @@ export const UserNotification = ({
                 >
                   <CheckIcon className="w-4 h-4" />
                   Mark as Read
+                  <Spinner
+                    isLoading={updateState?.status === "pending"}
+                    size="sm"
+                    speed="fast"
+                    circleColor="#1e40af"
+                    arcColor="#e5e5e5"
+                  />
                 </button>
               )}
             </div>
@@ -186,7 +228,12 @@ export const UserNotification = ({
   if (!isOpen) return null;
 
   return (
-    <div className={`${CN('bg-white rounded-2xl shadow-2xl p-6 mb-6 fixed right-9', className)}`}>
+    <div
+      className={`${CN(
+        "max-h-[500px] bg-white rounded-2xl shadow-2xl p-6 mb-6 fixed right-9 overflow-y-scroll",
+        className
+      )}`}
+    >
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold text-gray-800">Notifications</h2>
         <button
@@ -199,7 +246,7 @@ export const UserNotification = ({
       </div>
 
       <div className="space-y-3">
-        {notifications.length === 0 ? (
+        {notifications.data.length === 0 ? (
           <p className="text-center text-gray-500 py-8">No notifications</p>
         ) : (
           <NotificationList />
