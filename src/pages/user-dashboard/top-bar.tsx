@@ -2,50 +2,14 @@ import React, { useState, type ReactElement } from "react";
 import { BellIcon } from "@phosphor-icons/react";
 import { Link } from "react-router-dom";
 import { UserNotification } from "../../layouts/user-dashboard/notification";
+import {
+  useUserNotifications,
+  useMarkNotificationAsRead,
+  useDeleteNotification,
+} from "../../hooks/notification.hook";
+import Spinner from "../../shared-components/spinner";
 
 /* -------------------------------------------------------------------- */
-
-const notificationState = [
-  {
-    id: "1cb86fdb-a727-4889-92bb-705406b778e8",
-    type: "PURCHASE",
-    title: "Order Created",
-    message:
-      "Your order (333403cc-bf5f-4b5a-9be6-4cbaaf1e8aae) has been created successfully. Redirecting to payment.",
-    metadata: {
-      orderId: "333403cc-bf5f-4b5a-9be6-4cbaaf1e8aae",
-      totalAmount: "20000.00",
-    },
-    isRead: false,
-    createdAt: "2025-11-19T07:44:08.557Z",
-  },
-  {
-    id: "546f9b3b-d92a-4749-bb9c-526458de0b3a",
-    type: "CART",
-    title: "Item Added to Cart",
-    message: "Sleeping Dress has been added to your cart.",
-    metadata: {
-      productId: "cb088133-058e-43d9-aafb-ee66fed5678c",
-      quantity: 1,
-      size: "M",
-    },
-    isRead: false,
-    createdAt: "2025-11-19T07:40:53.668Z",
-  },
-  {
-    id: "delivery-example",
-    type: "DELIVERY",
-    title: "Your order is on its way! 🚚",
-    message:
-      "Hang tight. Your custom-fit item is en route and will be with you shortly. We'll keep you updated every step of the way!",
-    metadata: {
-      orderId: "333403cc-bf5f-4b5a-9be6-4cbaaf1e8aae",
-      estimatedDelivery: "Nov 26, 2025",
-    },
-    isRead: false,
-    createdAt: "2025-11-20T10:30:00.000Z",
-  },
-];
 
 type TopBarType = {
   title: React.ReactNode;
@@ -63,22 +27,34 @@ export default function TopBar({
   breadCrumb = "home",
 }: TopBarType) {
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState(notificationState);
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  // const [notifications, setNotifications] = useState(notificationState);
   const [expandedId, setExpandedId] = useState(null);
 
-  const markAsRead = (id) => {
-    setNotifications(
-      notifications.map((n) => (n.id === id ? { ...n, isRead: true } : n))
-    );
+  const {
+    isLoading,
+    isError,
+    // isSuccess,
+    // error,
+    data: userNotifications,
+  } = useUserNotifications();
+
+  const markAsRead = useMarkNotificationAsRead();
+  const deleteNotification = useDeleteNotification();
+
+  const handleMarkAsRead = async (id) => {
+    // setNotifications(
+    //   notifications.map((n) => (n.id === id ? { ...n, isRead: true } : n))
+    // );
+    await markAsRead.mutateAsync(id);
   };
 
-  const removeNotification = (id) => {
-    setNotifications(notifications.filter((n) => n.id !== id));
-    if (expandedId === id) setExpandedId(null);
+  const removeNotification = async (id) => {
+    // setNotifications(notifications.filter((n) => n.id !== id));
+    // if (expandedId === id) setExpandedId(null);
+    await deleteNotification.mutateAsync(id);
   };
 
-   const toggleNotification = (id) => {
+  const toggleNotification = (id) => {
     setExpandedId(expandedId === id ? null : id);
   };
 
@@ -113,26 +89,35 @@ export default function TopBar({
               onClick={() => setIsOpen(!isOpen)}
             >
               <BellIcon className="size-[1rem] lg:size-[1.25rem] block" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                  {unreadCount}
+              <Spinner
+                size="sm"
+                speed="fast"
+                arcColor="#9A6C50"
+                isLoading={isLoading}
+                className="absolute -top-1 -right-1 bg-white"
+              />
+              {!isLoading && userNotifications && (
+                <span className="absolute -top-1 -right-1 bg-primary-900 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                  {userNotifications.data.length}
                 </span>
               )}
             </button>
 
             {/* Notification */}
-            <UserNotification
-              isOpen={isOpen}
-              onClose={() => {
-                setIsOpen(!isOpen);
-              }}
-              className="w-[500px]"
-              data={notifications}
-              markAsRead={(id: string) => markAsRead(id)}
-              removeNotification={(id: string) => removeNotification(id)}
-              toggleNotification={(id: string) => toggleNotification(id)}
-              expandedId={expandedId}
-            />
+            {!isLoading && !isError && (
+              <UserNotification
+                isOpen={isOpen}
+                onClose={() => {
+                  setIsOpen(!isOpen);
+                }}
+                className="w-[500px]"
+                data={userNotifications}
+                markAsRead={(id: string) => handleMarkAsRead(id)}
+                removeNotification={(id: string) => removeNotification(id)}
+                toggleNotification={(id: string) => toggleNotification(id)}
+                expandedId={expandedId}
+              />
+            )}
           </div>
         </div>
       )}
