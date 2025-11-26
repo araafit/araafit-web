@@ -7,7 +7,7 @@ import TopBar from "../admin-components/top-bar/top-bar";
 import AdminDashboardLayout from "../../../layouts/admin-dashboard/dashboard-layout";
 import { Link } from "react-router-dom";
 import { OverviewTable } from "../admin-components/overViewTable/overview-data-table";
-import NotificationBell from "../admin-components/top-bar/notification-bell";
+import AdminNotification from "../admin-components/top-bar/notification-bell";
 import Overview from "../admin-components/top-overview-items";
 import {
   useAdminDashboardMetrics,
@@ -94,7 +94,7 @@ export function AdminDashboardOverview() {
             breadCrumb={<BreadCrumb />}
             rightSide={
               <div className="flex items-center gap-6">
-                <NotificationBell />
+                <AdminNotification />
 
                 <Button
                   variant="solid"

@@ -42,8 +42,48 @@ export default function TopBar({
           >
             My Measurements
           </Link>
+<<<<<<< Updated upstream
           <div className="size-[32px] lg:size-[40px] border border-neutral-100 rounded-[0.327rem] flex items-center justify-center hover:cursor-pointer">
             <BellIcon className="size-[1rem] lg:size-[1.25rem] block" />
+=======
+
+          <div className="relative">
+            <button
+              title="notification"
+              className="size-[32px] lg:size-[40px] border border-neutral-100 rounded-[0.327rem] flex items-center justify-center hover:cursor-pointer"
+              onClick={() => setIsOpen(!isOpen)}
+            >
+              <BellIcon className="size-[1rem] lg:size-[1.25rem] block" />
+              <Spinner
+                size="sm"
+                speed="fast"
+                arcColor="#9A6C50"
+                isLoading={isLoading}
+                className="absolute -top-1 -right-1 bg-white"
+              />
+              {!isLoading && userNotifications && (
+                <span className="absolute -top-1 -right-1 bg-primary-900 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center p-1">
+                  {userNotifications.total}
+                </span>
+              )}
+            </button>
+
+            {/* Notification */}
+            {!isLoading && !isError && (
+              <UserNotification
+                isOpen={isOpen}
+                onClose={() => {
+                  setIsOpen(!isOpen);
+                }}
+                className="w-[500px]"
+                data={userNotifications}
+                markAsRead={(id: string) => handleMarkAsRead(id)}
+                removeNotification={(id: string) => removeNotification(id)}
+                toggleNotification={(id: string) => toggleNotification(id)}
+                expandedId={expandedId}
+              />
+            )}
+>>>>>>> Stashed changes
           </div>
         </div>
       )}

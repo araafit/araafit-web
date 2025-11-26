@@ -5,8 +5,21 @@ import {
   PopoverClose,
 } from "../../../ui/popover";
 import { BellIcon, ArrowRightIcon, XIcon } from "@phosphor-icons/react";
+// import {
+//   useAdminNotifications,
+//   useMarkAdminNotificationAsRead,
+//   useAdminDeleteNotification,
+// } from "../../../../hooks/admin-notification.hooks";
 
-const NotificationBell = () => {
+const AdminNotification = () => {
+  // const {
+  //   isError,
+  //   isLoading,
+  //   isSuccess,
+  //   error,
+  //   data: notification,
+  // } = useAdminNotifications();
+
   return (
     <Popover>
       <PopoverTrigger>
@@ -14,7 +27,7 @@ const NotificationBell = () => {
           <BellIcon className="size-[1.25rem] block" />
         </div>
       </PopoverTrigger>
-      <PopoverContent className="w-[25rem] flex items-start gap-4">
+      <PopoverContent className="w-[25rem] max-h-[500px] flex items-start gap-4">
         <div>
           <h3 className="font-inter text-[#3D3D3D]">You’ve got a new order!</h3>
           <p className="text-[#4F4F4F] text-sm mt-1">
@@ -33,4 +46,4 @@ const NotificationBell = () => {
   );
 };
 
-export default NotificationBell;
+export default AdminNotification;
