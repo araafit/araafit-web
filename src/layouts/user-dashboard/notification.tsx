@@ -230,22 +230,22 @@ export const UserNotification = ({
   return (
     <div
       className={`${CN(
-        "max-h-[500px] bg-white rounded-2xl shadow-2xl p-6 mb-6 fixed right-9 overflow-y-scroll",
+        "h-auto bg-white rounded-2xl shadow-2xl p-6 pt-2 mb-6 fixed right-9",
         className
       )}`}
     >
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-gray-800">Notifications</h2>
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-xl font-semibold text-gray-800 font-inter invisible">Notifications</h2>
         <button
           title="close notification"
           onClick={onClose}
-          className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+          className="p-1 hover:bg-gray-100 rounded-md transition-colors"
         >
-          <XIcon className="w-5 h-5 text-gray-600" />
+          <XIcon className="w-5 h-5 text-red-600 hover:text-gray-600" />
         </button>
       </div>
 
-      <div className="space-y-3">
+      <div className="max-h-[500px] overflow-y-scroll space-y-3">
         {notifications.data.length === 0 ? (
           <p className="text-center text-gray-500 py-8">No notifications</p>
         ) : (
