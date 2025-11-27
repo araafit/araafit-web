@@ -17,7 +17,6 @@ import {
 } from "../../../ui/drawer";
 import { Dialog, DialogContent, DialogTrigger } from "../../../ui/dialog";
 import {
-  DialogClose,
   DialogDescription,
   DialogFooter,
   DialogHeader,
