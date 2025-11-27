@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -41,57 +41,78 @@ export default function StylesList({
   isError,
   styles = [],
 }: StylesList) {
+  const [isOpen, setIsOpen] = useState(false);
   const deleteDressStyleMutation = useDeleteDressStyle();
 
   const handleDelete = async (id: string) => {
     try {
       await deleteDressStyleMutation.mutateAsync(id);
+      setIsOpen(!isOpen);
     } catch (err) {
       // Error handled in hook
       console.error("Failed to delete dress style:", err);
     }
   };
 
-  const DeleteModal: React.FC<{ style: DressStyle }> = ({ style }) => (
-    <Dialog>
-      <DialogTrigger asChild>
-        <button
-          className="text-red-500 hover:text-red-600 p-1 rounded hover:bg-red-50 transition-colors"
-          title="Delete style"
+  const DeleteModal: React.FC<{ data: DressStyle }> = ({ data }) => {
+    return (
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogTrigger asChild>
+          <button
+            className="text-red-500 hover:text-red-600 p-1 rounded hover:bg-red-50 transition-colors"
+            title="Delete style"
+          >
+            <TrashSimpleIcon size={18} />
+          </button>
+        </DialogTrigger>
+
+        <DialogContent
+          className="max-w-[400px]"
+          onClick={(e) => e.stopPropagation()}
         >
-          <TrashSimpleIcon size={18} />
-        </button>
-      </DialogTrigger>
+          <DialogHeader>
+            <DialogTitle className="my-2">
+              Delete {data.dressStyle}?
+            </DialogTitle>
+            <DialogDescription className="text-[#4F4F4F] ">
+              Are you sure you want to delete this style and its information?
+              This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
 
-      <DialogContent className="max-w-[400px]">
-        <DialogHeader>
-          <DialogTitle className="my-2">Delete {style.dressStyle}?</DialogTitle>
-          <DialogDescription className="text-[#4F4F4F] ">
-            Are you sure you want to delete this style and its information? This
-            action cannot be undone.
-          </DialogDescription>
-        </DialogHeader>
-
-        <DialogFooter className="flex">
-          <DialogClose asChild className="flex-1">
+          <DialogFooter className="flex" onClick={(e) => e.stopPropagation()}>
             <Button
               text="Cancel"
               variant="outline"
-              className="border border-[#E7E7E7] text-[#3D3D3D]"
+              className="border border-[#E7E7E7] text-[#3D3D3D] flex-1"
+              onClick={() => setIsOpen(false)}
             />
-          </DialogClose>
-          <Button
-            text={deleteDressStyleMutation.isPending ? "Deleting..." : "Delete"}
-            type="submit"
-            variant="solid"
-            onClick={() => handleDelete(style.id)}
-            disabled={deleteDressStyleMutation.isPending}
-            className="text-white flex-1 bg-[#DC2626]"
-          />
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
+
+            <Button
+              type="button"
+              variant="solid"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete(data.id);
+              }}
+              disabled={deleteDressStyleMutation.isPending}
+              className="text-white flex-1 bg-[#DC2626]"
+            >
+              <div className="flex items-center justify-center gap-1">
+                <span>Delete</span>
+                <Spinner
+                  isLoading={deleteDressStyleMutation.isPending}
+                  arcColor="#ffff"
+                  speed="fast"
+                  size="sm"
+                />
+              </div>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  };
 
   const QuickViewContent: React.FC<{ style: DressStyle }> = ({ style }) => {
     const [selectedDressStyle, setSelectedDressStyle] = React.useState(
@@ -141,7 +162,9 @@ export default function StylesList({
           <div className="space-y-2">
             <label className="text-sm text-[#676767]">Dress Style</label>
             <Select
-              options={[{ label: selectedDressStyle, value: selectedDressStyle }]}
+              options={[
+                { label: selectedDressStyle, value: selectedDressStyle },
+              ]}
               value={selectedDressStyle}
               onChange={setSelectedDressStyle}
               selectClassName="h-12 px-3"
@@ -253,7 +276,7 @@ export default function StylesList({
                       </button>
                     </DrawerTrigger>
 
-                    <DrawerContent className="bg-white rounded-t-xl w-[500px] h-[52.75rem] flex flex-col">
+                    <DrawerContent className="w-[500px] h-screen bg-white rounded-t-xl flex flex-col overflow-y-scroll">
                       {/* Header */}
                       <DrawerHeader className="flex items-center gap-3 pb-3">
                         <DrawerClose>
@@ -338,7 +361,7 @@ export default function StylesList({
                   </Drawer>
 
                   {/* Delete Modal */}
-                  <DeleteModal style={style} />
+                  <DeleteModal data={style} />
                 </div>
               </div>
 
