@@ -57,11 +57,13 @@ export default function SizeTabs() {
     isLoading: isLoadingFemale,
     error: errorFemale,
   } = useSizeChart("female");
+
   const {
     data: maleChart,
     isLoading: isLoadingMale,
     error: errorMale,
   } = useSizeChart("male");
+
   const createSizeChartMutation = useCreateSizeChart();
   const updateSizeChartMutation = useUpdateSizeChart();
 
@@ -391,7 +393,12 @@ export default function SizeTabs() {
 
         {isLoadingFemale || isLoadingMale ? (
           <div className="flex justify-center items-center py-12">
-            <Spinner size="lg" speed="fast" />
+            <Spinner
+              size="md"
+              speed="fast"
+              isLoading={isLoadingFemale || isLoadingMale}
+              arcColor="#9A6C50"
+            />
           </div>
         ) : errorFemale || errorMale ? (
           <div className="bg-red-50 border border-red-200 rounded-md p-6">

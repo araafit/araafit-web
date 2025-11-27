@@ -2,7 +2,11 @@ import { useState, useEffect } from "react";
 import Button from "../../../shared-components/button";
 import { PencilSimpleIcon, EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
 import AvatarBadge from "../customers/customers-avatar";
-import { useAdminProfile, useUpdateAdminProfile, useUpdateAdminPassword } from "../../../hooks/admin-settings.hooks";
+import {
+  useAdminProfile,
+  useUpdateAdminProfile,
+  useUpdateAdminPassword,
+} from "../../../hooks/admin-settings.hooks";
 import { toast } from "react-hot-toast";
 import Spinner from "../../../shared-components/spinner";
 
@@ -30,7 +34,11 @@ export default function ManageOrdersRequests() {
   });
 
   // API hooks
-  const { data: adminProfile, isLoading: profileLoading, error: profileError } = useAdminProfile();
+  const {
+    data: adminProfile,
+    isLoading: profileLoading,
+    error: profileError,
+  } = useAdminProfile();
   const updateProfileMutation = useUpdateAdminProfile();
   const updatePasswordMutation = useUpdateAdminPassword();
 
@@ -107,7 +115,12 @@ export default function ManageOrdersRequests() {
   if (profileLoading) {
     return (
       <div className="bg-white w-full px-4 py-6 flex justify-center items-center min-h-[400px]">
-        <Spinner size="lg" speed="fast" />
+        <Spinner
+          size="md"
+          speed="fast"
+          isLoading={profileLoading}
+          arcColor="#9A6C50"
+        />
       </div>
     );
   }
@@ -117,7 +130,9 @@ export default function ManageOrdersRequests() {
     return (
       <div className="bg-white w-full px-4 py-6">
         <div className="bg-red-50 border border-red-200 rounded-md p-6">
-          <p className="text-red-600">Failed to load admin profile. Please try again.</p>
+          <p className="text-red-600">
+            Failed to load admin profile. Please try again.
+          </p>
         </div>
       </div>
     );
@@ -342,22 +357,32 @@ export default function ManageOrdersRequests() {
                   </button>
                 </div>
                 {formValues.confirmPassword && !passwordsMatch && (
-                  <p className="mt-1 text-sm text-red-500">Passwords do not match</p>
+                  <p className="mt-1 text-sm text-red-500">
+                    Passwords do not match
+                  </p>
                 )}
               </div>
 
               {/* Save Button */}
               <div className="pt-4">
                 <Button
-                  text={updatePasswordMutation.isPending ? "Updating..." : "Save"}
+                  text={
+                    updatePasswordMutation.isPending ? "Updating..." : "Save"
+                  }
                   type="submit"
-                  variant={allFieldsFilled && passwordsMatch ? "solid" : "outline"}
+                  variant={
+                    allFieldsFilled && passwordsMatch ? "solid" : "outline"
+                  }
                   className={`w-full h-14 ${
                     allFieldsFilled && passwordsMatch
                       ? ""
                       : "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
                   }`}
-                  disabled={!allFieldsFilled || !passwordsMatch || updatePasswordMutation.isPending}
+                  disabled={
+                    !allFieldsFilled ||
+                    !passwordsMatch ||
+                    updatePasswordMutation.isPending
+                  }
                 />
               </div>
             </form>
