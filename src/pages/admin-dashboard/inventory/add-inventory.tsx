@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "../../ui/select";
 import { Switch } from "../../ui/switch";
-import NotificationBell from "../admin-components/top-bar/notification-bell";
+import NotificationBell from "../admin-components/top-bar/notification";
 import TopBar from "../admin-components/top-bar/top-bar";
 import { SkinToneSelectField } from "./skin-tone-selection-field";
 import { GenderRadio } from "./gender-radio";
@@ -248,7 +248,6 @@ export function AdminDashboardUploadInventory() {
             </div>
             {/* ----- Inventory fields ----- */}
             <div className="flex-1 max-w-[654px]">
-
               {/* Gender selection */}
               <div className="w-full bg-white rounded-[6px] py-6 px-4 mb-4">
                 <h2 className="mb-4 text-[1.4rem] font-semibold">

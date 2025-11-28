@@ -2,7 +2,7 @@ import { CaretRightIcon } from "@phosphor-icons/react";
 import TopBar from "../admin-components/top-bar/top-bar";
 import AdminDashboardLayout from "../../../layouts/admin-dashboard/dashboard-layout";
 import Overview from "../admin-components/top-overview-items";
-import NotificationBell from "../admin-components/top-bar/notification-bell";
+import NotificationBell from "../admin-components/top-bar/notification";
 import { DataTable } from "../admin-components/customersTable/customers-table";
 import { useCustomerMetrics } from "../../../hooks/admin-customers.hooks";
 import { convertCustomerMetricsToCards } from "../../../utils/admin-customers-utils";

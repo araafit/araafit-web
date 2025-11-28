@@ -6,7 +6,7 @@ import Button from "../../../shared-components/button";
 import Spinner from "../../../shared-components/spinner";
 import { convertApiDiscountsToTable } from "../../../utils/admin-discounts-utils";
 import { DiscountTable } from "../admin-components/discountsTable/discounts-table";
-import NotificationBell from "../admin-components/top-bar/notification-bell";
+import NotificationBell from "../admin-components/top-bar/notification";
 import TopBar from "../admin-components/top-bar/top-bar";
 import { CreateDiscountDrawer } from "./new-discounts";
 

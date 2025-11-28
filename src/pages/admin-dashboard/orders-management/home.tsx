@@ -2,7 +2,7 @@ import { CaretDownIcon, CaretRightIcon } from "@phosphor-icons/react";
 import TopBar from "../admin-components/top-bar/top-bar";
 import AdminDashboardLayout from "../../../layouts/admin-dashboard/dashboard-layout";
 import Overview from "../admin-components/top-overview-items";
-import NotificationBell from "../admin-components/top-bar/notification-bell";
+import NotificationBell from "../admin-components/top-bar/notification";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 import Orders from "./orders";
 import Requests from "./requests";
@@ -114,7 +114,7 @@ export function AdminDashboardOrders() {
   const { bulkUpdate, isUpdating } = useUpdateBulkOrderStatus();
   const { bulkUpdate: bulkSewingStatusUpdate, isUpdating: requestIsUpdating } =
     useUpdateBulkRequestStatus();
-  
+
   const requestsTabInSearchParam = searchParams[0].get("tab");
 
   const {
@@ -125,9 +125,9 @@ export function AdminDashboardOrders() {
 
   useEffect(() => {
     if (requestsTabInSearchParam && requestsTabInSearchParam === "requests") {
-      setTableTab("requests")
+      setTableTab("requests");
     }
-  },[requestsTabInSearchParam])
+  }, [requestsTabInSearchParam]);
 
   const handleBulkUpdateOnChange = async (
     selectedRows: OrderItem[],
@@ -202,7 +202,7 @@ export function AdminDashboardOrders() {
     ));
   };
   const RequestsTableStatusDropdown = () => {
-     return requestsTableStatus.map((status) => (
+    return requestsTableStatus.map((status) => (
       <DropdownMenuItem
         className={`${status.style} px-2 cursor-pointer text-xs py-1 w-auto  block  rounded-full`}
         key={status.label}
@@ -312,7 +312,11 @@ export function AdminDashboardOrders() {
                   </DropdownMenuTrigger>
 
                   <DropdownMenuContent className="w-52 h-full flex flex-col items-start gap-3 p-3 z-20 bg-[#FFFFFF] border border-gray-100 rounded-md mt-2">
-                    {tableTabs === "orders"? <OrdersTableStatusDropdown />:<RequestsTableStatusDropdown />}
+                    {tableTabs === "orders" ? (
+                      <OrdersTableStatusDropdown />
+                    ) : (
+                      <RequestsTableStatusDropdown />
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
 

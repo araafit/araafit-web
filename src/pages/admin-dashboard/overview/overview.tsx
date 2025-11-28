@@ -7,7 +7,7 @@ import TopBar from "../admin-components/top-bar/top-bar";
 import AdminDashboardLayout from "../../../layouts/admin-dashboard/dashboard-layout";
 import { Link } from "react-router-dom";
 import { OverviewTable } from "../admin-components/overViewTable/overview-data-table";
-import AdminNotification from "../admin-components/top-bar/notification-bell";
+import AdminNotification from "../admin-components/top-bar/notification";
 import Overview from "../admin-components/top-overview-items";
 import {
   useAdminDashboardMetrics,
@@ -247,8 +247,7 @@ export function AdminDashboardOverview() {
             <div className=" lg:w-[35.438rem] flex-auto bg-white rounded-md px-4 py-6 items-center justify-between">
               <div className="flex items-center justify-between w-full">
                 <h2 className="font-medium text-[28px] capitalize">
-                  Tailoring Requests{" "}
-                  {metrics && `(${metrics?.newRequests})`}
+                  Tailoring Requests {metrics && `(${metrics?.newRequests})`}
                 </h2>
                 <Link
                   to="/admin-dashboard/order-management?tab=requests"

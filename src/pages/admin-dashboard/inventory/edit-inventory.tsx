@@ -6,7 +6,7 @@ import {
 import TopBar from "../admin-components/top-bar/top-bar";
 import AdminDashboardLayout from "../../../layouts/admin-dashboard/dashboard-layout";
 import Button from "../../../shared-components/button";
-import NotificationBell from "../admin-components/top-bar/notification-bell";
+import NotificationBell from "../admin-components/top-bar/notification";
 import { useState, useEffect } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import {
@@ -192,9 +192,13 @@ export function AdminDashboardEditInventory() {
 
   const BreadCrumb = () => (
     <div className="font-inter font-light capitalize flex items-center">
-      <Link to="/admin-dashboard/overview" className="text-primary-900">Araafit</Link>
+      <Link to="/admin-dashboard/overview" className="text-primary-900">
+        Araafit
+      </Link>
       <CaretRightIcon className="text-primary-900" />
-      <Link to="/admin-dashboard/inventory" className="text-primary-900">Inventory</Link>
+      <Link to="/admin-dashboard/inventory" className="text-primary-900">
+        Inventory
+      </Link>
       <CaretRightIcon className="text-[#979797]" />
       <span className="text-[#979797]">{product?.category || "Product"}</span>
     </div>

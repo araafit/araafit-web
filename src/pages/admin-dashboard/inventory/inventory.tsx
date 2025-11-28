@@ -2,7 +2,7 @@ import { CaretRightIcon, DressIcon, PlusIcon } from "@phosphor-icons/react";
 import TopBar from "../admin-components/top-bar/top-bar";
 import AdminDashboardLayout from "../../../layouts/admin-dashboard/dashboard-layout";
 import Button from "../../../shared-components/button";
-import NotificationBell from "../admin-components/top-bar/notification-bell";
+import NotificationBell from "../admin-components/top-bar/notification";
 import Stockcount from "./stock-count";
 import { DataTable } from "../admin-components/inventoryTable/inventory-table";
 import {
@@ -154,7 +154,7 @@ export function AdminDashboardInventory() {
               />
             )}
           </div>
-          
+
           <Outlet />
         </div>
       </div>
