@@ -37,6 +37,9 @@ import type {
 } from "../../../../services/admin-discounts.service";
 import { toast } from "react-hot-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { DatePicker } from "../../../../shared-components/date-picker/date-picker";
+
+/* ----------------------------------------------------------------------------------------- */
 
 export type Discount = {
   id: string;
@@ -161,6 +164,17 @@ export const EditDiscountDrawer: React.FC<EditDiscountDrawerProps> = ({
     }
   };
 
+  const startDatePickerValue = startDate
+    ? new Date(startDate + "T00:00:00z")
+    : new Date();
+  const startDatePickerSetterValue = (date) =>
+    setStartDate(date ? date.toISOString().split("T")[0] : "");
+  const endDatePickerValue = endDate
+    ? new Date(endDate + "T00:00:00Z")
+    : new Date();
+  const endDatePickerSetterValue = (date) =>
+    setEndDate(date ? date.toISOString().split("T")[0] : "");
+
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger>
@@ -276,30 +290,19 @@ export const EditDiscountDrawer: React.FC<EditDiscountDrawerProps> = ({
 
           {/* Start & End Date */}
           <div className="flex gap-4">
-            <div className="flex-1 space-y-2">
-              <label className="font-inter font-light text-[16px] text-[#1C1C1C]">
-                Start Date
-              </label>
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full border border-[#D0D5DD] px-3 py-2 rounded-lg text-sm"
-                title="Start date"
-              />
-            </div>
-            <div className="flex-1 space-y-2">
-              <label className="font-inter font-light text-[16px] text-[#1C1C1C]">
-                End Date
-              </label>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="w-full border border-[#D0D5DD] px-3 py-2 rounded-lg text-sm"
-                title="End date"
-              />
-            </div>
+            <DatePicker
+              label="Start Date"
+              value={startDatePickerValue}
+              onChange={startDatePickerSetterValue}
+              placeholder="Start date"
+            />
+            
+            <DatePicker
+              label="End Date"
+              value={endDatePickerValue}
+              onChange={endDatePickerSetterValue}
+              placeholder="End date"
+            />
           </div>
         </div>
 
