@@ -8,7 +8,7 @@ import "./date-picker-style.css"
 
 interface DatePickerProps {
   label: string;
-  value: Date | undefined;
+  value?: Date | undefined;
   onChange: (date: Date | undefined) => void;
   placeholder?: string;
   className?: string;
