@@ -24,21 +24,23 @@ export const measurementsKeys = {
 
 // Get user measurements
 export const useMeasurements = () => {
-  // const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuth();
   return useQuery({
     queryKey: measurementsKeys.me(),
     queryFn: () => measurementsService.getMeasurements(),
     staleTime: 5 * 60 * 1000, // 5 minutes
-    // enabled: isAuthenticated,
+    enabled: isAuthenticated,
   });
 };
 
 // Get user measurements summary
 export const useMeasurementsSummary = () => {
+  const { isAuthenticated } = useAuth();
   return useQuery({
     queryKey: measurementsKeys.summary(),
     queryFn: () => measurementsService.getMeasurementsSummary(),
     staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: isAuthenticated,
   });
 };
 

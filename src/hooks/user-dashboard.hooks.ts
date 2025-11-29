@@ -1,6 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { ordersService, type Order } from "../services/orders.service";
-import { productsService, type Product } from "../services/products.service";
+import {
+  productsService,
+  type Product,
+  type ProductRecommendedSizeResponse,
+} from "../services/products.service";
 
 // Hook for fetching recent ongoing orders
 export const useRecentOngoingOrders = () => {
@@ -66,6 +70,26 @@ export const useProduct = (productId: string) => {
     enabled: !!productId,
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 30 * 60 * 1000, // 30 minutes
+  });
+};
+
+// Hook for fetching recommended sizes for a product for the current user
+export const useProductRecommendedSizes = (
+  productId: string,
+  measurementSetId?: string
+) => {
+  return useQuery<ProductRecommendedSizeResponse, Error>({
+    queryKey: [
+      "products",
+      productId,
+      "recommended-size",
+      measurementSetId ?? "default",
+    ],
+    queryFn: () =>
+      productsService.getProductRecommendedSizes(productId, measurementSetId),
+    enabled: !!productId,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 };
 

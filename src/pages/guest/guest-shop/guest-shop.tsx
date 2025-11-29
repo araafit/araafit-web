@@ -89,7 +89,7 @@ export function GuestShopPage() {
     <GuestPageLayout>
       <>
         <SearchProvider>
-          <div className="w-full h-full max-w-none p-4 sm:p-6 lg:p-8 bg-white md:rounded-md relative mb-10">
+          <div className="w-full h-full p-4 sm:p-6 lg:p-8 bg-white md:rounded-md relative mb-10">
             {/* Shop Tabs */}
             <div className="w-full h-full bg-white">
               <ShopTab

@@ -16,10 +16,15 @@ export function KidsShop() {
   } = useProducts({
     limit: 20,
     search: debouncedSearchQuery || undefined,
+    category: "dress",
   });
 
   const products = productsData?.products || [];
-  const kidsProducts = products.filter((item) => item.audience === "kids");
+  const kidsProducts = products.filter((item) =>
+    Array.isArray(item.audience)
+      ? item.audience.includes("kids")
+      : item.audience === "kids"
+  );
 
   // Helper function to generate product link
   const productLink = (product: Product) => {

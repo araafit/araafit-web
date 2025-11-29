@@ -1,15 +1,19 @@
 import UserDashboardLayout from "../../../layouts/user-dashboard/dashboard-layout";
 import TopBar from "../top-bar";
 import { CaretRightIcon } from "@phosphor-icons/react";
-import { useParams } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { DressDetail } from "../../../shared-components/shop/dress-detail";
+import { useProduct } from "../../../hooks/user-dashboard.hooks";
 
 /* -------------------------------------------------------- */
 
 export function DashboardShopDressDetailPage() {
   const params = useParams<{ shopTab: string; itemName: string }>();
-  const itemName = params.itemName?.replaceAll("-", " ");
+  const rawParam = params.itemName || "";
+  const { data: product } = useProduct(rawParam);
+
+  const crumbLabel =
+    (product?.slug || product?.name || rawParam).replaceAll("-", " ");
 
   const BreadCrumb = () => (
     <div className="font-inter font-light capitalize flex items-center">
@@ -23,7 +27,7 @@ export function DashboardShopDressDetailPage() {
         dress
       </Link>
       <CaretRightIcon className="text-[#979797]" />
-      <span className="text-[#979797]">{itemName}</span>
+      <span className="text-[#979797]">{crumbLabel}</span>
     </div>
   );
 

@@ -16,10 +16,15 @@ export function WomenShop() {
   } = useProducts({
     limit: 20,
     search: debouncedSearchQuery || undefined,
+    category: "dress",
   });
 
   const products = productsData?.products || [];
-  const womenProducts = products.filter((item) => item.audience === "women");
+  const womenProducts = products.filter((item) =>
+    Array.isArray(item.audience)
+      ? item.audience.includes("women")
+      : item.audience === "women"
+  );
 
   // Helper function to generate product link
   const productLink = (product: Product) => {

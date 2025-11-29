@@ -29,9 +29,20 @@ import {
 /* --------------------------------------------------------------------------------------- */
 
 // ------------------- Auth ---------------------
-export const useAuthStore = create((set) => ({
+export interface AuthUser {
+  id?: string;
+  email?: string;
+  [key: string]: unknown;
+}
+
+interface AuthState {
+  user: AuthUser | null;
+  login: (user: AuthUser) => void;
+}
+
+export const useAuthStore = create<AuthState>((set) => ({
   user: null,
-  login: (user: any) => set({ user }),
+  login: (user: AuthUser) => set({ user }),
 }));
 
 // ------------------- Measurements ---------------------
@@ -109,6 +120,78 @@ export const useShopStore = create<ShopState>((set) => ({
   },
 }));
 
+// ------------------- Fabric Request Flow ----------------------
+
+export interface FabricRequestState {
+  fabricId?: string;
+  selectedImageIndex: number;
+  selectedImageUrl?: string;
+  selectedStyleId?: number;
+  selectedStyleName?: string;
+  selectedStyleImageUrl?: string;
+  selectedMeasurementSetId?: string;
+  selectedMeasurementSetName?: string;
+  selectedMeasurementGender?: string | null;
+  setSelection: (payload: {
+    fabricId: string;
+    imageIndex: number;
+    imageUrl?: string;
+  }) => void;
+  setStyleSelection: (payload: {
+    styleId: number;
+    styleName: string;
+    styleImageUrl?: string;
+  }) => void;
+  setMeasurementSelection: (payload: {
+    id: string;
+    name?: string | null;
+    gender?: string | null;
+  }) => void;
+  reset: () => void;
+}
+
+export const useFabricRequestStore = create<FabricRequestState>((set) => ({
+  fabricId: undefined,
+  selectedImageIndex: 0,
+  selectedImageUrl: undefined,
+  selectedStyleId: undefined,
+  selectedStyleName: undefined,
+  selectedStyleImageUrl: undefined,
+  selectedMeasurementSetId: undefined,
+  selectedMeasurementSetName: undefined,
+  selectedMeasurementGender: undefined,
+  setSelection: ({ fabricId, imageIndex, imageUrl }) =>
+    set(() => ({
+      fabricId,
+      selectedImageIndex: imageIndex,
+      selectedImageUrl: imageUrl,
+    })),
+  setStyleSelection: ({ styleId, styleName, styleImageUrl }) =>
+    set(() => ({
+      selectedStyleId: styleId,
+      selectedStyleName: styleName,
+      selectedStyleImageUrl: styleImageUrl,
+    })),
+  setMeasurementSelection: ({ id, name, gender }) =>
+    set(() => ({
+      selectedMeasurementSetId: id,
+      selectedMeasurementSetName: name ?? undefined,
+      selectedMeasurementGender: gender ?? null,
+    })),
+  reset: () =>
+    set(() => ({
+      fabricId: undefined,
+      selectedImageIndex: 0,
+      selectedImageUrl: undefined,
+      selectedStyleId: undefined,
+      selectedStyleName: undefined,
+      selectedStyleImageUrl: undefined,
+      selectedMeasurementSetId: undefined,
+      selectedMeasurementSetName: undefined,
+      selectedMeasurementGender: undefined,
+    })),
+}));
+
 // ------------------- Orders ---------------------
 interface OrderState {
   items: OrderItem[];
@@ -119,7 +202,7 @@ interface OrderState {
 export const useOrdersStore = create<OrderState>((set) => ({
   items: orderItems,
   addItem: (item: OrderItem) =>
-    set((state: any) => ({ items: [...state.items, item] })),
+    set((state) => ({ items: [...state.items, item] })),
 }));
 
 // ------------------- Cart ---------------------
@@ -134,7 +217,7 @@ export interface CartState {
 export const useCartStore = create<CartState>((set) => ({
   items: cartItems,
   addItem: (item: CartItem) => {
-    return set((state: any) => ({ items: [...state.items, item] }));
+    return set((state) => ({ items: [...state.items, item] }));
   },
   removeItem: (orderId: string | number) => {
     return set((state) => {
@@ -172,14 +255,13 @@ export const useCartStore = create<CartState>((set) => ({
 // --------- Profile ----------------
 
 export interface ProfileState {
-  myProfile: any[];
+  myProfile: unknown[];
   measurement?: MeasurementInProfile;
-  card?: any[];
-  notification?: any[];
+  card?: unknown[];
+  notification?: unknown[];
 }
 
-// @ts-ignore
-export const useProfileState = create<ProfileState>((set) => ({
+export const useProfileState = create<ProfileState>(() => ({
   myProfile: [],
   measurement: measurementInProfile,
   card: [],

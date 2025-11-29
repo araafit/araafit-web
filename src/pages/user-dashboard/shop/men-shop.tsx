@@ -16,11 +16,16 @@ export function MenShop() {
   } = useProducts({
     limit: 20,
     search: debouncedSearchQuery || undefined,
+    category: "dress",
   });
 
   const products = productsData?.products || [];
 
-  const menProduct = products.filter((item) => item.audience === "men");
+  const menProduct = products.filter((item) =>
+    Array.isArray(item.audience)
+      ? item.audience.includes("men")
+      : item.audience === "men"
+  );
 
   // Helper function to generate product link
   const productLink = (product: Product) => {

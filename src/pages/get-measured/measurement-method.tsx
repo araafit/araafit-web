@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { WarningIcon } from "@phosphor-icons/react";
-import { IconArrowLeft } from "@tabler/icons-react";
 import { useGetMeasured } from "./context/get-measured-context";
 import { MeasurementStepperLines } from "./stepper-lines";
 import Button from "../../shared-components/button";
@@ -43,20 +42,12 @@ export function MeasurementMethod() {
 
 
   return (
-    <div className="flex flex-col gap-8 md:gap-[12rem] relative">
-        {/* Back Button */}
-        <button
-          onClick={() => stepTo(0)}
-          className="lg:absolute top-0 left-0 w-10 h-10 bg-white border border-gray-200 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors duration-200 shadow-sm z-10"
-          aria-label="Go back"
-        >
-          <IconArrowLeft size={16} className="text-gray-600" />
-        </button>
+    <div className="flex flex-col gap-6 md:gap-10">
 
-        <div className="w-full flex flex-col gap-7">
+        <div className="w-full flex flex-col gap-7 mx-auto items-center">
           <MeasurementStepperLines stepIndex={currentStep} />
 
-          <div className="w-full max-w-[51rem] flex flex-col gap-6">
+          <div className="w-full max-w-[51rem] mx-auto flex flex-col gap-6 items-center">
             <div>
               <h2 className="text-xl md:text-[2rem] text-[#1C1C1C] font-semibold mb-2">
                 Measurement Method

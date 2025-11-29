@@ -98,8 +98,10 @@ function GuestPageLayout({ children }: { children: React.ReactElement }) {
         </div>
       </div>
 
-      <div className="size-full overflow-y-auto">
-        {loading ? <Loader /> : children}
+      <div className="size-full overflow-y-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full h-full max-w-6xl mx-auto">
+          {loading ? <Loader /> : children}
+        </div>
       </div>
     </main>
   );

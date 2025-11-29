@@ -24,8 +24,11 @@ import {
 } from "../../../ui/dialog";
 import Button from "../../../../shared-components/button";
 import emptyFolder from "../../images/empty 1.png";
-import { useDeleteDressStyle } from "../../../../hooks/admin-settings.hooks";
-import Select from "../../../../shared-components/select";
+import {
+  useDeleteDressStyle,
+  useDressStyle,
+  useUpdateStyle,
+} from "../../../../hooks/admin-settings.hooks";
 
 /* --------------------------------------------------------------------------- */
 
@@ -43,10 +46,9 @@ export default function StylesList({
   const [isOpen, setIsOpen] = useState(false);
   const deleteDressStyleMutation = useDeleteDressStyle();
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number | string) => {
     try {
-      await deleteDressStyleMutation.mutateAsync(id);
-      setIsOpen(!isOpen);
+      await deleteDressStyleMutation.mutateAsync(String(id));
     } catch (err) {
       // Error handled in hook
       console.error("Failed to delete dress style:", err);
@@ -65,19 +67,14 @@ export default function StylesList({
           </button>
         </DialogTrigger>
 
-        <DialogContent
-          className="max-w-[400px]"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <DialogHeader>
-            <DialogTitle className="my-2">
-              Delete {data.dressStyle}?
-            </DialogTitle>
-            <DialogDescription className="text-[#4F4F4F] ">
-              Are you sure you want to delete this style and its information?
-              This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
+      <DialogContent className="max-w-[400px]">
+        <DialogHeader>
+          <DialogTitle className="my-2">Delete {style.name}?</DialogTitle>
+          <DialogDescription className="text-[#4F4F4F] ">
+            Are you sure you want to delete this style and its information? This
+            action cannot be undone.
+          </DialogDescription>
+        </DialogHeader>
 
           <DialogFooter className="flex" onClick={(e) => e.stopPropagation()}>
             <Button
@@ -113,24 +110,15 @@ export default function StylesList({
     );
   };
 
-  const QuickViewContent: React.FC<{ style: DressStyle }> = ({ style }) => {
-    const [selectedDressStyle, setSelectedDressStyle] = React.useState(
-      style.dressStyle
-    );
-    const [selectedDressSize, setSelectedDressSize] = React.useState(
-      String(style.dressSize ?? "")
-    );
-    const [yardEstimate, setYardEstimate] = React.useState(
-      String(style.yardEstimate ?? "")
-    );
-
-    const sizeOptions = [6, 8, 10, 12, 14, 16, 18, 20].map((n) => ({
-      label: String(n),
-      value: String(n),
-    }));
+  const QuickViewContent: React.FC<{ styleId: number }> = ({ styleId }) => {
+    const {
+      data: fullStyle,
+      isLoading,
+      isError,
+    } = useDressStyle(String(styleId));
 
     return (
-      <DrawerContent className="bg-white rounded-t-xl w-[500px] h-[52.75rem] flex flex-col">
+      <DrawerContent className="bg-white rounded-t-xl w-[500px] h-screen max-h-screen flex flex-col">
         {/* Header */}
         <DrawerHeader className="flex items-center gap-3 pb-3">
           <DrawerClose>
@@ -139,64 +127,323 @@ export default function StylesList({
             </div>
           </DrawerClose>
           <DrawerTitle className="text-lg font-semibold text-[#1C1C1C]">
-            View Style
+            Quick View
           </DrawerTitle>
         </DrawerHeader>
 
         {/* Body */}
         <div className="p-6 flex-1 overflow-y-auto space-y-6">
-          {/* Top images (quick preview) */}
+          {isLoading && !fullStyle && (
+            <div className="flex justify-center items-center py-12">
+              <Spinner size="md" speed="fast" isLoading arcColor="#9A6C50" />
+            </div>
+          )}
+
+          {isError && !fullStyle && (
+            <p className="text-sm text-red-600">
+              Failed to load style details. Please try again.
+            </p>
+          )}
+
+          {fullStyle && (
+            <>
+              {/* Style Images */}
+              <div className="space-y-3">
+                <label className="text-sm text-[#676767] font-medium">
+                  Style Images
+                </label>
           <div className="grid grid-cols-2 gap-4">
-            {(style.images?.slice(0, 2) || []).map((image, idx) => (
+                  {fullStyle.images.map((image, idx) => (
+                    <div key={image.id ?? idx} className="relative">
               <img
-                key={image.id ?? idx}
                 src={image.url || emptyFolder}
-                alt={`${style.dressStyle} ${idx + 1}`}
-                className="w-full h-40 object-cover rounded-lg border border-[#D0D5DD]"
+                        alt={`${fullStyle.name} ${idx + 1}`}
+                        className="w-full h-32 object-cover rounded-lg border border-[#D0D5DD]"
               />
+                    </div>
             ))}
+                  {fullStyle.images.length === 0 && (
+                    <div className="w-full h-32 flex items-center justify-center border border-dashed border-[#D0D5DD] rounded-lg text-xs text-[#676767]">
+                      No images uploaded for this style.
+                    </div>
+                  )}
+                </div>
           </div>
 
-          {/* Dress Style */}
-          <div className="space-y-2">
-            <label className="text-sm text-[#676767]">Dress Style</label>
-            <Select
-              options={[
-                { label: selectedDressStyle, value: selectedDressStyle },
-              ]}
-              value={selectedDressStyle}
-              onChange={setSelectedDressStyle}
-              selectClassName="h-12 px-3"
-              selectedOptionClassName="text-[#1C1C1C]"
-            />
+          {/* Style Name */}
+              <div className="space-y-1">
+            <label className="text-sm text-[#676767]">Style Name</label>
+            <div className="w-full h-12 border border-[#D0D5DD] rounded-lg px-3 text-sm bg-gray-50 flex items-center text-[#1C1C1C]">
+                  {fullStyle.name}
+            </div>
           </div>
 
-          {/* Dress Size */}
-          <div className="space-y-2">
-            <label className="text-sm text-[#676767]">Dress Size</label>
-            <Select
-              options={sizeOptions}
-              value={selectedDressSize}
-              onChange={setSelectedDressSize}
-              selectClassName="h-12 px-3"
-              selectedOptionClassName="text-[#1C1C1C]"
-            />
-          </div>
-
-          {/* Yard Estimate */}
-          <div className="space-y-2">
+              {/* Size Configurations (read-only) */}
+              <div className="space-y-1">
             <label className="text-sm text-[#676767]">
-              Yard Estimate (based on measurement & style)
+              Size Configurations
             </label>
-            <input
-              type="number"
-              step="0.5"
-              min="0"
-              value={yardEstimate}
-              onChange={(e) => setYardEstimate(e.target.value)}
-              className="w-full h-12 border border-[#D0D5DD] rounded-lg px-3 text-sm"
-            />
+                {fullStyle.sizeChartEntries &&
+                fullStyle.sizeChartEntries.length > 0 ? (
+              <div className="border border-[#E7E7E7] rounded-lg p-3 space-y-2 text-sm">
+                    {fullStyle.sizeChartEntries.map((entry) => (
+                  <div
+                    key={entry.id}
+                        className="flex items-center justify-between gap-3"
+                  >
+                        <div className="flex flex-col">
+                    <span className="text-[#1C1C1C]">
+                            {entry.sizeChartEntry?.label}
+                          </span>
+                          <span className="text-[11px] text-[#676767]">
+                            {entry.sizeChartEntry?.chart?.name} (
+                            {entry.sizeChartEntry?.chart?.gender})
+                    </span>
+                        </div>
+                        <span className="text-xs text-[#676767]">
+                      {entry.fabricYards} yards
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-[#676767]">
+                No size configurations linked to this style yet.
+              </p>
+            )}
           </div>
+
+              {/* Style ID */}
+              <div className="space-y-1">
+                <label className="text-sm text-[#676767]">Style ID</label>
+                <div className="w-full h-12 border border-[#D0D5DD] rounded-lg px-3 text-sm bg-gray-50 flex items-center text-[#888888]">
+                  {fullStyle.id}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </DrawerContent>
+    );
+  };
+
+  const StyleDetailsDrawer: React.FC<{ styleId: number }> = ({ styleId }) => {
+    const {
+      data: fullStyle,
+      isLoading,
+      isError,
+    } = useDressStyle(String(styleId));
+
+    const updateStyleMutation = useUpdateStyle();
+    const [editName, setEditName] = React.useState("");
+    const [editSizeConfigs, setEditSizeConfigs] = React.useState<
+      Record<string, string>
+    >({});
+
+    React.useEffect(() => {
+      if (fullStyle) {
+        setEditName(fullStyle.name);
+        const initialConfigs: Record<string, string> = {};
+        fullStyle.sizeChartEntries?.forEach((entry) => {
+          if (entry.sizeChartEntry?.id) {
+            initialConfigs[entry.sizeChartEntry.id] = entry.fabricYards;
+          }
+        });
+        setEditSizeConfigs(initialConfigs);
+      }
+    }, [fullStyle]);
+
+    const handleSave = async () => {
+      if (!fullStyle) return;
+
+      const sizeConfigsPayload = Object.entries(editSizeConfigs)
+        .map(([entryId, yardsStr]) => ({
+          sizeChartEntryId: entryId,
+          fabricYards: Number(yardsStr),
+        }))
+        .filter((cfg) => !Number.isNaN(cfg.fabricYards) && cfg.fabricYards > 0);
+
+      const payload: import("../../../../services/admin-settings.service").UpdateStyleRequest =
+        {};
+
+      if (editName.trim() && editName.trim() !== fullStyle.name) {
+        payload.name = editName.trim();
+      }
+
+      if (sizeConfigsPayload.length > 0) {
+        payload.sizeConfigs = sizeConfigsPayload;
+      }
+
+      if (!payload.name && !payload.sizeConfigs) {
+        return;
+      }
+
+      try {
+        await updateStyleMutation.mutateAsync({
+          id: fullStyle.id,
+          data: payload,
+        });
+      } catch {
+        // errors handled in hook
+      }
+    };
+
+    return (
+      <DrawerContent className="bg-white rounded-t-xl w-[500px] h-screen max-h-screen flex flex-col">
+        {/* Header */}
+        <DrawerHeader className="flex items-center gap-3 pb-3">
+          <DrawerClose>
+            <div className="border h-10 w-10 rounded cursor-pointer border-[#E8E8E8] flex items-center justify-center">
+              <ArrowLeftIcon />
+            </div>
+          </DrawerClose>
+          <DrawerTitle className="text-lg font-semibold text-[#1C1C1C]">
+            {fullStyle ? `Style Details: ${fullStyle.name}` : "Style Details"}
+          </DrawerTitle>
+        </DrawerHeader>
+
+        {/* Body */}
+        <div className="p-6 flex-1 overflow-y-auto pb-20 space-y-6">
+          {isLoading && !fullStyle && (
+            <div className="flex justify-center items-center py-12">
+              <Spinner size="md" speed="fast" isLoading arcColor="#9A6C50" />
+            </div>
+          )}
+
+          {isError && !fullStyle && (
+            <p className="text-sm text-red-600">
+              Failed to load style details. Please try again.
+            </p>
+          )}
+
+          {fullStyle && (
+            <>
+              {/* Style Images */}
+              <div className="space-y-3">
+                <label className="text-sm text-[#676767] font-medium">
+                  Style Images
+                </label>
+                <div className="grid grid-cols-2 gap-4">
+                  {fullStyle.images.map((image, idx) => (
+                    <div key={image.id ?? idx} className="relative">
+                      <img
+                        src={image.url || emptyFolder}
+                        alt={`${fullStyle.name} ${idx + 1}`}
+                        className="w-full h-32 object-cover rounded-lg border border-[#D0D5DD]"
+                      />
+                    </div>
+                  ))}
+                  {fullStyle.images.length === 0 && (
+                    <div className="w-full h-32 flex items-center justify-center border border-dashed border-[#D0D5DD] rounded-lg text-xs text-[#676767]">
+                      No images uploaded for this style.
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Style Name (editable) */}
+              <div className="space-y-1">
+                <label className="text-sm text-[#676767]">Style Name</label>
+                <input
+                  type="text"
+                  className="w-full h-12 border border-[#D0D5DD] rounded-lg px-3 text-sm"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  disabled={updateStyleMutation.isPending}
+                />
+              </div>
+
+              {/* Size Configurations (editable yards) */}
+              <div className="space-y-1">
+                <label className="text-sm text-[#676767]">
+                  Size Configurations
+                </label>
+                {fullStyle.sizeChartEntries &&
+                fullStyle.sizeChartEntries.length > 0 ? (
+                  <div className="border border-[#E7E7E7] rounded-lg p-3 space-y-2 text-sm">
+                    {fullStyle.sizeChartEntries.map((entry) => {
+                      console.log("entry", entry);
+                      return (
+                        <div
+                          key={entry.id}
+                          className="flex items-center justify-between gap-3"
+                        >
+                          <div className="flex flex-col">
+                            <span className="text-[#1C1C1C]">
+                              {entry.sizeChartEntry?.label}
+                            </span>
+                            <span className="text-[11px] text-[#676767]">
+                              {entry.sizeChartEntry?.chart?.name} (
+                              {entry.sizeChartEntry?.chart?.gender})
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span className="text-xs text-[#676767]">
+                              Yards
+                            </span>
+                            <input
+                              type="number"
+                              step="0.1"
+                              min="0"
+                              className="w-20 h-9 border border-[#D0D5DD] rounded-lg px-2 text-xs"
+                              value={
+                                editSizeConfigs[entry.sizeChartEntry?.id] ?? ""
+                              }
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                setEditSizeConfigs((prev) => {
+                                  const next = { ...prev };
+                                  if (!value) {
+                                    delete next[entry.sizeChartEntry.id];
+                                  } else {
+                                    next[entry.sizeChartEntry.id] = value;
+                                  }
+                                  return next;
+                                });
+                              }}
+                              disabled={updateStyleMutation.isPending}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-xs text-[#676767]">
+                    No size configurations linked to this style yet.
+                  </p>
+                )}
+              </div>
+
+              {/* Style ID */}
+              <div className="space-y-1">
+                <label className="text-sm text-[#676767]">Style ID</label>
+                <div className="w-full h-12 border border-[#D0D5DD] rounded-lg px-3 text-sm bg-gray-50 flex items-center text-[#888888]">
+                  {fullStyle.id}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Footer Actions */}
+        <div className="border-t border-[#E8E8E8] bg-gray-50 p-4 h-16 flex items-center justify-end gap-3">
+          <DrawerClose asChild>
+            <Button
+              text="Close"
+              variant="outline"
+              className="border border-[#E7E7E7] text-[#3D3D3D]"
+              disabled={updateStyleMutation.isPending}
+            />
+          </DrawerClose>
+          <Button
+            text={updateStyleMutation.isPending ? "Saving..." : "Save changes"}
+            type="button"
+            variant="solid"
+            className="bg-[#9A6C50] text-white"
+            onClick={handleSave}
+            disabled={updateStyleMutation.isPending}
+          />
         </div>
       </DrawerContent>
     );
@@ -253,16 +500,14 @@ export default function StylesList({
             {/* Image */}
             <img
               src={style.images?.[0]?.url || emptyFolder}
-              alt={style.dressStyle}
+              alt={style.name}
               className="w-full h-40 object-cover"
             />
 
             {/* Info */}
             <div className="p-4 flex flex-col gap-2 flex-1">
               <div className="flex justify-between items-center">
-                <h3 className="font-medium text-[#1C1C1C]">
-                  {style.dressStyle}
-                </h3>
+                <h3 className="font-medium text-[#1C1C1C]">{style.name}</h3>
                 <div className="flex gap-2">
                   {/* Edit Button - View Style Details */}
                   <Drawer>
@@ -275,88 +520,7 @@ export default function StylesList({
                       </button>
                     </DrawerTrigger>
 
-                    <DrawerContent className="w-[500px] h-screen bg-white rounded-t-xl flex flex-col overflow-y-scroll">
-                      {/* Header */}
-                      <DrawerHeader className="flex items-center gap-3 pb-3">
-                        <DrawerClose>
-                          <div className="border h-10 w-10 rounded cursor-pointer border-[#E8E8E8] flex items-center justify-center">
-                            <ArrowLeftIcon />
-                          </div>
-                        </DrawerClose>
-                        <DrawerTitle className="text-lg font-semibold text-[#1C1C1C]">
-                          Style Details: {style.dressStyle}
-                        </DrawerTitle>
-                      </DrawerHeader>
-
-                      {/* Body */}
-                      <div className="p-6 flex-1 overflow-y-auto pb-20 space-y-6">
-                        {/* Style Images */}
-                        <div className="space-y-3">
-                          <label className="text-sm text-[#676767] font-medium">
-                            Style Images
-                          </label>
-                          <div className="grid grid-cols-2 gap-4">
-                            {style.images.map((image, idx) => (
-                              <div key={image.id} className="relative">
-                                <img
-                                  src={image.url}
-                                  alt={`${style.dressStyle} ${idx + 1}`}
-                                  className="w-full h-32 object-cover rounded-lg border border-[#D0D5DD]"
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Dress Style */}
-                        <div className="space-y-1">
-                          <label className="text-sm text-[#676767]">
-                            Dress Style
-                          </label>
-                          <div className="w-full h-12 border border-[#D0D5DD] rounded-lg px-3 text-sm bg-gray-50 flex items-center text-[#1C1C1C]">
-                            {style.dressStyle}
-                          </div>
-                        </div>
-
-                        {/* Dress Size */}
-                        <div className="space-y-1">
-                          <label className="text-sm text-[#676767]">
-                            Dress Size
-                          </label>
-                          <div className="w-full h-12 border border-[#D0D5DD] rounded-lg px-3 text-sm bg-gray-50 flex items-center text-[#1C1C1C]">
-                            {style.dressSize}
-                          </div>
-                        </div>
-
-                        {/* Yard Estimate */}
-                        <div className="space-y-1">
-                          <label className="text-sm text-[#676767]">
-                            Yard Estimate
-                          </label>
-                          <div className="w-full h-12 border border-[#D0D5DD] rounded-lg px-3 text-sm bg-gray-50 flex items-center text-[#1C1C1C]">
-                            {style.yardEstimate} yards
-                          </div>
-                        </div>
-
-                        {/* Style ID */}
-                        <div className="space-y-1">
-                          <label className="text-sm text-[#676767]">
-                            Style ID
-                          </label>
-                          <div className="w-full h-12 border border-[#D0D5DD] rounded-lg px-3 text-sm bg-gray-50 flex items-center text-[#888888]">
-                            {style.id}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Footer Note */}
-                      <div className="border-t border-[#E8E8E8] bg-gray-50 p-4 h-16 flex items-center justify-center">
-                        <p className="text-sm text-[#676767] italic">
-                          Style details are read-only. To modify, delete and
-                          create a new style.
-                        </p>
-                      </div>
-                    </DrawerContent>
+                    <StyleDetailsDrawer styleId={style.id} />
                   </Drawer>
 
                   {/* Delete Modal */}
@@ -372,7 +536,7 @@ export default function StylesList({
                     <ArrowRightIcon size={14} />
                   </button>
                 </DrawerTrigger>
-                <QuickViewContent style={style} />
+                <QuickViewContent styleId={style.id} />
               </Drawer>
             </div>
           </div>

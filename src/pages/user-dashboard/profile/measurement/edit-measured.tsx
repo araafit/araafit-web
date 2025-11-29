@@ -56,14 +56,15 @@ export function DashboardEditMeasurementPage() {
 
   // Set pre-existing measurements
   useEffect(() => {
-    if (currentMeasurements) {
+    if (currentMeasurements?.measurements) {
+      const base = currentMeasurements.measurements;
       setSelectedValues({
-        bust: currentMeasurements.bust as number,
-        waist: currentMeasurements.waist as number,
-        hips: currentMeasurements.hips as number,
-        height: currentMeasurements.height as number,
-        dressSize: currentMeasurements.dressSize as number,
-        skinTone: currentMeasurements.skinTone as string,
+        bust: (base.bust as number) ?? 0,
+        waist: (base.waist as number) ?? 0,
+        hips: (base.hips as number) ?? 0,
+        height: (base.height as number) ?? 0,
+        dressSize: (base.dressSize as number) ?? 0,
+        skinTone: (base.skinTone as string) ?? "",
       });
     }
   }, [currentMeasurements]);

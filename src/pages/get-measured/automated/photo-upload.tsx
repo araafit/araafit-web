@@ -128,7 +128,7 @@ export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
     title: string;
     description?: string;
   }) => (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 mx-auto">
       <div className="flex items-center gap-2">
         <h3 className="text-base font-normal text-[#1C1C1C] font-inter">
           {title}
@@ -216,7 +216,7 @@ export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
 
   return (
     <div className="flex flex-col">
-      <div className="w-full flex flex-col gap-5">
+      <div className="w-full flex flex-col gap-5 mx-auto items-center">
         <MeasurementStepperLines stepIndex={currentStep} className="mb-10" />
 
         <div className="w-full max-w-[51rem] flex flex-col gap-6">

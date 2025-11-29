@@ -71,6 +71,7 @@ export interface InstantCheckoutRequest {
   productId: string;
   quantity: number;
   size: string;
+  callbackUrl?: string;
 }
 
 export interface CheckoutResponse {

@@ -18,6 +18,7 @@ export default function AllItems({
   const { data: productsData, isLoading, isError, error } = useProducts({
     limit: 20,
     search: debouncedSearchQuery || undefined,
+    category: "dress",
   });
 
   // Helper function to generate product link

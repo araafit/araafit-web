@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import showToast from "../utils/notification";
 import { notificationStyles } from "../style/custom";
 import { landingPageService } from "../services/landing-page.service";
+import { useAuthStore } from "../stores/auth-store";
 
 /* ---------------------------------------------------------------------------------- */
 
@@ -34,10 +35,13 @@ export const useClaimDiscount = () => {
 };
 
 export const useActiveDiscounts = () => {
+  const { isAuthenticated, isGuest } = useAuthStore();
   return useQuery({
-    queryFn: () => landingPageService.getActiveDiscounts(),
+    queryFn: () =>
+      landingPageService.getActiveDiscounts(isAuthenticated ? "user" : "guest"),
     queryKey: ["activeDiscounts"],
     staleTime: 2 * 60 * 1000,
+    enabled: isAuthenticated || isGuest,
     retry: (failureCount, error: unknown) => {
       const axiosError = error as { response?: { status?: number } };
       if (

@@ -1,11 +1,7 @@
-import { ArrowLeftIcon } from "@phosphor-icons/react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Button from "../../../shared-components/button";
-import {
-  useSizeChart,
-  useCreateMeasurements,
-  useMeasurements,
-} from "../../../hooks/measurements.hooks";
+import { useCreateMeasurements, useMeasurements } from "../../../hooks/measurements.hooks";
+import { useSkinTonesList } from "../../../hooks/admin-settings.hooks";
 import Spinner from "../../../shared-components/spinner";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
@@ -31,11 +27,10 @@ export function ManualMeasurement() {
   const navigate = useNavigate();
   const { isAuthenticated, isGuest } = useAuth();
   const [searchParams] = useSearchParams();
-  const gender = searchParams.get("gender") || undefined;
+  const gender = (searchParams.get("gender") || undefined) as "male" | "female" | undefined;
 
   // API hooks
-  const { data: sizeChart, isLoading: sizeChartLoading } = useSizeChart(gender);
-  console.log(sizeChart);
+  const { data: skinTones } = useSkinTonesList();
   const { data: existingMeasurements } = useMeasurements();
   const createMeasurements = useCreateMeasurements();
   const updateMeasurement = useMeasurementsStore(
@@ -47,36 +42,39 @@ export function ManualMeasurement() {
     Record<string, number | string>
   >({});
 
-  // Prefill existing measurements if available
+  // Optional name for the measurement set (authenticated users)
+  const [measurementName, setMeasurementName] = useState<string>("");
+
+  // Prefill existing measurements if available (from the aggregated measurements object)
   useEffect(() => {
-    if (existingMeasurements) {
+    if (existingMeasurements?.measurements) {
+      const base = existingMeasurements.measurements;
       setSelectedValues((prev) => {
         const updated: Record<string, number | string> = { ...prev };
-        const keys = sizeChart ? Object.keys(sizeChart) : [];
-        keys.forEach((key) => {
-          if (key === "skinTones") {
-            updated.skinTone = (existingMeasurements.skinTone as string) || "";
-            return;
-          }
-          if (key === "chest") {
-            updated.chest =
-              (existingMeasurements as unknown as Record<string, number | null>)
-                .chest ??
-              (existingMeasurements.bust as number) ??
-              0;
-            return;
-          }
-          const value = (
-            existingMeasurements as unknown as Record<string, number | null>
-          )[key];
-          if (typeof value === "number") {
-            updated[key] = value;
-          }
+        updated.skinTone = (base.skinTone as string) || "";
+
+        const chestOrBust =
+          (base as unknown as Record<string, number | null>).chest ??
+          (base.bust as number) ??
+          0;
+
+        if (gender === "male") updated.chest = chestOrBust;
+        else updated.bust = chestOrBust;
+
+        const keys =
+          (gender || "female") === "male"
+            ? (["waist", "height", "shoulder", "neck"] as const)
+            : (["waist", "hips", "height", "shoulder", "neck"] as const);
+
+        keys.forEach((k) => {
+          const v = (base as unknown as Record<string, number | null>)[k];
+          if (typeof v === "number") updated[k] = v;
         });
+
         return updated;
       });
     }
-  }, [existingMeasurements, sizeChart]);
+  }, [existingMeasurements, gender]);
 
   const handleSelection = (type: string, value: number | string) => {
     setSelectedValues((prev) => ({
@@ -85,31 +83,11 @@ export function ManualMeasurement() {
     }));
   };
 
-  // Determine required fields based on the sizeChart response (exclude skinTones)
-  const orderedKeys = (() => {
-    if (!sizeChart) return [] as string[];
-    const keys = Object.keys(sizeChart);
-    const preferred = [
-      "bust",
-      "chest",
-      "waist",
-      "hips",
-      "shoulder",
-      "inseam",
-      "height",
-      "dressSize",
-      "skinTones",
-    ];
-    const first = preferred.filter((k) => keys.includes(k));
-    const rest = keys.filter((k) => !preferred.includes(k));
-    return [...first, ...rest];
-  })();
-
-  const requiredKeys = orderedKeys.filter((k) => k !== "skinTones");
-  const measurementNotSelected = requiredKeys.some((key) => {
-    const val = selectedValues[key];
-    return val === 0 || val === "" || val === undefined || val === null;
-  });
+  // Required fields per gender
+  const requiredFields =
+    (gender || "female") === "male"
+      ? (["chest", "waist", "height"] as const)
+      : (["bust", "waist", "hips", "height"] as const);
 
   const saveData = async () => {
     if (!isAuthenticated && !isGuest) {
@@ -124,21 +102,20 @@ export function ManualMeasurement() {
         typeof selectedValues["height"] === "string"
           ? (selectedValues["height"] as string)
           : String(selectedValues["height"] ?? "");
-      const dressSizeVal = (selectedValues["dressSize"] as number) ?? 0;
       const skinToneVal = (selectedValues["skinTone"] as string) ?? "";
 
       updateMeasurement("bust", bustVal);
       updateMeasurement("waist", waistVal);
       updateMeasurement("hip", hipsVal);
       updateMeasurement("height", heightVal);
-      updateMeasurement("dressSize", dressSizeVal);
       updateMeasurement("skinTone", skinToneVal);
 
-      navigate("/get-measured/summary");
+      navigate(`/get-measured/summary?gender=${gender}`);
       return;
     }
 
     const payload = {
+      gender,
       bust:
         (selectedValues["bust"] as number) ??
         (selectedValues["chest"] as number) ??
@@ -146,8 +123,8 @@ export function ManualMeasurement() {
       waist: (selectedValues["waist"] as number) ?? 0,
       hips: (selectedValues["hips"] as number) ?? 0,
       height: (selectedValues["height"] as number) ?? 0,
-      dressSize: (selectedValues["dressSize"] as number) ?? 0,
       skinTone: (selectedValues["skinTone"] as string) ?? "",
+      name: measurementName || undefined,
     };
 
     createMeasurements.mutate(payload, {
@@ -167,42 +144,16 @@ export function ManualMeasurement() {
     });
   };
 
-  if (sizeChartLoading) {
+  if (!gender) {
     return (
-      <section className="min-h-screen bg-[#F5F5F5] px-0 py-0 md:py-2 md:px-16 overflow-y-scroll relative">
-        <div className="w-full min-h-[809px] bg-white flex justify-center items-center border rounded-md p-4 md:p-14">
-          <div className="flex flex-col md:flex-row items-center justify-center gap-2">
-            <span className="text-sm md:text-base">
-              Loading measurement options
-            </span>
-            <Spinner
-              isLoading={sizeChartLoading}
-              speed="fast"
-              size="lg"
-              arcColor="#9A6C50"
-            />
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  const isEmpty =
-    !sizeChart ||
-    (typeof sizeChart === "object" &&
-      sizeChart !== null &&
-      Object.keys(sizeChart).length === 0);
-
-  if (isEmpty) {
-    return (
-      <section className="min-h-screen bg-[#F5F5F5] px-0 py-0 md:py-2 md:px-16 overflow-y-scroll relative">
+      <section className="min-h-screen px-0 py-0 md:py-2 md:px-16 overflow-y-scroll relative">
         <div className="w-full min-h-[809px] bg-white flex justify-center items-center border rounded-md p-4 md:p-14">
           <div className="flex flex-col items-center justify-center gap-3">
             <h5 className="text-lg md:text-xl font-semibold text-center">
-              No measurement options
+              Gender not selected
             </h5>
             <p className="text-neutral-500 text-sm md:text-base text-center px-4">
-              We couldn't find any measurement options for the selected gender.
+              Please go back and select your gender to continue manual measurement.
             </p>
             <Button
               variant="outline"
@@ -217,24 +168,6 @@ export function ManualMeasurement() {
   }
 
   return (
-    <section className="min-h-screen bg-[#F5F5F5] px-0 py-0 md:py-2 md:px-16 overflow-y-scroll relative">
-      <div className="w-full min-h-[809px] bg-white flex justify-center border rounded-md p-4 md:p-14">
-        <button
-          type="button"
-          className="absolute top-4 md:top-[32px] left-4 md:left-[200px] w-8 h-8 md:w-[40px] md:h-[40px] rounded-md border border-[#E8E8E8] flex flex-col items-center justify-center bg-white text-neutral-800 cursor-pointer z-10 hover:bg-gray-50 transition-colors"
-          onClick={() => navigate(-1)}
-          title="Go back"
-        >
-          <ArrowLeftIcon
-            size={20}
-            className="md:hidden text-neutral-800 block"
-          />
-          <ArrowLeftIcon
-            size={50}
-            className="hidden md:block h-full text-neutral-800"
-          />
-        </button>
-
         <div
           className="w-full max-w-4xl flex flex-col gap-4 md:gap-6"
           style={waterMarkStyle}
@@ -249,82 +182,87 @@ export function ManualMeasurement() {
           </div>
 
           <div className="w-full flex flex-col gap-4 md:gap-6">
-            {orderedKeys.map((key) => {
-              if (key === "skinTones") {
-                const tones =
-                  ((
-                    sizeChart as unknown as Record<
-                      string,
-                      { name: string; hex: string }[]
-                    >
-                  )[key] as { name: string; hex: string }[]) || [];
-                return (
-                  <div
-                    key={key}
-                    className="w-full flex flex-col gap-2 md:gap-3"
-                  >
-                    <span className="font-medium capitalize text-[#1C1C1C] text-sm md:text-base">
-                      Skin Tone:
-                    </span>
-                    <div className="grid grid-cols-3 sm:grid-cols-6 md:flex md:items-center md:justify-between gap-2 md:gap-4 flex-wrap">
-                      {tones.map((tone) => (
-                        <Button
-                          key={tone.name}
-                          style={{ backgroundColor: tone.hex }}
-                          className={`w-full md:w-[58px] h-[36px] md:h-[44px] rounded-md border hover:border-neutral-700 focus:border-neutral-700 cursor-pointer ${
-                            selectedValues.skinTone === tone.name
-                              ? "border-neutral-700 ring-2 ring-neutral-700"
-                              : "border-gray-300"
-                          }`}
-                          onClick={() => handleSelection("skinTone", tone.name)}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                );
-              }
+            {/* Measurement set name (optional, for authenticated users) */}
+            {isAuthenticated && (
+              <div className="w-full flex flex-col gap-2 md:gap-3">
+                <span className="text-sm md:text-base text-[#1C1C1C] font-medium">
+                  Measurement set name (optional)
+                </span>
+                <input
+                  type="text"
+                  className="w-full h-12 border border-[#D0D5DD] rounded-md px-3 text-sm"
+                  placeholder="e.g. Evening Gown, Workwear, Casual"
+                  value={measurementName}
+                  onChange={(e) => setMeasurementName(e.target.value)}
+                />
+              </div>
+            )}
 
-              const items =
-                (sizeChart[key] as { id: string; value: number; label?: string }[]) || [];
-              // console.log("items", items);
-              // console.log("key", key, sizeChart);
-              const label = ["dressSize", "clotheSize"].includes(key)
-                ? "Size"
-                : key === "hips"
-                ? "Hips"
-                : key === "chest"
-                ? "Chest"
-                : key.charAt(0).toUpperCase() + key.slice(1);
+            {/* Skin tones */}
+            <div className="w-full flex flex-col gap-2 md:gap-3">
+              <span className="font-medium capitalize text-[#1C1C1C] text-sm md:text-base">
+                Skin Tone:
+              </span>
+              <div className="grid grid-cols-3 sm:grid-cols-6 md:flex md:items-center md:justify-between gap-2 md:gap-4 flex-wrap">
+                {(skinTones ?? []).map((tone) => (
+                  <Button
+                    key={tone.name}
+                    style={{ backgroundColor: tone.hex }}
+                    className={`w-full md:w-[58px] h-[36px] md:h-[44px] rounded-md border hover:border-neutral-700 focus:border-neutral-700 cursor-pointer ${
+                      selectedValues.skinTone === tone.name
+                        ? "border-neutral-700 ring-2 ring-neutral-700"
+                        : "border-gray-300"
+                    }`}
+                    onClick={() => handleSelection("skinTone", tone.name)}
+                  />
+                ))}
+              </div>
+            </div>
 
-              return (
-                <div key={key} className="w-full flex flex-col gap-2 md:gap-3">
-                  <span className="font-medium capitalize text-[#1C1C1C] text-sm md:text-base">
-                    {label}:
-                  </span>
-                  <div className="grid grid-cols-4 sm:grid-cols-6 md:flex md:items-center md:justify-between gap-2 md:gap-4 flex-wrap">
-                    {items.map((item) => (
-                      <Button
-                        key={item.id}
-                        type="button"
-                        text={item.label || String(item.value)}
-                        variant="outline"
-                        className={`w-full md:w-[58px] h-[36px] md:h-[44px] text-xs md:text-[0.875rem] border-[#E8E8E8] flex items-center justify-center text-neutral-800 hover:border-neutral-700 focus:border-neutral-700 ${
-                          selectedValues[key] === item.value
-                            ? "border-primary-950 bg-primary-50"
-                            : ""
-                        }`}
-                        onClick={() => handleSelection(key, item.value)}
-                      />
-                    ))}
-                  </div>
+            {/* Numeric inputs per gender */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {(requiredFields as readonly string[]).map((f) => (
+                <div key={f} className="space-y-1">
+                  <label className="text-sm text-[#676767] capitalize">
+                    {f}
+                  </label>
+                  <input
+                    type="number"
+                    className="w-full h-12 border border-[#D0D5DD] rounded-md px-3 text-sm"
+                    value={String(selectedValues[f] ?? "")}
+                    onChange={(e) =>
+                      handleSelection(f, e.target.value === "" ? "" : Number(e.target.value))
+                    }
+                    min={0}
+                  />
                 </div>
-              );
-            })}
+              ))}
+              {/* Optional fields */}
+              {["neck", "shoulder"].map((f) => (
+                <div key={f} className="space-y-1">
+                  <label className="text-sm text-[#676767] capitalize">{f} (optional)</label>
+                  <input
+                    type="number"
+                    className="w-full h-12 border border-[#D0D5DD] rounded-md px-3 text-sm"
+                    value={String(selectedValues[f] ?? "")}
+                    onChange={(e) =>
+                      handleSelection(f, e.target.value === "" ? "" : Number(e.target.value))
+                    }
+                    min={0}
+                  />
+                </div>
+              ))}
+            </div>
 
             <Button
               variant="solid"
               onClick={saveData}
-              disabled={measurementNotSelected || createMeasurements.isPending}
+              disabled={
+                requiredFields.some((k) => {
+                  const v = selectedValues[k as string];
+                  return v === "" || v === undefined || v === null || Number(v) <= 0;
+                }) || createMeasurements.isPending
+              }
               className="w-full md:w-[175px] self-end mt-4 md:mt-2 disabled:bg-neutral-50 disabled:cursor-not-allowed"
             >
               <div className="flex items-center justify-center gap-1">
@@ -343,7 +281,5 @@ export function ManualMeasurement() {
             </Button>
           </div>
         </div>
-      </div>
-    </section>
   );
 }

@@ -53,13 +53,14 @@ export function FabricRequestSummary() {
   // Function to create guest user with measurements
   const handleRequest = async () => {
     try {
+      const base = measurementData?.measurements;
       const payload: SewingRequest = {
-        bust: measurementData?.bust || 0,
-        waist: measurementData?.waist || 0,
-        hips: measurementData?.hips || 0,
-        height: measurementData?.height || 0,
-        dressSize: measurementData?.dressSize || 0,
-        skinTone: measurementData?.skinTone || "",
+        bust: base?.bust || 0,
+        waist: base?.waist || 0,
+        hips: base?.hips || 0,
+        height: base?.height || 0,
+        dressSize: (base?.dressSize as number) || 0,
+        skinTone: base?.skinTone || "",
         size: selectedSize || "",
         dressStyle: selectedStyle || "",
         yardEstimate: selectedYards ? Number(selectedYards) : 0,
@@ -161,14 +162,14 @@ export function FabricRequestSummary() {
                   <span className="text-neutral-800 font-medium">Bust</span>
 
                   <span className="font-semibold text-neutral-950">
-                     {measurementData?.bust? measurementData.bust : 'N/A'}
+                    {measurementData?.measurements?.bust}
                   </span>
                 </div>
                 <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
                   <span className="text-neutral-800 font-medium">Waist</span>
 
                   <span className="font-semibold text-neutral-950">
-                    {measurementData?.waist? measurementData.waist : 'N/A'}
+                    {measurementData?.measurements?.waist}
                   </span>
                 </div>
 
@@ -178,14 +179,14 @@ export function FabricRequestSummary() {
                   </span>
 
                   <span className="font-semibold text-neutral-950">
-                   {measurementData?.hips ? measurementData.hips : 'N/A'}
+                    {measurementData?.measurements?.hips}
                   </span>
                 </div>
 
                 <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
                   <span className="text-neutral-800 font-medium">Height</span>
                   <span className="font-semibold text-neutral-950">
-                    {measurementData?.height? measurementData.height : 'N/A'}
+                    {measurementData?.measurements?.height}
                   </span>
                 </div>
 
@@ -195,7 +196,7 @@ export function FabricRequestSummary() {
                   </span>
 
                   <span className="font-semibold text-neutral-950">
-                    {measurementData?.dressSize ? measurementData.dressSize : 'N/A'}
+                    {measurementData?.measurements?.dressSize}
                   </span>
                 </div>
 
@@ -205,12 +206,12 @@ export function FabricRequestSummary() {
                   </span>
 
 
-                  {measurementData?.skinTone ? ( <div className="flex items-center gap-1">
+                  {measurementData?.measurements.skinTone ? ( <div className="flex items-center gap-1">
                     <div
                       className="w-[58px] h-[44px] rounded-md"
                       style={{
                         backgroundColor:
-                          skinToneObj[measurementData?.skinTone as string],
+                          skinToneObj[measurementData?.measurements?.skinTone as string],
                       }}
                     />
                   </div>):(<span className="font-semibold text-neutral-950">N/A</span>)}

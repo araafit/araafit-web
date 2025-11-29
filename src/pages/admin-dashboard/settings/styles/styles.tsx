@@ -6,8 +6,9 @@ import {
 } from "@phosphor-icons/react";
 import { useState } from "react";
 import {
-  useCreateDressStyle,
   useDressStyles,
+  useCreateStyle,
+  useChartsByGender,
 } from "../../../../hooks/admin-settings.hooks";
 import Button from "../../../../shared-components/button";
 import {
@@ -32,14 +33,16 @@ import Spinner from "../../../../shared-components/spinner";
 
 export default function StylesTabs() {
   const [selectedStyle, setSelectedStyle] = useState("");
-  const [selectedSize, setSelectedSize] = useState("");
-  const [yardEstimate, setYardEstimate] = useState("");
   const [contributorPhotos, setContributorPhotos] = useState<File[]>([]);
   const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
+  const [gender, setGender] = useState<"male" | "female">("female");
+  const [selectedChartId, setSelectedChartId] = useState<string>("");
+  const [sizeConfigs, setSizeConfigs] = useState<Record<string, string>>({});
 
   // API hooks
   const { data: styles, isLoading, isError } = useDressStyles();
-  const createDressStyleMutation = useCreateDressStyle();
+  const createStyleMutation = useCreateStyle();
+  const chartsList = useChartsByGender(gender);
 
   const handlePhotosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -109,40 +112,39 @@ export default function StylesTabs() {
   };
 
   const handleAdd = async () => {
+    const sizeConfigsPayload = Object.entries(sizeConfigs)
+      .map(([entryId, yardsStr]) => ({
+        sizeChartEntryId: entryId,
+        fabricYards: Number(yardsStr),
+      }))
+      .filter((cfg) => !Number.isNaN(cfg.fabricYards) && cfg.fabricYards > 0);
+
     if (
       !selectedStyle ||
-      !selectedSize ||
-      !yardEstimate ||
+      sizeConfigsPayload.length === 0 ||
       contributorPhotos.length === 0
     ) {
       console.warn("Form validation failed:", {
         selectedStyle: !!selectedStyle,
-        selectedSize: !!selectedSize,
-        yardEstimate: !!yardEstimate,
+        hasSizeConfigs: sizeConfigsPayload.length > 0,
         hasPhotos: contributorPhotos.length > 0,
       });
       return;
     }
 
-    const yardNumber = Number(yardEstimate);
-    if (isNaN(yardNumber) || yardNumber <= 0) {
-      console.warn("Invalid yard estimate:", yardEstimate);
-      return;
-    }
-
     try {
-      await createDressStyleMutation.mutateAsync({
-        dressStyle: selectedStyle,
-        dressSize: selectedSize,
-        yardEstimate: yardNumber,
+      await createStyleMutation.mutateAsync({
+        name: selectedStyle,
+        sizeConfigs: sizeConfigsPayload,
         files: contributorPhotos,
       });
 
       // Reset form
       setSelectedStyle("");
-      setSelectedSize("");
-      setYardEstimate("");
       setContributorPhotos([]);
+      setGender("female");
+      setSelectedChartId("");
+      setSizeConfigs({});
       setIsAddDrawerOpen(false);
     } catch (error) {
       console.error("Failed to create dress style:", error);
@@ -162,7 +164,7 @@ export default function StylesTabs() {
             </div>
           </DrawerTrigger>
 
-          <DrawerContent className="bg-white rounded-t-xl w-[500px]  h-[52.75rem] flex flex-col">
+          <DrawerContent className="bg-white rounded-t-xl w-full max-w-[500px] h-screen max-h-screen flex flex-col">
             {/* Header */}
             <DrawerHeader className="flex items-center gap-3  pb-3">
               <DrawerClose>
@@ -179,7 +181,16 @@ export default function StylesTabs() {
             <div className="p-6 flex-1 overflow-y-auto pb-20 space-y-6">
               {/* Upload Section */}
               <div className="h-[298px] w-full px-6 flex flex-row justify-center items-center border border-dashed border-[#D0D5DD] rounded-[12px] bg-white">
-                {createDressStyleMutation.isPending ? (
+                <input
+                  type="file"
+                  accept="image/png, image/jpg, image/jpeg"
+                  multiple
+                  onChange={handlePhotosChange}
+                  id="file-upload"
+                  style={{ display: "none" }}
+                  disabled={createStyleMutation.isPending}
+                />
+                {createStyleMutation.isPending ? (
                   <div className="flex items-center gap-2 text-[#9A6C50] font-medium">
                     <span className="relative flex h-5 w-5">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#9A6C50] opacity-75"></span>
@@ -199,7 +210,7 @@ export default function StylesTabs() {
                       onChange={handlePhotosChange}
                       id="file-upload"
                       className="hidden"
-                      disabled={createDressStyleMutation.isPending}
+                      disabled={createStyleMutation.isPending}
                     />
                     <div className="h-12 w-12 bg-[#F0F2F5] rounded-full flex items-center justify-center mx-auto">
                       <CloudArrowUpIcon className="text-[#475367]" size={32} />
@@ -220,6 +231,14 @@ export default function StylesTabs() {
                       <span className="text-[#5D5D5D]">OR</span>
                       <div className="flex-grow border-t border-[#F0F2F5]"></div>
                     </div>
+                    <Button
+                      text="Browse Files"
+                      variant="solid"
+                      className="text-white shadow-sm w-44"
+                      onClick={() =>
+                        document.getElementById("file-upload")?.click()
+                      }
+                    />
                     <span className="h-12 py-3 px-5 bg-primary-500 rounded-[0.375rem] text-white shadow-sm w-44">
                       Browser file
                     </span>
@@ -250,87 +269,152 @@ export default function StylesTabs() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-sm text-[#676767]">Dress Style</label>
-                <Select
-                  value={selectedStyle}
-                  onValueChange={setSelectedStyle}
-                  disabled={createDressStyleMutation.isPending}
-                >
-                  <SelectTrigger className="w-full h-12 border border-[#D0D5DD] rounded-lg px-3 text-sm">
-                    <SelectValue placeholder="Select Style" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Corset">Corset</SelectItem>
-                    <SelectItem value="Peplum top">Peplum top</SelectItem>
-                    <SelectItem value="A-gowns">A-gowns</SelectItem>
-                    <SelectItem value="Puffy sleeves">Puffy sleeves</SelectItem>
-                    <SelectItem value="Off-shoulder">Off-shoulder</SelectItem>
-                    <SelectItem value="Flay dresses">Flay dresses</SelectItem>
-                    <SelectItem value="Boubou">Boubou</SelectItem>
-                    <SelectItem value="Jumpsuit">Jumpsuit</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Dress Size Dropdown */}
-              <div className="space-y-1">
-                <label className="text-sm text-[#676767]">Dress Size</label>
-                <Select
-                  value={selectedSize}
-                  onValueChange={setSelectedSize}
-                  disabled={createDressStyleMutation.isPending}
-                >
-                  <SelectTrigger className="w-full h-12 border border-[#D0D5DD] rounded-lg px-3 text-sm">
-                    <SelectValue placeholder="Select Size" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="6">6</SelectItem>
-                    <SelectItem value="8">8</SelectItem>
-                    <SelectItem value="10">10</SelectItem>
-                    <SelectItem value="12">12</SelectItem>
-                    <SelectItem value="14">14</SelectItem>
-                    <SelectItem value="16">16</SelectItem>
-                    <SelectItem value="18">18</SelectItem>
-                    <SelectItem value="20">20</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Yard Estimate */}
-              <div className="space-y-1">
-                <label className="text-sm text-[#676767]">Yard Estimate</label>
+                <label className="text-sm text-[#676767]">Style Name</label>
                 <input
-                  type="number"
-                  step="0.1"
-                  min="0.1"
-                  placeholder="Enter yard estimate (e.g., 3.5)"
-                  value={yardEstimate}
-                  onChange={(e) => setYardEstimate(e.target.value)}
+                  type="text"
+                  placeholder="Enter style name (e.g., Corset)"
+                  value={selectedStyle}
+                  onChange={(e) => setSelectedStyle(e.target.value)}
                   className="w-full h-12 border border-[#D0D5DD] rounded-lg px-3 text-sm"
-                  disabled={createDressStyleMutation.isPending}
+                  disabled={createStyleMutation.isPending}
                 />
+              </div>
+
+              {/* Size Configurations */}
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-sm text-[#676767]">
+                    Size Chart Gender
+                  </label>
+                  <Select
+                    value={gender}
+                    onValueChange={(value) =>
+                      setGender(value as "male" | "female")
+                    }
+                    disabled={createStyleMutation.isPending}
+                  >
+                    <SelectTrigger className="w-full h-12 border border-[#D0D5DD] rounded-lg px-3 text-sm">
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="female">Female</SelectItem>
+                      <SelectItem value="male">Male</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-sm text-[#676767]">Size Chart</label>
+                  <Select
+                    value={selectedChartId}
+                    onValueChange={(value) => {
+                      setSelectedChartId(value);
+                      setSizeConfigs({});
+                    }}
+                    disabled={createStyleMutation.isPending}
+                  >
+                    <SelectTrigger className="w-full h-12 border border-[#D0D5DD] rounded-lg px-3 text-sm">
+                      <SelectValue placeholder="Select size chart" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {chartsList.data?.map((chart) => (
+                        <SelectItem key={chart.id} value={chart.id}>
+                          {chart.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="border border-[#F0F2F5] rounded-lg p-3 max-h-56 overflow-y-auto">
+                  {!selectedChartId ? (
+                    <p className="text-xs text-[#676767]">
+                      Select a size chart to configure fabric yards per size.
+                    </p>
+                  ) : chartsList.isLoading ? (
+                    <div className="flex items-center justify-center py-6">
+                      <Spinner size="sm" speed="fast" />
+                    </div>
+                  ) : (
+                    (() => {
+                      const chart = chartsList.data?.find(
+                        (c) => c.id === selectedChartId
+                      );
+                      if (
+                        !chart ||
+                        !chart.entries ||
+                        chart.entries.length === 0
+                      ) {
+                        return (
+                          <p className="text-xs text-[#676767]">
+                            No entries available for this chart.
+                          </p>
+                        );
+                      }
+                      console.log("chart.entries", chart.entries);
+                      return (
+                        <div className="space-y-2">
+                          {chart.entries.map((entry) => (
+                            <div
+                              key={entry.id}
+                              className="flex items-center justify-between gap-3 text-sm"
+                            >
+                              <span className="text-[#1C1C1C]">
+                                {entry.label}
+                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-[#676767]">
+                                  Yards
+                                </span>
+                                <input
+                                  type="number"
+                                  step="0.1"
+                                  min="0"
+                                  className="w-20 h-9 border border-[#D0D5DD] rounded-lg px-2 text-xs"
+                                  value={sizeConfigs[entry.id] ?? ""}
+                                  onChange={(e) => {
+                                    const value = e.target.value;
+                                    setSizeConfigs((prev) => {
+                                      const next = { ...prev };
+                                      if (!value) {
+                                        delete next[entry.id];
+                                      } else {
+                                        next[entry.id] = value;
+                                      }
+                                      return next;
+                                    });
+                                  }}
+                                  disabled={createStyleMutation.isPending}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()
+                  )}
+                </div>
               </div>
             </div>
 
             {/* Sticky Footer */}
             <div className="border-t border-[#E8E8E8] bg-white p-4 h-20 flex justify-center items-center sticky bottom-0">
               <Button
+                text={createStyleMutation.isPending ? "Adding..." : "Add"}
                 type="button"
                 variant="solid"
                 className="w-full md:max-w-[9.375rem]"
                 disabled={
                   !selectedStyle ||
-                  !selectedSize ||
-                  !yardEstimate ||
                   contributorPhotos.length === 0 ||
-                  createDressStyleMutation.isPending
+                  createStyleMutation.isPending
                 }
                 onClick={handleAdd}
               >
                 <div className="flex items-center justify-center gap-2">
                   <span>Add</span>
                   <Spinner
-                    isLoading={createDressStyleMutation.isPending}
+                    isLoading={createStyleMutation.isPending}
                     speed="fast"
                     size="sm"
                     arcColor="#ffff"

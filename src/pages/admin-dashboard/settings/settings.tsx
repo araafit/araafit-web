@@ -3,7 +3,7 @@ import TopBar from "../admin-components/top-bar/top-bar";
 import AdminDashboardLayout from "../../../layouts/admin-dashboard/dashboard-layout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 import Profile from "./profile";
-import SizeTabs from "./size";
+import SizeTabs from "./size-v2";
 import StylesTabs from "./styles/styles";
 
 /* ------------------------------------------------------------------------------------------ */

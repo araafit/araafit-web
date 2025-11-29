@@ -3,6 +3,8 @@ import apiClient from "../lib/axios";
 import type { ApiResponse } from "./admin-auth.service";
 import type { Pagination } from "./products.service";
 
+type Audience = "men" | "women" | "kids";
+
 // Types for Admin Inventory
 export interface ProductImage {
   id: string;
@@ -10,10 +12,32 @@ export interface ProductImage {
   publicId: string;
 }
 
+export interface SizeChartEntry {
+  id: string;
+  label: string;
+  chart?: {
+    id: string;
+    name: string;
+    gender: "male" | "female";
+  };
+  chestMin?: number | null;
+  chestMax?: number | null;
+  waistMin?: number | null;
+  waistMax?: number | null;
+  hipsMin?: number | null;
+  hipsMax?: number | null;
+  neckMin?: number | null;
+  neckMax?: number | null;
+  shoulderMin?: number | null;
+  shoulderMax?: number | null;
+  heightMin?: number | null;
+  heightMax?: number | null;
+}
+
 export interface AdminProduct {
   id: string;
   name: string;
-  audience: "men" | "women" | "kids";
+  audience: Audience | Audience[];
   category: "dress" | "fabric";
   description?: string;
   materialType?: string;
@@ -31,6 +55,14 @@ export interface AdminProduct {
   style?: string;
   patternType?: string;
   skinToneRecommendation?: string[];
+  /**
+   * IDs of size chart entries currently linked to this product
+   */
+  sizeChartEntryIds?: string[];
+  /**
+   * All size chart entries available for this product (derived from its charts)
+   */
+  availableSizeChartEntries?: SizeChartEntry[];
   images: ProductImage[];
   createdAt: string;
   updatedAt: string;
@@ -48,7 +80,7 @@ export interface ProductMetrics {
 
 export interface CreateProductRequest {
   files?: File[];
-  audience: "men" | "women" | "kids";
+  audience: Audience | Audience[];
   name: string;
   category: "dress" | "fabric";
   description?: string;
@@ -67,11 +99,12 @@ export interface CreateProductRequest {
   discountEnd?: string;
   skinToneRecommendation?: string[];
   styleId?: number;
+  sizeChartEntryIds?: string[];
 }
 
 export interface UpdateProductRequest {
   files?: File[];
-  audience: "men" | "women" | "kids";
+  audience?: Audience | Audience[];
   name?: string;
   description?: string;
   materialType?: string;
@@ -89,6 +122,7 @@ export interface UpdateProductRequest {
   discountEnd?: string;
   skinToneRecommendation?: string[];
   styleId?: number;
+  sizeChartEntryIds?: string[];
 }
 
 export interface CreateProductResponse {
@@ -156,7 +190,12 @@ class AdminInventoryService {
     // Add required fields
     formData.append("name", data.name);
     formData.append("category", data.category);
-    formData.append("audience", data.audience);
+    const createAudiences = Array.isArray(data.audience)
+      ? data.audience
+      : [data.audience];
+    createAudiences.forEach((aud) => {
+      formData.append("audience", aud);
+    });
 
     // Add optional string fields
     const stringFields = [
@@ -201,6 +240,13 @@ class AdminInventoryService {
       );
       data.skinToneRecommendation.forEach((tone) => {
         formData.append("skinToneRecommendation", tone);
+      });
+    }
+
+    // Add size chart entry IDs if provided
+    if (data.sizeChartEntryIds && data.sizeChartEntryIds.length > 0) {
+      data.sizeChartEntryIds.forEach((id) => {
+        formData.append("sizeChartEntryIds", id);
       });
     }
 
@@ -258,10 +304,31 @@ class AdminInventoryService {
     if (data.styleId !== undefined)
       formData.append("styleId", data.styleId.toString());
 
+    if (data.audience) {
+      const updateAudiences = Array.isArray(data.audience)
+        ? data.audience
+        : [data.audience];
+      updateAudiences.forEach((aud) => {
+        formData.append("audience", aud);
+      });
+    }
+
     if (data.skinToneRecommendation && data.skinToneRecommendation.length > 0) {
       data.skinToneRecommendation.forEach((tone) => {
         formData.append("skinToneRecommendation", tone);
       });
+    }
+
+    // Handle size chart entry IDs – allow clearing with an empty array
+    if (data.sizeChartEntryIds !== undefined) {
+      if (data.sizeChartEntryIds.length === 0) {
+        // Explicitly signal clearing on backend
+        formData.append("sizeChartEntryIds", "");
+      } else {
+        data.sizeChartEntryIds.forEach((id) => {
+          formData.append("sizeChartEntryIds", id);
+        });
+      }
     }
 
     const response = await apiClient.put<ApiResponse<UpdateProductResponse>>(

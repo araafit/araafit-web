@@ -73,12 +73,22 @@ export interface SizeChartItemResponse {
   value: number;
 }
 
-// Types for dress styles
-export interface CreateDressStyleRequest {
-  dressStyle: string;
-  dressSize: string;
-  yardEstimate: number;
+// Types for new styles endpoint
+export interface SizeConfigPayload {
+  sizeChartEntryId: string;
+  fabricYards: number;
+}
+
+export interface CreateStyleRequest {
+  name: string;
+  sizeConfigs: SizeConfigPayload[];
   files: File[];
+}
+
+export interface UpdateStyleRequest {
+  name?: string;
+  sizeConfigs?: SizeConfigPayload[];
+  files?: File[];
 }
 
 export interface DressStyleImage {
@@ -88,11 +98,36 @@ export interface DressStyleImage {
 }
 
 export interface DressStyle {
-  id: string;
-  dressStyle: string;
-  dressSize: string;
-  yardEstimate: number;
+  id: number;
+  name: string;
   images: DressStyleImage[];
+  createdAt: string;
+  sewingPrice?: number | string | null;
+  sizeChartEntries?: Array<{
+    id: string;
+    fabricYards: string;
+    sizeChartEntry: {
+      id: string;
+      label: string;
+      chestMin: number | null;
+      chestMax: number | null;
+      waistMin: number | null;
+      waistMax: number | null;
+      hipsMin: number | null;
+      hipsMax: number | null;
+      neckMin: number | null;
+      neckMax: number | null;
+      shoulderMin: number | null;
+      shoulderMax: number | null;
+      heightMin: number | null;
+      heightMax: number | null;
+      chart: {
+        id: string;
+        name: string;
+        gender: "male" | "female";
+      };
+    };
+  }>;
 }
 
 export interface CreateDressStyleResponse {
@@ -171,48 +206,260 @@ class AdminSettingsService {
     return response.data.data;
   }
 
-  // Dress Styles Management
-  async createDressStyle(
-    request: CreateDressStyleRequest
-  ): Promise<CreateDressStyleResponse> {
+  /* --------------------------------------------------------------------------------
+   * Size Chart V2 (Multiple charts per gender with entries)
+   * ------------------------------------------------------------------------------*/
+  // V2 Types
+  async getSkinTones(): Promise<Array<{ name: string; hex: string }>> {
+    const response = await apiClient.get<
+      ApiResponse<Array<{ name: string; hex: string }>>
+    >("/size-chart/skin-tones");
+    return response.data.data;
+  }
+
+  async getChartsByGender(
+    gender: "male" | "female"
+  ): Promise<
+    Array<{
+      id: string;
+      name: string;
+      gender: "male" | "female";
+      entries: Array<{
+        id: string;
+        label: string;
+        chestMin?: number;
+        chestMax?: number;
+        waistMin?: number;
+        waistMax?: number;
+        hipsMin?: number;
+        hipsMax?: number;
+        neckMin?: number;
+        neckMax?: number;
+        shoulderMin?: number;
+        shoulderMax?: number;
+        heightMin?: number;
+        heightMax?: number;
+      }>;
+    }>
+  > {
+    const response = await apiClient.get<
+      ApiResponse<
+        Array<{
+          id: string;
+          name: string;
+          gender: "male" | "female";
+          entries: Array<{
+            id: string;
+            label: string;
+            chestMin?: number;
+            chestMax?: number;
+            waistMin?: number;
+            waistMax?: number;
+            hipsMin?: number;
+            hipsMax?: number;
+            neckMin?: number;
+            neckMax?: number;
+            shoulderMin?: number;
+            shoulderMax?: number;
+            heightMin?: number;
+            heightMax?: number;
+          }>;
+        }>
+      >
+    >(`/size-chart/${gender}`);
+    return response.data.data;
+  }
+
+  async getChartById(
+    id: string
+  ): Promise<{
+    id: string;
+    name: string;
+    gender: "male" | "female";
+    entries: Array<{
+      id: string;
+      label: string;
+      chestMin?: number;
+      chestMax?: number;
+      waistMin?: number;
+      waistMax?: number;
+      hipsMin?: number;
+      hipsMax?: number;
+      neckMin?: number;
+      neckMax?: number;
+      shoulderMin?: number;
+      shoulderMax?: number;
+      heightMin?: number;
+      heightMax?: number;
+    }>;
+  }> {
+    const response = await apiClient.get<
+      ApiResponse<{
+        id: string;
+        name: string;
+        gender: "male" | "female";
+        entries: Array<{
+          id: string;
+          label: string;
+          chestMin?: number;
+          chestMax?: number;
+          waistMin?: number;
+          waistMax?: number;
+          hipsMin?: number;
+          hipsMax?: number;
+          neckMin?: number;
+          neckMax?: number;
+          shoulderMin?: number;
+          shoulderMax?: number;
+          heightMin?: number;
+          heightMax?: number;
+        }>;
+      }>
+    >(`/size-chart/chart/${id}`);
+    return response.data.data;
+  }
+
+  async createChart(params: {
+    gender: "male" | "female";
+    name: string;
+  }): Promise<{ id: string; name: string; gender: "male" | "female" }> {
+    const response = await apiClient.post<
+      ApiResponse<{ id: string; name: string; gender: "male" | "female" }>
+    >(`/size-chart/${params.gender}`, { name: params.name });
+    return response.data.data;
+  }
+
+  async createChartEntry(
+    chartId: string,
+    payload: {
+      label: string;
+      chestMin?: number;
+      chestMax?: number;
+      waistMin?: number;
+      waistMax?: number;
+      hipsMin?: number;
+      hipsMax?: number;
+      neckMin?: number;
+      neckMax?: number;
+      shoulderMin?: number;
+      shoulderMax?: number;
+      heightMin?: number;
+      heightMax?: number;
+    }
+  ): Promise<{
+    id: string;
+    label: string;
+  }> {
+    const response = await apiClient.post<ApiResponse<{ id: string; label: string }>>(
+      `/size-chart/${chartId}/entries`,
+      payload
+    );
+    return response.data.data;
+  }
+
+  async updateChartEntry(
+    entryId: string,
+    payload: Partial<{
+      label: string;
+      chestMin: number;
+      chestMax: number;
+      waistMin: number;
+      waistMax: number;
+      hipsMin: number;
+      hipsMax: number;
+      neckMin: number;
+      neckMax: number;
+      shoulderMin: number;
+      shoulderMax: number;
+      heightMin: number;
+      heightMax: number;
+    }>
+  ): Promise<{ id: string }> {
+    const response = await apiClient.patch<ApiResponse<{ id: string }>>(
+      `/size-chart/entries/${entryId}`,
+      payload
+    );
+    return response.data.data;
+  }
+
+  async deleteChartEntry(entryId: string): Promise<{ affected: number }> {
+    const response = await apiClient.delete<ApiResponse<{ affected: number }>>(
+      `/size-chart/entries/${entryId}`
+    );
+    return response.data.data;
+  }
+
+  // Styles Management
+
+  async createStyle(request: CreateStyleRequest): Promise<void> {
     const formData = new FormData();
-    formData.append("dressStyle", request.dressStyle);
-    formData.append("dressSize", request.dressSize);
-    formData.append("yardEstimate", request.yardEstimate.toString());
+    formData.append("name", request.name);
+    formData.append("sizeConfigs", JSON.stringify(request.sizeConfigs));
 
     request.files.forEach((file) => {
       formData.append("files", file);
     });
 
-    const response = await apiClient.post<
-      ApiResponse<CreateDressStyleResponse>
-    >("/dress-styles", formData, {
+    await apiClient.post("/styles", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
-      timeout: 100000, // 100 seconds for file upload
+      timeout: 100000,
     });
-    return response.data.data;
   }
 
   async getDressStyles(): Promise<DressStyle[]> {
-    const response = await apiClient.get<ApiResponse<DressStyle[]>>(
-      "/dress-styles"
-    );
+    const response = await apiClient.get<ApiResponse<DressStyle[]>>("/styles");
     return response.data.data;
   }
 
-  async getDressStyle(id: string): Promise<DressStyle> {
+  async getDressStyle(id: number | string): Promise<DressStyle> {
     const response = await apiClient.get<ApiResponse<DressStyle>>(
-      `/dress-styles/${id}`
+      `/styles/${id}`
     );
     return response.data.data;
   }
 
-  async deleteDressStyle(id: string): Promise<DeleteDressStyleResponse> {
+  async deleteDressStyle(
+    id: number | string
+  ): Promise<DeleteDressStyleResponse> {
     const response = await apiClient.delete<
       ApiResponse<DeleteDressStyleResponse>
-    >(`/dress-styles/${id}`);
+    >(`/styles/${id}`);
+    return response.data.data;
+  }
+
+  async updateStyle(
+    id: number | string,
+    request: UpdateStyleRequest
+  ): Promise<DressStyle> {
+    const formData = new FormData();
+
+    if (request.name) {
+      formData.append("name", request.name);
+    }
+
+    if (request.sizeConfigs) {
+      formData.append("sizeConfigs", JSON.stringify(request.sizeConfigs));
+    }
+
+    if (request.files && request.files.length > 0) {
+      request.files.forEach((file) => {
+        formData.append("files", file);
+      });
+    }
+
+    const response = await apiClient.put<ApiResponse<DressStyle>>(
+      `/styles/${id}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        timeout: 100000,
+      }
+    );
+
     return response.data.data;
   }
 }
