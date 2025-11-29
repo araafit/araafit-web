@@ -9,7 +9,7 @@ import { useLocation } from "react-router-dom";
 /* ------------------------------------------------------------------------------------- */
 
 const BreadCrumb = () => {
-    const breadcrumbPaths = ["all", "men", "women", "kids"];
+    const breadcrumbPaths = ["all", "dresses", "fabrics"];
 
     const params = useLocation();
     const segments = params.pathname.trim().split("/").filter(Boolean);

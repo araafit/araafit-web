@@ -46,9 +46,11 @@ class LandingPageService {
     return data;
   }
 
-  async getActiveDiscounts(): Promise<ActiveDiscount[]> {
+  async getActiveDiscounts(
+    authType: "user" | "guest"
+  ): Promise<ActiveDiscount[]> {
     const response = await apiClient.get<ApiResponse<ActiveDiscount[]>>(
-      "/discounts/active"
+      `/discounts/active/${authType === "user" ? "logged-in" : "guest"}`
     );
     const data: ApiResponse<ActiveDiscount[]> = response.data;
 

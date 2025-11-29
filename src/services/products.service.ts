@@ -1,5 +1,7 @@
 import apiClient from "../lib/axios";
 
+type Audience = "men" | "women" | "kids";
+
 // Types for Products
 export interface ProductImage {
   id: string;
@@ -7,9 +9,34 @@ export interface ProductImage {
   publicId: string;
 }
 
+export interface ProductSizeChart {
+  id: string;
+  name: string;
+  gender: "male" | "female";
+}
+
+export interface ProductSizeChartEntry {
+  id: string;
+  chart: ProductSizeChart;
+  label: string;
+  chestMin: number | null;
+  chestMax: number | null;
+  waistMin: number | null;
+  waistMax: number | null;
+  hipsMin: number | null;
+  hipsMax: number | null;
+  neckMin: number | null;
+  neckMax: number | null;
+  shoulderMin: number | null;
+  shoulderMax: number | null;
+  heightMin: number | null;
+  heightMax: number | null;
+}
+
 export interface Product {
   id: string;
   name: string;
+  slug?: string;
   category: "dress" | "fabric";
   description: string;
   materialType: string;
@@ -27,8 +54,9 @@ export interface Product {
   style: string | null;
   patternType: string | null;
   skinToneRecommendation: ["sand", "espresso", "sand", "espresso"];
-  audience: "men" | "women" | "kids";
+  audience: Audience | Audience[];
   images: ProductImage[];
+  availableSizeChartEntries?: ProductSizeChartEntry[];
   createdAt: string;
   updatedAt: string;
 }
@@ -51,7 +79,7 @@ export interface ProductsQueryParams {
   category?: "dress" | "fabric";
   page?: number;
   limit?: number;
-  audience?: "men" | "women" | "kids";
+  audience?: Audience;
   search?: string;
 }
 
@@ -59,6 +87,19 @@ export interface ApiResponse<T> {
   message: string;
   success: boolean;
   data: T;
+}
+
+export interface ProductRecommendedSize {
+  chartId: string;
+  chartName: string;
+  entryId: string;
+  label: string;
+}
+
+export interface ProductRecommendedSizeResponse {
+  productId: string;
+  gender: "MALE" | "FEMALE" | string;
+  recommendedSizes: ProductRecommendedSize[];
 }
 
 // Service functions
@@ -74,7 +115,7 @@ export const productsService = {
       if (params.page) queryString.append("page", params.page.toString());
       if (params.limit) queryString.append("limit", params.limit.toString());
       if (params.audience)
-        queryString.append("limit", params.audience.toString());
+        queryString.append("audience", params.audience.toString());
       if (params.search) queryString.append("search", params.search);
 
       const url = `/products${
@@ -127,6 +168,31 @@ export const productsService = {
       return response.data.data;
     } catch (error) {
       console.error(`Error fetching product ${productId}:`, error);
+      throw error;
+    }
+  },
+
+  async getProductRecommendedSizes(
+    productId: string,
+    measurementSetId?: string
+  ): Promise<ProductRecommendedSizeResponse> {
+    try {
+      const params = new URLSearchParams();
+      if (measurementSetId) {
+        params.append("measurementSetId", measurementSetId);
+      }
+      const url = `/products/${productId}/recommended-size${
+        params.toString() ? `?${params.toString()}` : ""
+      }`;
+
+      const response =
+        await apiClient.get<ApiResponse<ProductRecommendedSizeResponse>>(url);
+      return response.data.data;
+    } catch (error) {
+      console.error(
+        `Error fetching recommended sizes for product ${productId}:`,
+        error
+      );
       throw error;
     }
   },

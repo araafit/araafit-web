@@ -140,11 +140,12 @@ export default function Register() {
             await verifyEmailWithMeasurements.mutateAsync({
               email,
               measurement: {
+                gender: "female", // Fallback until gender is collected in this flow
                 bust: parseNumber(measurements.bust),
                 waist: parseNumber(measurements.waist),
                 hips: parseNumber(measurements.hip),
                 height: parseHeightInches(measurements.height),
-                dressSize: parseNumber(measurements.dressSize),
+                dressSize: String(parseNumber(measurements.dressSize)),
                 skinTone: String(measurements.skinTone || ""),
               },
             });
@@ -226,6 +227,7 @@ export default function Register() {
         dateOfBirth: data.dateOfBirth,
         deliveryAddress: data.deliveryAddress,
         password: data.password,
+        gender: "female", // Fallback until gender is collected in this flow
         measurement: {
           bust: 36, // Default values - should be collected elsewhere
           waist: 28,

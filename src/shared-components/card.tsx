@@ -83,13 +83,21 @@ function Card({
               )}
             </span>
 
-            {/* Can only make sewing request if item is fabric */}
+            {/* Can only start sewing flow if item is fabric */}
             {product && product.category === "fabric" ? (
               <Button
-                text="Make request"
+                text="Sew with this fabric"
                 variant="outline"
-                className="md:h-8 md:p-2 md:text-sm md:flex items-center justify-center"
-                onClick={() => navigate(link as string)}
+                className="md:h-8 md:p-2 md:text-sm md:flex items-center justify-center whitespace-nowrap"
+                onClick={() => {
+                  if (!link) return;
+                  // For dashboard fabrics, route to the stepper flow
+                  if (link.startsWith("/dashboard/shop/fabric/")) {
+                    navigate(`${link}/request`);
+                  } else {
+                    navigate(link);
+                  }
+                }}
               />
             ) : (
               <ShoppingCartSimpleIcon

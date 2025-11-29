@@ -27,15 +27,17 @@ export function FabricDetail() {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [noRefundAccepted, setNoRefundAccepted] = useState(false);
   const [autoSelectedSize, setAutoSelectedSize] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   // Auto-select size from saved measurements if available and matches fabric sizes
   useEffect(() => {
-    if (!selectedSize && measurementMe) {
+    if (!selectedSize && measurementMe?.measurements) {
+      const base = measurementMe.measurements;
       let derivedSize: number | null = null;
-      if (typeof measurementMe.dressSize === "number" && !Number.isNaN(measurementMe.dressSize)) {
-        derivedSize = measurementMe.dressSize;
-      } else if (measurementMe.size) {
-        const parsed = parseInt(String(measurementMe.size), 10);
+      if (typeof base.dressSize === "number" && !Number.isNaN(base.dressSize)) {
+        derivedSize = base.dressSize;
+      } else if (base.size) {
+        const parsed = parseInt(String(base.size), 10);
         if (!Number.isNaN(parsed)) {
           derivedSize = parsed;
         }
@@ -111,22 +113,37 @@ export function FabricDetail() {
       <div className="h-auto bg-white rounded-md p-4 flex flex-col gap-6">
         <div className="flex flex-col gap-5">
           <div className="flex flex-col lg:flex-row items-start justify-between gap-6">
-            {/* Item preview */}
-            <div className="rounded-md flex flex-col gap-5 w-full lg:w-1/2">
+            {/* Item preview with selectable fabric color */}
+            <div className="rounded-md flex flex-col gap-4 w-full lg:w-1/2">
               <img
-                src={product.images?.[0]?.url || "/placeholder-image.jpg"}
+                src={
+                  product.images?.[selectedImageIndex]?.url ||
+                  product.images?.[0]?.url ||
+                  "/placeholder-image.jpg"
+                }
                 alt={product.name}
                 className="w-full rounded-md object-cover h-[33rem]"
               />
 
-              <div className="w-full flex gap-[1rem] flex-wrap">
-                {product.images?.slice(1, 6).map((image, idx) => (
-                  <img
-                    key={idx}
-                    src={image.url}
-                    alt={`${product.name} view ${idx + 2}`}
-                    className="w-[101px] h-[67px] rounded-md object-cover border border-white cursor-pointer hover:border-primary-500 transition-colors"
-                  />
+              <div className="w-full flex gap-3 flex-wrap">
+                {(product.images || []).map((image, idx) => (
+                  <button
+                    key={image.id ?? idx}
+                    type="button"
+                    onClick={() => setSelectedImageIndex(idx)}
+                    className={`w-[88px] h-[60px] rounded-md overflow-hidden border transition-colors ${
+                      selectedImageIndex === idx
+                        ? "border-primary-500 ring-2 ring-primary-200"
+                        : "border-[#E8E8E8] hover:border-primary-300"
+                    }`}
+                    title={`Select color ${idx + 1}`}
+                  >
+                    <img
+                      src={image.url}
+                      alt={`${product.name} option ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
                 ))}
               </div>
             </div>

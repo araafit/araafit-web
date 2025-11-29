@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useVerifyPayment } from "../hooks/orders.hooks";
 
 /**
  * Paystack callback page for handling popup redirects
@@ -7,38 +8,60 @@ import { useSearchParams } from "react-router-dom";
  */
 export default function PaystackCallback() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const verifyPaymentMutation = useVerifyPayment();
+
+  // Extract parameters from URL
+  const reference = searchParams.get("reference");
+  const trxref = searchParams.get("trxref");
+  const success = searchParams.get("success") === "true";
+
+
+  const ref = reference || trxref;
+  const context = searchParams.get("context") || "dashboard";
 
   useEffect(() => {
-    // Extract parameters from URL
-    const reference = searchParams.get("reference");
-    const trxref = searchParams.get("trxref");
-    const success = searchParams.get("success") === "true";
 
-    // Send message to parent window (popup opener)
+    // If opened as a popup, keep legacy postMessage behavior
     if (window.opener) {
       window.opener.postMessage(
         {
           type: "paystack_callback",
           success,
-          reference: reference || trxref,
+          reference: ref,
           searchParams: Object.fromEntries(searchParams.entries()),
         },
         window.location.origin
       );
 
-      // Close the popup after sending the message
       setTimeout(() => {
         window.close();
       }, 500);
-    } else {
-      // Fallback for direct access (shouldn't happen in normal flow)
-      console.log("Paystack callback - no opener window found");
-      
-      // Try to redirect to dashboard if accessed directly
-      setTimeout(() => {
-        window.location.href = "/dashboard";
-      }, 2000);
+      return;
     }
+
+    // Direct redirect flow - verify payment before sending user to success page
+    if (!ref) {
+      // Missing reference – send user back to appropriate cart
+      setTimeout(() => {
+        navigate(context === "guest" ? "/cart" : "/dashboard/cart");
+      }, 2000);
+      return;
+    }
+
+    verifyPaymentMutation.mutate(ref, {
+      onSuccess: () => {
+        const targetPath =
+          context === "guest"
+            ? "/cart/checkout/success"
+            : "/dashboard/cart/checkout/success";
+        navigate(targetPath + `?reference=${encodeURIComponent(ref)}`);
+      },
+      onError: () => {
+        const targetPath = context === "guest" ? "/cart" : "/dashboard/cart";
+        navigate(targetPath);
+      },
+    });
   }, [searchParams]);
 
   return (
@@ -58,10 +81,3 @@ export default function PaystackCallback() {
     </div>
   );
 }
-
-
-
-
-
-
-

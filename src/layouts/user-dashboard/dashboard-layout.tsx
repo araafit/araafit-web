@@ -29,18 +29,16 @@ const navMenu = [
     icon: DressIcon,
     isDropDown: true,
     dropdown: [
-      { label: "all", value: "all", link: "/dashboard/shop/all", icon: null },
-      { label: "men", value: "men", link: "/dashboard/shop/men", icon: null },
       {
-        label: "women",
-        value: "women",
-        link: "/dashboard/shop/women",
+        label: "ready made",
+        value: "ready-made",
+        link: "/dashboard/shop",
         icon: null,
       },
       {
-        label: "kids",
-        value: "kids",
-        link: "/dashboard/shop/kids",
+        label: "fabrics",
+        value: "fabrics",
+        link: "/dashboard/shop/fabrics",
         icon: null,
       },
     ],
@@ -88,7 +86,7 @@ export default function UserDashboardLayout({
       toggleSwitch(); // Close modal
       navigate("/auth/login"); // Redirect to login
     }
-  }, [logoutMutation.isSuccess]);
+  }, [logoutMutation.isSuccess, navigate, toggleSwitch]);
 
   const handleLogout = () => {
     logoutMutation.mutate();
@@ -140,6 +138,7 @@ export default function UserDashboardLayout({
         lg:translate-x-0
         ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
         transition-transform duration-300 ease-in-out
+        shrink-0
       `}
       >
         <div className="w-full h-full flex flex-col justify-between">
@@ -317,7 +316,7 @@ export default function UserDashboardLayout({
       </div>
 
       {/* Main Content */}
-      <div className="grow lg:ml-0 pt-16 lg:pt-0 h-screen lg:h-full flex flex-col overflow-x-hidden">
+      <div className="flex-1 min-w-0 lg:ml-0 pt-16 lg:pt-0 h-screen lg:h-full flex flex-col overflow-x-hidden">
         {topBar && <div className="sticky top-0 z-40">{topBar}</div>}
         <div className="grow overflow-y-auto">{children}</div>
       </div>

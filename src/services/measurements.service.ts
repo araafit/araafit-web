@@ -3,13 +3,25 @@ import { getFirebaseStorage } from "../lib/firebase";
 import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
 import type { ApiResponse } from "./auth.service";
 
+export type Gender = "male" | "female";
+
 export interface Measurements {
-  bust: number;
-  waist: number;
-  hips: number;
-  height: number;
-  dressSize: number;
-  skinTone: string;
+  // Shared
+  waist?: number;
+  height?: number;
+  skinTone?: string | null;
+
+  // Female-specific
+  bust?: number;
+  hips?: number;
+  dressSize?: string | null;
+
+  // Male-specific
+  chest?: number;
+  neck?: number;
+  inseam?: number;
+  shoulder?: number;
+  size?: string | null;
 }
 
 export interface MeasurementsResponse {
@@ -24,34 +36,73 @@ export interface MeasurementsSummaryResponse {
   lastUpdated: string;
 }
 
+// Measurement sets v2
+export interface MeasurementSizeAssignment {
+  id: string;
+  chartId: string;
+  chartName: string;
+  entryId: string;
+  label: string;
+}
+
+export interface MeasurementAssignedSize {
+  entryId: string;
+  label: string;
+  chartId: string;
+  chartName: string;
+}
+
+export interface MeasurementSet {
+  id: string;
+  name: string;
+  gender: string;
+  chest: number | null;
+  waist: number | null;
+  hips: number | null;
+  neck: number | null;
+  sleeve: number | null;
+  inseam: number | null;
+  shoulder: number | null;
+  height: number | null;
+  createdAt: string;
+  updatedAt: string;
+  assignedSize?: MeasurementAssignedSize | null;
+  sizeAssignments: MeasurementSizeAssignment[];
+}
+
 export interface CreateMeasurementsRequest {
-  bust: number;
-  waist: number;
-  hips: number;
-  height: number;
-  dressSize: number;
-  skinTone: string;
+  gender?: Gender;
+  name?: string;
+  // Shared
+  waist?: number;
+  height?: number;
+  skinTone?: string;
+  // Female
+  bust?: number;
+  hips?: number;
+  dressSize?: string;
+  // Male
+  chest?: number;
+  neck?: number;
+  inseam?: number;
+  shoulder?: number;
+  size?: string;
 }
 
 export interface CreateMeasurementsResponse {
   message: string;
   measurements: Measurements;
   lastUpdated: string;
+  gender?: Gender;
 }
 
-export interface UpdateMeasurementsRequest {
-  bust?: number;
-  waist?: number;
-  hips?: number;
-  height?: number;
-  dressSize?: number;
-  skinTone?: string;
-}
+export interface UpdateMeasurementsRequest extends CreateMeasurementsRequest {}
 
 export interface UpdateMeasurementsResponse {
   message: string;
   measurements: Measurements;
   lastUpdated: string;
+  gender?: Gender;
 }
 
 export interface UploadedImageInfo {
@@ -64,41 +115,24 @@ export interface UploadMeasurementImagesResponse {
   side: UploadedImageInfo;
 }
 
+// Response for GET /measurements/me
 export interface MeasurementMe {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  deliveryAddress: string;
-  dateOfBirth: string;
-  isVerified: string;
-  phoneNumber: string | number;
-  city: string;
-  zipCode: string | null;
-  bust: number | null;
-  waist: number | null;
-  hips: number | null;
-  height: number | null;
-  dressSize: number | null;
-  chest: string | null;
-  skinTone: string | null;
-  inseam: string | number | null;
-  shoulder: number | null;
-  size: string | null;
+  measurements: Measurements;
+  lastUpdated: string;
   gender: string | null;
-  isGuest: boolean;
-  orderCount: number;
-  createdAt: string;
-  updateAt: string;
-  isActive: boolean;
-  blockReason: string | null;
+  measurementSets: MeasurementSet[];
 }
 
 export const measurementsService = {
   async getMeasurements(): Promise<MeasurementMe> {
-    const response = await apiClient.get<ApiResponse<MeasurementMe>>(
-      "/measurements/me"
-    );
+    const response = await apiClient.get<
+      ApiResponse<{
+        measurements: Measurements;
+        lastUpdated: string;
+        gender: string | null;
+        measurementSets: MeasurementSet[];
+      }>
+    >("/measurements/me");
     return response.data.data;
   },
 
@@ -112,19 +146,45 @@ export const measurementsService = {
   async createMeasurements(
     data: CreateMeasurementsRequest
   ): Promise<CreateMeasurementsResponse> {
+    // Normalize payload (e.g., coerce numeric dressSize to string)
+    const payload: Record<string, unknown> = { ...data };
+    if (typeof (payload as any).dressSize === "number") {
+      (payload as any).dressSize = String((payload as any).dressSize);
+    }
+    Object.keys(payload).forEach((k) => {
+      if (payload[k] === undefined) delete payload[k];
+    });
+
     const response = await apiClient.patch<
-      ApiResponse<CreateMeasurementsResponse>
-    >("/measurements/measurement", data);
-    return response.data.data;
+      ApiResponse<{ measurements: Measurements; lastUpdated: string; gender?: Gender }>
+    >("/measurements/measurement", payload);
+
+    return {
+      message: response.data.message,
+      ...response.data.data,
+    };
   },
 
   async updateMeasurements(
     data: UpdateMeasurementsRequest
   ): Promise<UpdateMeasurementsResponse> {
+    // Normalize payload (e.g., coerce numeric dressSize to string)
+    const payload: Record<string, unknown> = { ...data };
+    if (typeof (payload as any).dressSize === "number") {
+      (payload as any).dressSize = String((payload as any).dressSize);
+    }
+    Object.keys(payload).forEach((k) => {
+      if (payload[k] === undefined) delete payload[k];
+    });
+
     const response = await apiClient.patch<
-      ApiResponse<UpdateMeasurementsResponse>
-    >("/measurements/measurement", data);
-    return response.data.data;
+      ApiResponse<{ measurements: Measurements; lastUpdated: string; gender?: Gender }>
+    >("/measurements/measurement", payload);
+
+    return {
+      message: response.data.message,
+      ...response.data.data,
+    };
   },
 
   async uploadMeasurementImages(

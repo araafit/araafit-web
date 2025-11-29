@@ -873,12 +873,16 @@ export function Confirmation() {
                 }
 
                 const guestUserData = {
-                  bust,
+                  gender,
+                  // Shared
                   waist,
-                  hips,
                   height: Math.round(height * 0.393701), // Convert cm to inches
-                  dressSize,
                   skinTone: skinTone?.name?.toLowerCase() || "medium",
+                  // Female
+                  bust: isMale ? undefined : bust,
+                  hips: isMale ? undefined : hips,
+                  // Male
+                  chest: isMale ? bust : undefined,
                 };
 
                 createGuestUser.mutate(guestUserData, {
@@ -960,11 +964,12 @@ export function Confirmation() {
                 }
 
                 const measurementData = {
+                  gender,
                   bust,
                   waist,
                   hips,
                   height: Math.round(height * 0.393701), // Convert cm to inches
-                  dressSize,
+                  dressSize: String(dressSize),
                   skinTone: skinTone?.name?.toLowerCase() || "medium",
                 };
 

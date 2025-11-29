@@ -47,17 +47,18 @@ import {
 } from "./guest/guest-shop/import-entry";
 import GuestCartPage from "./guest/cart/guest-cart";
 import GuestCartCheckout from "./guest/cart/guest-cart-checkout";
+import GuestCheckoutSuccess from "./guest/cart/guest-checkout-success";
 import PaystackCallback from "./paystack-callback";
 import CheckoutSuccess from "./user-dashboard/cart/checkout/checkout-success";
 import { FabricRequestSummary } from "./guest/guest-shop/fabric-request-summary";
-import {
-  AllShop,
-  KidsShop,
-  WomenShop,
-  MenShop,
-} from "./user-dashboard/shop/shop-pages-export";
-import ShopLayout from "./user-dashboard/shop/context/shop-layout";
+import { DashboardShopPage } from "./user-dashboard/shop/dashboard-shop";
+import { DashboardFabricsPage } from "./user-dashboard/shop/dashboard-fabrics";
+import { DashboardFabricRequestFlowPage } from "./user-dashboard/shop/fabric-request-flow";
+import { DashboardFabricStyleStepPage } from "./user-dashboard/shop/fabric-style-step";
+import { DashboardFabricMeasurementStepPage } from "./user-dashboard/shop/fabric-measurement-step";
+import { DashboardFabricReviewStepPage } from "./user-dashboard/shop/fabric-review-step";
 import { OrderStatusProvider } from "./admin-dashboard/orders-management/table-status-context-provider";
+import GetMeasuredLayout from "../layouts/get-measured/get-measured-layout";
 
 /* -------------------------------------------------------------------------------------------------------- */
 
@@ -83,6 +84,7 @@ const pagesRoutes = createBrowserRouter([
   },
   {
     path: "get-measured",
+    element: <GetMeasuredLayout />,
     children: [
       {
         path: "",
@@ -90,15 +92,15 @@ const pagesRoutes = createBrowserRouter([
         index: true,
       },
       {
-        path: "/get-measured/manual",
+        path: "manual",
         element: <PickGender />,
       },
       {
-        path: "/get-measured/manual/measurement",
+        path: "manual/measurement",
         element: <ManualMeasurement />,
       },
       {
-        path: "/get-measured/summary",
+        path: "summary",
         element: <MeasurementSummary />,
       },
     ],
@@ -136,6 +138,10 @@ const pagesRoutes = createBrowserRouter([
       {
         path: "checkout",
         element: <GuestCartCheckout />,
+      },
+      {
+        path: "checkout/success",
+        element: <GuestCheckoutSuccess />,
       },
     ],
   },
@@ -185,37 +191,13 @@ const pagesRoutes = createBrowserRouter([
         path: "shop",
         children: [
           {
-            path: "all",
-            element: (
-              <ShopLayout>
-                <AllShop />
-              </ShopLayout>
-            ),
+            path: "",
+            element: <DashboardShopPage />,
             index: true,
           },
           {
-            path: "men",
-            element: (
-              <ShopLayout>
-                <MenShop />
-              </ShopLayout>
-            ),
-          },
-          {
-            path: "women",
-            element: (
-              <ShopLayout>
-                <WomenShop />
-              </ShopLayout>
-            ),
-          },
-          {
-            path: "kids",
-            element: (
-              <ShopLayout>
-                <KidsShop />
-              </ShopLayout>
-            ),
+            path: "fabrics",
+            element: <DashboardFabricsPage />,
           },
           {
             path: "dress/:itemName",
@@ -224,6 +206,22 @@ const pagesRoutes = createBrowserRouter([
           {
             path: "fabric/:itemName",
             element: <DashboardShopFabricDetailPage />,
+          },
+          {
+            path: "fabric/:itemName/request",
+            element: <DashboardFabricRequestFlowPage />,
+          },
+          {
+            path: "fabric/:itemName/style",
+            element: <DashboardFabricStyleStepPage />,
+          },
+          {
+            path: "fabric/:itemName/measurement",
+            element: <DashboardFabricMeasurementStepPage />,
+          },
+          {
+            path: "fabric/:itemName/review",
+            element: <DashboardFabricReviewStepPage />,
           },
         ],
       },

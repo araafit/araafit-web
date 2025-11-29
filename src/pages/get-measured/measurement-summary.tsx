@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import showToast from "../../utils/notification";
 import Spinner from "../../shared-components/spinner";
@@ -28,6 +29,11 @@ const waterMarkStyle: React.CSSProperties = {
 
 export function MeasurementSummary() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const gender = (searchParams.get("gender") || "").toLowerCase() as
+    | "male"
+    | "female"
+    | "";
   const [savedState, setSavedState] = useState({
     isLoading: false,
     isSaved: false,
@@ -43,12 +49,18 @@ export function MeasurementSummary() {
 
     try {
       await createGuestUserMutation.mutateAsync({
-        bust: Number(selectedMeasurements.bust || 36),
+        // Shared
         waist: Number(selectedMeasurements.waist || 28),
-        hips: Number(selectedMeasurements.hip || 38),
         height: Number(selectedMeasurements.height || 165),
-        dressSize: Number(selectedMeasurements.dressSize || 10),
-        skinTone: String(selectedMeasurements.skinTone), // You might want to get this from the measurements store
+        skinTone: String(selectedMeasurements.skinTone || ""),
+        gender: gender || undefined,
+        // Female
+        bust: gender === "male" ? undefined : Number(selectedMeasurements.bust || 36),
+        hips: gender === "male" ? undefined : Number(selectedMeasurements.hip || 38),
+        // Male
+        chest: gender === "male" ? Number(selectedMeasurements.bust || 38) : undefined,
+        inseam: undefined,
+        shoulder: undefined,
       });
 
       navigate("/shop");
@@ -84,7 +96,6 @@ export function MeasurementSummary() {
         waist: parseNumber(selectedMeasurements.waist),
         hips: parseNumber(selectedMeasurements.hip),
         height: parseHeightInches(selectedMeasurements.height),
-        dressSize: parseNumber(selectedMeasurements.dressSize),
         skinTone: String(selectedMeasurements.skinTone || ""),
       });
       setSavedState({ isLoading: false, isSaved: true });
@@ -109,146 +120,114 @@ export function MeasurementSummary() {
   }, [savedState.isSaved]);
 
   return (
-    <div className="h-screen bg-[#F5F5F5] px-0 py-0 md:py-2 md:px-16 overflow-y-scroll relative">
-      <div className="w-full h-[809px] bg-white flex justify-center border rounded-md p-14">
-        <div className="flex flex-col">
-          <div className="size-full bg-white py-5 px-8 rounded-md flex flex-col items-center justify-center gap-6">
-            <div className="w-[30.125rem]">
-              <div className="flex flex-col items-center gap-4">
-                <h5 className="text-[2rem] font-semibold">
-                  Measurement Summary
-                </h5>
+    <div className="flex flex-col items-center justify-center gap-6">
+      <div className="w-full max-w-[30.125rem]">
+        <div className="flex flex-col items-center gap-4">
+          <h5 className="text-[2rem] font-semibold">Measurement Summary</h5>
+          <p className="text-neutral-500 font-light text-center">
+            We’ve successfully captured your measurements and detected your skin tone.
+          </p>
+        </div>
 
-                <p className="text-neutral-500 font-light text-center">
-                  We’ve successfully captured your measurements and detected
-                  your skin tone.
-                </p>
-              </div>
-
-              <div className="flex flex-col gap-5">
-                <div className="flex items justify-between">
-                  <span className="font-medium text-[18px] text-neutral-950">
-                    Measurement
-                  </span>
-
-                  <div
-                    className="flex items-center gap-2 font-light cursor-pointer"
-                    onClick={() => navigate("/dashboard/profile/get-measured")}
-                  >
-                    <PencilSimpleIcon />
-                    <span>Edit</span>
-                  </div>
-                </div>
-
-                <div
-                  className="w-full flex flex-col gap-6"
-                  style={waterMarkStyle}
-                >
-                  <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
-                    <span className="text-neutral-800 font-medium">Bust</span>
-                    <span className="font-semibold text-neutral-950">
-                      {selectedMeasurements.bust}
-                    </span>
-                  </div>
-                  <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
-                    <span className="text-neutral-800 font-medium">Waist</span>
-                    <span className="font-semibold text-neutral-950">
-                      {selectedMeasurements.waist}
-                    </span>
-                  </div>
-                  <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
-                    <span className="text-neutral-800 font-medium">
-                      Hip (inches)
-                    </span>
-                    <span className="font-semibold text-neutral-950">
-                      {selectedMeasurements.hip}
-                    </span>
-                  </div>
-                  <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
-                    <span className="text-neutral-800 font-medium">Height</span>
-                    <span className="font-semibold text-neutral-950">
-                      {selectedMeasurements.height}
-                    </span>
-                  </div>
-                  <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
-                    <span className="text-neutral-800 font-medium">
-                      Dress size
-                    </span>
-                    <span className="font-semibold text-neutral-950">
-                      {selectedMeasurements.dressSize}
-                    </span>
-                  </div>
-                  <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
-                    <span className="text-neutral-800 font-medium">
-                      Skin Tone
-                    </span>
-                    <span className="text-neutral-950">
-                      <div className="flex items-center gap-1">
-                        <div
-                          className="w-[58px] h-[44px] rounded-md"
-                          style={{ backgroundColor: "#c89a6d" }}
-                        />
-                        {/* <span className="font-light">
-                          {selectedMeasurements.skinTone}
-                        </span> */}
-                      </div>
-                    </span>
-                  </div>
-                </div>
-              </div>
+        <div className="flex flex-col gap-5">
+          <div className="flex items justify-between">
+            <span className="font-medium text-[18px] text-neutral-950">
+              Measurement
+            </span>
+            <div
+              className="flex items-center gap-2 font-light cursor-pointer"
+              onClick={() => navigate("/dashboard/profile/get-measured")}
+            >
+              <PencilSimpleIcon />
+              <span>Edit</span>
             </div>
           </div>
 
-          {/*  */}
-          <div className="flex items-center justify-end gap-6">
-            {!isAuthenticated && (
-              <Button
-                text="Continue as guest"
-                variant="outline"
-                className="min-w-[10rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed border-neutral-100 text-neutral-950"
-                onClick={handleContinueAsGuest}
-                disabled={createGuestUserMutation.isPending}
-              >
-                <div className="flex items-center justify-center gap-1">
-                  <span>{isAuthenticated ? "Save" : "Continue as guest"}</span>
-                  <Spinner
-                    size="sm"
-                    isLoading={createGuestUserMutation.isPending}
-                  />
-                </div>
-              </Button>
+          <div className="w-full flex flex-col gap-6" style={waterMarkStyle}>
+            {/* Bust/Chest by gender */}
+            <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
+              <span className="text-neutral-800 font-medium">
+                {gender === "male" ? "Chest" : "Bust"}
+              </span>
+              <span className="font-semibold text-neutral-950">
+                {selectedMeasurements.bust}
+              </span>
+            </div>
+
+            {/* Waist */}
+            <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
+              <span className="text-neutral-800 font-medium">Waist</span>
+              <span className="font-semibold text-neutral-950">
+                {selectedMeasurements.waist}
+              </span>
+            </div>
+
+            {/* Hips: hide for male */}
+            {gender !== "male" && (
+              <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
+                <span className="text-neutral-800 font-medium">Hip (inches)</span>
+                <span className="font-semibold text-neutral-950">
+                  {selectedMeasurements.hip}
+                </span>
+              </div>
             )}
 
-            <Button
-              variant="solid"
-              className="min-w-[10rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed"
-              onClick={
-                isAuthenticated
-                  ? handleSaveMeasurements
-                  : handleCreateFreeAccount
-              }
-              disabled={
+            {/* Height */}
+            <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
+              <span className="text-neutral-800 font-medium">Height</span>
+              <span className="font-semibold text-neutral-950">
+                {selectedMeasurements.height}
+              </span>
+            </div>
+
+            {/* Skin Tone */}
+            <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
+              <span className="text-neutral-800 font-medium">Skin Tone</span>
+              <span className="text-neutral-950 font-light">
+                {String(selectedMeasurements.skinTone || "")}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* CTA buttons */}
+      <div className="flex items-center justify-end gap-6 w-full max-w-[30.125rem]">
+        {!isAuthenticated && (
+          <Button
+            text="Continue as guest"
+            variant="outline"
+            className="min-w-[10rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed border-neutral-100 text-neutral-950"
+            onClick={handleContinueAsGuest}
+            disabled={createGuestUserMutation.isPending}
+          >
+            <div className="flex items-center justify-center gap-1">
+              <span>{isAuthenticated ? "Save" : "Continue as guest"}</span>
+              <Spinner size="sm" isLoading={createGuestUserMutation.isPending} />
+            </div>
+          </Button>
+        )}
+
+        <Button
+          variant="solid"
+          className="min-w-[10rem] self-end disabled:bg-neutral-50 disabled:cursor-not-allowed"
+          onClick={isAuthenticated ? handleSaveMeasurements : handleCreateFreeAccount}
+          disabled={
+            (isAuthenticated && (savedState.isLoading || updateMeasurements.isPending)) ||
+            (!isAuthenticated && createGuestUserMutation.isPending)
+          }
+        >
+          <div className="flex items-center justify-center gap-1">
+            <span>{isAuthenticated ? "Save measurements" : "Create a free account"}</span>
+            <Spinner
+              size="sm"
+              isLoading={
                 (isAuthenticated && (savedState.isLoading || updateMeasurements.isPending)) ||
                 (!isAuthenticated && createGuestUserMutation.isPending)
               }
-            >
-              <div className="flex items-center justify-center gap-1">
-                <span>
-                  {isAuthenticated
-                    ? "Save measurements"
-                    : "Create a free account"}
-                </span>
-                <Spinner
-                  size="sm"
-                  isLoading={
-                    (isAuthenticated && (savedState.isLoading || updateMeasurements.isPending)) ||
-                    (!isAuthenticated && createGuestUserMutation.isPending)
-                  }
-                />
-              </div>
-            </Button>
+            />
           </div>
-        </div>
+        </Button>
       </div>
     </div>
   );

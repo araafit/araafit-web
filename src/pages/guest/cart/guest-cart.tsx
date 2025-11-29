@@ -36,8 +36,8 @@ function GuestCart() {
   if (isLoading) {
     return (
       <GuestPageLayout>
-        <div className="size-full">
-          <div className="size-full relative p-8 bg-white rounded-md overflow-y-scroll flex items-center justify-center">
+        <div className="w-full h-full">
+          <div className="w-full h-full relative p-8 bg-white rounded-md overflow-y-scroll flex items-center justify-center">
             <div className="flex flex-col items-center gap-4">
               <Spinner
                 size="lg"
@@ -56,8 +56,8 @@ function GuestCart() {
   if (isError) {
     return (
       <GuestPageLayout>
-        <div className="size-full px-4">
-          <div className="size-full relative p-8 bg-white rounded-md overflow-y-scroll flex items-center justify-center">
+        <div className="w-full h-full">
+          <div className="w-full h-full relative p-8 bg-white rounded-md overflow-y-scroll flex items-center justify-center">
             <div className="flex flex-col items-center gap-4 text-center">
               <p className="font-light text-center text-neutral-500">
                 Unable to load cart
@@ -79,8 +79,8 @@ function GuestCart() {
 
   return (
     <GuestPageLayout>
-      <div className="size-full px-4 pb-4">
-        <div className="size-full relative p-8 bg-white rounded-md overflow-y-scroll">
+      <div className="w-full h-full pb-4">
+        <div className="w-full h-full relative p-4 sm:p-6 lg:p-8 bg-white rounded-md overflow-y-scroll">
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between">
               <h2 className="font-semibold text-[28px] capitalize">

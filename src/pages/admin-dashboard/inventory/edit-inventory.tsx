@@ -9,10 +9,7 @@ import Button from "../../../shared-components/button";
 import NotificationBell from "../admin-components/top-bar/notification-bell";
 import { useState, useEffect } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import {
-  useUpdateProduct,
-  useProduct,
-} from "../../../hooks/admin-inventory.hooks";
+import { useUpdateProduct, useProduct } from "../../../hooks/admin-inventory.hooks";
 import { useNavigate, useParams } from "react-router-dom";
 // import { TableButton } from "../../ui/button";
 import { Switch } from "../../ui/switch";
@@ -29,16 +26,19 @@ import {
 import Spinner from "../../../shared-components/spinner";
 import { SkinToneSelectField } from "./skin-tone-selection-field";
 import { GenderRadio } from "./gender-radio";
+import { useChartsByGender, useSkinTonesList } from "../../../hooks/admin-settings.hooks";
 
 /* -------------------------------------------------------------------------------- */
 
-const skinTone = ["Porcelin", "Ivory", "Sand", "Espresso", "Chestnut", "Honey"];
+type Audience = "men" | "women" | "kids";
+type SizeChartGender = "male" | "female";
+
 //const categories = ["dress", "fabric"];
 //const discountTypes = ["percentage", "fixed"];
 
 interface ProductFormData {
   name: string;
-  audience: "men" | "women" | "kids";
+  audience: Audience[];
   category: "dress" | "fabric";
   description: string;
   materialType: string;
@@ -52,6 +52,7 @@ interface ProductFormData {
   discountValue: number;
   discountStart: string;
   discountEnd: string;
+  sizeChartEntryIds: string[];
 }
 
 interface ImageState {
@@ -81,12 +82,14 @@ export function AdminDashboardEditInventory() {
     watch,
     reset,
     control,
+    setValue,
     formState: { errors },
   } = useForm<ProductFormData>({
     mode: "all",
     defaultValues: {
       category: "dress",
       discountType: "percentage",
+      sizeChartEntryIds: [],
     },
   });
 
@@ -94,14 +97,57 @@ export function AdminDashboardEditInventory() {
 
   const watchCategory = watch("category");
 
+  const [sizeChartGender, setSizeChartGender] =
+    useState<SizeChartGender>("female");
+  const [selectedChartId, setSelectedChartId] = useState<string>("");
+  const [selectedSizeEntryIds, setSelectedSizeEntryIds] = useState<string[]>(
+    []
+  );
+
+  const chartsList = useChartsByGender(sizeChartGender);
+  const skinTonesQuery = useSkinTonesList();
+  const skinToneOptions =
+    skinTonesQuery.data?.map((tone) => tone.name) ?? [];
+
+  const handleToggleSizeEntry = (entryId: string) => {
+    setSelectedSizeEntryIds((prev) => {
+      const exists = prev.includes(entryId);
+      const next = exists ? prev.filter((id) => id !== entryId) : [...prev, entryId];
+      setValue("sizeChartEntryIds", next, { shouldDirty: true });
+      return next;
+    });
+  };
+
+  const deriveGenderFromAudience = (
+    audience: Audience | Audience[] | undefined
+  ): SizeChartGender => {
+    const list = Array.isArray(audience) ? audience : audience ? [audience] : [];
+    if (list.includes("men")) return "male";
+    if (list.includes("women")) return "female";
+    return "female";
+  };
+
   // Load product data when it's fetched
   useEffect(() => {
     if (product) {
+      console.log("product", product);
       // Set form values
+      const initialSelectedEntryIds =
+        product.availableSizeChartEntries?.map((e) => e.id) || [];
+      const firstAvailableEntry = product.availableSizeChartEntries?.[0];
+      const initialGender: SizeChartGender =
+        firstAvailableEntry?.chart?.gender ??
+        deriveGenderFromAudience(product.audience);
+      const initialChartId = firstAvailableEntry?.chart?.id ?? "";
+
       reset({
         name: product.name,
         category: product.category,
-        audience: product.audience,
+        audience: Array.isArray(product.audience)
+          ? product.audience
+          : product.audience
+            ? [product.audience]
+            : [],
         description: product.description || "",
         materialType: product.materialType || "",
         dressSize: product.dressSize || "",
@@ -114,11 +160,15 @@ export function AdminDashboardEditInventory() {
         discountValue: product.discountValue || 0,
         discountStart: product.discountStart?.split("T")[0] || "",
         discountEnd: product.discountEnd?.split("T")[0] || "",
+        sizeChartEntryIds: initialSelectedEntryIds,
       });
 
       // Set other state
       setSelectedTone(product.skinToneRecommendation || []);
       setDiscountsEnabled(!!product.discountType);
+      setSizeChartGender(initialGender);
+      setSelectedChartId(initialChartId);
+      setSelectedSizeEntryIds(initialSelectedEntryIds);
 
       // Set existing images
       setImages(
@@ -186,6 +236,7 @@ export function AdminDashboardEditInventory() {
           discountStart: discountsEnabled ? data.discountStart : undefined,
           discountEnd: discountsEnabled ? data.discountEnd : undefined,
           skinToneRecommendation: selectedTone,
+          sizeChartEntryIds: data.sizeChartEntryIds ?? [],
         },
       });
 
@@ -530,10 +581,127 @@ export function AdminDashboardEditInventory() {
                     <SkinToneSelectField
                       name="skinTone"
                       label="Skin Tone"
-                      options={skinTone}
+                      options={skinToneOptions}
                       control={control}
                     />
                   </div>
+                </div>
+              </div>
+
+              {/* Size Chart Entries */}
+              <div className="bg-white rounded-[6px] py-6 px-4 mt-4">
+                <h4 className="font-semibold">Size Chart Entries</h4>
+                <p className="text-xs text-[#676767] mt-1">
+                  Optionally link size chart entries that this product supports.
+                </p>
+
+                <div className="flex gap-4 items-center mt-4">
+                  <div className="w-[180px]">
+                    <label className="block text-[#4F4F4F] font-light text-sm">
+                      Gender
+                    </label>
+                    <Select
+                      value={sizeChartGender}
+                      onValueChange={(value) =>
+                        setSizeChartGender(value as SizeChartGender)
+                      }
+                    >
+                      <SelectTrigger className="w-full h-12 border border-[#D0D5DD] text-[#676767] text-sm bg-white flex items-center justify-between px-3">
+                        <SelectValue placeholder="Select gender" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Gender</SelectLabel>
+                          <SelectItem value="female">Female</SelectItem>
+                          <SelectItem value="male">Male</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex-1">
+                    <label className="block text-[#4F4F4F] font-light text-sm">
+                      Size Chart
+                    </label>
+                    <Select
+                      value={selectedChartId}
+                      onValueChange={(value) => setSelectedChartId(value)}
+                    >
+                      <SelectTrigger className="w-full h-12 border border-[#D0D5DD] text-[#676767] text-sm bg-white flex items-center justify-between px-3">
+                        <SelectValue placeholder="Select a size chart" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Charts</SelectLabel>
+                          {chartsList.data?.map((chart) => (
+                            <SelectItem key={chart.id} value={chart.id}>
+                              {chart.name}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="mt-4 max-h-56 overflow-y-auto border border-[#F0F2F5] rounded-lg p-3">
+                  {!selectedChartId ? (
+                    <p className="text-xs text-[#676767]">
+                      Select a chart to choose entries.
+                    </p>
+                  ) : chartsList.isLoading ? (
+                    <div className="flex items-center justify-center py-6">
+                      <Spinner size="sm" speed="fast" />
+                    </div>
+                  ) : (
+                    (() => {
+                      const chart = chartsList.data?.find(
+                        (c) => c.id === selectedChartId
+                      );
+                      if (!chart || !chart.entries || chart.entries.length === 0) {
+                        return (
+                          <p className="text-xs text-[#676767]">
+                            No entries available for this chart.
+                          </p>
+                        );
+                      }
+                      return (
+                        <div className="flex flex-col gap-2">
+                          {chart.entries.map((entry) => {
+                            console.log(selectedSizeEntryIds);
+                            const checked = selectedSizeEntryIds.includes(entry.id);
+                            return (
+                              <label
+                                key={entry.id}
+                                className="flex items-center justify-between cursor-pointer text-sm text-[#1C1C1C]"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="checkbox"
+                                    className="hidden"
+                                    checked={checked}
+                                    onChange={() => handleToggleSizeEntry(entry.id)}
+                                  />
+                                  <div
+                                    className={`w-4 h-4 rounded border flex items-center justify-center ${
+                                      checked
+                                        ? "border-[#9A6C50] bg-[#9A6C50]"
+                                        : "border-[#D0D5DD] bg-white"
+                                    }`}
+                                  >
+                                    {checked && (
+                                      <span className="w-2 h-2 rounded-sm bg-white" />
+                                    )}
+                                  </div>
+                                  <span>{entry.label}</span>
+                                </div>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()
+                  )}
                 </div>
               </div>
 

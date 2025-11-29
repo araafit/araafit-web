@@ -35,14 +35,21 @@ export interface VerifyOtpResponse {
 export interface GoogleAuthRequest {
   idToken: string;
   measurement?: {
-    gender?: string;
-    bust: number;
-    waist: number;
-    hips: number;
-    height: number;
-    dressSize?: number;
+    gender?: "male" | "female";
+    // Shared
+    waist?: number;
+    height?: number;
+    skinTone?: string;
+    // Female
+    bust?: number;
+    hips?: number;
+    dressSize?: string;
+    // Male
+    chest?: number;
+    neck?: number;
+    inseam?: number;
+    shoulder?: number;
     size?: string;
-    skinTone: string;
   };
 }
 
@@ -60,14 +67,26 @@ export interface RegisterRequest {
   email: string;
   firstName: string;
   lastName: string;
-  dateOfBirth: string;
+  dateOfBirth?: string;
   deliveryAddress: string;
   password: string;
-  measurement: {
-    bust: number;
-    waist: number;
-    hips: number;
-    skinTone: string;
+  gender: "male" | "female";
+  measurement?: {
+    gender?: "male" | "female";
+    // Shared
+    waist?: number;
+    height?: number;
+    skinTone?: string;
+    // Female
+    bust?: number;
+    hips?: number;
+    dressSize?: string;
+    // Male
+    chest?: number;
+    neck?: number;
+    inseam?: number;
+    shoulder?: number;
+    size?: string;
   };
 }
 
@@ -81,12 +100,18 @@ export interface RegisterResponse {
 }
 
 export interface GuestUserRequest {
-  bust: number;
-  waist: number;
-  hips: number;
-  height: number;
-  dressSize: number;
-  skinTone: string;
+  // Shared
+  waist?: number;
+  height?: number;
+  skinTone?: string;
+  gender?: "male" | "female";
+  // Female
+  bust?: number;
+  hips?: number;
+  // Male
+  chest?: number;
+  inseam?: number;
+  shoulder?: number;
 }
 
 export interface GuestUserResponse {
@@ -160,12 +185,21 @@ export interface ResendOtpRequest {
 export interface VerifyEmailWithMeasurementsRequest {
   email: string;
   measurement: {
-    bust: number;
-    waist: number;
-    hips: number;
-    height: number;
-    dressSize: number;
-    skinTone: string;
+    gender?: "male" | "female";
+    // Shared
+    waist?: number;
+    height?: number;
+    skinTone?: string;
+    // Female
+    bust?: number;
+    hips?: number;
+    dressSize?: string;
+    // Male
+    chest?: number;
+    neck?: number;
+    inseam?: number;
+    shoulder?: number;
+    size?: string;
   };
 }
 
@@ -178,7 +212,7 @@ class AuthService {
   async googleAuth(payload?: GoogleAuthRequest): Promise<GoogleAuthResponse> {
     const response = await apiClient.post<ApiResponse<GoogleAuthResponse>>(
       "/auth/google-auth",
-      { payload }
+      payload
     );
 
     return response.data.data;

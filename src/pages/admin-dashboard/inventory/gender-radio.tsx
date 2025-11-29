@@ -2,22 +2,14 @@ import { type UseFormRegister, type UseFormWatch } from "react-hook-form";
 
 /* ------------------------------------------------- */
 
-interface ProductFormData {
-  audience: "men" | "women" | "kids";
-  name: string;
-  category: "dress" | "fabric";
-  description: string;
-  materialType: string;
-  dressSize: string;
-  weight: number;
-  thickness: string;
-  skinTone: string[];
-  quantityInStock: number;
-  price: number;
-  discountType: "percentage" | "fixed";
-  discountValue: number;
-  discountStart: string;
-  discountEnd: string;
+type Audience = "men" | "women" | "kids";
+
+interface GenderRadioProps {
+  fieldLabel: string;
+  fieldId: string;
+  fieldValue: Audience;
+  fieldWatch: UseFormWatch<any>;
+  registerField: UseFormRegister<any>;
 }
 
 export const GenderRadio = ({
@@ -26,19 +18,16 @@ export const GenderRadio = ({
   fieldValue,
   fieldWatch,
   registerField,
-}: {
-  fieldLabel: string;
-  fieldId: string;
-  fieldValue: string;
-  fieldWatch: UseFormWatch<ProductFormData>;
-  registerField: UseFormRegister<ProductFormData>;
-}) => {
-  const selectedAudience = fieldWatch("audience");
+}: GenderRadioProps) => {
+  const selectedAudience = fieldWatch("audience") || [];
+  const isChecked = Array.isArray(selectedAudience)
+    ? selectedAudience.includes(fieldValue)
+    : false;
 
   return (
-    <label htmlFor="for-men" className="cursor-pointer flex items-center">
+    <label htmlFor={fieldId} className="cursor-pointer flex items-center">
       <input
-        type="radio"
+        type="checkbox"
         id={fieldId}
         className="hidden"
         value={fieldValue}
@@ -46,12 +35,12 @@ export const GenderRadio = ({
       />
       <div
         className={`border rounded-full p-1 flex items-center justify-center ${
-          selectedAudience === "men" ? "border-primary-500" : "border-gray-300"
+          isChecked ? "border-primary-500" : "border-gray-300"
         }`}
       >
         <div
           className={`w-2 h-2 rounded-full ${
-            selectedAudience === "men" ? "bg-primary-500" : "bg-transparent"
+            isChecked ? "bg-primary-500" : "bg-transparent"
           }`}
         />
       </div>
