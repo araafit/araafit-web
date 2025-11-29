@@ -29,11 +29,10 @@ export default function FabricItems({
   });
 
   // Helper function to generate product link
-  const getProductLink = (product: Product) => {
-    return userPage === "shop"
-      ? `/${userPage}/fabric/${product.id}`
-      : `/${userPage}/shop/fabric/${product.id}`;
-  };
+  const itemRequestLink = (product: Product) =>
+    `/${userPage}/shop/fabric/${product.id}/request`;
+  const itemImage = (product: Product) =>
+    product.images?.[0]?.url || "/placeholder-image.jpg";
 
   if (isLoading) {
     return (
@@ -58,9 +57,9 @@ export default function FabricItems({
     );
   }
 
-  const products = productsData?.products || [];
+  const fabricProducts = productsData?.products || [];
 
-  if (products.length === 0 && !isLoading && !isError) {
+  if (fabricProducts.length === 0 && !isLoading && !isError) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
@@ -80,15 +79,15 @@ export default function FabricItems({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6 lg:gap-8">
-      {products.map((product) => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 hover:shadow-xl">
+      {fabricProducts.map((product) => (
         <Card
           key={product.id}
           itemName={product.name}
           itemCost={product.price ?? 0}
-          itemImage={product.images?.[0]?.url || "/placeholder-image.jpg"}
+          itemImage={itemImage(product)}
           product={product}
-          link={getProductLink(product)}
+          link={itemRequestLink(product)}
         />
       ))}
     </div>
