@@ -47,19 +47,13 @@ export function DashboardFabricMeasurementStepPage() {
         (typeof m.chest === "number" ? m.chest : undefined) ??
         (typeof m.bust === "number" ? m.bust : undefined) ??
         null,
-      waist:
-        typeof m.waist === "number" ? m.waist : null,
-      hips:
-        typeof m.hips === "number" ? m.hips : null,
-      neck:
-        typeof m.neck === "number" ? m.neck : null,
+      waist: typeof m.waist === "number" ? m.waist : null,
+      hips: typeof m.hips === "number" ? m.hips : null,
+      neck: typeof m.neck === "number" ? m.neck : null,
       sleeve: null,
-      inseam:
-        typeof m.inseam === "number" ? m.inseam : null,
-      shoulder:
-        typeof m.shoulder === "number" ? m.shoulder : null,
-      height:
-        typeof m.height === "number" ? m.height : null,
+      inseam: typeof m.inseam === "number" ? m.inseam : null,
+      shoulder: typeof m.shoulder === "number" ? m.shoulder : null,
+      height: typeof m.height === "number" ? m.height : null,
       createdAt: measurementsData.lastUpdated,
       updatedAt: measurementsData.lastUpdated,
       assignedSize: null,
@@ -108,48 +102,43 @@ export function DashboardFabricMeasurementStepPage() {
   // Guard: must have fabric & style selected
   if (!fabricId) {
     return (
-      <Navigate
-        to={`/dashboard/shop/fabric/${rawParam}/request`}
-        replace
-      />
+      <Navigate to={`/dashboard/shop/fabric/${rawParam}/request`} replace />
     );
   }
 
   if (!selectedStyleId) {
-    return (
-      <Navigate
-        to={`/dashboard/shop/fabric/${rawParam}/style`}
-        replace
-      />
-    );
+    return <Navigate to={`/dashboard/shop/fabric/${rawParam}/style`} replace />;
   }
 
   return (
     <section className="min-h-screen bg-[#F5F5F5] flex items-start justify-center px-4 py-6 md:px-8">
       <div className="w-full max-w-[72rem] bg-white rounded-md shadow-sm p-4 md:p-6 flex flex-col gap-6">
         {/* Header */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-4">
+          <FabricRequestStepperLines stepIndex={2} />
+
+          <div className="w-full flex items-center justify-evenly gap-5 my-5">
             <button
               type="button"
               onClick={() =>
                 navigate(`/dashboard/shop/fabric/${rawParam}/style`)
               }
               className="inline-flex items-center justify-center w-9 h-9 rounded-md border border-neutral-200 text-neutral-700 hover:bg-neutral-50 transition-colors"
+              title="back to fabrics"
             >
               <ArrowLeftIcon size={18} />
             </button>
+
             <div className="flex flex-col">
               <h1 className="text-xl md:text-2xl font-semibold text-neutral-900">
                 Choose your measurements
               </h1>
               <span className="text-xs md:text-sm text-neutral-500 mt-0.5">
-                Step 3 of 4 · Select the measurement set we should use for this request
+                Step 3 of 4 · Select the measurement set we should use for this
+                request
               </span>
             </div>
           </div>
-
-          <FabricRequestStepperLines stepIndex={2} />
         </div>
 
         {/* Content */}
@@ -163,7 +152,9 @@ export function DashboardFabricMeasurementStepPage() {
           {isError && (
             <div className="flex items-center justify-center h-64">
               <div className="text-center max-w-sm">
-                <p className="text-red-600 mb-1">Failed to load your measurements</p>
+                <p className="text-red-600 mb-1">
+                  Failed to load your measurements
+                </p>
                 <p className="text-xs md:text-sm text-neutral-500 mb-4">
                   {error instanceof Error
                     ? error.message
@@ -187,7 +178,8 @@ export function DashboardFabricMeasurementStepPage() {
                   You don&apos;t have any saved measurement sets yet.
                 </p>
                 <p className="text-xs md:text-sm text-neutral-500 mb-4">
-                  Take your measurements so we can recommend the right fit for this style.
+                  Take your measurements so we can recommend the right fit for
+                  this style.
                 </p>
                 <button
                   type="button"
@@ -358,5 +350,3 @@ export function DashboardFabricMeasurementStepPage() {
     </section>
   );
 }
-
-

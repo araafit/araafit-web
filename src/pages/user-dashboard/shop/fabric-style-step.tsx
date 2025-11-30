@@ -40,7 +40,6 @@ export function DashboardFabricStyleStepPage() {
     name: string;
     images?: Array<{ url: string }>;
   }) => {
-    console.log("style", style);
     setSelectedStyleId(style.id);
     setStyleSelection({
       styleId: style.id,
@@ -68,17 +67,21 @@ export function DashboardFabricStyleStepPage() {
     <section className="min-h-screen bg-[#F5F5F5] flex items-start justify-center px-4 py-6 md:px-8">
       <div className="w-full max-w-[72rem] bg-white rounded-md shadow-sm p-4 md:p-6 flex flex-col gap-6">
         {/* Header */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-4">
+          <FabricRequestStepperLines stepIndex={1} />
+
+          <div className="w-full flex items-center justify-evenly gap-5 my-5">
             <button
               type="button"
               onClick={() =>
                 navigate(`/dashboard/shop/fabric/${rawParam}/request`)
               }
               className="inline-flex items-center justify-center w-9 h-9 rounded-md border border-neutral-200 text-neutral-700 hover:bg-neutral-50 transition-colors"
+              title="back to fabrics"
             >
               <ArrowLeftIcon size={18} />
             </button>
+
             <div className="flex flex-col">
               <h1 className="text-xl md:text-2xl font-semibold text-neutral-900">
                 Choose a style
@@ -89,8 +92,6 @@ export function DashboardFabricStyleStepPage() {
               </span>
             </div>
           </div>
-
-          <FabricRequestStepperLines stepIndex={1} />
         </div>
 
         {/* Styles grid */}
