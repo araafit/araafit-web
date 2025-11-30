@@ -28,7 +28,7 @@ export function DashboardShopPage() {
           <TopBar title="Shop" breadCrumb={<BreadCrumb />} />
 
           <div className="size-full rounded-[6px] p-2 lg:p-4 mt-0 lg:mt-20 relative">
-            <div className="bg-white h-[94%] overflow-y-scroll relative">
+            <div className="bg-white h-[90%] rounded-[6px] shadow-sm overflow-y-scroll relative">
               <ShopTab
                 items={["All", "Men", "Women", "Kids"]}
                 tabContainerClassName="bg-transparent h-full"
