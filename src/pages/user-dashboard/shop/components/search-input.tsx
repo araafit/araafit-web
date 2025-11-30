@@ -34,6 +34,7 @@ export default function SearchInput() {
           <button
             onClick={handleClearSearch}
             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            title="Clear search"
           >
             <XIcon className="size-5" />
           </button>
