@@ -64,6 +64,14 @@ export interface SewingRequestResponse extends FabricSize {
   fabric: Fabric;
 }
 
+export interface SewingRequestReviewPayload {
+  fabricId: string;
+  styleId: string;
+  measurementId: string;
+  yardEstimate: number;
+  noteForTailor: string;
+}
+
 class FabricRequestService {
   async getSewingRequest() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -87,6 +95,27 @@ class FabricRequestService {
   async makeSewingRequest(payload: SewingRequest) {
     const response = await apiClient.post<ApiResponse<SewingRequestResponse>>(
       "/sewing-requests/checkout",
+      payload
+    );
+
+    if (response.status !== 201) {
+      const error = new AxiosError(
+        "Unable to make sewing request",
+        response.status.toString(),
+        response.config,
+        response.request,
+        response
+      );
+      throw error;
+    }
+
+    return response.data;
+  }
+
+  /* Review sewing request */
+  async sewingRequestReview(payload: SewingRequestReviewPayload) {
+    const response = await apiClient.post<ApiResponse<any>>(
+      "/sewing-requests/preview",
       payload
     );
 
