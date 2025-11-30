@@ -4,6 +4,7 @@ import type { SewingRequest } from "../services/request.service";
 import showToast from "../utils/notification";
 import { notificationStyles } from "../style/custom";
 import useAuth from "./use-auth";
+import { type SewingRequestReviewPayload } from "../services/request.service";
 
 /* --------------------------------------------------------------------- */
 
@@ -43,6 +44,28 @@ export const useMakeSewingRequest = () => {
       setTimeout(() => {
         window.location.href = isAuthenticated ? "/dashboard/shop" : "/shop";
       }, 1000);
+    },
+    onError: (error) => {
+      console.log("Failed to make sewing request:", error);
+      showToast.error("Failed to make request. Please try again.", {
+        icon: null,
+        style: notificationStyles.alertError,
+        duration: 5000,
+      });
+    },
+  });
+};
+
+export const useSewingRequestReview = () => {
+  return useMutation({
+    mutationFn: (payload: SewingRequestReviewPayload) =>
+      fabricRequestService.sewingRequestReview(payload),
+    onSuccess: (response) => {
+      showToast.success(response.message || "Here'sa review of your request", {
+        icon: null,
+        style: notificationStyles.alertSuccess,
+        duration: 5000,
+      });
     },
     onError: (error) => {
       console.log("Failed to make sewing request:", error);
