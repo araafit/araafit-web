@@ -8,7 +8,7 @@ import PasswordResetPage from "./user-auth/reset/password-reset-page";
 import Register from "./user-auth/register/register";
 import {
   DashboardHomePage,
-  DashboardShopFabricDetailPage,
+  // DashboardShopFabricDetailPage,
   DashboardShopDressDetailPage,
   DashboardOrdersPage,
   DashboardCartPage,
@@ -203,10 +203,10 @@ const pagesRoutes = createBrowserRouter([
             path: "dress/:itemName",
             element: <DashboardShopDressDetailPage />,
           },
-          {
+          /*{
             path: "fabric/:itemName",
             element: <DashboardShopFabricDetailPage />,
-          },
+          },*/
           {
             path: "fabric/:itemName/request",
             element: <DashboardFabricRequestFlowPage />,
