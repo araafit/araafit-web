@@ -122,6 +122,12 @@ export const useShopStore = create<ShopState>((set) => ({
 
 // ------------------- Fabric Request Flow ----------------------
 
+interface DiscountApplied {
+  name: string;
+  value: number;
+  type: "percentage" | "fixed";
+}
+
 export interface FabricRequestState {
   fabricId?: string;
   selectedImageIndex: number;
@@ -132,6 +138,8 @@ export interface FabricRequestState {
   selectedMeasurementSetId?: string;
   selectedMeasurementSetName?: string;
   selectedMeasurementGender?: string | null;
+  discountApplied?: null | DiscountApplied;
+  setDiscount: (payload: DiscountApplied | null) => void,
   setSelection: (payload: {
     fabricId: string;
     imageIndex: number;
@@ -160,6 +168,7 @@ export const useFabricRequestStore = create<FabricRequestState>((set) => ({
   selectedMeasurementSetId: undefined,
   selectedMeasurementSetName: undefined,
   selectedMeasurementGender: undefined,
+  discountApplied: null,
   setSelection: ({ fabricId, imageIndex, imageUrl }) =>
     set(() => ({
       fabricId,
@@ -178,6 +187,11 @@ export const useFabricRequestStore = create<FabricRequestState>((set) => ({
       selectedMeasurementSetName: name ?? undefined,
       selectedMeasurementGender: gender ?? null,
     })),
+  setDiscount: (discount: DiscountApplied) => {
+    set(() => ({
+      discountApplied: discount
+    }));
+  },
   reset: () =>
     set(() => ({
       fabricId: undefined,
