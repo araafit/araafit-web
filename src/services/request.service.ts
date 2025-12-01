@@ -72,6 +72,56 @@ export interface SewingRequestReviewPayload {
   noteForTailor: string;
 }
 
+export interface ReviewMeasurements {
+  id: string;
+  name: string;
+  chest: number;
+  waist: number;
+  hips: number;
+  neck: number | null;
+  sleeve: number | null;
+  inseam: number | null;
+  shoulder: number | null;
+  height: number;
+  gender: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReviewPrice {
+  pricePerYard: number;
+  yardEstimate: number;
+  fabricCost: number;
+  styleCost: number;
+  originalAmount: number;
+  discountAmount: number;
+  totalAmount: number;
+}
+
+interface DiscountApplied {
+  name: string;
+  value: number;
+  type: "percentage" | "fixed";
+}
+
+export interface SewingRequestReviewResponse {
+  fabric: {
+    id: string;
+    name: string;
+    pricePerYard: number;
+    details: string;
+  };
+  style: {
+    id: string;
+    dressStyle: string;
+    dressSize: string;
+    sewingPrice: number;
+  };
+  measurement: ReviewMeasurements;
+  price: ReviewPrice;
+  discountApplied: null | DiscountApplied;
+}
+
 class FabricRequestService {
   async getSewingRequest() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -114,10 +164,9 @@ class FabricRequestService {
 
   /* Review sewing request */
   async sewingRequestReview(payload: SewingRequestReviewPayload) {
-    const response = await apiClient.post<ApiResponse<any>>(
-      "/sewing-requests/preview",
-      payload
-    );
+    const response = await apiClient.post<
+      ApiResponse<SewingRequestReviewResponse>
+    >("/sewing-requests/preview", payload);
 
     if (response.status !== 201) {
       const error = new AxiosError(
