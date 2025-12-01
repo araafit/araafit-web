@@ -166,7 +166,7 @@ export default function CheckoutDeliveryInfo({
                 id="email"
                 type="email"
                 className="w-full p-4 border border-gray-300 outline-none rounded-[6px] disabled:cursor-not-allowed"
-                disabled={!editInfo}
+                disabled
                 {...register("email", {
                   required: "Email is required",
                   pattern: {
@@ -176,9 +176,7 @@ export default function CheckoutDeliveryInfo({
                 })}
               />
 
-              {errors.email && (
-                <small className="text-red-400">{errors.email.message}</small>
-              )}
+              <small className="text-primary-500 text-xs">Email field can not be edited</small>
             </div>
 
             <div className="grow flex flex-col gap-2">
