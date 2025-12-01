@@ -68,12 +68,12 @@ export const useSewingRequestReview = () => {
       });
     },
     onError: (error) => {
-      console.log("Failed to make sewing request:", error);
-      showToast.error("Failed to make request. Please try again.", {
-        icon: null,
-        style: notificationStyles.alertError,
-        duration: 5000,
-      });
+      console.log("Failed return request review:", error);
+      // showToast.error("Failed to make request. Please try again.", {
+      //   icon: null,
+      //   style: notificationStyles.alertError,
+      //   duration: 5000,
+      // });
     },
   });
 };
