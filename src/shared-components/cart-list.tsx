@@ -6,7 +6,11 @@ import Button from "./button";
 import Modal from "./modal";
 import { MinusIcon, PlusIcon, TrashSimpleIcon } from "@phosphor-icons/react";
 import { formatPrice } from "../utils/format-price";
-import { useUpdateQuantity, useRemoveFromCart, useRemoveManyFromCart } from "../hooks/cart.hooks";
+import {
+  useUpdateQuantity,
+  useRemoveFromCart,
+  useRemoveManyFromCart,
+} from "../hooks/cart.hooks";
 import type { CartItem } from "../services/cart.service";
 import Spinner from "./spinner";
 
@@ -73,13 +77,17 @@ function CartList({ cartData, checkoutLink }: CartEngine) {
   };
 
   const selectedItemIds = useMemo(
-    () => Object.entries(selectedIds).filter(([, v]) => v).map(([k]) => k),
+    () =>
+      Object.entries(selectedIds)
+        .filter(([, v]) => v)
+        .map(([k]) => k),
     [selectedIds]
   );
 
   // Bulk delete selected items
   const removeSelected = () => {
-    if (selectedItemIds.length === 0 || removeManyFromCartMutation.isPending) return;
+    if (selectedItemIds.length === 0 || removeManyFromCartMutation.isPending)
+      return;
     removeManyFromCartMutation.mutate(selectedItemIds, {
       onSuccess: () => {
         setSelectedIds({});
@@ -100,15 +108,19 @@ function CartList({ cartData, checkoutLink }: CartEngine) {
             {selectedItemIds.length} selected
           </span>
           <Button
-            text={removeManyFromCartMutation.isPending ? "Deleting..." : "Delete selected"}
             variant="clear"
             className="bg-red-600 text-white px-4 py-2 rounded disabled:opacity-50"
             onClick={removeSelected}
             disabled={removeManyFromCartMutation.isPending}
           >
             <div className="flex items-center gap-2">
-              <TrashSimpleIcon className="size-[16px]" />
-              {removeManyFromCartMutation.isPending && <Spinner size="sm" />}
+              <span>Remove Selected</span>
+              <Spinner
+                isLoading={removeManyFromCartMutation.isPending}
+                size="sm"
+                speed="fast"
+                arcColor="#ffff"
+              />
             </div>
           </Button>
         </div>
@@ -165,13 +177,11 @@ function CartList({ cartData, checkoutLink }: CartEngine) {
                     />
                     <span className="flex items-center gap-1">
                       {item.quantity}
-                      {updateQuantityMutation.isPending && (
-                        <Spinner
-                          size="sm"
-                          arcColor="#9a6c50"
-                          isLoading={updateQuantityMutation.isPending}
-                        />
-                      )}
+                      <Spinner
+                        size="sm"
+                        arcColor="#9a6c50"
+                        isLoading={updateQuantityMutation.isPending}
+                      />
                     </span>
                     <PlusIcon
                       className={`cursor-pointer ${
