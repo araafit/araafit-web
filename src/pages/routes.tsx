@@ -57,6 +57,7 @@ import { DashboardFabricRequestFlowPage } from "./user-dashboard/shop/fabric-req
 import { DashboardFabricStyleStepPage } from "./user-dashboard/shop/fabric-style-step";
 import { DashboardFabricMeasurementStepPage } from "./user-dashboard/shop/fabric-measurement-step";
 import { DashboardFabricReviewStepPage } from "./user-dashboard/shop/fabric-review-step";
+import { DashboardFabricCheckoutStepPage } from "./user-dashboard/shop/fabric-checkout-step";
 import { OrderStatusProvider } from "./admin-dashboard/orders-management/table-status-context-provider";
 import GetMeasuredLayout from "../layouts/get-measured/get-measured-layout";
 
@@ -222,6 +223,10 @@ const pagesRoutes = createBrowserRouter([
           {
             path: "fabric/:itemName/review",
             element: <DashboardFabricReviewStepPage />,
+          },
+           {
+            path: "fabric/:itemName/checkout",
+            element: <DashboardFabricCheckoutStepPage />,
           },
         ],
       },
