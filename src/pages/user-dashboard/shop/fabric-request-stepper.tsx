@@ -5,7 +5,7 @@ export function FabricRequestStepperLines({
   stepIndex: number;
   className?: string;
 }) {
-  const steps = ["fabric", "style", "measurement", "review"];
+  const steps = ["fabric", "style", "measurement", "review", "checkout"];
 
   return (
     <div
