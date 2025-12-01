@@ -187,7 +187,7 @@ export const useFabricRequestStore = create<FabricRequestState>((set) => ({
       selectedMeasurementSetName: name ?? undefined,
       selectedMeasurementGender: gender ?? null,
     })),
-  setDiscount: (discount: DiscountApplied) => {
+  setDiscount: (discount: DiscountApplied | null) => {
     set(() => ({
       discountApplied: discount
     }));
