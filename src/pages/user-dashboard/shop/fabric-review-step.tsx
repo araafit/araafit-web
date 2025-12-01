@@ -9,14 +9,17 @@ import { useMeasurements } from "../../../hooks/measurements.hooks";
 import type { MeasurementSet } from "../../../services/measurements.service";
 import Spinner from "../../../shared-components/spinner";
 import { formatPrice } from "../../../utils/format-price";
+import Button from "../../../shared-components/button";
+import { useSewingRequestReview } from "../../../hooks/requests.hooks";
+import { useEffect } from "react";
 
 /* ---------------------------------------------------------------------- */
 
 export function DashboardFabricReviewStepPage() {
+  const [hasSubmitted, setHasSubmitted] = useState(false);
   const params = useParams<{ itemName: string }>();
   const rawParam = params.itemName || "";
   const navigate = useNavigate();
-
   const {
     fabricId,
     selectedImageUrl,
@@ -25,7 +28,10 @@ export function DashboardFabricReviewStepPage() {
     selectedStyleImageUrl,
     selectedMeasurementSetId,
     selectedMeasurementSetName,
+    setDiscount,
   } = useFabricRequestStore((state) => state);
+
+  const requestReview = useSewingRequestReview();
 
   const {
     data: product,
@@ -76,7 +82,7 @@ export function DashboardFabricReviewStepPage() {
     if (!matchedSizeConfig) return null;
     const n = Number(matchedSizeConfig.fabricYards);
     if (!Number.isFinite(n) || n <= 0) return null;
-    return n;
+    return n.toFixed(0);
   }, [matchedSizeConfig]);
 
   const pricePerYard = useMemo(() => {
@@ -96,7 +102,7 @@ export function DashboardFabricReviewStepPage() {
 
   const fabricCost = useMemo(() => {
     if (!yardsNeeded || !pricePerYard) return null;
-    return yardsNeeded * pricePerYard;
+    return Number(yardsNeeded) * pricePerYard;
   }, [yardsNeeded, pricePerYard]);
 
   const totalCost = useMemo(() => {
@@ -109,51 +115,78 @@ export function DashboardFabricReviewStepPage() {
 
   const [noteForTailor, setNoteForTailor] = useState("");
 
-  const isLoading =
-    isProductLoading || isStyleLoading || isMeasurementsLoading;
+  const isLoading = isProductLoading || isStyleLoading || isMeasurementsLoading;
 
   const hasHardError = isProductError || isStyleError || isMeasurementsError;
+
+  useEffect(() => {
+    if (
+      !fabricId ||
+      !selectedStyleId ||
+      !selectedMeasurementSetId ||
+      !yardsNeeded
+    )
+      return;
+
+    setHasSubmitted(true);
+
+    requestReview.mutate({
+      fabricId: fabricId,
+      styleId: selectedStyleId.toString() as string,
+      measurementId: selectedMeasurementSetId as string,
+      yardEstimate: yardsNeeded ? Number(yardsNeeded) : 0,
+      noteForTailor: noteForTailor,
+    });
+
+    if (requestReview.isSuccess) {
+      console.log(requestReview.data.data.discountApplied);
+      setDiscount(requestReview.data.data.discountApplied);
+    }
+  }, [
+    fabricId,
+    selectedMeasurementSetId,
+    selectedStyleId,
+    yardsNeeded,
+    hasSubmitted,
+  ]);
 
   // Guards: ensure previous steps completed
   if (!fabricId) {
     return (
-      <Navigate
-        to={`/dashboard/shop/fabric/${rawParam}/request`}
-        replace
-      />
+      <Navigate to={`/dashboard/shop/fabric/${rawParam}/request`} replace />
     );
   }
 
   if (!selectedStyleId) {
-    return (
-      <Navigate
-        to={`/dashboard/shop/fabric/${rawParam}/style`}
-        replace
-      />
-    );
+    return <Navigate to={`/dashboard/shop/fabric/${rawParam}/style`} replace />;
   }
 
   if (!selectedMeasurementSetId) {
     return (
-      <Navigate
-        to={`/dashboard/shop/fabric/${rawParam}/measurement`}
-        replace
-      />
+      <Navigate to={`/dashboard/shop/fabric/${rawParam}/measurement`} replace />
     );
   }
+
+  const handleContinue = () => {
+    // Next: Checkout step
+    navigate(`/dashboard/shop/fabric/${rawParam}/checkout`);
+  };
 
   return (
     <section className="min-h-screen bg-[#F5F5F5] flex items-start justify-center px-4 py-6 md:px-8">
       <div className="w-full max-w-[72rem] bg-white rounded-md shadow-sm p-4 md:p-6 flex flex-col gap-6">
         {/* Header */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-4 mb-2">
+          <FabricRequestStepperLines stepIndex={3} />
+
+          <div className="w-full flex items-center justify-evenly gap-5 my-5">
             <button
               type="button"
               onClick={() =>
                 navigate(`/dashboard/shop/fabric/${rawParam}/measurement`)
               }
               className="inline-flex items-center justify-center w-9 h-9 rounded-md border border-neutral-200 text-neutral-700 hover:bg-neutral-50 transition-colors"
+              title="Back button"
             >
               <ArrowLeftIcon size={18} />
             </button>
@@ -166,8 +199,6 @@ export function DashboardFabricReviewStepPage() {
               </span>
             </div>
           </div>
-
-          <FabricRequestStepperLines stepIndex={3} />
         </div>
 
         {isLoading && (
@@ -289,7 +320,9 @@ export function DashboardFabricReviewStepPage() {
                       type="button"
                       className="text-xs text-primary-600 hover:text-primary-700 underline"
                       onClick={() =>
-                        navigate(`/dashboard/shop/fabric/${rawParam}/measurement`)
+                        navigate(
+                          `/dashboard/shop/fabric/${rawParam}/measurement`
+                        )
                       }
                     >
                       Change
@@ -338,7 +371,7 @@ export function DashboardFabricReviewStepPage() {
                     <span className="text-neutral-600">Yards needed</span>
                     <span className="font-medium text-neutral-900">
                       {yardsNeeded
-                        ? `${formatPrice(yardsNeeded)} yd`
+                        ? `${formatPrice(Number(yardsNeeded))} yd`
                         : "Not available"}
                     </span>
                   </div>
@@ -367,18 +400,19 @@ export function DashboardFabricReviewStepPage() {
                     Total estimate
                   </span>
                   <span className="text-lg font-semibold text-neutral-900">
-                    {totalCost
-                      ? `₦${formatPrice(totalCost)}`
-                      : "Not available"}
+                    {totalCost ? `₦${formatPrice(totalCost)}` : "Not available"}
                   </span>
                 </div>
 
                 {!yardsNeeded && (
                   <p className="mt-1 text-[11px] text-amber-700 flex items-start gap-1">
-                    <WarningCircleIcon size={14} className="mt-0.5 flex-shrink-0" />
+                    <WarningCircleIcon
+                      size={14}
+                      className="mt-0.5 flex-shrink-0"
+                    />
                     <span>
-                      We couldn&apos;t automatically map your measurement set to a
-                      size entry for this style. The yard estimate and fabric
+                      We couldn&apos;t automatically map your measurement set to
+                      a size entry for this style. The yard estimate and fabric
                       cost may need to be confirmed by an admin.
                     </span>
                   </p>
@@ -388,13 +422,14 @@ export function DashboardFabricReviewStepPage() {
 
             {/* Footer actions (placeholder for actual checkout) */}
             <div className="flex items-center justify-end pt-4 border-t border-neutral-100 mt-2">
-              <button
+              <Button
+                variant="solid"
+                text="Confirm to proceed"
                 type="button"
                 className="px-5 py-2.5 rounded-md bg-[#9A6C50] text-white text-sm font-medium hover:bg-[#7B523F] transition-colors disabled:bg-neutral-200 disabled:text-neutral-500 disabled:cursor-not-allowed"
-                disabled={isLoading || hasHardError}
-              >
-                Confirm (coming soon)
-              </button>
+                disabled={isLoading || hasHardError || requestReview.isPending}
+                onClick={handleContinue}
+              />
             </div>
           </>
         )}
@@ -402,5 +437,3 @@ export function DashboardFabricReviewStepPage() {
     </section>
   );
 }
-
-
