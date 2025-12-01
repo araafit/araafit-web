@@ -88,7 +88,7 @@ const Tab = ({
     <div className={CN("rounded-lg flex flex-col h-full", tabContainerClassName)}>
       <div
         className={CN(
-          "flex items-center justify-start lg:justify-center space-x-0 lg:space-x-1 flex-shrink-0 flex-wrap lg:flex-nowrap gap-1 lg:gap-0 overflow-x-auto lg:overflow-x-visible",
+          "flex-inline items-center justify-start space-x-0 lg:space-x-1 flex-shrink-0 flex-wrap lg:flex-nowrap gap-1 lg:gap-0 overflow-x-auto lg:overflow-x-visible",
           tabListClassName
         )}
       >
