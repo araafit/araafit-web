@@ -3,7 +3,7 @@ import UserDashboardLayout from "../../../layouts/user-dashboard/dashboard-layou
 import Tab from "../../../shared-components/tab";
 import TopBar from "../top-bar";
 import Measurements from "./measurement/measurements";
-import BillingCards from "./billing-card/card";
+// import BillingCards from "./billing-card/card";
 import Notification from "./notification";
 import ProfileSettings from "./profile-settings/profile-settings";
 import { useSearchParams } from "react-router-dom";
@@ -22,7 +22,7 @@ export function DashboardProfilePage() {
     tabParam === "measurement" || tabParam === "measurements" || tabParam === "1"
       ? 1
       : 0;
-  const tabItems = ["My Profile", "My Measurement", "My Card", "Notification"];
+  const tabItems = ["My Profile", "My Measurement", "Notification"];
 
   const BreadCrumb = () => (
     <div className="font-inter font-light capitalize flex items-center">
@@ -42,12 +42,12 @@ export function DashboardProfilePage() {
             items={tabItems}
             defaultTab={defaultTabIndex}
             tabContainerClassName="bg-transparent h-full"
-            tabListClassName="w-full md:w-[35rem] text-xs lg:text-[0.875rem] text-neutral-700 border border-neutral-100 p-1 lg:p-[0.254rem] bg-transparent rounded-md flex flex-nowrap overflow-x-auto lg:flex-wrap"
+            tabListClassName="w-full max-w-fit text-xs lg:text-[0.875rem] text-neutral-700 border border-neutral-100 p-1 lg:p-[0.254rem] bg-transparent rounded-md flex-inline flex-nowrap overflow-x-auto lg:flex-wrap"
             activeTabClassName="bg-primary-900 text-white rounded-md"
           >
             <ProfileSettings />
             <Measurements />
-            <BillingCards />
+            {/* <BillingCards /> */}
             <Notification />
           </Tab>
         </div>
