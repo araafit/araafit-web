@@ -19,7 +19,7 @@ export function DashboardFabricReviewStepPage() {
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const params = useParams<{ itemName: string }>();
   const rawParam = params.itemName || "";
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const {
     fabricId,
     selectedImageUrl,
@@ -133,7 +133,7 @@ export function DashboardFabricReviewStepPage() {
 
     requestReview.mutate({
       fabricId: fabricId,
-      styleId: selectedStyleId.toString() as string,
+      styleId: selectedStyleId,
       measurementId: selectedMeasurementSetId as string,
       yardEstimate: yardsNeeded ? Number(yardsNeeded) : 0,
       noteForTailor: noteForTailor,
@@ -171,14 +171,7 @@ export function DashboardFabricReviewStepPage() {
   const handleContinue = () => {
     // Next: Checkout step
     navigate(
-      `/dashboard/shop/fabric/${rawParam}/checkout?
-      fabricId=${fabricId},
-      selectedStyleId=${selectedStyleId},
-      selectedMeasurementSetId=${selectedMeasurementSetId},
-      yardsNeeded=${yardsNeeded},
-      gender=${measurementsData?.gender},
-      noteForTailor=${noteForTailor},
-      totalCost=${totalCost}`
+      `/dashboard/shop/fabric/${rawParam}/checkout?fabricId=${fabricId}&selectedStyleId=${selectedStyleId}&selectedMeasurementSetId=${selectedMeasurementSetId}&yardsNeeded=${yardsNeeded}&gender=${measurementsData?.gender}&noteForTailor=${noteForTailor}&totalCost=${totalCost}`
     );
   };
 
@@ -436,7 +429,7 @@ export function DashboardFabricReviewStepPage() {
                 variant="solid"
                 text="Confirm to proceed"
                 type="button"
-                className="px-5 py-2.5 rounded-md bg-[#9A6C50] text-white text-sm font-medium hover:bg-[#7B523F] transition-colors disabled:bg-neutral-200 disabled:text-neutral-500 disabled:cursor-not-allowed"
+                className="px-5 py-2.5 rounded-md bg-[#9A6C50] text-white text-sm font-medium hover:bg-[#7B523F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isLoading || hasHardError || requestReview.isPending}
                 onClick={handleContinue}
               />

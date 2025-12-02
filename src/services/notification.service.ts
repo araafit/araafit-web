@@ -8,13 +8,13 @@ import { type User } from "../stores/auth-store";
 enum NotificationType {
   PURCHASE = "PURCHASE",
   CART = "CART",
-  DELIVERY = "DELIVERY"
+  DELIVERY = "DELIVERY",
 }
 
 // Interface for Purchase notification metadata
 export interface PurchaseMetadata {
   orderId: string;
-  requestId?: string
+  requestId?: string;
   totalAmount: string;
 }
 
@@ -43,12 +43,17 @@ export interface Notification {
 
 // Interface for the complete API response
 export interface NotificationResponse {
-  data: Notification[],
-  total: number,
-  page: number,
-  limit: number,
-  totalPages: number
-};
+  data: Notification[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface NotificationPreferences {
+  receiveEmailNotifications: boolean;
+  receiveInAppNotifications: boolean;
+}
 
 export const userNotificationService = {
   async getAllNotification(): Promise<NotificationResponse> {
@@ -68,8 +73,46 @@ export const userNotificationService = {
   },
 
   async deleteNotification(id: number): Promise<ApiResponse<null>> {
-    const response = await apiClient.delete<ApiResponse<null>>(`/notifications/${id}`);
+    const response = await apiClient.delete<ApiResponse<null>>(
+      `/notifications/${id}`
+    );
 
     return response.data;
+  },
+
+  async enableEmailNotification(
+    enable: boolean
+  ): Promise<NotificationPreferences> {
+    const response = await apiClient.post<ApiResponse<NotificationPreferences>>(
+      "/notifications/preferences",
+      {
+        receiveEmailNotifications: enable,
+        receiveInAppNotifications: false,
+      }
+    );
+
+    if (response.status !== 200) {
+      throw new Error("Failed to update email notification preference");
+    }
+
+    return response.data.data;
+  },
+
+  async enableInAppNotification(
+    enable: boolean
+  ): Promise<NotificationPreferences> {
+    const response = await apiClient.post<ApiResponse<NotificationPreferences>>(
+      "/notifications/preferences",
+      {
+        receiveEmailNotifications: false,
+        receiveInAppNotifications: enable,
+      }
+    );
+
+    if (response.status !== 200) {
+      throw new Error("Failed to update in-app notification preference");
+    }
+
+    return response.data.data;
   },
 };

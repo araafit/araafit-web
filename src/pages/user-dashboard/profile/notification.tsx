@@ -82,7 +82,7 @@ export default function Notification() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-2">
+      {/* <div className="flex flex-col gap-2">
         <span className="text-neutral-950">Order notification</span>
         <div className="w-full h-[55px] bg-primary-50 rounded-md flex items-center justify-start px-6">
           <div className="flex space-x-3">
@@ -92,7 +92,7 @@ export default function Notification() {
             </span>
           </div>
         </div>
-      </div>
+      </div> */}
 
       <div className="flex flex-col gap-2">
         <span className="text-neutral-950">In-App notification</span>

@@ -144,15 +144,100 @@ export const useDeleteNotification = () => {
   });
 };
 
-/* helpers to invalidate related queries after mutations */
+export const useEnableInAppNotification = () => {
+  const queryClient = useQueryClient();
 
-export const invalidateAllUserNotifications = (qc: QueryClient) =>
-  qc.invalidateQueries({ queryKey: userNotificationsKeys.all });
+  return useMutation({
+    mutationFn: (enable: boolean) =>
+      userNotificationService.enableInAppNotification(enable),
+    mutationKey: userNotificationsKeys.update("enableInApp12345"),
+    onSuccess: (notificationData) => {
+      showToast.success(
+        notificationData.message ||
+          `In-App Notification ${notificationData.enabled ? "enabled" : "disabled"
+          } successfully!`,
+        {
+          icon: null,
+          style: notificationStyles.alertSuccess,
+        }
+      );
 
-export const invalidateNotificationLists = (
-  qc: QueryClient,
-  params?: Record<string, unknown>
-) => qc.invalidateQueries({ queryKey: userNotificationsKeys.lists(params) });
+      // Invalidate all user notifications
+      queryClient.invalidateQueries({
+        queryKey: userNotificationsKeys.lists(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: userNotificationsKeys.all,
+      });
+    },
+    onError: (error: unknown) => {
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+      };
+      console.log(axiosError);
+    },
+    retry: (failureCount, error: unknown) => {
+      // Don't retry on 401/403 errors
+      const axiosError = error as { response?: { status?: number } };
 
-export const invalidateNotificationDetail = (qc: QueryClient, id: string) =>
-  qc.invalidateQueries({ queryKey: userNotificationsKeys.detail(id) });
+      if (
+        axiosError?.response?.status === 401 ||
+        axiosError?.response?.status === 403
+      ) {
+        return false;
+      }
+
+      // Retry once for other errors
+      return failureCount < 1;
+    }
+  });
+};
+
+export const useEnableEmailNotification = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (enable: boolean) =>
+      userNotificationService.enableEmailNotification(enable),
+    mutationKey: userNotificationsKeys.update("enableEmail12345"),
+    onSuccess: (notificationData) => {
+      showToast.success(
+        notificationData.message ||
+          `Email Notification ${notificationData.enabled ? "enabled" : "disabled"
+          } successfully!`,
+        {
+          icon: null,
+          style: notificationStyles.alertSuccess,
+        }
+      );
+
+      // Invalidate all user notifications
+      queryClient.invalidateQueries({
+        queryKey: userNotificationsKeys.lists(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: userNotificationsKeys.all,
+      });
+    },
+    onError: (error: unknown) => {
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+      };
+      console.log(axiosError);
+    },
+    retry: (failureCount, error: unknown) => {
+      // Don't retry on 401/403 errors
+      const axiosError = error as { response?: { status?: number } };
+
+      if (
+        axiosError?.response?.status === 401 ||
+        axiosError?.response?.status === 403
+      ) {
+        return false;
+      }
+
+      // Retry once for other errors
+      return failureCount < 1;
+    }
+  });
+}

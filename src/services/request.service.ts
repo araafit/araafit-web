@@ -66,7 +66,7 @@ export interface SewingRequestResponse extends FabricSize {
 
 export interface SewingRequestReviewPayload {
   fabricId: string;
-  styleId: string;
+  styleId: string | number;
   measurementId: string;
   yardEstimate: number;
   noteForTailor: string;

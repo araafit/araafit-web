@@ -7,6 +7,7 @@ import Button from "../../../shared-components/button";
 import Spinner from "../../../shared-components/spinner";
 import { useSearchParams } from "react-router-dom";
 import { useFabricRequestStore } from "../../../shared-hooks/state-store";
+import { formatNumber } from "../../../utils/admin-dashboard-utils";
 
 /* ------------------------------------------------------------------------------ */
 
@@ -23,14 +24,15 @@ export function DashboardFabricCheckoutStepPage() {
   const params = useParams<{ itemName: string }>();
   const rawParam = params.itemName || "";
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [searchParams, _] = useSearchParams();
 
   const { discountApplied: discount } = useFabricRequestStore((state) => state);
 
   const fabricId = searchParams.get("fabricId") || "";
   const selectedStyleId = searchParams.get("styleId") || "";
   const selectedMeasurementSetId = searchParams.get("measurementId") || "";
-  const yardsNeeded = Number(searchParams.get("yardEstimate") || "0");
+  const yardsNeeded = Number(searchParams.get("yardsNeeded") || "0");
   const gender = searchParams.get("gender") || "";
   const noteForTailor = searchParams.get("noteForTailor") || "";
   const totalCost = Number(searchParams.get("totalCost") || "0");
@@ -64,6 +66,8 @@ export function DashboardFabricCheckoutStepPage() {
       noteForTailor,
     });
   };
+
+  // console.log(discount, yardsNeeded);
 
   return (
     <section className="min-h-screen bg-[#F5F5F5] flex items-start justify-center px-4 py-6 md:px-8">
@@ -122,10 +126,10 @@ export function DashboardFabricCheckoutStepPage() {
 
           {/* Payment Summary */}
           <div className="mt-8 p-6 bg-secondary border border-border rounded-[6px] mb-5">
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-muted-foreground">Total cost</span>
-              <span className="font-semibold text-foreground">
-                &#8358;{totalCost || 0}
+            <div className={`flex justify-between items-center ${hasDiscount ? "mb-4" : "mb-0"}`}>
+              <span className={`${hasDiscount?"text-muted-foreground":"text-lg font-bold"}`}>Total cost</span>
+              <span className={`${hasDiscount ? "font-semibold text-md" : "text-lg font-bold"} text-foreground`}>
+                &#8358;{formatNumber(totalCost) || 0}
               </span>
             </div>
 
@@ -146,17 +150,18 @@ export function DashboardFabricCheckoutStepPage() {
               </div>
             )}
 
-            <div className="flex justify-between items-center border-t border-border pt-3">
+            {hasDiscount && ( <div className="flex justify-between items-center border-t border-border pt-3">
               <span className="text-lg font-bold text-foreground">
                 Final cost
               </span>
               <span className="text-2xl font-bold text-primary">
                 &#8358;
                 {discount?.type === "percentage"
-                  ? finalCostIfIsPercentage
-                  : finalCostIfIsFixed}
+                  ? formatNumber(finalCostIfIsPercentage)
+                  : formatNumber(finalCostIfIsFixed)}
               </span>
-            </div>
+            </div>)}
+
           </div>
 
           <Button
