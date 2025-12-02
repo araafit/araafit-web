@@ -6,6 +6,7 @@ import { useState } from "react";
 import Button from "../../../shared-components/button";
 import Spinner from "../../../shared-components/spinner";
 import { useSearchParams } from "react-router-dom";
+import { useFabricRequestStore } from "../../../shared-hooks/state-store";
 
 /* ------------------------------------------------------------------------------ */
 
@@ -24,15 +25,30 @@ export function DashboardFabricCheckoutStepPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
+  const { discountApplied: discount } = useFabricRequestStore((state) => state);
+
   const fabricId = searchParams.get("fabricId") || "";
   const selectedStyleId = searchParams.get("styleId") || "";
   const selectedMeasurementSetId = searchParams.get("measurementId") || "";
   const yardsNeeded = Number(searchParams.get("yardEstimate") || "0");
+  const gender = searchParams.get("gender") || "";
   const noteForTailor = searchParams.get("noteForTailor") || "";
+  const totalCost = Number(searchParams.get("totalCost") || "0");
 
   const makeRequest = useMakeSewingRequest();
 
   const [agreedToPolicy, setAgreedToPolicy] = useState(false);
+
+  const hasDiscount = discount?.value && discount.value > 0;
+  const percentageDiscountAmount =
+    discount?.type === "percentage"
+      ? Math.floor((totalCost * discount.value) / 100)
+      : 0;
+  const fixedDiscountAmount = discount?.type === "fixed" ? discount.value : 0;
+  const finalCostIfIsPercentage = totalCost
+    ? totalCost - percentageDiscountAmount
+    : 0;
+  const finalCostIfIsFixed = totalCost ? totalCost - fixedDiscountAmount : 0;
 
   const onPolicyChange = (checked: boolean) => {
     setAgreedToPolicy(checked);
@@ -44,7 +60,7 @@ export function DashboardFabricCheckoutStepPage() {
       dressStyle: selectedStyleId.toString(),
       size: selectedMeasurementSetId.toString(),
       yardEstimate: yardsNeeded as number,
-      gender: "",
+      gender: gender,
       noteForTailor,
     });
   };
@@ -61,7 +77,7 @@ export function DashboardFabricCheckoutStepPage() {
             <button
               type="button"
               onClick={() =>
-                navigate(`/dashboard/shop/fabric/${rawParam}/measurement`)
+                navigate(`/dashboard/shop/fabric/${rawParam}/review`)
               }
               className="inline-flex items-center justify-center w-9 h-9 rounded-md border border-neutral-200 text-neutral-700 hover:bg-neutral-50 transition-colors"
               title="Back button"
@@ -104,6 +120,45 @@ export function DashboardFabricCheckoutStepPage() {
             </span>
           </label>
 
+          {/* Payment Summary */}
+          <div className="mt-8 p-6 bg-secondary border border-border rounded-[6px] mb-5">
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-muted-foreground">Total cost</span>
+              <span className="font-semibold text-foreground">
+                &#8358;{totalCost || 0}
+              </span>
+            </div>
+
+            {hasDiscount && (
+              <div className="flex justify-between items-center mb-4 text-[#B47409]">
+                <span className="text-muted-foreground">
+                  Discount{" "}
+                  {discount?.type === "percentage"
+                    ? `(${discount.value}%)`
+                    : `${discount.value}`}
+                </span>
+                <span className="font-semibold">
+                  - &#8358;
+                  {discount?.type === "percentage"
+                    ? percentageDiscountAmount
+                    : fixedDiscountAmount}
+                </span>
+              </div>
+            )}
+
+            <div className="flex justify-between items-center border-t border-border pt-3">
+              <span className="text-lg font-bold text-foreground">
+                Final cost
+              </span>
+              <span className="text-2xl font-bold text-primary">
+                &#8358;
+                {discount?.type === "percentage"
+                  ? finalCostIfIsPercentage
+                  : finalCostIfIsFixed}
+              </span>
+            </div>
+          </div>
+
           <Button
             variant="solid"
             className="w-full disabled:opacity-50 disabled:cursor-not-allowed flex justify-center"
@@ -112,6 +167,7 @@ export function DashboardFabricCheckoutStepPage() {
           >
             <div className="flex items-center gap-2">
               <span>Make payment</span>
+
               <Spinner
                 arcColor="#ffff"
                 size="sm"
