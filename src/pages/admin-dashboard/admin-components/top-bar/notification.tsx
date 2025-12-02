@@ -158,6 +158,7 @@ const NotificationList = ({
                     <span className="font-medium">Order ID:</span>
                     <span className="font-mono text-xs">
                       {(
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         notification.metadata as any
                       ).requestId?.substring(0, 8)}
                       ...
@@ -236,25 +237,16 @@ const AdminNotification = () => {
   const deleteNotification = useAdminDeleteNotification();
 
   const {
-    isError,
-    isLoading,
-    isSuccess,
-    error,
     data: notification,
   } = useAdminNotifications();
 
   const [expandedId, setExpandedId] = useState(null);
 
   const handleMarkAsRead = async (id) => {
-    // setNotifications(
-    //   notifications.map((n) => (n.id === id ? { ...n, isRead: true } : n))
-    // );
     await markAsRead.mutateAsync(id);
   };
 
   const removeNotification = async (id) => {
-    // setNotifications(notifications.filter((n) => n.id !== id));
-    // if (expandedId === id) setExpandedId(null);
     await deleteNotification.mutateAsync(id);
   };
 
@@ -262,9 +254,6 @@ const AdminNotification = () => {
     setExpandedId(expandedId === id ? null : id);
   };
 
-  if (isSuccess) {
-    console.log(notification);
-  }
 
   return (
     <Popover>

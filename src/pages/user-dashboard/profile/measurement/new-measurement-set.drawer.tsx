@@ -34,7 +34,7 @@ export function NewMeasurementSetDrawer({
       ? (["chest", "waist", "height"] as const)
       : (["bust", "waist", "hips", "height"] as const);
 
-  const optionalFields = ["neck", "shoulder"] as const;
+  // const optionalFields = ["neck", "shoulder"] as const;
 
   const handleFieldChange = (field: string, value: string) => {
     setValues((prev) => ({
@@ -108,6 +108,7 @@ export function NewMeasurementSetDrawer({
         value={values[field] ?? ""}
         onChange={(e) => handleFieldChange(field, e.target.value)}
         min={0}
+        title="h"
       />
     </div>
   );
@@ -122,6 +123,7 @@ export function NewMeasurementSetDrawer({
             <button
               type="button"
               className="border h-10 w-10 rounded-md cursor-pointer border-[#E8E8E8] flex items-center justify-center bg-white"
+              title="Add measurements"
             >
               <ArrowLeftIcon />
             </button>

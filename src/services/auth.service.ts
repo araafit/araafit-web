@@ -104,6 +104,7 @@ export interface GuestUserRequest {
   waist?: number;
   height?: number;
   skinTone?: string;
+  dressSize?: string | number;
   gender?: "male" | "female";
   // Female
   bust?: number;

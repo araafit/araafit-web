@@ -101,12 +101,12 @@ function Card({
 
         {page === "ready-made" ? (
           <Link
-            to={link}
+            to={link as string}
             className="absolute top-0 left-0 w-full h-[86%] bg-transparent"
           />
         ) : (
           <Link
-            to={link}
+            to={link as string}
             className="absolute top-0 left-0 w-full h-full rounded-b-md flex items-center justify-center group hover:bg-[#00000099] transition-all"
           >
             <div className="w-auto flex items-center gap-2 p-2 rounded-md border border-white text-white invisible group-hover:visible">

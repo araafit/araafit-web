@@ -69,7 +69,7 @@ export default function StylesList({
 
       <DialogContent className="max-w-[400px]">
         <DialogHeader>
-          <DialogTitle className="my-2">Delete {style.name}?</DialogTitle>
+          <DialogTitle className="my-2">Delete {data.name}?</DialogTitle>
           <DialogDescription className="text-[#4F4F4F] ">
             Are you sure you want to delete this style and its information? This
             action cannot be undone.
@@ -350,6 +350,7 @@ export default function StylesList({
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
                   disabled={updateStyleMutation.isPending}
+                  title="Style name"
                 />
               </div>
 
@@ -402,6 +403,7 @@ export default function StylesList({
                                 });
                               }}
                               disabled={updateStyleMutation.isPending}
+                              title="yards required"
                             />
                           </div>
                         </div>

@@ -59,7 +59,7 @@ export function FabricRequestSummary() {
         waist: base?.waist || 0,
         hips: base?.hips || 0,
         height: base?.height || 0,
-        dressSize: (base?.dressSize as number) || 0,
+        dressSize: String(base?.dressSize || ""),
         skinTone: base?.skinTone || "",
         size: selectedSize || "",
         dressStyle: selectedStyle || "",
