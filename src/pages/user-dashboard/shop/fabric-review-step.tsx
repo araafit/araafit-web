@@ -28,6 +28,7 @@ export function DashboardFabricReviewStepPage() {
     selectedStyleImageUrl,
     selectedMeasurementSetId,
     selectedMeasurementSetName,
+    // discountApplied,
     setDiscount,
   } = useFabricRequestStore((state) => state);
 
@@ -139,7 +140,7 @@ export function DashboardFabricReviewStepPage() {
     });
 
     if (requestReview.isSuccess) {
-      console.log(requestReview.data.data.discountApplied);
+      // console.log(requestReview.data.data.discountApplied);
       setDiscount(requestReview.data.data.discountApplied);
     }
   }, [
@@ -169,7 +170,16 @@ export function DashboardFabricReviewStepPage() {
 
   const handleContinue = () => {
     // Next: Checkout step
-    navigate(`/dashboard/shop/fabric/${rawParam}/checkout`);
+    navigate(
+      `/dashboard/shop/fabric/${rawParam}/checkout?
+      fabricId=${fabricId},
+      selectedStyleId=${selectedStyleId},
+      selectedMeasurementSetId=${selectedMeasurementSetId},
+      yardsNeeded=${yardsNeeded},
+      gender=${measurementsData?.gender},
+      noteForTailor=${noteForTailor},
+      totalCost=${totalCost}`
+    );
   };
 
   return (
