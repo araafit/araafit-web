@@ -19,7 +19,7 @@ export function DashboardFabricReviewStepPage() {
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const params = useParams<{ itemName: string }>();
   const rawParam = params.itemName || "";
-  const navigate = useNavigate();
+  const navigate = useNavigate(); 
   const {
     fabricId,
     selectedImageUrl,
