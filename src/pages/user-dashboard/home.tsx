@@ -249,6 +249,7 @@ export function DashboardHomePage() {
                   link={`/dashboard/shop/dress/${product.id}`}
                   product={product}
                   addToCart={() => addToCart(productToCartItem(product))}
+                  page="ready-made"
                 />
               ))}
             </div>
