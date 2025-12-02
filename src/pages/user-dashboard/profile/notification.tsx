@@ -1,4 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
+import {
+  useEnableEmailNotification,
+  useEnableInAppNotification,
+} from "../../../hooks/notification.hook";
+import Spinner from "../../../shared-components/spinner";
 
 /* -------------------------------------------------- */
 
@@ -36,35 +41,57 @@ const NotificationToggle = ({
  * @returns ReactElement
  */
 export default function Notification() {
-  const [notifications, setNofications] = React.useState<Notifications>({
-    setEmail: true,
-    setOrder: true,
+  const [notifications, setNotifications] = React.useState<Notifications>({
+    setEmail: false,
+    setOrder: false,
     setInApp: false,
-    setPromotional: true,
+    setPromotional: false,
   });
+
+  const enabledInAppNotification = useEnableInAppNotification();
+  const enableEmailNotification = useEnableEmailNotification();
 
   const toggleNotificaton = (
     notification: "setEmail" | "setOrder" | "setInApp" | "setPromotional"
   ) => {
     if (notification == "setEmail") {
-      setNofications({ ...notifications, setEmail: !notifications.setEmail });
+      setNotifications({ ...notifications, setEmail: !notifications.setEmail });
+
+      enableEmailNotification.mutate(!notifications.setEmail);
     }
 
-    if (notification == "setOrder") {
-      setNofications({ ...notifications, setOrder: !notifications.setOrder });
-    }
+    // if (notification == "setOrder") {
+    //   setNotifications({ ...notifications, setOrder: !notifications.setOrder });
+    // }
 
     if (notification == "setInApp") {
-      setNofications({ ...notifications, setInApp: !notifications.setInApp });
+      setNotifications({ ...notifications, setInApp: !notifications.setInApp });
+      enabledInAppNotification.mutate(!notifications.setInApp);
     }
 
     if (notification == "setPromotional") {
-      setNofications({
+      setNotifications({
         ...notifications,
         setPromotional: !notifications.setPromotional,
       });
     }
   };
+
+  useEffect(() => {
+    if (enabledInAppNotification.isSuccess) {
+      setNotifications({
+        ...notifications,
+        setInApp: enabledInAppNotification.data.receiveInAppNotifications,
+      });
+    }
+
+    if (enableEmailNotification.isSuccess) {
+      setNotifications({
+        ...notifications,
+        setEmail: enableEmailNotification.data.receiveEmailNotifications,
+      });
+    }
+  }, [enabledInAppNotification.isSuccess, enableEmailNotification.isSuccess]);
 
   return (
     <div className="size-full bg-white py-5 px-8 rounded-md flex flex-col gap-6">
@@ -74,10 +101,19 @@ export default function Notification() {
         <span className="text-neutral-950">Email notification</span>
         <div className="w-full h-[55px] bg-primary-50 rounded-md flex items-center justify-start px-6">
           <div className="flex space-x-3">
-            <NotificationToggle isToggled={notifications.setEmail} onClick={() => toggleNotificaton("setEmail")} />
+            <NotificationToggle
+              isToggled={notifications.setEmail}
+              onClick={() => toggleNotificaton("setEmail")}
+            />
             <span className="text-[0.875rem]">
               Notify me via email once payment is made.
             </span>
+            <Spinner
+              isLoading={enableEmailNotification.isPending}
+              speed="fast"
+              size="sm"
+              arcColor="#9A6C50"
+            />
           </div>
         </div>
       </div>
@@ -98,11 +134,20 @@ export default function Notification() {
         <span className="text-neutral-950">In-App notification</span>
         <div className="w-full h-[55px] bg-primary-50 rounded-md flex items-center justify-start px-6">
           <div className="flex space-x-3">
-            <NotificationToggle isToggled={notifications.setInApp} onClick={() => toggleNotificaton("setInApp")} />
+            <NotificationToggle
+              isToggled={notifications.setInApp}
+              onClick={() => toggleNotificaton("setInApp")}
+            />
             <span className="text-[0.875rem]">
               Receive important updates directly in the app while you browse or
               shop.
             </span>
+            <Spinner
+              isLoading={enabledInAppNotification.isPending}
+              speed="fast"
+              size="sm"
+              arcColor="#9A6C50"
+            />
           </div>
         </div>
       </div>
@@ -112,7 +157,10 @@ export default function Notification() {
           <span className="text-neutral-950">Promotional Messages</span>
           <div className="w-full h-[55px] bg-primary-50 rounded-md flex items-center justify-start px-6">
             <div className="flex space-x-3">
-              <NotificationToggle isToggled={notifications.setPromotional} onClick={() => toggleNotificaton("setPromotional")} />
+              <NotificationToggle
+                isToggled={notifications.setPromotional}
+                onClick={() => toggleNotificaton("setPromotional")}
+              />
               <span className="text-[0.875rem]">
                 Be the first to know about exclusive, style drops, and limited
                 offers.
