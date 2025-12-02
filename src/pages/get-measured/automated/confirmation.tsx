@@ -842,6 +842,8 @@ export function Confirmation() {
                   return;
                 }
 
+
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 let bust, waist, hips, dressSize;
 
                 if (accurateMeasurements) {

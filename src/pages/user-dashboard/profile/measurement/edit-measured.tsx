@@ -63,7 +63,7 @@ export function DashboardEditMeasurementPage() {
         waist: (base.waist as number) ?? 0,
         hips: (base.hips as number) ?? 0,
         height: (base.height as number) ?? 0,
-        dressSize: (base.dressSize as number) ?? 0,
+        dressSize: (base.dressSize as unknown as number) ?? 0,
         skinTone: (base.skinTone as string) ?? "",
       });
     }
@@ -80,7 +80,8 @@ export function DashboardEditMeasurementPage() {
   };
 
   const handleUpdate = () => {
-    updateMeasurements.mutate(selectedValues, {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    updateMeasurements.mutate(selectedValues as unknown as any, {
       onSuccess: () => {
         navigate("/dashboard/profile");
       },
