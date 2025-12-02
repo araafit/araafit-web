@@ -28,7 +28,7 @@ export function DashboardFabricReviewStepPage() {
     selectedStyleImageUrl,
     selectedMeasurementSetId,
     selectedMeasurementSetName,
-    // discountApplied,
+    discountApplied: discount,
     setDiscount,
   } = useFabricRequestStore((state) => state);
 
@@ -95,6 +95,7 @@ export function DashboardFabricReviewStepPage() {
 
   const sewingPrice = useMemo(() => {
     if (!style) return null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const raw = (style as any).sewingPrice;
     const n = typeof raw === "number" ? raw : Number(raw ?? 0);
     if (!Number.isFinite(n) || n < 0) return null;
@@ -266,11 +267,22 @@ export function DashboardFabricReviewStepPage() {
                         {product?.name || "Selected fabric"}
                       </p>
                     </div>
-                    <div className="text-xs text-neutral-500">
-                      Price per yard:{" "}
-                      {pricePerYard
-                        ? `₦${formatPrice(pricePerYard)}`
-                        : "Not available"}
+
+                    <div className="flex items-center gap-3">
+                      <div className="text-xs text-neutral-500">
+                        Price per yard:{" "}
+                        {pricePerYard
+                          ? `₦${formatPrice(pricePerYard)}`
+                          : "Not available"}
+                      </div>
+
+                      {discount && (
+                        <div className="text-xs bg-primary-500 p-1 rounded-md text-white">
+                          {discount.type === "percentage"
+                            ? ` ${discount.value}% OFF`
+                            : `₦${discount.value} OFF`}{" "}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
