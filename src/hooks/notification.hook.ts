@@ -2,7 +2,6 @@ import {
   useQuery,
   useMutation,
   useQueryClient,
-  type QueryClient,
 } from "@tanstack/react-query";
 import { userNotificationService } from "../services/notification.service";
 import showToast from "../utils/notification";
@@ -56,13 +55,16 @@ export const useMarkNotificationAsRead = () => {
 
   return useMutation({
     mutationFn: (id: number) => userNotificationService.readNotification(id),
-      mutationKey: userNotificationsKeys.update("update54321"),
+    mutationKey: userNotificationsKeys.update("update54321"),
     onSuccess: (notificationData) => {
       if (notificationData.isRead) {
-        showToast.success(notificationData.message || `Notification marked as read!`, {
-          icon: null,
-          style: notificationStyles.alertSuccess,
-        });
+        showToast.success(
+          notificationData.message || `Notification marked as read!`,
+          {
+            icon: null,
+            style: notificationStyles.alertSuccess,
+          }
+        );
       }
       // Invalidate all user notifications
       queryClient.invalidateQueries({
@@ -152,15 +154,17 @@ export const useEnableInAppNotification = () => {
       userNotificationService.enableInAppNotification(enable),
     mutationKey: userNotificationsKeys.update("enableInApp12345"),
     onSuccess: (notificationData) => {
-      showToast.success(
-        notificationData.message ||
-          `In-App Notification ${notificationData.enabled ? "enabled" : "disabled"
+      if (notificationData.receiveInAppNotifications) {
+        showToast.success(
+          `In-App Notification ${
+            notificationData.receiveInAppNotifications ? "enabled" : "disabled"
           } successfully!`,
-        {
-          icon: null,
-          style: notificationStyles.alertSuccess,
-        }
-      );
+          {
+            icon: null,
+            style: notificationStyles.alertSuccess,
+          }
+        );
+      }
 
       // Invalidate all user notifications
       queryClient.invalidateQueries({
@@ -189,7 +193,7 @@ export const useEnableInAppNotification = () => {
 
       // Retry once for other errors
       return failureCount < 1;
-    }
+    },
   });
 };
 
@@ -201,15 +205,17 @@ export const useEnableEmailNotification = () => {
       userNotificationService.enableEmailNotification(enable),
     mutationKey: userNotificationsKeys.update("enableEmail12345"),
     onSuccess: (notificationData) => {
-      showToast.success(
-        notificationData.message ||
-          `Email Notification ${notificationData.enabled ? "enabled" : "disabled"
+      if (notificationData.receiveEmailNotifications) {
+        showToast.success(
+          `Email Notification ${
+            notificationData.receiveEmailNotifications ? "enabled" : "disabled"
           } successfully!`,
-        {
-          icon: null,
-          style: notificationStyles.alertSuccess,
-        }
-      );
+          {
+            icon: null,
+            style: notificationStyles.alertSuccess,
+          }
+        );
+      }
 
       // Invalidate all user notifications
       queryClient.invalidateQueries({
@@ -238,6 +244,6 @@ export const useEnableEmailNotification = () => {
 
       // Retry once for other errors
       return failureCount < 1;
-    }
+    },
   });
-}
+};
