@@ -3,7 +3,8 @@ import Button from "../../../../shared-components/button";
 import ChangePassword from "./change-password";
 import ProfileInfo from "./profile-info";
 import { useDeleteMe } from "../../../../hooks/users.hooks";
-
+import Spinner from "../../../../shared-components/spinner";
+import { useUser } from "../../../../stores/auth-store";
 
 /* ----------------------------------------------------------------------- */
 
@@ -14,6 +15,8 @@ import { useDeleteMe } from "../../../../hooks/users.hooks";
  */
 export default function ProfileSettings() {
   const deleteMe = useDeleteMe();
+  const user = useUser();
+
   return (
     <div className="w-full flex flex-col gap-6">
       <ProfileInfo />
@@ -33,12 +36,13 @@ export default function ProfileSettings() {
 
         <Button
           className="text-red-500"
-          onClick={() => deleteMe.mutate()}
+          onClick={() => deleteMe.mutate(user?.id)}
           disabled={deleteMe.isPending}
         >
           <div className="w-full flex items-center gap-2">
             <TrashSimpleIcon />
             <span>Delete account</span>
+            <Spinner speed="fast" size="sm" arcColor="#DC2626" isLoading={deleteMe.isPending} />
           </div>
         </Button>
       </div>

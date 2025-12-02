@@ -54,8 +54,8 @@ export const usersService = {
     return response.data;
   },
 
-  async deleteMe(): Promise<DeleteMeResponse> {
-    const response = await apiClient.delete<DeleteMeResponse>("/users/me");
+  async deleteMe(userId): Promise<DeleteMeResponse> {
+    const response = await apiClient.delete<DeleteMeResponse>(`/customers/${userId}`);
     return response.data;
   },
 };

@@ -48,7 +48,7 @@ export const useDeleteMe = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => usersService.deleteMe(),
+    mutationFn: (userId) => usersService.deleteMe(userId),
     onSuccess: (data) => {
       toast.success(data.message || "Account deleted successfully");
       clearAuth();
