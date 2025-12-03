@@ -105,110 +105,128 @@ export function Confirmation() {
    * Compute bust/waist/hip Y rows (pixel indices) and their left/right bounds.
    * Uses silhouette rows and landmarks to center the torso and ignore arms.
    */
-  const computeMeasurementRows = useCallback((
-    mask: ImageData,
-    _landmarks: Landmark[],
-    imgW: number,
-    imgH: number,
-    isSideView = false
-  ) => {
-    // fallback if landmarks missing
-    if (!_landmarks || _landmarks.length === 0) {
-      const fallbackBust = Math.floor(imgH * 0.3);
-      const fallbackWaist = Math.floor(imgH * 0.55);
-      const fallbackHip = Math.floor(imgH * 0.78);
-      return {
-        bust: { y: fallbackBust, left: 0, right: imgW },
-        waist: { y: fallbackWaist, left: 0, right: imgW },
-        hip: { y: fallbackHip, left: 0, right: imgW },
-      };
-    }
-
-    const { leftBounds, rightBounds } = getRowBoundsFromMask(mask);
-
-    // landmark-derived pixels
-    const ls = _landmarks[11],
-      rs = _landmarks[12],
-      lh = _landmarks[23],
-      rh = _landmarks[24];
-
-    // normalized coordinates
-    const shoulderYNorm = ((ls?.y ?? 0.2) + (rs?.y ?? 0.2)) / 2;
-    const hipYNorm = ((lh?.y ?? 0.7) + (rh?.y ?? 0.7)) / 2;
-    const waistAnchorNorm = hipYNorm; // pelvis/mid-hip as anchor
-    const torsoSpanNorm = Math.max(0.0001, hipYNorm - shoulderYNorm);
-
-    const shoulderY = Math.round(shoulderYNorm * imgH);
-    const hipY = Math.round(hipYNorm * imgH);
-    const bustY = Math.round(
-      (shoulderYNorm + torsoSpanNorm * POSITION_OFFSETS.BUST_DOWN_TORSO_RATIO) * imgH
-    );
-    const waistY = Math.round(
-      (waistAnchorNorm - torsoSpanNorm * POSITION_OFFSETS.WAIST_UP_TORSO_RATIO) * imgH
-    );
-
-    // compute left/right at shoulder & hip rows (fallback to landmark x if row bounds unavailable)
-    const L_shoulder =
-      leftBounds[shoulderY] > -1
-        ? leftBounds[shoulderY]
-        : Math.round((((ls?.x ?? 0.35) + (rs?.x ?? 0.65)) / 2) * imgW) - 20;
-    const R_shoulder =
-      rightBounds[shoulderY] > -1
-        ? rightBounds[shoulderY]
-        : Math.round((((ls?.x ?? 0.35) + (rs?.x ?? 0.65)) / 2) * imgW) + 20;
-    const L_hip =
-      leftBounds[hipY] > -1
-        ? leftBounds[hipY]
-        : Math.round((((lh?.x ?? 0.4) + (rh?.x ?? 0.6)) / 2) * imgW) - 20;
-    const R_hip =
-      rightBounds[hipY] > -1
-        ? rightBounds[hipY]
-        : Math.round((((lh?.x ?? 0.4) + (rh?.x ?? 0.6)) / 2) * imgW) + 20;
-
-    const shoulderWidth = Math.max(1, R_shoulder - L_shoulder);
-    const hipWidth = Math.max(1, R_hip - L_hip);
-
-    // torso center x estimate (avg of shoulder/hip centers)
-    const centerX = Math.round(
-      ((L_shoulder + R_shoulder) / 2 + (L_hip + R_hip) / 2) / 2
-    );
-
-    // estimate torso half width and clamp
-    const torsoHalfEstimate = Math.max(
-      Math.min(imgW * 0.35, Math.max(shoulderWidth, hipWidth) * 0.5), // tighter band
-      Math.max(imgW * 0.06, 20)
-    );
-
-
-    // --- hip: from waist anchor, move down by torso ratio ---
-    const foundHipY = Math.round(
-      (waistAnchorNorm + torsoSpanNorm * POSITION_OFFSETS.HIP_DOWN_TORSO_RATIO) * imgH
-    );
-
-    // compute left/right bounds per row
-    const buildBounds = (y: number) => {
-      const hasRow = leftBounds[y] > -1 && rightBounds[y] > -1;
-      if (isSideView && hasRow) {
-        // side view: use full silhouette width
-        const left = Math.max(0, leftBounds[y]);
-        const right = Math.min(imgW, rightBounds[y]);
-        return { y, left, right };
+  const computeMeasurementRows = useCallback(
+    (
+      mask: ImageData,
+      _landmarks: Landmark[],
+      imgW: number,
+      imgH: number,
+      isSideView = false
+    ) => {
+      // fallback if landmarks missing
+      if (!_landmarks || _landmarks.length === 0) {
+        const fallbackBust = Math.floor(imgH * 0.3);
+        const fallbackWaist = Math.floor(imgH * 0.55);
+        const fallbackHip = Math.floor(imgH * 0.78);
+        return {
+          bust: { y: fallbackBust, left: 0, right: imgW },
+          waist: { y: fallbackWaist, left: 0, right: imgW },
+          hip: { y: fallbackHip, left: 0, right: imgW },
+        };
       }
 
-      // front view (or missing row bounds): use center-limited torso band to avoid arms
-      const L = hasRow ? leftBounds[y] : Math.round(centerX - torsoHalfEstimate);
-      const R = hasRow ? rightBounds[y] : Math.round(centerX + torsoHalfEstimate);
-      const left = Math.max(0, Math.round(Math.max(L, centerX - torsoHalfEstimate)));
-      const right = Math.min(imgW, Math.round(Math.min(R, centerX + torsoHalfEstimate)));
-      return { y, left, right };
-    };
+      const { leftBounds, rightBounds } = getRowBoundsFromMask(mask);
 
-    return {
-      bust: buildBounds(bustY),
-      waist: buildBounds(waistY),
-      hip: buildBounds(foundHipY),
-    };
-  }, [getRowBoundsFromMask]);
+      // landmark-derived pixels
+      const ls = _landmarks[11],
+        rs = _landmarks[12],
+        lh = _landmarks[23],
+        rh = _landmarks[24];
+
+      // normalized coordinates
+      const shoulderYNorm = ((ls?.y ?? 0.2) + (rs?.y ?? 0.2)) / 2;
+      const hipYNorm = ((lh?.y ?? 0.7) + (rh?.y ?? 0.7)) / 2;
+      const waistAnchorNorm = hipYNorm; // pelvis/mid-hip as anchor
+      const torsoSpanNorm = Math.max(0.0001, hipYNorm - shoulderYNorm);
+
+      const shoulderY = Math.round(shoulderYNorm * imgH);
+      const hipY = Math.round(hipYNorm * imgH);
+      const bustY = Math.round(
+        (shoulderYNorm +
+          torsoSpanNorm * POSITION_OFFSETS.BUST_DOWN_TORSO_RATIO) *
+          imgH
+      );
+      const waistY = Math.round(
+        (waistAnchorNorm -
+          torsoSpanNorm * POSITION_OFFSETS.WAIST_UP_TORSO_RATIO) *
+          imgH
+      );
+
+      // compute left/right at shoulder & hip rows (fallback to landmark x if row bounds unavailable)
+      const L_shoulder =
+        leftBounds[shoulderY] > -1
+          ? leftBounds[shoulderY]
+          : Math.round((((ls?.x ?? 0.35) + (rs?.x ?? 0.65)) / 2) * imgW) - 20;
+      const R_shoulder =
+        rightBounds[shoulderY] > -1
+          ? rightBounds[shoulderY]
+          : Math.round((((ls?.x ?? 0.35) + (rs?.x ?? 0.65)) / 2) * imgW) + 20;
+      const L_hip =
+        leftBounds[hipY] > -1
+          ? leftBounds[hipY]
+          : Math.round((((lh?.x ?? 0.4) + (rh?.x ?? 0.6)) / 2) * imgW) - 20;
+      const R_hip =
+        rightBounds[hipY] > -1
+          ? rightBounds[hipY]
+          : Math.round((((lh?.x ?? 0.4) + (rh?.x ?? 0.6)) / 2) * imgW) + 20;
+
+      const shoulderWidth = Math.max(1, R_shoulder - L_shoulder);
+      const hipWidth = Math.max(1, R_hip - L_hip);
+
+      // torso center x estimate (avg of shoulder/hip centers)
+      const centerX = Math.round(
+        ((L_shoulder + R_shoulder) / 2 + (L_hip + R_hip) / 2) / 2
+      );
+
+      // estimate torso half width and clamp
+      const torsoHalfEstimate = Math.max(
+        Math.min(imgW * 0.35, Math.max(shoulderWidth, hipWidth) * 0.5), // tighter band
+        Math.max(imgW * 0.06, 20)
+      );
+
+      // --- hip: from waist anchor, move down by torso ratio ---
+      const foundHipY = Math.round(
+        (waistAnchorNorm +
+          torsoSpanNorm * POSITION_OFFSETS.HIP_DOWN_TORSO_RATIO) *
+          imgH
+      );
+
+      // compute left/right bounds per row
+      const buildBounds = (y: number) => {
+        const hasRow = leftBounds[y] > -1 && rightBounds[y] > -1;
+        if (isSideView && hasRow) {
+          // side view: use full silhouette width
+          const left = Math.max(0, leftBounds[y]);
+          const right = Math.min(imgW, rightBounds[y]);
+          return { y, left, right };
+        }
+
+        // front view (or missing row bounds): use center-limited torso band to avoid arms
+        const L = hasRow
+          ? leftBounds[y]
+          : Math.round(centerX - torsoHalfEstimate);
+        const R = hasRow
+          ? rightBounds[y]
+          : Math.round(centerX + torsoHalfEstimate);
+        const left = Math.max(
+          0,
+          Math.round(Math.max(L, centerX - torsoHalfEstimate))
+        );
+        const right = Math.min(
+          imgW,
+          Math.round(Math.min(R, centerX + torsoHalfEstimate))
+        );
+        return { y, left, right };
+      };
+
+      return {
+        bust: buildBounds(bustY),
+        waist: buildBounds(waistY),
+        hip: buildBounds(foundHipY),
+      };
+    },
+    [getRowBoundsFromMask]
+  );
 
   /**
    * Compute measurement rows using provided Y positions (for consistency between views)
@@ -219,71 +237,70 @@ export function Confirmation() {
    * Get inner torso bounds at a specific Y level, excluding arms/hands
    * Looks for gaps in the mask to identify the main torso area
    */
-  const getInnerTorsoBounds = useCallback((
-    mask: ImageData,
-    y: number,
-    landmarks: Landmark[]
-  ) => {
-    const { leftBounds, rightBounds } = getRowBoundsFromMask(mask);
-    const clampedY = Math.max(0, Math.min(mask.height - 1, Math.round(y)));
+  const getInnerTorsoBounds = useCallback(
+    (mask: ImageData, y: number, landmarks: Landmark[]) => {
+      const { leftBounds, rightBounds } = getRowBoundsFromMask(mask);
+      const clampedY = Math.max(0, Math.min(mask.height - 1, Math.round(y)));
 
-    if (leftBounds[clampedY] === -1 || rightBounds[clampedY] === -1) {
-      return null; // No body detected at this row
-    }
-
-    // Get the full row bounds
-    const fullLeft = leftBounds[clampedY];
-    const fullRight = rightBounds[clampedY];
-
-    // Use shoulder landmarks to estimate torso center and reasonable width
-    const shoulderLeft = landmarks[11];
-    const shoulderRight = landmarks[12];
-
-    if (!shoulderLeft || !shoulderRight) {
-      return { left: fullLeft, right: fullRight }; // Fallback to full bounds
-    }
-
-    // Calculate torso center from shoulders
-    const torsoCenter = ((shoulderLeft.x + shoulderRight.x) / 2) * mask.width;
-    const shoulderWidth =
-      Math.abs(shoulderRight.x - shoulderLeft.x) * mask.width;
-
-    // Estimate reasonable torso half-width (shoulder width + some expansion for body)
-    const maxTorsoHalfWidth = shoulderWidth * 0.8; // 80% of shoulder width as max torso radius
-
-    // Scan inward from the edges to find the inner torso bounds
-    const rowStart = clampedY * mask.width * 4;
-
-    // Find leftmost torso edge (scan from center outward to left)
-    let innerLeft = Math.round(torsoCenter);
-    for (let x = Math.round(torsoCenter); x >= fullLeft; x--) {
-      const pixelIndex = rowStart + x * 4;
-      if (mask.data[pixelIndex + 3] > ALPHA_THRESHOLD) {
-        innerLeft = x;
-      } else {
-        break; // Hit a gap, stop here
+      if (leftBounds[clampedY] === -1 || rightBounds[clampedY] === -1) {
+        return null; // No body detected at this row
       }
 
-      // Don't go beyond reasonable torso width
-      if (torsoCenter - x > maxTorsoHalfWidth) break;
-    }
+      // Get the full row bounds
+      const fullLeft = leftBounds[clampedY];
+      const fullRight = rightBounds[clampedY];
 
-    // Find rightmost torso edge (scan from center outward to right)
-    let innerRight = Math.round(torsoCenter);
-    for (let x = Math.round(torsoCenter); x <= fullRight; x++) {
-      const pixelIndex = rowStart + x * 4;
-      if (mask.data[pixelIndex + 3] > ALPHA_THRESHOLD) {
-        innerRight = x;
-      } else {
-        break; // Hit a gap, stop here
+      // Use shoulder landmarks to estimate torso center and reasonable width
+      const shoulderLeft = landmarks[11];
+      const shoulderRight = landmarks[12];
+
+      if (!shoulderLeft || !shoulderRight) {
+        return { left: fullLeft, right: fullRight }; // Fallback to full bounds
       }
 
-      // Don't go beyond reasonable torso width
-      if (x - torsoCenter > maxTorsoHalfWidth) break;
-    }
+      // Calculate torso center from shoulders
+      const torsoCenter = ((shoulderLeft.x + shoulderRight.x) / 2) * mask.width;
+      const shoulderWidth =
+        Math.abs(shoulderRight.x - shoulderLeft.x) * mask.width;
 
-    return { left: innerLeft, right: innerRight };
-  }, [getRowBoundsFromMask]);
+      // Estimate reasonable torso half-width (shoulder width + some expansion for body)
+      const maxTorsoHalfWidth = shoulderWidth * 0.8; // 80% of shoulder width as max torso radius
+
+      // Scan inward from the edges to find the inner torso bounds
+      const rowStart = clampedY * mask.width * 4;
+
+      // Find leftmost torso edge (scan from center outward to left)
+      let innerLeft = Math.round(torsoCenter);
+      for (let x = Math.round(torsoCenter); x >= fullLeft; x--) {
+        const pixelIndex = rowStart + x * 4;
+        if (mask.data[pixelIndex + 3] > ALPHA_THRESHOLD) {
+          innerLeft = x;
+        } else {
+          break; // Hit a gap, stop here
+        }
+
+        // Don't go beyond reasonable torso width
+        if (torsoCenter - x > maxTorsoHalfWidth) break;
+      }
+
+      // Find rightmost torso edge (scan from center outward to right)
+      let innerRight = Math.round(torsoCenter);
+      for (let x = Math.round(torsoCenter); x <= fullRight; x++) {
+        const pixelIndex = rowStart + x * 4;
+        if (mask.data[pixelIndex + 3] > ALPHA_THRESHOLD) {
+          innerRight = x;
+        } else {
+          break; // Hit a gap, stop here
+        }
+
+        // Don't go beyond reasonable torso width
+        if (x - torsoCenter > maxTorsoHalfWidth) break;
+      }
+
+      return { left: innerLeft, right: innerRight };
+    },
+    [getRowBoundsFromMask]
+  );
   /**
    * Calculate accurate measurements using the visualization method
    */
@@ -350,8 +367,12 @@ export function Confirmation() {
         const shoulderRight = frontLandmarks[12];
         const bustWidthFromShoulders =
           shoulderLeft && shoulderRight
-            ? Math.abs(shoulderRight.x - shoulderLeft.x) * frontMask.width * (1 - POSITION_OFFSETS.BUST_FRONT_SHRINK_RATIO) * pixelToCmRatio
-            : (frontMeasurements.bust.right - frontMeasurements.bust.left) * pixelToCmRatio;
+            ? Math.abs(shoulderRight.x - shoulderLeft.x) *
+              frontMask.width *
+              (1 - POSITION_OFFSETS.BUST_FRONT_SHRINK_RATIO) *
+              pixelToCmRatio
+            : (frontMeasurements.bust.right - frontMeasurements.bust.left) *
+              pixelToCmRatio;
 
         const bustWidth = bustWidthFromShoulders;
         const bustDepth =
@@ -650,7 +671,6 @@ export function Confirmation() {
                       </p>
                     </div>
                   )}*/}
-
                   {isMale ? (
                     <>
                       <div className="flex justify-between items-center py-3 border-b border-neutral-100">
@@ -677,7 +697,8 @@ export function Confirmation() {
                           <span className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
                             {accurateMeasurements
                               ? Math.round(
-                                  accurateMeasurements.waist.circumference / 2.54
+                                  accurateMeasurements.waist.circumference /
+                                    2.54
                                 )
                               : Math.round(
                                   measurements.measurements.waist / 2.54
@@ -737,7 +758,8 @@ export function Confirmation() {
                           <span className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
                             {accurateMeasurements
                               ? Math.round(
-                                  accurateMeasurements.waist.circumference / 2.54
+                                  accurateMeasurements.waist.circumference /
+                                    2.54
                                 )
                               : Math.round(
                                   measurements.measurements.waist / 2.54
@@ -763,9 +785,10 @@ export function Confirmation() {
                       </div>
                     </>
                   )}
-
                   <div className="flex justify-between items-center py-3 border-b border-neutral-100">
-                    <span className="text-sm md:text-lg text-neutral-700">Height</span>
+                    <span className="text-sm md:text-lg text-neutral-700">
+                      Height
+                    </span>
                     <span className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
                       {Math.floor(measurements.measurements.height / 30.48)}'
                       {Math.round(
@@ -774,10 +797,11 @@ export function Confirmation() {
                       "
                     </span>
                   </div>
-
                   {!isMale && (
                     <div className="flex justify-between items-center py-3 border-b border-neutral-100">
-                      <span className="text-sm md:text-lg text-neutral-700">Dress Size</span>
+                      <span className="text-sm md:text-lg text-neutral-700">
+                        Dress Size
+                      </span>
                       <span className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
                         {measurements.dressSize.us}
                       </span>
@@ -790,7 +814,9 @@ export function Confirmation() {
               {skinTone && (
                 <div className="bg-white">
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                    <span className="text-sm md:text-lg text-neutral-700">Skin Tone</span>
+                    <span className="text-sm md:text-lg text-neutral-700">
+                      Skin Tone
+                    </span>
                     <div className="flex items-center gap-3">
                       <div
                         className="w-10 h-6 md:w-12 md:h-8 rounded-lg border border-neutral-200"
@@ -842,7 +868,6 @@ export function Confirmation() {
                   return;
                 }
 
-
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 let bust, waist, hips, dressSize;
 
@@ -864,11 +889,15 @@ export function Confirmation() {
                   waist = Math.round(measurements.measurements.waist / 2.54);
                   hips = Math.round(measurements.measurements.hip / 2.54);
                   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
-                  dressSize = Number(measurements.dressSize.us) as unknown as any;
+                  dressSize = Number(
+                    measurements.dressSize.us
+                  ) as unknown as any;
                 } else {
                   toast.error("No measurements available");
                   return;
                 }
+
+                console.log("dressSize", dressSize);
 
                 if (!height) {
                   toast.error("Height information missing");

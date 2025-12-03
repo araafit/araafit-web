@@ -4,7 +4,6 @@ import ChangePassword from "./change-password";
 import ProfileInfo from "./profile-info";
 import { useDeleteMe } from "../../../../hooks/users.hooks";
 import Spinner from "../../../../shared-components/spinner";
-import { useUser } from "../../../../stores/auth-store";
 
 /* ----------------------------------------------------------------------- */
 
@@ -15,7 +14,6 @@ import { useUser } from "../../../../stores/auth-store";
  */
 export default function ProfileSettings() {
   const deleteMe = useDeleteMe();
-  const user = useUser();
 
   return (
     <div className="w-full flex flex-col gap-6">
@@ -36,7 +34,7 @@ export default function ProfileSettings() {
 
         <Button
           className="text-red-500"
-          onClick={() => deleteMe.mutate(user?.id)}
+          onClick={() => deleteMe.mutate()}
           disabled={deleteMe.isPending}
         >
           <div className="w-full flex items-center gap-2">
