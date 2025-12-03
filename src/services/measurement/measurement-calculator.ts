@@ -106,6 +106,7 @@ export class MeasurementCalculatorService {
       const hip = hipCircumference;
 
       return {
+        neck: neckCircumference,
         bust,
         waist,
         hip,

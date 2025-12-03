@@ -13,10 +13,11 @@ import {
 } from "../../../services/measurement";
 import { POSITION_OFFSETS } from "../../../services/measurement";
 import { extractSkinToneFromPhoto } from "../../../services/measurement/skin-tone-extractor";
-import SilhouetteVisualization from "./silhouette-visualization";
+//import SilhouetteVisualization from "./silhouette-visualization";
 import { useCreateMeasurements } from "../../../hooks/measurements.hooks";
 import { useCreateGuestUser } from "../../../hooks/auth.hooks";
 import { useAuthStore } from "../../../stores/auth-store";
+import { useSkinTonesList } from "../../../hooks/admin-settings.hooks";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import type { Landmark } from "../../../services/measurement/types";
@@ -24,6 +25,7 @@ import {
   pixelHeightFromMask,
   pixelHeightFromLandmarks,
 } from "../../../services/measurement/utils";
+import { EditMeasurementsDrawer } from "./edit-measurements.drawer";
 
 /* ------------------------------------------------------------------- */
 
@@ -37,6 +39,7 @@ export function Confirmation() {
   const { isAuthenticated, isGuest } = useAuthStore();
   const createMeasurements = useCreateMeasurements();
   const createGuestUser = useCreateGuestUser();
+  const { data: skinTones } = useSkinTonesList();
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [measurements, setMeasurements] = useState<MeasurementResult | null>(
@@ -56,6 +59,19 @@ export function Confirmation() {
     waist: { width: number; depth: number; circumference: number };
     hip: { width: number; depth: number; circumference: number };
     pixelToCmRatio: number;
+  } | null>(null);
+
+  // Edited measurements (overrides original when user edits)
+  const [editedMeasurements, setEditedMeasurements] = useState<{
+    bust?: number;
+    chest?: number;
+    waist: number;
+    hips?: number;
+    height: number;
+    skinTone: string;
+    dressSize?: string;
+    neck?: number;
+    shoulder?: number;
   } | null>(null);
 
   const ALPHA_THRESHOLD = 128;
@@ -539,7 +555,7 @@ export function Confirmation() {
   if (isProcessing) {
     return (
       <div className="flex flex-col">
-        <div className="w-full flex flex-col gap-5">
+        <div className="w-full flex flex-col gap-5 items-center">
           <MeasurementStepperLines stepIndex={currentStep} />
 
           <div className="w-full max-w-[51rem] flex flex-col gap-6">
@@ -586,7 +602,7 @@ export function Confirmation() {
   if (error) {
     return (
       <div className="flex flex-col">
-        <div className="w-full flex flex-col gap-5">
+        <div className="w-full flex flex-col gap-5 items-center">
           <MeasurementStepperLines stepIndex={currentStep} />
 
           <div className="w-full max-w-[51rem] flex flex-col gap-6">
@@ -630,7 +646,7 @@ export function Confirmation() {
 
   return (
     <div className="flex flex-col">
-      <div className="w-full flex flex-col gap-5">
+      <div className="w-full flex flex-col gap-5 items-center">
         <MeasurementStepperLines stepIndex={currentStep} />
 
         <div className="w-full max-w-[51rem] flex flex-col gap-6 md:gap-8">
@@ -653,10 +669,34 @@ export function Confirmation() {
                   <h3 className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
                     Measurement
                   </h3>
-                  <button className="flex items-center gap-2 text-neutral-600 hover:text-neutral-800 transition-colors self-start sm:self-center">
-                    <PencilSimpleIcon size={16} />
-                    <span className="text-xs md:text-sm">Edit</span>
-                  </button>
+                  {isAuthenticated && (
+                    <EditMeasurementsDrawer
+                      trigger={
+                        <button className="flex items-center gap-2 text-neutral-600 hover:text-neutral-800 transition-colors self-start sm:self-center">
+                          <PencilSimpleIcon size={16} />
+                          <span className="text-xs md:text-sm">Edit</span>
+                        </button>
+                      }
+                      measurements={measurements}
+                      accurateMeasurements={accurateMeasurements}
+                      gender={gender as "male" | "female"}
+                      skinTone={skinTone}
+                      onSave={(updated) => {
+                        setEditedMeasurements(updated);
+                        // Update skin tone state if changed
+                        if (updated.skinTone && skinTones) {
+                          const tone = skinTones.find((t) => t.name === updated.skinTone);
+                          if (tone) {
+                            setSkinTone({
+                              hex: tone.hex,
+                              rgb: { r: 0, g: 0, b: 0 }, // Not needed for display
+                              name: tone.name,
+                            });
+                          }
+                        }
+                      }}
+                    />
+                  )}
                 </div>
 
                 <div className="space-y-4 md:space-y-6">
@@ -679,13 +719,14 @@ export function Confirmation() {
                         </span>
                         <div className="text-right">
                           <span className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
-                            {accurateMeasurements
-                              ? Math.round(
-                                  accurateMeasurements.bust.circumference / 2.54
-                                )
-                              : Math.round(
-                                  measurements.measurements.bust / 2.54
-                                )}
+                            {editedMeasurements?.chest ??
+                              (accurateMeasurements
+                                ? Math.round(
+                                    accurateMeasurements.bust.circumference / 2.54
+                                  )
+                                : Math.round(
+                                    measurements.measurements.bust / 2.54
+                                  ))}
                           </span>
                         </div>
                       </div>
@@ -695,14 +736,15 @@ export function Confirmation() {
                         </span>
                         <div className="text-right">
                           <span className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
-                            {accurateMeasurements
-                              ? Math.round(
-                                  accurateMeasurements.waist.circumference /
-                                    2.54
-                                )
-                              : Math.round(
-                                  measurements.measurements.waist / 2.54
-                                )}
+                            {editedMeasurements?.waist ??
+                              (accurateMeasurements
+                                ? Math.round(
+                                    accurateMeasurements.waist.circumference /
+                                      2.54
+                                  )
+                                : Math.round(
+                                    measurements.measurements.waist / 2.54
+                                  ))}
                           </span>
                         </div>
                       </div>
@@ -712,10 +754,11 @@ export function Confirmation() {
                         </span>
                         <div className="text-right">
                           <span className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
-                            {Math.round(
-                              (measurements.measurements.shoulderWidth || 0) /
-                                2.54
-                            )}
+                            {editedMeasurements?.shoulder ??
+                              Math.round(
+                                (measurements.measurements.shoulderWidth || 0) /
+                                  2.54
+                              )}
                           </span>
                         </div>
                       </div>
@@ -740,13 +783,14 @@ export function Confirmation() {
                         </span>
                         <div className="text-right">
                           <span className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
-                            {accurateMeasurements
-                              ? Math.round(
-                                  accurateMeasurements.bust.circumference / 2.54
-                                )
-                              : Math.round(
-                                  measurements.measurements.bust / 2.54
-                                )}
+                            {editedMeasurements?.bust ??
+                              (accurateMeasurements
+                                ? Math.round(
+                                    accurateMeasurements.bust.circumference / 2.54
+                                  )
+                                : Math.round(
+                                    measurements.measurements.bust / 2.54
+                                  ))}
                           </span>
                         </div>
                       </div>
@@ -756,14 +800,15 @@ export function Confirmation() {
                         </span>
                         <div className="text-right">
                           <span className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
-                            {accurateMeasurements
-                              ? Math.round(
-                                  accurateMeasurements.waist.circumference /
-                                    2.54
-                                )
-                              : Math.round(
-                                  measurements.measurements.waist / 2.54
-                                )}
+                            {editedMeasurements?.waist ??
+                              (accurateMeasurements
+                                ? Math.round(
+                                    accurateMeasurements.waist.circumference /
+                                      2.54
+                                  )
+                                : Math.round(
+                                    measurements.measurements.waist / 2.54
+                                  ))}
                           </span>
                         </div>
                       </div>
@@ -773,13 +818,14 @@ export function Confirmation() {
                         </span>
                         <div className="text-right">
                           <span className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
-                            {accurateMeasurements
-                              ? Math.round(
-                                  accurateMeasurements.hip.circumference / 2.54
-                                )
-                              : Math.round(
-                                  measurements.measurements.hip / 2.54
-                                )}
+                            {editedMeasurements?.hips ??
+                              (accurateMeasurements
+                                ? Math.round(
+                                    accurateMeasurements.hip.circumference / 2.54
+                                  )
+                                : Math.round(
+                                    measurements.measurements.hip / 2.54
+                                  ))}
                           </span>
                         </div>
                       </div>
@@ -790,11 +836,11 @@ export function Confirmation() {
                       Height
                     </span>
                     <span className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
-                      {Math.floor(measurements.measurements.height / 30.48)}'
-                      {Math.round(
-                        (measurements.measurements.height % 30.48) / 2.54
-                      )}
-                      "
+                      {editedMeasurements?.height
+                        ? `${Math.floor(editedMeasurements.height / 12)}'${editedMeasurements.height % 12}"`
+                        : `${Math.floor(measurements.measurements.height / 30.48)}'${Math.round(
+                            (measurements.measurements.height % 30.48) / 2.54
+                          )}"`}
                     </span>
                   </div>
                   {!isMale && (
@@ -803,7 +849,7 @@ export function Confirmation() {
                         Dress Size
                       </span>
                       <span className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
-                        {measurements.dressSize.us}
+                        {editedMeasurements?.dressSize ?? measurements.dressSize.us}
                       </span>
                     </div>
                   )}
@@ -831,7 +877,7 @@ export function Confirmation() {
               )}
 
               {/* Silhouette Visualization (Debug) */}
-              {frontPhoto && sidePhoto && measurements?.debug && (
+              {/*{frontPhoto && sidePhoto && measurements?.debug && (
                 <SilhouetteVisualization
                   frontPhoto={frontPhoto}
                   sidePhoto={sidePhoto}
@@ -841,7 +887,7 @@ export function Confirmation() {
                   sideLandmarks={measurements.debug.sideLandmarks}
                   heightInCm={measurements.metadata.heightInCm}
                 />
-              )}
+              )}*/}
             </>
           )}
         </div>
@@ -868,10 +914,14 @@ export function Confirmation() {
                   return;
                 }
 
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                let bust, waist, hips, dressSize;
+                let bust, waist, hips;
 
-                if (accurateMeasurements) {
+                // Use edited measurements if available, otherwise use accurate or original
+                if (editedMeasurements) {
+                  bust = editedMeasurements.bust ?? editedMeasurements.chest ?? 0;
+                  waist = editedMeasurements.waist;
+                  hips = editedMeasurements.hips ?? 0;
+                } else if (accurateMeasurements) {
                   // Use accurate measurements from visualization method (convert to inches)
                   bust = Math.round(
                     accurateMeasurements.bust.circumference / 2.54
@@ -882,22 +932,15 @@ export function Confirmation() {
                   hips = Math.round(
                     accurateMeasurements.hip.circumference / 2.54
                   );
-                  dressSize = Number(measurements?.dressSize?.us) || 12;
                 } else if (measurements) {
                   // Fall back to original measurements (convert to inches)
                   bust = Math.round(measurements.measurements.bust / 2.54);
                   waist = Math.round(measurements.measurements.waist / 2.54);
                   hips = Math.round(measurements.measurements.hip / 2.54);
-                  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
-                  dressSize = Number(
-                    measurements.dressSize.us
-                  ) as unknown as any;
                 } else {
                   toast.error("No measurements available");
                   return;
                 }
-
-                console.log("dressSize", dressSize);
 
                 if (!height) {
                   toast.error("Height information missing");
@@ -908,8 +951,13 @@ export function Confirmation() {
                   gender,
                   // Shared
                   waist,
-                  height: Math.round(height * 0.393701), // Convert cm to inches
-                  skinTone: skinTone?.name?.toLowerCase() || "medium",
+                  height: editedMeasurements?.height
+                    ? editedMeasurements.height
+                    : Math.round(height * 0.393701), // Convert cm to inches
+                  skinTone:
+                    editedMeasurements?.skinTone ||
+                    skinTone?.name?.toLowerCase() ||
+                    "medium",
                   // Female
                   bust: isMale ? undefined : bust,
                   hips: isMale ? undefined : hips,
@@ -917,8 +965,7 @@ export function Confirmation() {
                   chest: isMale ? bust : undefined,
                 };
 
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                createGuestUser.mutate(guestUserData as unknown as any, {
+                createGuestUser.mutate(guestUserData as Parameters<typeof createGuestUser.mutate>[0], {
                   onSuccess: () => {
                     toast.success("Welcome! Continue shopping as a guest.");
                     navigate("/shop"); // This will show the guest shop page
@@ -976,7 +1023,15 @@ export function Confirmation() {
 
                 let bust, waist, hips, dressSize;
 
-                if (accurateMeasurements) {
+                // Use edited measurements if available, otherwise use accurate or original
+                if (editedMeasurements) {
+                  bust = editedMeasurements.bust ?? editedMeasurements.chest ?? 0;
+                  waist = editedMeasurements.waist;
+                  hips = editedMeasurements.hips ?? 0;
+                  dressSize = editedMeasurements.dressSize
+                    ? Number(editedMeasurements.dressSize)
+                    : Number(measurements?.dressSize?.us) || 12;
+                } else if (accurateMeasurements) {
                   // Use accurate measurements from visualization method (in cm)
                   bust = Math.round(
                     accurateMeasurements.bust.circumference / 2.54
@@ -1001,9 +1056,14 @@ export function Confirmation() {
                   bust,
                   waist,
                   hips,
-                  height: Math.round(height * 0.393701), // Convert cm to inches
+                  height: editedMeasurements?.height
+                    ? editedMeasurements.height
+                    : Math.round(height * 0.393701), // Convert cm to inches
                   dressSize: String(dressSize),
-                  skinTone: skinTone?.name?.toLowerCase() || "medium",
+                  skinTone:
+                    editedMeasurements?.skinTone ||
+                    skinTone?.name?.toLowerCase() ||
+                    "medium",
                 };
 
                 console.log("Saving accurate measurements:", {

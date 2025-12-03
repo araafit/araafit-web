@@ -3,7 +3,6 @@ import { useSearch } from "../../pages/user-dashboard/shop/context/search-contex
 import Card from "../card";
 import type { Product } from "../../services/products.service";
 import LoaderView from "../../layouts/user-dashboard/loader";
-import SearchInput from "../../pages/user-dashboard/shop/components/search-input";
 
 /* ------------------------------------------------------------------ */
 
@@ -81,24 +80,18 @@ export default function FabricItems({
   }
 
   return (
-    <div className="flex flex-col gap-6 relative">
-      <div className="bg-white w-full flex justify-end sticky top-0 z-10 p-2">
-        <SearchInput />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 hover:shadow-xl pb-3">
-        {fabricProducts.map((product) => (
-          <Card
-            key={product.id}
-            itemName={product.name}
-            itemCost={product.price ?? 0}
-            itemImage={itemImage(product)}
-            product={product}
-            link={itemRequestLink(product)}
-            page="fabric"
-          />
-        ))}
-      </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 pb-3">
+      {fabricProducts.map((product) => (
+        <Card
+          key={product.id}
+          itemName={product.name}
+          itemCost={product.price ?? 0}
+          itemImage={itemImage(product)}
+          product={product}
+          link={itemRequestLink(product)}
+          page="fabric"
+        />
+      ))}
     </div>
   );
 }

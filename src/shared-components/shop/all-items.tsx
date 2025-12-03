@@ -18,7 +18,7 @@ export default function AllItems({
   const { data: productsData, isLoading, isError, error } = useProducts({
     limit: 20,
     search: debouncedSearchQuery || undefined,
-    category: "dress",
+    // No category filter - show all products
   });
 
   // Helper function to generate product link
@@ -27,6 +27,11 @@ export default function AllItems({
     return userPage === "shop"
       ? `/${userPage}/${category}/${product.id}`
       : `/${userPage}/shop/${category}/${product.id}`;
+  };
+
+  // Helper function to get page prop based on product category
+  const getPageProp = (product: Product) => {
+    return product.category === "dress" ? "ready-made" : "fabric";
   };
 
   if (isLoading) {
@@ -80,7 +85,7 @@ export default function AllItems({
           itemImage={product.images?.[0]?.url || "/placeholder-image.jpg"}
           product={product}
           link={getProductLink(product)}
-          page="ready-made"
+          page={getPageProp(product)}
         />
       ))}
     </div>

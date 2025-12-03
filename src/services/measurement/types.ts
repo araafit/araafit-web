@@ -24,6 +24,7 @@ export interface RawMeasurements {
   waist: number;
   hip: number;
   height: number;
+  neck: number;
   shoulderWidth: number;
   armLength: number;
   torsoLength: number;

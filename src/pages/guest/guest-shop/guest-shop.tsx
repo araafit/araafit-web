@@ -93,7 +93,7 @@ export function GuestShopPage() {
             {/* Shop Tabs */}
             <div className="w-full h-full bg-white">
               <ShopTab
-                items={["All", "Dresses", "Fabrics"]}
+                items={["All", "Ready made", "Fabrics"]}
                 tabContainerClassName="bg-transparent h-full"
                 tabListClassName=" text-[0.875rem] text-neutral-700 border-b border-neutral-100 p-[0.254rem] bg-white mb-2"
                 activeTabClassName="bg-primary-900 text-white rounded-t-md"

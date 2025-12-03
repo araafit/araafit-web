@@ -37,6 +37,7 @@ function Card({
   addToCart,
 }: Card) {
   const [showSizeModal, setShowSizeModal] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const addToCartMutation = useAddToCart();
 
   // Handle add to cart click
@@ -65,56 +66,87 @@ function Card({
 
   return (
     <>
-      <div className={CN("rounded-t-md bg-white relative", containerClass)}>
-        <img
-          src={itemImage}
-          alt={itemName}
-          className="w-full h-[11.0625rem] object-top object-cover"
-        />
-
-        <div className="rounded-b-md border border-neutral-100 py-2 px-3">
-          <div className="font-light text-neutral-700 mb-2">{itemName}</div>
-
-          <div className="w-full flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-            <span className="text-neutral-900 font-semibold leading-araafit sm:block">
-              ₦{formatPrice(Number(itemCost))}
-              {product?.category === "fabric" && (
-                <span className=" ml-1">/yd</span>
-              )}
-            </span>
-
-            {/* Can only make sewing request if item is fabric */}
-            {page === "ready-made" && (
-              <ShoppingCartSimpleIcon
-                className={`size-[20px] cursor-pointer transition-colors ${
-                  addToCartMutation.isPending
-                    ? "text-gray-400 cursor-not-allowed"
-                    : "text-primary-500 hover:text-primary-600"
-                }`}
-                onClick={
-                  addToCartMutation.isPending ? undefined : handleAddToCart
-                }
-              />
-            )}
-          </div>
-        </div>
-
-        {page === "ready-made" ? (
-          <Link
-            to={link as string}
-            className="absolute top-0 left-0 w-full h-[86%] bg-transparent"
-          />
-        ) : (
-          <Link
-            to={link as string}
-            className="absolute top-0 left-0 w-full h-full rounded-b-md flex items-center justify-center group hover:bg-[#00000099] transition-all"
-          >
-            <div className="w-auto flex items-center gap-2 p-2 rounded-md border border-white text-white invisible group-hover:visible">
-              <p className="text-lg font-normal">Sew this fabric</p>
-              <ScissorsIcon size={24} />
-            </div>
-          </Link>
+      <div
+        className={CN(
+          "rounded-md bg-white relative overflow-hidden border border-neutral-100 flex flex-col transition-all duration-300",
+          page === "fabric" && isHovered ? "shadow-lg" : "",
+          containerClass
         )}
+        onMouseEnter={() => page === "fabric" && setIsHovered(true)}
+        onMouseLeave={() => page === "fabric" && setIsHovered(false)}
+      >
+        {/* Image section - clickable for navigation */}
+        <Link
+          to={link as string}
+          className="relative block w-full h-[11.0625rem] overflow-hidden"
+        >
+          <img
+            src={itemImage}
+            alt={itemName}
+            className="w-full h-full object-top object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        </Link>
+
+        {/* Content section */}
+        <div className="rounded-b-md border-t-0 border-x-0 border-b border-neutral-100 px-3 pb-2 flex flex-col transition-all duration-300 relative">
+          {/* Title and Price - shifts up on hover for fabric */}
+          <div
+            className={CN(
+              "transition-all duration-300",
+              page === "fabric" && isHovered ? "-translate-y-2" : ""
+            )}
+          >
+            <div className="font-light text-neutral-700 mb-2">{itemName}</div>
+
+            <div className="w-full flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+              <span className="text-neutral-900 font-semibold leading-araafit sm:block">
+                ₦{formatPrice(Number(itemCost))}
+                {product?.category === "fabric" && (
+                  <span className=" ml-1">/yd</span>
+                )}
+              </span>
+
+              {/* Shopping cart icon for ready-made items */}
+              {page === "ready-made" && (
+                <ShoppingCartSimpleIcon
+                  className={`size-[20px] cursor-pointer transition-colors ${
+                    addToCartMutation.isPending
+                      ? "text-gray-400 cursor-not-allowed"
+                      : "text-primary-500 hover:text-primary-600"
+                  }`}
+                  onClick={
+                    addToCartMutation.isPending ? undefined : handleAddToCart
+                  }
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Sew this fabric button - slides up from bottom for fabric cards */}
+          {page === "fabric" && (
+            <div
+              className={CN(
+                "absolute bottom-0 left-0 right-0 transform transition-all duration-300 ease-out",
+                isHovered
+                  ? "translate-y-0 opacity-100"
+                  : "translate-y-full opacity-0"
+              )}
+            >
+              <Link
+                to={link as string}
+                className="block w-full bg-[#9A6C50] hover:bg-[#7B523F] text-white px-4 py-3 rounded-b-md transition-colors duration-200"
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <ScissorsIcon size={18} weight="bold" />
+                  <span className="text-sm font-semibold">Sew this fabric</span>
+                </div>
+                <p className="text-xs text-white/80 text-center mt-1">
+                  Start custom order
+                </p>
+              </Link>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Size Selection Modal */}

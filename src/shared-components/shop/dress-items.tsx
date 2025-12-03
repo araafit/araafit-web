@@ -81,6 +81,7 @@ export default function DressItems({
           itemImage={product.images?.[0]?.url || "/placeholder-image.jpg"}
           product={product}
           link={getProductLink(product)}
+          page="ready-made"
         />
       ))}
     </div>
