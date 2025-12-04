@@ -15,7 +15,12 @@ export default function AllItems({
   userPage: "shop" | "dashboard";
 }) {
   const { debouncedSearchQuery } = useSearch();
-  const { data: productsData, isLoading, isError, error } = useProducts({
+  const {
+    data: productsData,
+    isLoading,
+    isError,
+    error,
+  } = useProducts({
     limit: 20,
     search: debouncedSearchQuery || undefined,
     // No category filter - show all products
@@ -25,8 +30,12 @@ export default function AllItems({
   const getProductLink = (product: Product) => {
     const category = product.category === "dress" ? "dress" : "fabric";
     return userPage === "shop"
-      ? `/${userPage}/${category}/${product.id}`
-      : `/${userPage}/shop/${category}/${product.id}`;
+      ? `/${userPage}/${category}/${product.id}${
+          category === "fabric" ? "/request" : ""
+        }`
+      : `/${userPage}/shop/${category}/${product.id}${
+          category === "fabric" ? "/request" : ""
+        }`;
   };
 
   // Helper function to get page prop based on product category
@@ -49,7 +58,9 @@ export default function AllItems({
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <p className="text-red-600 mb-2">Error loading products</p>
-          <p className="text-gray-600">{error?.message || "Please try again later"}</p>
+          <p className="text-gray-600">
+            {error?.message || "Please try again later"}
+          </p>
         </div>
       </div>
     );
@@ -62,13 +73,14 @@ export default function AllItems({
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <p className="text-gray-600 mb-2">
-            {debouncedSearchQuery 
-              ? `No products found for "${debouncedSearchQuery}"` 
-              : "No products available"
-            }
+            {debouncedSearchQuery
+              ? `No products found for "${debouncedSearchQuery}"`
+              : "No products available"}
           </p>
           {debouncedSearchQuery && (
-            <p className="text-sm text-gray-500">Try searching with different keywords</p>
+            <p className="text-sm text-gray-500">
+              Try searching with different keywords
+            </p>
           )}
         </div>
       </div>

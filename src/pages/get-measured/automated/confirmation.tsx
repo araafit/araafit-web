@@ -558,7 +558,7 @@ export function Confirmation() {
         <div className="w-full flex flex-col gap-5 items-center">
           <MeasurementStepperLines stepIndex={currentStep} />
 
-          <div className="w-full max-w-[51rem] flex flex-col gap-6">
+          <div className="w-full max-w-[51rem] flex flex-col gap-6 items-center">
             <div>
               <h2 className="text-xl md:text-[2rem] text-[#1C1C1C] font-semibold mb-2">
                 Processing Your Measurements
@@ -669,34 +669,32 @@ export function Confirmation() {
                   <h3 className="text-lg md:text-xl font-semibold text-[#1C1C1C]">
                     Measurement
                   </h3>
-                  {isAuthenticated && (
-                    <EditMeasurementsDrawer
-                      trigger={
-                        <button className="flex items-center gap-2 text-neutral-600 hover:text-neutral-800 transition-colors self-start sm:self-center">
-                          <PencilSimpleIcon size={16} />
-                          <span className="text-xs md:text-sm">Edit</span>
-                        </button>
-                      }
-                      measurements={measurements}
-                      accurateMeasurements={accurateMeasurements}
-                      gender={gender as "male" | "female"}
-                      skinTone={skinTone}
-                      onSave={(updated) => {
-                        setEditedMeasurements(updated);
-                        // Update skin tone state if changed
-                        if (updated.skinTone && skinTones) {
-                          const tone = skinTones.find((t) => t.name === updated.skinTone);
-                          if (tone) {
-                            setSkinTone({
-                              hex: tone.hex,
-                              rgb: { r: 0, g: 0, b: 0 }, // Not needed for display
-                              name: tone.name,
-                            });
-                          }
+                  <EditMeasurementsDrawer
+                    trigger={
+                      <button className="flex items-center gap-2 text-neutral-600 hover:text-neutral-800 transition-colors self-start sm:self-center">
+                        <PencilSimpleIcon size={16} />
+                        <span className="text-xs md:text-sm">Edit</span>
+                      </button>
+                    }
+                    measurements={measurements}
+                    accurateMeasurements={accurateMeasurements}
+                    gender={gender as "male" | "female"}
+                    skinTone={skinTone}
+                    onSave={(updated) => {
+                      setEditedMeasurements(updated);
+                      // Update skin tone state if changed
+                      if (updated.skinTone && skinTones) {
+                        const tone = skinTones.find((t) => t.name === updated.skinTone);
+                        if (tone) {
+                          setSkinTone({
+                            hex: tone.hex,
+                            rgb: { r: 0, g: 0, b: 0 }, // Not needed for display
+                            name: tone.name,
+                          });
                         }
-                      }}
-                    />
-                  )}
+                      }
+                    }}
+                  />
                 </div>
 
                 <div className="space-y-4 md:space-y-6">

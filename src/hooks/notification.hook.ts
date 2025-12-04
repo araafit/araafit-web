@@ -54,7 +54,7 @@ export const useMarkNotificationAsRead = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: number) => userNotificationService.readNotification(id),
+    mutationFn: (id: string) => userNotificationService.readNotification(id),
     mutationKey: userNotificationsKeys.update("update54321"),
     onSuccess: (notificationData) => {
       if (notificationData.isRead) {
@@ -97,12 +97,12 @@ export const useMarkNotificationAsRead = () => {
   });
 };
 
-// Update notification (Mark as read)
+// Delete notification
 export const useDeleteNotification = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: number) => userNotificationService.deleteNotification(id),
+    mutationFn: (id: string) => userNotificationService.deleteNotification(id),
     mutationKey: userNotificationsKeys.remove("delete54321"),
     onSuccess: (notificationData) => {
       if (notificationData.success) {

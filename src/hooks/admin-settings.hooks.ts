@@ -7,6 +7,7 @@ import type {
   UpdateSizeChartRequest,
   CreateStyleRequest,
   UpdateStyleRequest,
+  StyleCostResponse,
 } from "../services/admin-settings.service";
 import { toast } from "react-hot-toast";
 import showToast from "../utils/notification";
@@ -26,6 +27,8 @@ export const adminSettingsKeys = {
   skinTones: () => [...adminSettingsKeys.all, "skin-tones"] as const,
   dressStyles: () => [...adminSettingsKeys.all, "dress-styles"] as const,
   dressStyle: (id: string) => [...adminSettingsKeys.dressStyles(), id] as const,
+  styleCost: (styleId: string, fabricId: string, measurementSetId?: string) =>
+    [...adminSettingsKeys.all, "style-cost", styleId, fabricId, measurementSetId ?? "default"] as const,
 };
 
 // Admin Profile Hooks
@@ -403,6 +406,38 @@ export const useDressStyle = (id: string) => {
         return false;
       }
       return failureCount < 3;
+    },
+  });
+};
+
+export const useStyleCost = (
+  styleId: number | string | undefined,
+  fabricProductId: string | undefined,
+  measurementSetId?: string | undefined
+) => {
+  return useQuery<StyleCostResponse>({
+    queryKey: adminSettingsKeys.styleCost(
+      String(styleId ?? ""),
+      fabricProductId ?? "",
+      measurementSetId
+    ),
+    queryFn: () =>
+      adminSettingsService.getStyleCost(
+        styleId!,
+        fabricProductId!,
+        measurementSetId
+      ),
+    enabled: !!styleId && !!fabricProductId,
+    retry: (failureCount, error) => {
+      const axiosError = error as { response?: { status?: number } };
+      if (
+        axiosError.response?.status === 401 ||
+        axiosError.response?.status === 403 ||
+        axiosError.response?.status === 404
+      ) {
+        return false;
+      }
+      return failureCount < 2;
     },
   });
 };

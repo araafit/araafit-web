@@ -239,6 +239,7 @@ export default function StylesList({
     const [editSizeConfigs, setEditSizeConfigs] = React.useState<
       Record<string, string>
     >({});
+    const [editSewingPrice, setEditSewingPrice] = React.useState<string>("");
 
     React.useEffect(() => {
       if (fullStyle) {
@@ -250,6 +251,13 @@ export default function StylesList({
           }
         });
         setEditSizeConfigs(initialConfigs);
+        // Initialize sewing price from style data
+        const sewingPriceValue = fullStyle.sewingPrice;
+        setEditSewingPrice(
+          sewingPriceValue !== null && sewingPriceValue !== undefined
+            ? String(sewingPriceValue)
+            : ""
+        );
       }
     }, [fullStyle]);
 
@@ -274,7 +282,27 @@ export default function StylesList({
         payload.sizeConfigs = sizeConfigsPayload;
       }
 
-      if (!payload.name && !payload.sizeConfigs) {
+      // Handle sewing price - check if it changed
+      const currentSewingPrice = fullStyle.sewingPrice;
+      const newSewingPrice = editSewingPrice.trim()
+        ? Number(editSewingPrice.trim())
+        : null;
+      
+      // Only include if it changed
+      if (
+        (currentSewingPrice === null || currentSewingPrice === undefined) &&
+        newSewingPrice !== null
+      ) {
+        payload.sewingPrice = newSewingPrice;
+      } else if (
+        currentSewingPrice !== null &&
+        currentSewingPrice !== undefined &&
+        Number(currentSewingPrice) !== newSewingPrice
+      ) {
+        payload.sewingPrice = newSewingPrice;
+      }
+
+      if (!payload.name && !payload.sizeConfigs && payload.sewingPrice === undefined) {
         return;
       }
 
@@ -352,6 +380,27 @@ export default function StylesList({
                   disabled={updateStyleMutation.isPending}
                   title="Style name"
                 />
+              </div>
+
+              {/* Sewing Price (editable) */}
+              <div className="space-y-1">
+                <label className="text-sm text-[#676767]">
+                  Sewing Price (₦) <span className="text-[#888888]">(optional)</span>
+                </label>
+                <input
+                  type="number"
+                  className="w-full h-12 border border-[#D0D5DD] rounded-lg px-3 text-sm"
+                  value={editSewingPrice}
+                  onChange={(e) => setEditSewingPrice(e.target.value)}
+                  disabled={updateStyleMutation.isPending}
+                  placeholder="Enter sewing price"
+                  min="0"
+                  step="0.01"
+                  title="Sewing price"
+                />
+                <p className="text-xs text-[#888888] mt-1">
+                  The cost for tailoring this style. Leave empty if not applicable.
+                </p>
               </div>
 
               {/* Size Configurations (editable yards) */}

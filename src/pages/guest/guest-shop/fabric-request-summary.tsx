@@ -44,29 +44,30 @@ export function FabricRequestSummary() {
 
   const sewingRequest = useMakeSewingRequest();
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [searchParams] = useSearchParams();
-  const selectedStyle = searchParams.get("style");
-  const selectedSize = searchParams.get("size");
-  const selectedYards = searchParams.get("yards");
+  const selectedStyleId = searchParams.get("styleId") || searchParams.get("style");
+  const selectedMeasurementSetId = searchParams.get("measurementId") || searchParams.get("selectedMeasurementSetId");
+  const selectedYards = searchParams.get("yards") || searchParams.get("yardsNeeded");
 
   // Function to create guest user with measurements
   const handleRequest = async () => {
+    // Validate required fields
+    if (!params.fabricId) {
+      console.error("Missing fabricId");
+      return;
+    }
+    if (!selectedStyleId) {
+      console.error("Missing styleId");
+      return;
+    }
+
     try {
-      const base = measurementData?.measurements;
       const payload: SewingRequest = {
-        bust: base?.bust || 0,
-        waist: base?.waist || 0,
-        hips: base?.hips || 0,
-        height: base?.height || 0,
-        dressSize: String(base?.dressSize || ""),
-        skinTone: base?.skinTone || "",
-        size: selectedSize || "",
-        dressStyle: selectedStyle || "",
+        fabricId: params.fabricId,
+        styleId: Number(selectedStyleId),
+        measurementId: selectedMeasurementSetId || "__base__", // Use base measurements for guests if no measurement set ID provided
         yardEstimate: selectedYards ? Number(selectedYards) : 0,
-        noteForTailor: tailorNote,
-        gender: measurementData?.gender || "",
-        fabricId: params.fabricId || "",
+        noteForTailor: tailorNote || undefined,
       };
 
       await sewingRequest.mutateAsync(payload);

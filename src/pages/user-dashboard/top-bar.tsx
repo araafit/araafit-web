@@ -37,6 +37,8 @@ export default function TopBar({
     // error,
     data: userNotifications,
   } = useUserNotifications();
+  
+  console.log("notifications: ", userNotifications);
 
   const markAsRead = useMarkNotificationAsRead();
   const deleteNotification = useDeleteNotification();
@@ -96,9 +98,9 @@ export default function TopBar({
                 isLoading={isLoading}
                 className="absolute -top-1 -right-1 bg-white"
               />
-              {!isLoading && userNotifications && (
+              {!isLoading && userNotifications && userNotifications.notifications.length > 0 && (
                 <span className="absolute -top-1 -right-1 bg-primary-900 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                  {userNotifications.data.length}
+                  {userNotifications.notifications.length}
                 </span>
               )}
             </button>

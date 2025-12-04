@@ -6,6 +6,7 @@ import { ArrowLeftIcon } from "@phosphor-icons/react";
 import { useFabricRequestStore } from "../../../shared-hooks/state-store";
 import { formatPrice } from "../../../utils/format-price";
 import Spinner from "../../../shared-components/spinner";
+import { useFabricRequestContext } from "./use-fabric-request-context";
 
 /* ---------------------------------------------------------------------- */
 
@@ -16,6 +17,7 @@ export function DashboardFabricRequestFlowPage() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const navigate = useNavigate();
   const setSelection = useFabricRequestStore((state) => state.setSelection);
+  const { basePath, fabricsPath } = useFabricRequestContext();
 
   const crumbLabel = (product?.slug || product?.name || rawParam).replaceAll(
     "-",
@@ -54,7 +56,7 @@ export function DashboardFabricRequestFlowPage() {
           <div className="w-full flex items-center justify-evenly gap-5 my-5">
             <button
               type="button"
-              onClick={() => navigate("/dashboard/shop/fabrics")}
+              onClick={() => navigate(fabricsPath)}
               className="inline-flex items-center justify-center w-9 h-9 rounded-md border border-neutral-200 text-neutral-700 hover:bg-neutral-50 transition-colors"
               title="back to fabrics"
             >
@@ -149,7 +151,7 @@ export function DashboardFabricRequestFlowPage() {
                 type="button"
                 className="px-5 py-2.5 rounded-md bg-[#9A6C50] text-white text-sm font-medium hover:bg-[#7B523F] transition-colors"
                 onClick={() =>
-                  navigate(`/dashboard/shop/fabric/${rawParam}/style`)
+                  navigate(`${basePath}/fabric/${rawParam}/style`)
                 }
               >
                 Continue

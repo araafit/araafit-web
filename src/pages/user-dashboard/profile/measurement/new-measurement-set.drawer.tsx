@@ -26,6 +26,7 @@ export function NewMeasurementSetDrawer({
   const [gender, setGender] = React.useState<Gender>(defaultGender);
   const [name, setName] = React.useState("");
   const [values, setValues] = React.useState<Record<string, string>>({});
+  const [errors, setErrors] = React.useState<Record<string, string>>({});
 
   const createMeasurements = useCreateMeasurements();
 
@@ -36,16 +37,43 @@ export function NewMeasurementSetDrawer({
 
   // const optionalFields = ["neck", "shoulder"] as const;
 
+  const validateField = (field: string, value: string): string => {
+    const isRequired = (requiredFields as readonly string[]).includes(field);
+    if (isRequired) {
+      const trimmed = value.trim();
+      if (!trimmed) {
+        return `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
+      }
+      const num = Number(trimmed);
+      if (Number.isNaN(num)) {
+        return "Please enter a valid number";
+      }
+      if (num <= 0) {
+        return "Value must be greater than 0";
+      }
+    }
+    return "";
+  };
+
   const handleFieldChange = (field: string, value: string) => {
     setValues((prev) => ({
       ...prev,
       [field]: value,
     }));
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
   };
 
   const resetForm = () => {
     setName("");
     setValues({});
+    setErrors({});
     setGender(defaultGender);
   };
 
@@ -57,37 +85,60 @@ export function NewMeasurementSetDrawer({
     }
   };
 
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+    
+    requiredFields.forEach((field) => {
+      const value = values[field];
+      const error = validateField(field, value || "");
+      if (error) {
+        newErrors[field] = error;
+      }
+    });
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const isInvalid =
     requiredFields.some((field) => {
       const v = values[field];
-      if (v === undefined || v === "") return true;
-      const num = Number(v);
+      if (v === undefined || v === "" || v.trim() === "") return true;
+      const num = Number(v.trim());
       return Number.isNaN(num) || num <= 0;
     }) || createMeasurements.isPending;
 
   const handleSubmit = async () => {
-    if (isInvalid) return;
+    // Validate all required fields
+    if (!validateForm()) {
+      return;
+    }
 
+    if (isInvalid) {
+      return;
+    }
+
+    // Use trimmed values to ensure no whitespace issues
     const payload: import("../../../../services/measurements.service").CreateMeasurementsRequest =
       {
         gender,
-        name: name || undefined,
-        waist: Number(values.waist),
-        height: Number(values.height),
+        name: name.trim() || undefined,
+        waist: Number((values.waist || "").trim()),
+        height: Number((values.height || "").trim()),
       };
 
     if (gender === "male") {
-      payload.chest = Number(values.chest);
+      payload.chest = Number((values.chest || "").trim());
     } else {
-      payload.bust = Number(values.bust);
-      payload.hips = Number(values.hips);
+      payload.bust = Number((values.bust || "").trim());
+      payload.hips = Number((values.hips || "").trim());
     }
 
-    if (values.neck) {
-      payload.neck = Number(values.neck);
+    if (values.neck?.trim()) {
+      payload.neck = Number(values.neck.trim());
     }
-    if (values.shoulder) {
-      payload.shoulder = Number(values.shoulder);
+    if (values.shoulder?.trim()) {
+      payload.shoulder = Number(values.shoulder.trim());
     }
 
     try {
@@ -99,19 +150,49 @@ export function NewMeasurementSetDrawer({
     }
   };
 
-  const renderNumberInput = (field: string, label: string) => (
-    <div key={field} className="space-y-1">
-      <label className="text-sm text-[#676767] capitalize">{label}</label>
-      <input
-        type="number"
-        className="w-full h-10 border border-[#D0D5DD] rounded-md px-3 text-sm"
-        value={values[field] ?? ""}
-        onChange={(e) => handleFieldChange(field, e.target.value)}
-        min={0}
-        title="h"
-      />
-    </div>
-  );
+  const renderNumberInput = (field: string, label: string) => {
+    const isRequiredField = (requiredFields as readonly string[]).includes(field);
+    const hasError = !!errors[field];
+    
+    return (
+      <div key={field} className="space-y-1">
+        <label className="text-sm text-[#676767] capitalize">
+          {label}
+          {isRequiredField && <span className="text-red-500 ml-1">*</span>}
+        </label>
+        <input
+          type="number"
+          className={`w-full h-10 border rounded-md px-3 text-sm ${
+            hasError
+              ? "border-red-300 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+              : "border-[#D0D5DD] focus:border-[#9A6C50] focus:ring-1 focus:ring-[#9A6C50]"
+          } focus:outline-none`}
+          value={values[field] ?? ""}
+          onChange={(e) => handleFieldChange(field, e.target.value)}
+          onBlur={(e) => {
+            if (isRequiredField) {
+              const error = validateField(field, e.target.value);
+              if (error) {
+                setErrors((prev) => ({ ...prev, [field]: error }));
+              } else {
+                setErrors((prev) => {
+                  const next = { ...prev };
+                  delete next[field];
+                  return next;
+                });
+              }
+            }
+          }}
+          min={0}
+          step="0.1"
+          required={isRequiredField}
+        />
+        {hasError && (
+          <p className="text-xs text-red-600">{errors[field]}</p>
+        )}
+      </div>
+    );
+  };
 
   return (
     <Drawer open={open} onOpenChange={handleOpenChange}>

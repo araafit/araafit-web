@@ -30,8 +30,12 @@ export default function FabricItems({
   });
 
   // Helper function to generate product link
-  const itemRequestLink = (product: Product) =>
-    `/${userPage}/shop/fabric/${product.id}/request`;
+  const itemRequestLink = (product: Product) => {
+    // For guest shop, use /shop path; for dashboard, use /dashboard/shop path
+    return userPage === "shop"
+      ? `/shop/fabric/${product.id}/request`
+      : `/dashboard/shop/fabric/${product.id}/request`;
+  };
   const itemImage = (product: Product) =>
     product.images?.[0]?.url || "/placeholder-image.jpg";
 

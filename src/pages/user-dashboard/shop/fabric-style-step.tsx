@@ -5,6 +5,7 @@ import { FabricRequestStepperLines } from "./fabric-request-stepper";
 import { useFabricRequestStore } from "../../../shared-hooks/state-store";
 import { useDressStyles } from "../../../hooks/admin-settings.hooks";
 import emptyFolder from "../../../assets/icons/empty-state.svg";
+import { useFabricRequestContext } from "./use-fabric-request-context";
 
 /* ---------------------------------------------------------------------- */
 
@@ -12,6 +13,7 @@ export function DashboardFabricStyleStepPage() {
   const params = useParams<{ itemName: string }>();
   const rawParam = params.itemName || "";
   const navigate = useNavigate();
+  const { basePath } = useFabricRequestContext();
 
   const {
     fabricId,
@@ -50,14 +52,14 @@ export function DashboardFabricStyleStepPage() {
 
   const handleContinue = () => {
     if (!selectedStyleId) return;
-    navigate(`/dashboard/shop/fabric/${rawParam}/measurement`);
+    navigate(`${basePath}/fabric/${rawParam}/measurement`);
   };
 
   // If user hits this page without going through fabric selection, redirect them
   if (!fabricId) {
     return (
       <Navigate
-        to={`/dashboard/shop/fabric/${rawParam}/request`}
+        to={`${basePath}/fabric/${rawParam}/request`}
         replace
       />
     );
@@ -74,7 +76,7 @@ export function DashboardFabricStyleStepPage() {
             <button
               type="button"
               onClick={() =>
-                navigate(`/dashboard/shop/fabric/${rawParam}/request`)
+                navigate(`${basePath}/fabric/${rawParam}/request`)
               }
               className="inline-flex items-center justify-center w-9 h-9 rounded-md border border-neutral-200 text-neutral-700 hover:bg-neutral-50 transition-colors"
               title="back to fabrics"

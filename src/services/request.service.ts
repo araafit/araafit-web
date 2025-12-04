@@ -1,7 +1,6 @@
 import apiClient from "../lib/axios";
 import { type ApiResponse } from "./admin-auth.service";
 import type { User } from "../stores/auth-store";
-import type { Measurements } from "./measurements.service";
 import { AxiosError } from "axios";
 /* ------------------------------------------------------- */
 
@@ -49,13 +48,12 @@ export interface FabricSize {
   updatedAt: string;
 }
 
-export interface SewingRequest extends Measurements {
-  size: string;
-  dressStyle: string;
-  yardEstimate: string | number;
-  noteForTailor: string;
-  gender: string;
+export interface SewingRequest {
   fabricId: string;
+  styleId: number;
+  measurementId: string;
+  yardEstimate: number;
+  noteForTailor?: string;
 }
 
 export interface SewingRequestResponse extends FabricSize {

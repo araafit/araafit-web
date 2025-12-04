@@ -8,6 +8,9 @@ import Spinner from "../../../shared-components/spinner";
 import { useSearchParams } from "react-router-dom";
 import { useFabricRequestStore } from "../../../shared-hooks/state-store";
 import { formatNumber } from "../../../utils/admin-dashboard-utils";
+import { useFabricRequestContext } from "./use-fabric-request-context";
+import useAuth from "../../../hooks/use-auth";
+import { GuestRegistrationModal } from "./guest-registration-modal";
 
 /* ------------------------------------------------------------------------------ */
 
@@ -24,22 +27,42 @@ export function DashboardFabricCheckoutStepPage() {
   const params = useParams<{ itemName: string }>();
   const rawParam = params.itemName || "";
   const navigate = useNavigate();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [searchParams, _] = useSearchParams();
+  const { basePath } = useFabricRequestContext();
+  const { isGuestUser } = useAuth();
+  const [searchParams] = useSearchParams();
 
-  const { discountApplied: discount } = useFabricRequestStore((state) => state);
+  const {
+    fabricId: storeFabricId,
+    selectedStyleId: storeStyleId,
+    selectedMeasurementSetId: storeMeasurementId,
+    discountApplied: discount,
+  } = useFabricRequestStore((state) => state);
 
-  const fabricId = searchParams.get("fabricId") || "";
-  const selectedStyleId = searchParams.get("styleId") || "";
-  const selectedMeasurementSetId = searchParams.get("measurementId") || "";
+  // Use store values as primary source, fallback to URL params for backward compatibility
+  const fabricId = storeFabricId || searchParams.get("fabricId") || "";
+  const selectedStyleId = storeStyleId || Number(searchParams.get("selectedStyleId") || searchParams.get("styleId") || "0");
+  const selectedMeasurementSetId = storeMeasurementId || searchParams.get("selectedMeasurementSetId") || searchParams.get("measurementId") || "";
   const yardsNeeded = Number(searchParams.get("yardsNeeded") || "0");
-  const gender = searchParams.get("gender") || "";
   const noteForTailor = searchParams.get("noteForTailor") || "";
   const totalCost = Number(searchParams.get("totalCost") || "0");
+
+  // Debug logging
+  console.log("Checkout step - Store values:", {
+    storeFabricId,
+    storeStyleId,
+    storeMeasurementId,
+  });
+  console.log("Checkout step - Final values:", {
+    fabricId,
+    selectedStyleId,
+    selectedMeasurementSetId,
+    yardsNeeded,
+  });
 
   const makeRequest = useMakeSewingRequest();
 
   const [agreedToPolicy, setAgreedToPolicy] = useState(false);
+  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
 
   const hasDiscount = discount?.value && discount.value > 0;
   const percentageDiscountAmount =
@@ -57,17 +80,101 @@ export function DashboardFabricCheckoutStepPage() {
   };
 
   const checkoutMutation = async () => {
-    await makeRequest.mutateAsync({
-      fabricId,
-      dressStyle: selectedStyleId.toString(),
-      size: selectedMeasurementSetId.toString(),
-      yardEstimate: yardsNeeded as number,
-      gender: gender,
-      noteForTailor,
-    });
+    // If guest user, show registration modal first
+    if (isGuestUser) {
+      setShowRegistrationModal(true);
+      return;
+    }
+
+    // Proceed with checkout for authenticated users
+    // Validate required fields
+    if (!fabricId) {
+      console.error("Missing fabricId");
+      return;
+    }
+    if (!selectedStyleId || selectedStyleId === 0) {
+      console.error("Missing or invalid styleId:", selectedStyleId);
+      return;
+    }
+    if (!selectedMeasurementSetId) {
+      console.error("Missing measurementId:", selectedMeasurementSetId);
+      return;
+    }
+
+    try {
+      await makeRequest.mutateAsync({
+        fabricId,
+        styleId: selectedStyleId,
+        measurementId: selectedMeasurementSetId,
+        yardEstimate: yardsNeeded,
+        noteForTailor: noteForTailor || undefined,
+      });
+    } catch (error) {
+      // If backend returns 400 and user is guest, show registration modal
+      const axiosError = error as { response?: { status?: number } };
+      if (axiosError?.response?.status === 400 && isGuestUser) {
+        setShowRegistrationModal(true);
+      }
+    }
   };
 
-  // console.log(discount, yardsNeeded);
+  const handleRegistrationSuccess = async () => {
+    // After successful registration, proceed with checkout
+    setShowRegistrationModal(false);
+    
+    // Validate required fields
+    if (!fabricId) {
+      console.error("Missing fabricId");
+      return;
+    }
+    if (!selectedStyleId || selectedStyleId === 0) {
+      console.error("Missing or invalid styleId:", selectedStyleId);
+      return;
+    }
+    if (!selectedMeasurementSetId) {
+      console.error("Missing measurementId:", selectedMeasurementSetId);
+      return;
+    }
+
+    try {
+      await makeRequest.mutateAsync({
+        fabricId,
+        styleId: selectedStyleId,
+        measurementId: selectedMeasurementSetId,
+        yardEstimate: yardsNeeded,
+        noteForTailor: noteForTailor || undefined,
+      });
+    } catch (error) {
+      // Error handled in hook
+      console.error("Checkout failed after registration:", error);
+    }
+  };
+
+  const handleRegistrationClose = () => {
+    setShowRegistrationModal(false);
+  };
+
+  // Guard: Ensure we have required values
+  if (!fabricId || !selectedStyleId || !selectedMeasurementSetId) {
+    return (
+      <section className="min-h-screen bg-[#F5F5F5] flex items-start justify-center px-4 py-6 md:px-8">
+        <div className="w-full max-w-[72rem] bg-white rounded-md shadow-sm p-4 md:p-6 flex flex-col items-center justify-center gap-6">
+          <div className="text-center">
+            <p className="text-red-600 mb-2">Missing required information</p>
+            <p className="text-sm text-neutral-500 mb-4">
+              Please go back and complete all steps.
+            </p>
+            <Button
+              text="Back to Review"
+              variant="outline"
+              className="border border-[#E7E7E7] text-[#3D3D3D]"
+              onClick={() => navigate(`${basePath}/fabric/${rawParam}/review`)}
+            />
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="min-h-screen bg-[#F5F5F5] flex items-start justify-center px-4 py-6 md:px-8">
@@ -81,7 +188,7 @@ export function DashboardFabricCheckoutStepPage() {
             <button
               type="button"
               onClick={() =>
-                navigate(`/dashboard/shop/fabric/${rawParam}/review`)
+                navigate(`${basePath}/fabric/${rawParam}/review`)
               }
               className="inline-flex items-center justify-center w-9 h-9 rounded-md border border-neutral-200 text-neutral-700 hover:bg-neutral-50 transition-colors"
               title="Back button"
@@ -171,7 +278,9 @@ export function DashboardFabricCheckoutStepPage() {
             onClick={checkoutMutation}
           >
             <div className="flex items-center gap-2">
-              <span>Make payment</span>
+              <span>
+                {isGuestUser ? "Sign up & Make payment" : "Make payment"}
+              </span>
 
               <Spinner
                 arcColor="#ffff"
@@ -183,6 +292,13 @@ export function DashboardFabricCheckoutStepPage() {
           </Button>
         </div>
       </div>
+
+      {/* Guest Registration Modal */}
+      <GuestRegistrationModal
+        isOpen={showRegistrationModal}
+        onClose={handleRegistrationClose}
+        onSuccess={handleRegistrationSuccess}
+      />
     </section>
   );
 }

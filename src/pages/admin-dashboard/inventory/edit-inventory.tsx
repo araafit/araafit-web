@@ -30,6 +30,8 @@ import Spinner from "../../../shared-components/spinner";
 import { SkinToneSelectField } from "./skin-tone-selection-field";
 import { GenderRadio } from "./gender-radio";
 import { useChartsByGender, useSkinTonesList } from "../../../hooks/admin-settings.hooks";
+import { Controller } from "react-hook-form";
+import type { UpdateProductRequest } from "../../../services/admin-inventory.service";
 
 /* -------------------------------------------------------------------------------- */
 
@@ -40,17 +42,22 @@ type SizeChartGender = "male" | "female";
 //const discountTypes = ["percentage", "fixed"];
 
 interface ProductFormData {
-  name: string;
-  audience: Audience[];
   category: "dress" | "fabric";
+  audience: Audience[];
+  name: string;
   description: string;
   materialType: string;
-  dressSize: string;
+  // Dress-specific fields
+  price: number;
+  // Fabric-specific fields
+  pricePerYard: number;
+  patternType: string;
+  totalSize: string;
+  // Shared fields
   weight: number;
   thickness: string;
   skinTone: string[];
   quantityInStock: number;
-  price: number;
   discountType: "percentage" | "fixed";
   discountValue: number;
   discountStart: string;
@@ -98,25 +105,46 @@ export function AdminDashboardEditInventory() {
 
   console.log(errors);
 
-  const watchCategory = watch("category");
-
   const [sizeChartGender, setSizeChartGender] =
     useState<SizeChartGender>("female");
-  const [selectedChartId, setSelectedChartId] = useState<string>("");
+  const [selectedChartIds, setSelectedChartIds] = useState<string[]>([]);
   const [selectedSizeEntryIds, setSelectedSizeEntryIds] = useState<string[]>(
     []
   );
 
   const chartsList = useChartsByGender(sizeChartGender);
   const skinTonesQuery = useSkinTonesList();
-  const skinToneOptions =
-    skinTonesQuery.data?.map((tone) => tone.name) ?? [];
+  const skinToneOptions = skinTonesQuery.data ?? [];
+  
+  const category = watch("category");
 
   const handleToggleSizeEntry = (entryId: string) => {
     setSelectedSizeEntryIds((prev) => {
       const exists = prev.includes(entryId);
       const next = exists ? prev.filter((id) => id !== entryId) : [...prev, entryId];
       setValue("sizeChartEntryIds", next, { shouldDirty: true });
+      return next;
+    });
+  };
+
+  const handleToggleChart = (chartId: string) => {
+    setSelectedChartIds((prev) => {
+      const exists = prev.includes(chartId);
+      const next = exists ? prev.filter((id) => id !== chartId) : [...prev, chartId];
+      
+      // When unselecting a chart, remove its entries from selection
+      if (exists) {
+        const chart = chartsList.data?.find((c) => c.id === chartId);
+        if (chart?.entries) {
+          const entryIdsToRemove = chart.entries.map((e) => e.id);
+          setSelectedSizeEntryIds((current) => {
+            const filtered = current.filter((id) => !entryIdsToRemove.includes(id));
+            setValue("sizeChartEntryIds", filtered, { shouldDirty: true });
+            return filtered;
+          });
+        }
+      }
+      
       return next;
     });
   };
@@ -141,7 +169,15 @@ export function AdminDashboardEditInventory() {
       const initialGender: SizeChartGender =
         firstAvailableEntry?.chart?.gender ??
         deriveGenderFromAudience(product.audience);
-      const initialChartId = firstAvailableEntry?.chart?.id ?? "";
+      
+      // Get unique chart IDs from available entries
+      const initialChartIds = Array.from(
+        new Set(
+          product.availableSizeChartEntries
+            ?.map((e) => e.chart?.id)
+            .filter((id): id is string => !!id) || []
+        )
+      );
 
       reset({
         name: product.name,
@@ -153,24 +189,27 @@ export function AdminDashboardEditInventory() {
             : [],
         description: product.description || "",
         materialType: product.materialType || "",
-        dressSize: product.dressSize || "",
         weight: product.weight || 0,
         thickness: product.thickness || "",
         quantityInStock: product.quantityInStock || 0,
         price: product.price || 0,
+        pricePerYard: product.pricePerYard || 0,
+        patternType: product.patternType || "",
+        totalSize: product.totalSize || "",
         discountType:
           (product.discountType as "percentage" | "fixed") || "percentage",
         discountValue: product.discountValue || 0,
         discountStart: product.discountStart?.split("T")[0] || "",
         discountEnd: product.discountEnd?.split("T")[0] || "",
         sizeChartEntryIds: initialSelectedEntryIds,
+        skinTone: product.skinToneRecommendation || [],
       });
 
       // Set other state
       setSelectedTone(product.skinToneRecommendation || []);
       setDiscountsEnabled(!!product.discountType);
       setSizeChartGender(initialGender);
-      setSelectedChartId(initialChartId);
+      setSelectedChartIds(initialChartIds);
       setSelectedSizeEntryIds(initialSelectedEntryIds);
 
       // Set existing images
@@ -211,26 +250,35 @@ export function AdminDashboardEditInventory() {
         .filter((img) => !img.isExisting && img.file)
         .map((img) => img.file!);
 
+      const payload: UpdateProductRequest = {
+        audience: data.audience,
+        files: newFiles.length > 0 ? newFiles : undefined,
+        name: data.name,
+        description: data.description,
+        materialType: data.materialType,
+        weight: data.weight,
+        thickness: data.thickness,
+        quantityInStock: data.quantityInStock,
+        discountType: discountsEnabled ? data.discountType : undefined,
+        discountValue: discountsEnabled ? data.discountValue : undefined,
+        discountStart: discountsEnabled ? data.discountStart : undefined,
+        discountEnd: discountsEnabled ? data.discountEnd : undefined,
+        skinToneRecommendation: data.skinTone || selectedTone,
+        sizeChartEntryIds: data.sizeChartEntryIds ?? [],
+      };
+
+      // Add category-specific fields
+      if (data.category === "dress") {
+        if (data.price) payload.price = data.price;
+      } else if (data.category === "fabric") {
+        if (data.pricePerYard) payload.pricePerYard = data.pricePerYard;
+        if (data.patternType) payload.patternType = data.patternType;
+        if (data.totalSize) payload.totalSize = data.totalSize;
+      }
+
       await updateProductMutation.mutateAsync({
         productId: inventoryId,
-        data: {
-          audience: data.audience,
-          files: newFiles.length > 0 ? newFiles : undefined,
-          name: data.name,
-          description: data.description,
-          materialType: data.materialType,
-          dressSize: data.dressSize,
-          weight: data.weight,
-          thickness: data.thickness,
-          quantityInStock: data.quantityInStock,
-          price: data.price,
-          discountType: discountsEnabled ? data.discountType : undefined,
-          discountValue: discountsEnabled ? data.discountValue : undefined,
-          discountStart: discountsEnabled ? data.discountStart : undefined,
-          discountEnd: discountsEnabled ? data.discountEnd : undefined,
-          skinToneRecommendation: selectedTone,
-          sizeChartEntryIds: data.sizeChartEntryIds ?? [],
-        },
+        data: payload,
       });
 
       // Navigate back to inventory on success
@@ -244,19 +292,22 @@ export function AdminDashboardEditInventory() {
     <div className="font-lora font-medium text-[#1C1C1C]">Inventory</div>
   );
 
-  const BreadCrumb = () => (
-    <div className="font-inter font-light capitalize flex items-center">
-      <Link to="/admin-dashboard/overview" className="text-primary-900">
-        Araafit
-      </Link>
-      <CaretRightIcon className="text-primary-900" />
-      <Link to="/admin-dashboard/inventory" className="text-primary-900">
-        Inventory
-      </Link>
-      <CaretRightIcon className="text-[#979797]" />
-      <span className="text-[#979797]">{product?.category || "Product"}</span>
-    </div>
-  );
+  const BreadCrumb = () => {
+    const categoryValue = watch("category");
+    return (
+      <div className="font-inter font-light capitalize flex items-center">
+        <Link to="/admin-dashboard/overview" className="text-primary-900">
+          Araafit
+        </Link>
+        <CaretRightIcon className="text-primary-900" />
+        <Link to="/admin-dashboard/inventory" className="text-primary-900">
+          Inventory
+        </Link>
+        <CaretRightIcon className="text-[#979797]" />
+        <span className="text-[#979797]">{categoryValue || product?.category || "Product"}</span>
+      </div>
+    );
+  };
 
   if (isLoadingProduct) {
     return (
@@ -404,90 +455,102 @@ export function AdminDashboardEditInventory() {
 
             {/* ----- Inventory fields ----- */}
             <div className="flex-1 max-w-[654px]">
-              {/* Gender selection */}
-              <div className="w-full bg-white rounded-[6px] py-6 px-4 mb-4">
-                <h2 className="mb-4 text-[1.4rem] font-semibold">
-                  Who Is This For?
-                </h2>
-
-                <div className="flex items-center gap-12">
-                  <GenderRadio
-                    fieldId="for-men"
-                    fieldValue="men"
-                    fieldLabel="For Men"
-                    registerField={register}
-                    fieldWatch={watch}
-                  />
-                  <GenderRadio
-                    fieldId="for-women"
-                    fieldValue="women"
-                    fieldLabel="For Women"
-                    registerField={register}
-                    fieldWatch={watch}
-                  />
-                  <GenderRadio
-                    fieldId="for-kids"
-                    fieldValue="kids"
-                    fieldLabel="For Kids"
-                    registerField={register}
-                    fieldWatch={watch}
-                  />
-                </div>
-              </div>
-
               {/* General Information */}
-              <div className="bg-white rounded-[6px] py-6 px-4">
-                <h4 className="font-semibold">General Information</h4>
-                <div className="flex gap-4 items-center mt-4">
-                  <div className="w-[303px]">
-                    <label
-                      htmlFor="name"
-                      className="block text-[#4F4F4F] font-light text-sm"
-                    >
-                      Product Name
-                    </label>
-                    <input
-                      {...register("name", {
-                        required: "Product name is required",
-                        minLength: {
-                          value: 2,
-                          message: "Name must be at least 2 characters",
-                        },
-                      })}
-                      type="text"
-                      className="h-14 w-full border border-[#D0D5DD] pl-2 rounded-lg outline-none focus:outline-none"
-                    />
-                    {errors.name && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {errors.name.message}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <Select {...register("category")}>
-                      <label
-                        htmlFor="name"
-                        className="block text-[#4F4F4F] font-light text-sm"
+              <div className="bg-white rounded-[6px] py-6 px-4 mb-4">
+                <h4 className="font-semibold mb-4">General Information</h4>
+                
+                {/* Category Selection */}
+                <div className="mb-4">
+                  <label
+                    htmlFor="category"
+                    className="block text-[#4F4F4F] font-light text-sm mb-2"
+                  >
+                    Inventory Type
+                  </label>
+                  <Controller
+                    name="category"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
                       >
-                        Category
-                      </label>
-                      <SelectTrigger className="w-full h-14 border border-[#D0D5DD] text-[#676767] text-sm bg-white flex items-center justify-between px-3">
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Categories</SelectLabel>
-                          <SelectItem value="fabric">Fabric</SelectItem>
-                          <SelectItem value="dress">Dress</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
+                        <SelectTrigger className="w-full h-14 border border-[#D0D5DD] text-[#676767] text-sm bg-white flex items-center justify-between px-3">
+                          <SelectValue placeholder="Select inventory type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectLabel>Inventory Types</SelectLabel>
+                            <SelectItem value="fabric">Fabric</SelectItem>
+                            <SelectItem value="dress">Dress</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+
+                {/* Audience Selection */}
+                <div className="mb-4">
+                  <label className="block text-[#4F4F4F] font-light text-sm mb-2">
+                    Audience
+                  </label>
+                  <div className="flex items-center gap-12">
+                    <GenderRadio
+                      fieldId="for-men"
+                      fieldValue="men"
+                      fieldLabel="Men"
+                      registerField={register}
+                      fieldWatch={watch}
+                    />
+                    <GenderRadio
+                      fieldId="for-women"
+                      fieldValue="women"
+                      fieldLabel="Women"
+                      registerField={register}
+                      fieldWatch={watch}
+                    />
+                    <GenderRadio
+                      fieldId="for-kids"
+                      fieldValue="kids"
+                      fieldLabel="Kids"
+                      registerField={register}
+                      fieldWatch={watch}
+                    />
                   </div>
                 </div>
-                <div className="w-full mt-4">
+
+                {/* Product Name */}
+                <div className="mb-4">
+                  <label
+                    htmlFor="name"
+                    className="block text-[#4F4F4F] font-light text-sm mb-2"
+                  >
+                    Product Name
+                  </label>
+                  <input
+                    {...register("name", {
+                      required: "Product name is required",
+                      minLength: {
+                        value: 2,
+                        message: "Name must be at least 2 characters",
+                      },
+                    })}
+                    type="text"
+                    className="h-14 w-full border border-[#D0D5DD] pl-2 rounded-lg outline-none focus:outline-none"
+                  />
+                  {errors.name && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.name.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Product Description */}
+                <div>
                   <label
                     htmlFor="description"
-                    className="block text-[#4F4F4F] font-light"
+                    className="block text-[#4F4F4F] font-light text-sm mb-2"
                   >
                     Product Description
                   </label>
@@ -500,87 +563,102 @@ export function AdminDashboardEditInventory() {
                 </div>
               </div>
 
-              {/* Product Information */}
+              {/* Material Information */}
               <div className="bg-white rounded-[6px] py-6 px-4 mt-4">
-                <h4 className="font-semibold">
-                  {watchCategory === "dress" ? "Dress" : "Fabric"} Information
-                </h4>
+                <h4 className="font-semibold">Material Information</h4>
                 <div className="flex gap-4 items-center mt-4">
                   <div className="w-[303px]">
                     <label
                       htmlFor="materialType"
-                      className="block text-[#4F4F4F] font-light text-sm"
+                      className="block text-[#4F4F4F] font-light text-sm mb-2"
                     >
                       Material Type
                     </label>
                     <input
                       {...register("materialType")}
                       type="text"
-                      placeholder="Enter material type"
+                      placeholder="e.g., Cotton, Silk, Linen"
                       className="h-14 w-full border border-[#D0D5DD] pl-2 rounded-lg outline-none focus:outline-none"
                     />
                   </div>
                   <div className="flex-1">
-                    <Select>
-                      <label
-                        htmlFor="dressSize"
-                        className="block text-[#4F4F4F] font-light text-sm"
-                      >
-                        General {watchCategory === "dress" ? "Dress" : "Fabric"}{" "}
-                        Size
-                      </label>
-                      <SelectTrigger className="w-full h-14 border border-[#D0D5DD] text-[#676767] text-sm bg-white flex items-center justify-between px-3">
-                        <SelectValue placeholder="Select a size" />
-                      </SelectTrigger>
-                      <SelectContent {...register("dressSize")}>
-                        <SelectGroup>
-                          <SelectLabel>Sizes</SelectLabel>
-                          {[6, 8, 10, 12, 14, 16, 18, 20].map((size) => (
-                            <SelectItem key={size} value={size.toString()}>
-                              {size}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="flex gap-4 items-center mt-4">
-                  <div className="w-[303px]">
                     <label
                       htmlFor="weight"
-                      className="block text-[#4F4F4F] font-light text-sm"
+                      className="block text-[#4F4F4F] font-light text-sm mb-2"
                     >
                       Weight (gsm)
                     </label>
                     <input
                       type="number"
-                      {...register("weight")}
+                      {...register("weight", { valueAsNumber: true })}
+                      placeholder="Enter weight"
                       className="h-14 w-full font-light border border-[#D0D5DD] pl-2 rounded-lg outline-none focus:outline-none"
                     />
                   </div>
-                  <div className="flex-1">
+                </div>
+                <div className="flex gap-4 items-center mt-4">
+                  <div className="w-[303px]">
                     <label
                       htmlFor="thickness"
-                      className="block text-[#4F4F4F] font-light text-sm"
+                      className="block text-[#4F4F4F] font-light text-sm mb-2"
                     >
                       Thickness (mm)
                     </label>
                     <input
                       type="number"
                       {...register("thickness")}
+                      placeholder="Enter thickness"
                       className="h-14 w-full font-light border border-[#D0D5DD] pl-2 rounded-lg outline-none focus:outline-none"
                     />
                   </div>
                 </div>
               </div>
 
+              {/* Fabric-specific Information */}
+              {category === "fabric" && (
+                <div className="bg-white rounded-[6px] py-6 px-4 mt-4">
+                  <h4 className="font-semibold">Fabric Information</h4>
+                  <div className="flex gap-4 items-center mt-4">
+                    <div className="w-[303px]">
+                      <label
+                        htmlFor="patternType"
+                        className="block text-[#4F4F4F] font-light text-sm mb-2"
+                      >
+                        Pattern Type
+                      </label>
+                      <input
+                        {...register("patternType")}
+                        type="text"
+                        placeholder="e.g., Solid, Striped, Floral"
+                        className="h-14 w-full border border-[#D0D5DD] pl-2 rounded-lg outline-none focus:outline-none"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label
+                        htmlFor="totalSize"
+                        className="block text-[#4F4F4F] font-light text-sm mb-2"
+                      >
+                        Total Size
+                      </label>
+                      <input
+                        {...register("totalSize")}
+                        type="text"
+                        placeholder="e.g., 5 yards, 10 meters"
+                        className="h-14 w-full border border-[#D0D5DD] pl-2 rounded-lg outline-none focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Skin Tone Recommendation */}
-              {/* skin tone Info */}
               <div className="bg-white rounded-[6px] py-6 px-4 mt-4">
                 <h4 className="font-semibold">Skin Tone Recommendation</h4>
-                <div className="flex gap-4 items-center mt-4">
-                  <div className="w-full ">
+                <p className="text-xs text-[#676767] mt-1 mb-4">
+                  Select skin tones that complement this {category === "fabric" ? "fabric" : "dress"}.
+                </p>
+                <div className="flex gap-4 items-center">
+                  <div className="w-full">
                     <SkinToneSelectField
                       name="skinTone"
                       label="Skin Tone"
@@ -591,152 +669,222 @@ export function AdminDashboardEditInventory() {
                 </div>
               </div>
 
-              {/* Size Chart Entries */}
-              <div className="bg-white rounded-[6px] py-6 px-4 mt-4">
-                <h4 className="font-semibold">Size Chart Entries</h4>
-                <p className="text-xs text-[#676767] mt-1">
-                  Optionally link size chart entries that this product supports.
-                </p>
+              {/* Size Chart Entries - Only for Dresses */}
+              {category === "dress" && (
+                <div className="bg-white rounded-[6px] py-6 px-4 mt-4">
+                  <h4 className="font-semibold">Size Chart Entries</h4>
+                  <p className="text-xs text-[#676767] mt-1">
+                    Select multiple size charts and their entries that this dress supports.
+                  </p>
 
-                <div className="flex gap-4 items-center mt-4">
-                  <div className="w-[180px]">
-                    <label className="block text-[#4F4F4F] font-light text-sm">
-                      Gender
-                    </label>
-                    <Select
-                      value={sizeChartGender}
-                      onValueChange={(value) =>
-                        setSizeChartGender(value as SizeChartGender)
-                      }
-                    >
-                      <SelectTrigger className="w-full h-12 border border-[#D0D5DD] text-[#676767] text-sm bg-white flex items-center justify-between px-3">
-                        <SelectValue placeholder="Select gender" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Gender</SelectLabel>
-                          <SelectItem value="female">Female</SelectItem>
-                          <SelectItem value="male">Male</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="flex-1">
-                    <label className="block text-[#4F4F4F] font-light text-sm">
-                      Size Chart
-                    </label>
-                    <Select
-                      value={selectedChartId}
-                      onValueChange={(value) => setSelectedChartId(value)}
-                    >
-                      <SelectTrigger className="w-full h-12 border border-[#D0D5DD] text-[#676767] text-sm bg-white flex items-center justify-between px-3">
-                        <SelectValue placeholder="Select a size chart" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Charts</SelectLabel>
-                          {chartsList.data?.map((chart) => (
-                            <SelectItem key={chart.id} value={chart.id}>
-                              {chart.name}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="mt-4 max-h-56 overflow-y-auto border border-[#F0F2F5] rounded-lg p-3">
-                  {!selectedChartId ? (
-                    <p className="text-xs text-[#676767]">
-                      Select a chart to choose entries.
-                    </p>
-                  ) : chartsList.isLoading ? (
-                    <div className="flex items-center justify-center py-6">
-                      <Spinner size="sm" speed="fast" />
+                  <div className="flex gap-4 items-center mt-4">
+                    <div className="w-[180px]">
+                      <label className="block text-[#4F4F4F] font-light text-sm">
+                        Gender
+                      </label>
+                      <Select
+                        value={sizeChartGender}
+                        onValueChange={(value) => {
+                          setSizeChartGender(value as SizeChartGender);
+                          // Clear selections when gender changes
+                          setSelectedChartIds([]);
+                          setSelectedSizeEntryIds([]);
+                          setValue("sizeChartEntryIds", [], { shouldDirty: true });
+                        }}
+                      >
+                        <SelectTrigger className="w-full h-12 border border-[#D0D5DD] text-[#676767] text-sm bg-white flex items-center justify-between px-3">
+                          <SelectValue placeholder="Select gender" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectLabel>Gender</SelectLabel>
+                            <SelectItem value="female">Female</SelectItem>
+                            <SelectItem value="male">Male</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
                     </div>
-                  ) : (
-                    (() => {
-                      const chart = chartsList.data?.find(
-                        (c) => c.id === selectedChartId
-                      );
-                      if (!chart || !chart.entries || chart.entries.length === 0) {
-                        return (
-                          <p className="text-xs text-[#676767]">
-                            No entries available for this chart.
-                          </p>
-                        );
-                      }
-                      return (
+                  </div>
+
+                  {/* Size Charts Selection */}
+                  <div className="mt-4">
+                    <label className="block text-[#4F4F4F] font-light text-sm mb-2">
+                      Size Charts
+                    </label>
+                    {chartsList.isLoading ? (
+                      <div className="flex items-center justify-center py-6">
+                        <Spinner size="sm" speed="fast" />
+                      </div>
+                    ) : chartsList.data && chartsList.data.length > 0 ? (
+                      <div className="border border-[#F0F2F5] rounded-lg p-3 max-h-32 overflow-y-auto">
                         <div className="flex flex-col gap-2">
-                          {chart.entries.map((entry) => {
-                            console.log(selectedSizeEntryIds);
-                            const checked = selectedSizeEntryIds.includes(entry.id);
+                          {chartsList.data.map((chart) => {
+                            const isSelected = selectedChartIds.includes(chart.id);
                             return (
                               <label
-                                key={entry.id}
-                                className="flex items-center justify-between cursor-pointer text-sm text-[#1C1C1C]"
+                                key={chart.id}
+                                className="flex items-center gap-2 cursor-pointer text-sm text-[#1C1C1C]"
                               >
-                                <div className="flex items-center gap-2">
-                                  <input
-                                    type="checkbox"
-                                    className="hidden"
-                                    checked={checked}
-                                    onChange={() => handleToggleSizeEntry(entry.id)}
-                                  />
-                                  <div
-                                    className={`w-4 h-4 rounded border flex items-center justify-center ${
-                                      checked
-                                        ? "border-[#9A6C50] bg-[#9A6C50]"
-                                        : "border-[#D0D5DD] bg-white"
-                                    }`}
-                                  >
-                                    {checked && (
-                                      <span className="w-2 h-2 rounded-sm bg-white" />
-                                    )}
-                                  </div>
-                                  <span>{entry.label}</span>
+                                <input
+                                  type="checkbox"
+                                  className="hidden"
+                                  checked={isSelected}
+                                  onChange={() => handleToggleChart(chart.id)}
+                                />
+                                <div
+                                  className={`w-4 h-4 rounded border flex items-center justify-center ${
+                                    isSelected
+                                      ? "border-[#9A6C50] bg-[#9A6C50]"
+                                      : "border-[#D0D5DD] bg-white"
+                                  }`}
+                                >
+                                  {isSelected && (
+                                    <span className="w-2 h-2 rounded-sm bg-white" />
+                                  )}
                                 </div>
+                                <span>{chart.name}</span>
+                                <span className="text-xs text-[#676767] ml-auto">
+                                  ({chart.entries?.length ?? 0} entries)
+                                </span>
                               </label>
                             );
                           })}
                         </div>
-                      );
-                    })()
+                      </div>
+                    ) : (
+                      <p className="text-xs text-[#676767]">
+                        No charts available for this gender.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Entries from Selected Charts */}
+                  {selectedChartIds.length > 0 && (
+                    <div className="mt-4">
+                      <label className="block text-[#4F4F4F] font-light text-sm mb-2">
+                        Chart Entries
+                      </label>
+                      <div className="max-h-56 overflow-y-auto border border-[#F0F2F5] rounded-lg p-3">
+                        {(() => {
+                          const selectedCharts = chartsList.data?.filter((c) =>
+                            selectedChartIds.includes(c.id)
+                          );
+                          const allEntries = selectedCharts?.flatMap((chart) =>
+                            (chart.entries || []).map((entry) => ({
+                              ...entry,
+                              chartName: chart.name,
+                            }))
+                          ) || [];
+
+                          if (allEntries.length === 0) {
+                            return (
+                              <p className="text-xs text-[#676767]">
+                                No entries available in selected charts.
+                              </p>
+                            );
+                          }
+
+                          return (
+                            <div className="flex flex-col gap-4">
+                              {selectedCharts?.map((chart) => {
+                                if (!chart.entries || chart.entries.length === 0) {
+                                  return null;
+                                }
+                                return (
+                                  <div key={chart.id} className="space-y-2">
+                                    <div className="text-xs font-medium text-[#676767] border-b border-[#F0F2F5] pb-1">
+                                      {chart.name}
+                                    </div>
+                                    {chart.entries.map((entry) => {
+                                      const checked = selectedSizeEntryIds.includes(entry.id);
+                                      return (
+                                        <label
+                                          key={entry.id}
+                                          className="flex items-center gap-2 cursor-pointer text-sm text-[#1C1C1C] ml-2"
+                                        >
+                                          <input
+                                            type="checkbox"
+                                            className="hidden"
+                                            checked={checked}
+                                            onChange={() => handleToggleSizeEntry(entry.id)}
+                                          />
+                                          <div
+                                            className={`w-4 h-4 rounded border flex items-center justify-center ${
+                                              checked
+                                                ? "border-[#9A6C50] bg-[#9A6C50]"
+                                                : "border-[#D0D5DD] bg-white"
+                                            }`}
+                                          >
+                                            {checked && (
+                                              <span className="w-2 h-2 rounded-sm bg-white" />
+                                            )}
+                                          </div>
+                                          <span>{entry.label}</span>
+                                        </label>
+                                      );
+                                    })}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    </div>
                   )}
                 </div>
-              </div>
+              )}
 
               {/* Quantity/Price */}
               <div className="bg-white rounded-[6px] py-6 px-4 mt-4">
-                <h4 className="font-semibold">Quantity/Price</h4>
+                <h4 className="font-semibold">Quantity & Pricing</h4>
                 <div className="flex gap-4 items-center mt-4">
                   <div className="w-[303px]">
                     <label
                       htmlFor="quantityInStock"
-                      className="block text-[#4F4F4F] font-light text-sm"
+                      className="block text-[#4F4F4F] font-light text-sm mb-2"
                     >
                       Quantity Available
                     </label>
                     <input
                       type="number"
-                      {...register("quantityInStock")}
+                      {...register("quantityInStock", { valueAsNumber: true })}
+                      placeholder="Enter quantity"
                       className="h-14 w-full font-light border border-[#D0D5DD] pl-2 rounded-lg outline-none focus:outline-none"
                     />
                   </div>
                   <div className="flex-1">
-                    <label
-                      htmlFor="price"
-                      className="block text-[#4F4F4F] font-light text-sm"
-                    >
-                      Price (₦)
-                    </label>
-                    <input
-                      type="number"
-                      {...register("price")}
-                      className="h-14 w-full font-light border border-[#D0D5DD] pl-2 rounded-lg outline-none focus:outline-none"
-                    />
+                    {category === "dress" ? (
+                      <>
+                        <label
+                          htmlFor="price"
+                          className="block text-[#4F4F4F] font-light text-sm mb-2"
+                        >
+                          Price (₦)
+                        </label>
+                        <input
+                          type="number"
+                          {...register("price", { valueAsNumber: true })}
+                          placeholder="Enter price"
+                          className="h-14 w-full font-light border border-[#D0D5DD] pl-2 rounded-lg outline-none focus:outline-none"
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <label
+                          htmlFor="pricePerYard"
+                          className="block text-[#4F4F4F] font-light text-sm mb-2"
+                        >
+                          Price Per Yard (₦)
+                        </label>
+                        <input
+                          type="number"
+                          {...register("pricePerYard", { valueAsNumber: true })}
+                          placeholder="Enter price per yard"
+                          className="h-14 w-full font-light border border-[#D0D5DD] pl-2 rounded-lg outline-none focus:outline-none"
+                        />
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

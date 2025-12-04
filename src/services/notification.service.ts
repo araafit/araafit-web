@@ -1,11 +1,10 @@
 import apiClient from "../lib/axios";
 import { type ApiResponse } from "./admin-auth.service";
-import { type User } from "../stores/auth-store";
 
 /* ---------------------------------------------------------------- */
 
 // Enum for notification types
-enum NotificationType {
+export enum NotificationType {
   PURCHASE = "PURCHASE",
   CART = "CART",
   DELIVERY = "DELIVERY",
@@ -13,9 +12,10 @@ enum NotificationType {
 
 // Interface for Purchase notification metadata
 export interface PurchaseMetadata {
-  orderId: string;
+  orderId?: string;
   requestId?: string;
-  totalAmount: string;
+  totalAmount: number | string;
+  [key: string]: unknown; // Allow additional fields
 }
 
 // Interface for Cart notification metadata
@@ -26,28 +26,25 @@ export interface CartMetadata {
 }
 
 // Union type for metadata (can be either Purchase or Cart)
-export type NotificationMetadata = PurchaseMetadata | CartMetadata;
+export type NotificationMetadata = PurchaseMetadata | CartMetadata | Record<string, unknown>;
 
 // Interface for individual notification item
 export interface Notification {
   id: string;
-  type: NotificationType;
+  type: string; // API returns string, not enum
   title: string;
   message: string;
   metadata: NotificationMetadata;
   isRead: boolean;
-  user: User;
   userId: string;
   createdAt: string;
 }
 
 // Interface for the complete API response
 export interface NotificationResponse {
-  data: Notification[];
+  userId: string;
   total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+  notifications: Notification[];
 }
 
 export interface NotificationPreferences {
@@ -58,13 +55,13 @@ export interface NotificationPreferences {
 export const userNotificationService = {
   async getAllNotification(): Promise<NotificationResponse> {
     const response = await apiClient.get<ApiResponse<NotificationResponse>>(
-      "/notifications/all"
+      "/notifications"
     );
 
     return response.data.data;
   },
 
-  async readNotification(id: number): Promise<Omit<Notification, "User">> {
+  async readNotification(id: string): Promise<Notification> {
     const response = await apiClient.post<ApiResponse<Notification>>(
       `/notifications/${id}/read`
     );
@@ -72,7 +69,7 @@ export const userNotificationService = {
     return response.data.data;
   },
 
-  async deleteNotification(id: number): Promise<ApiResponse<null>> {
+  async deleteNotification(id: string): Promise<ApiResponse<null>> {
     const response = await apiClient.delete<ApiResponse<null>>(
       `/notifications/${id}`
     );

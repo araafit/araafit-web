@@ -221,37 +221,79 @@ export function ManualMeasurement() {
 
             {/* Numeric inputs per gender */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {(requiredFields as readonly string[]).map((f) => (
-                <div key={f} className="space-y-1">
-                  <label className="text-sm text-[#676767] capitalize">
-                    {f}
-                  </label>
-                  <input
-                    type="number"
-                    className="w-full h-12 border border-[#D0D5DD] rounded-md px-3 text-sm"
-                    value={String(selectedValues[f] ?? "")}
-                    onChange={(e) =>
-                      handleSelection(f, e.target.value === "" ? "" : Number(e.target.value))
-                    }
-                    min={0}
-                  />
-                </div>
-              ))}
+              {(requiredFields as readonly string[]).map((f) => {
+                // Define unit and placeholder for each field
+                const getFieldConfig = (field: string) => {
+                  switch (field) {
+                    case "chest":
+                      return { unit: "inches", placeholder: "e.g. 38", label: "Chest" };
+                    case "bust":
+                      return { unit: "inches", placeholder: "e.g. 36", label: "Bust" };
+                    case "waist":
+                      return { unit: "inches", placeholder: "e.g. 30", label: "Waist" };
+                    case "hips":
+                      return { unit: "inches", placeholder: "e.g. 38", label: "Hips" };
+                    case "height":
+                      return { unit: "inches", placeholder: "e.g. 65 (or 5'5\")", label: "Height" };
+                    default:
+                      return { unit: "inches", placeholder: "", label: field };
+                  }
+                };
+
+                const config = getFieldConfig(f);
+                return (
+                  <div key={f} className="space-y-1">
+                    <label className="text-sm text-[#676767] capitalize">
+                      {config.label} <span className="text-[#888888] font-normal">({config.unit})</span>
+                    </label>
+                    <input
+                      type="number"
+                      className="w-full h-12 border border-[#D0D5DD] rounded-md px-3 text-sm"
+                      value={String(selectedValues[f] ?? "")}
+                      onChange={(e) =>
+                        handleSelection(f, e.target.value === "" ? "" : Number(e.target.value))
+                      }
+                      placeholder={config.placeholder}
+                      min={0}
+                      step={f === "height" ? "0.1" : "0.5"}
+                    />
+                  </div>
+                );
+              })}
               {/* Optional fields */}
-              {["neck", "shoulder"].map((f) => (
-                <div key={f} className="space-y-1">
-                  <label className="text-sm text-[#676767] capitalize">{f} (optional)</label>
-                  <input
-                    type="number"
-                    className="w-full h-12 border border-[#D0D5DD] rounded-md px-3 text-sm"
-                    value={String(selectedValues[f] ?? "")}
-                    onChange={(e) =>
-                      handleSelection(f, e.target.value === "" ? "" : Number(e.target.value))
-                    }
-                    min={0}
-                  />
-                </div>
-              ))}
+              {["neck", "shoulder"].map((f) => {
+                const getOptionalFieldConfig = (field: string) => {
+                  switch (field) {
+                    case "neck":
+                      return { unit: "inches", placeholder: "e.g. 15", label: "Neck" };
+                    case "shoulder":
+                      return { unit: "inches", placeholder: "e.g. 16", label: "Shoulder" };
+                    default:
+                      return { unit: "inches", placeholder: "", label: field };
+                  }
+                };
+
+                const config = getOptionalFieldConfig(f);
+                return (
+                  <div key={f} className="space-y-1">
+                    <label className="text-sm text-[#676767] capitalize">
+                      {config.label} <span className="text-[#888888] font-normal">({config.unit})</span>{" "}
+                      <span className="text-[#888888] font-normal">(optional)</span>
+                    </label>
+                    <input
+                      type="number"
+                      className="w-full h-12 border border-[#D0D5DD] rounded-md px-3 text-sm"
+                      value={String(selectedValues[f] ?? "")}
+                      onChange={(e) =>
+                        handleSelection(f, e.target.value === "" ? "" : Number(e.target.value))
+                      }
+                      placeholder={config.placeholder}
+                      min={0}
+                      step="0.5"
+                    />
+                  </div>
+                );
+              })}
             </div>
 
             <Button

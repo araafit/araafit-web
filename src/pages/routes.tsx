@@ -45,6 +45,7 @@ import {
   GuestDressDetailPage,
   GuestFabricDetailPage,
 } from "./guest/guest-shop/import-entry";
+import GuestPageLayout from "../layouts/guest/guest-page-layout";
 import GuestCartPage from "./guest/cart/guest-cart";
 import GuestCartCheckout from "./guest/cart/guest-cart-checkout";
 import GuestCheckoutSuccess from "./guest/cart/guest-checkout-success";
@@ -121,6 +122,46 @@ const pagesRoutes = createBrowserRouter([
       {
         path: "fabric/:itemName",
         element: <GuestFabricDetailPage />,
+      },
+      {
+        path: "fabric/:itemName/request",
+        element: (
+          <GuestPageLayout>
+            <DashboardFabricRequestFlowPage />
+          </GuestPageLayout>
+        ),
+      },
+      {
+        path: "fabric/:itemName/style",
+        element: (
+          <GuestPageLayout>
+            <DashboardFabricStyleStepPage />
+          </GuestPageLayout>
+        ),
+      },
+      {
+        path: "fabric/:itemName/measurement",
+        element: (
+          <GuestPageLayout>
+            <DashboardFabricMeasurementStepPage />
+          </GuestPageLayout>
+        ),
+      },
+      {
+        path: "fabric/:itemName/review",
+        element: (
+          <GuestPageLayout>
+            <DashboardFabricReviewStepPage />
+          </GuestPageLayout>
+        ),
+      },
+      {
+        path: "fabric/:itemName/checkout",
+        element: (
+          <GuestPageLayout>
+            <DashboardFabricCheckoutStepPage />
+          </GuestPageLayout>
+        ),
       },
       {
         path: ":fabricId/summary",

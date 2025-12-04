@@ -38,6 +38,7 @@ export default function StylesTabs() {
   const [gender, setGender] = useState<"male" | "female">("female");
   const [selectedChartId, setSelectedChartId] = useState<string>("");
   const [sizeConfigs, setSizeConfigs] = useState<Record<string, string>>({});
+  const [sewingPrice, setSewingPrice] = useState<string>("");
 
   // API hooks
   const { data: styles, isLoading, isError } = useDressStyles();
@@ -137,6 +138,7 @@ export default function StylesTabs() {
         name: selectedStyle,
         sizeConfigs: sizeConfigsPayload,
         files: contributorPhotos,
+        sewingPrice: sewingPrice ? Number(sewingPrice) : null,
       });
 
       // Reset form
@@ -145,6 +147,7 @@ export default function StylesTabs() {
       setGender("female");
       setSelectedChartId("");
       setSizeConfigs({});
+      setSewingPrice("");
       setIsAddDrawerOpen(false);
     } catch (error) {
       console.error("Failed to create dress style:", error);
@@ -239,9 +242,6 @@ export default function StylesTabs() {
                         document.getElementById("file-upload")?.click()
                       }
                     />
-                    <span className="h-12 py-3 px-5 bg-primary-500 rounded-[0.375rem] text-white shadow-sm w-44">
-                      Browser file
-                    </span>
                   </label>
                 )}
               </div>
@@ -278,6 +278,25 @@ export default function StylesTabs() {
                   className="w-full h-12 border border-[#D0D5DD] rounded-lg px-3 text-sm"
                   disabled={createStyleMutation.isPending}
                 />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm text-[#676767]">
+                  Sewing Price (₦) <span className="text-[#888888]">(optional)</span>
+                </label>
+                <input
+                  type="number"
+                  placeholder="Enter sewing price"
+                  value={sewingPrice}
+                  onChange={(e) => setSewingPrice(e.target.value)}
+                  className="w-full h-12 border border-[#D0D5DD] rounded-lg px-3 text-sm"
+                  disabled={createStyleMutation.isPending}
+                  min="0"
+                  step="0.01"
+                />
+                <p className="text-xs text-[#888888] mt-1">
+                  The cost for tailoring this style. Leave empty if not applicable.
+                </p>
               </div>
 
               {/* Size Configurations */}

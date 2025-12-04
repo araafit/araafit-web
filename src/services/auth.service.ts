@@ -127,7 +127,7 @@ export interface CompleteRegistrationRequest {
   lastName: string;
   password: string;
   deliveryAddress: string;
-  dateOfBirth: string;
+  dateOfBirth?: string;
 }
 
 export interface CompleteRegistrationResponse {
@@ -292,11 +292,10 @@ class AuthService {
   async completeRegistration(
     data: CompleteRegistrationRequest
   ): Promise<CompleteRegistrationResponse> {
-    const response = await apiClient.patch<CompleteRegistrationResponse>(
-      "/auth/complete-registration",
-      data
-    );
-    return response.data;
+    const response = await apiClient.patch<
+      ApiResponse<CompleteRegistrationResponse>
+    >("/auth/complete-registration", data);
+    return response.data.data;
   }
 
   /**

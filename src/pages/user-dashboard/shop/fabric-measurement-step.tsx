@@ -6,6 +6,8 @@ import { useFabricRequestStore } from "../../../shared-hooks/state-store";
 import { useMeasurements } from "../../../hooks/measurements.hooks";
 import type { MeasurementSet } from "../../../services/measurements.service";
 import Spinner from "../../../shared-components/spinner";
+import { useFabricRequestContext } from "./use-fabric-request-context";
+import useAuth from "../../../hooks/use-auth";
 
 /* ---------------------------------------------------------------------- */
 
@@ -13,6 +15,8 @@ export function DashboardFabricMeasurementStepPage() {
   const params = useParams<{ itemName: string }>();
   const rawParam = params.itemName || "";
   const navigate = useNavigate();
+  const { basePath } = useFabricRequestContext();
+  const { isGuestUser } = useAuth();
 
   const {
     fabricId,
@@ -95,19 +99,18 @@ export function DashboardFabricMeasurementStepPage() {
 
   const handleContinue = () => {
     if (!selectedSetId) return;
-    // Next: review step (to be implemented)
-    navigate(`/dashboard/shop/fabric/${rawParam}/review`);
+    navigate(`${basePath}/fabric/${rawParam}/review`);
   };
 
   // Guard: must have fabric & style selected
   if (!fabricId) {
     return (
-      <Navigate to={`/dashboard/shop/fabric/${rawParam}/request`} replace />
+      <Navigate to={`${basePath}/fabric/${rawParam}/request`} replace />
     );
   }
 
   if (!selectedStyleId) {
-    return <Navigate to={`/dashboard/shop/fabric/${rawParam}/style`} replace />;
+    return <Navigate to={`${basePath}/fabric/${rawParam}/style`} replace />;
   }
 
   return (
@@ -121,7 +124,7 @@ export function DashboardFabricMeasurementStepPage() {
             <button
               type="button"
               onClick={() =>
-                navigate(`/dashboard/shop/fabric/${rawParam}/style`)
+                navigate(`${basePath}/fabric/${rawParam}/style`)
               }
               className="inline-flex items-center justify-center w-9 h-9 rounded-md border border-neutral-200 text-neutral-700 hover:bg-neutral-50 transition-colors"
               title="back to fabrics"
@@ -175,11 +178,14 @@ export function DashboardFabricMeasurementStepPage() {
             <div className="flex items-center justify-center h-64">
               <div className="text-center max-w-sm">
                 <p className="text-sm md:text-base text-neutral-700 mb-2">
-                  You don&apos;t have any saved measurement sets yet.
+                  {isGuestUser 
+                    ? "You need to take measurements to proceed with a custom order."
+                    : "You don&apos;t have any saved measurement sets yet."}
                 </p>
                 <p className="text-xs md:text-sm text-neutral-500 mb-4">
-                  Take your measurements so we can recommend the right fit for
-                  this style.
+                  {isGuestUser
+                    ? "Take your measurements so we can create a custom fit for you."
+                    : "Take your measurements so we can recommend the right fit for this style."}
                 </p>
                 <button
                   type="button"

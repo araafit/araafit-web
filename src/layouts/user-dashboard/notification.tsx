@@ -93,7 +93,7 @@ export const UserNotification = ({
   }
 
   const NotificationList = () => {
-    return notifications.data.map((notification) => (
+    return notifications.notifications.map((notification) => (
       <div
         key={notification.id}
         className={`rounded-xl transition-all duration-300 ${getNotificationColor(
@@ -246,7 +246,7 @@ export const UserNotification = ({
       </div>
 
       <div className="max-h-[500px] overflow-y-scroll space-y-3">
-        {notifications.data.length === 0 ? (
+        {notifications.notifications.length === 0 ? (
           <p className="text-center text-gray-500 py-8">No notifications</p>
         ) : (
           <NotificationList />

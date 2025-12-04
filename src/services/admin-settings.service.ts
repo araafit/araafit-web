@@ -83,12 +83,14 @@ export interface CreateStyleRequest {
   name: string;
   sizeConfigs: SizeConfigPayload[];
   files: File[];
+  sewingPrice?: number | string | null;
 }
 
 export interface UpdateStyleRequest {
   name?: string;
   sizeConfigs?: SizeConfigPayload[];
   files?: File[];
+  sewingPrice?: number | string | null;
 }
 
 export interface DressStyleImage {
@@ -128,6 +130,25 @@ export interface DressStyle {
       };
     };
   }>;
+}
+
+export interface StyleCostItem {
+  chartId: string;
+  chartName: string;
+  sizeLabel: string;
+  sizeChartEntryId: string;
+  fabricYards: number;
+  pricePerYard: number;
+  fabricCost: number;
+}
+
+export interface StyleCostResponse {
+  styleId: number;
+  fabricProductId: string;
+  measurementSetId?: string;
+  gender: "male" | "female";
+  items: StyleCostItem[];
+  message?: string;
 }
 
 export interface CreateDressStyleResponse {
@@ -396,6 +417,10 @@ class AdminSettingsService {
     formData.append("name", request.name);
     formData.append("sizeConfigs", JSON.stringify(request.sizeConfigs));
 
+    if (request.sewingPrice !== undefined && request.sewingPrice !== null && request.sewingPrice !== "") {
+      formData.append("sewingPrice", String(request.sewingPrice));
+    }
+
     request.files.forEach((file) => {
       formData.append("files", file);
     });
@@ -443,6 +468,10 @@ class AdminSettingsService {
       formData.append("sizeConfigs", JSON.stringify(request.sizeConfigs));
     }
 
+    if (request.sewingPrice !== undefined) {
+      formData.append("sewingPrice", request.sewingPrice === null ? "" : String(request.sewingPrice));
+    }
+
     if (request.files && request.files.length > 0) {
       request.files.forEach((file) => {
         formData.append("files", file);
@@ -460,6 +489,25 @@ class AdminSettingsService {
       }
     );
 
+    return response.data.data;
+  }
+
+  async getStyleCost(
+    styleId: number | string,
+    fabricProductId: string,
+    measurementSetId?: string
+  ): Promise<StyleCostResponse> {
+    const params = new URLSearchParams({
+      fabricProductId,
+    });
+    
+    if (measurementSetId && measurementSetId !== "__base__") {
+      params.append("measurementSetId", measurementSetId);
+    }
+
+    const response = await apiClient.get<ApiResponse<StyleCostResponse>>(
+      `/styles/${styleId}/cost?${params.toString()}`
+    );
     return response.data.data;
   }
 }

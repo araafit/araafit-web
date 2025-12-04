@@ -23,7 +23,9 @@ const NotificationToggle = ({
 }) => {
   return (
     <div
-      className="w-[32px] h-[20px] p-[2px] rounded-xl relative bg-primary-500 cursor-pointer"
+      className={`w-[32px] h-[20px] p-[2px] rounded-xl relative cursor-pointer transition-colors duration-300 ${
+        isToggled ? "bg-primary-500" : "bg-neutral-300"
+      }`}
       onClick={onClick}
     >
       <div
@@ -78,20 +80,22 @@ export default function Notification() {
   };
 
   useEffect(() => {
-    if (enabledInAppNotification.isSuccess) {
-      setNotifications({
-        ...notifications,
+    if (enabledInAppNotification.isSuccess && enabledInAppNotification.data) {
+      setNotifications((prev) => ({
+        ...prev,
         setInApp: enabledInAppNotification.data.receiveInAppNotifications,
-      });
+      }));
     }
+  }, [enabledInAppNotification.isSuccess, enabledInAppNotification.data]);
 
-    if (enableEmailNotification.isSuccess) {
-      setNotifications({
-        ...notifications,
+  useEffect(() => {
+    if (enableEmailNotification.isSuccess && enableEmailNotification.data) {
+      setNotifications((prev) => ({
+        ...prev,
         setEmail: enableEmailNotification.data.receiveEmailNotifications,
-      });
+      }));
     }
-  }, [enabledInAppNotification.isSuccess, enableEmailNotification.isSuccess]);
+  }, [enableEmailNotification.isSuccess, enableEmailNotification.data]);
 
   return (
     <div className="size-full bg-white py-5 px-8 rounded-md flex flex-col gap-6">

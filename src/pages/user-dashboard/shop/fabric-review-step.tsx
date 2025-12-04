@@ -4,14 +4,14 @@ import { ArrowLeftIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import { FabricRequestStepperLines } from "./fabric-request-stepper";
 import { useFabricRequestStore } from "../../../shared-hooks/state-store";
 import { useProduct } from "../../../hooks/user-dashboard.hooks";
-import { useDressStyle } from "../../../hooks/admin-settings.hooks";
+import { useDressStyle, useStyleCost } from "../../../hooks/admin-settings.hooks";
 import { useMeasurements } from "../../../hooks/measurements.hooks";
-import type { MeasurementSet } from "../../../services/measurements.service";
 import Spinner from "../../../shared-components/spinner";
 import { formatPrice } from "../../../utils/format-price";
 import Button from "../../../shared-components/button";
 import { useSewingRequestReview } from "../../../hooks/requests.hooks";
 import { useEffect } from "react";
+import { useFabricRequestContext } from "./use-fabric-request-context";
 
 /* ---------------------------------------------------------------------- */
 
@@ -20,6 +20,7 @@ export function DashboardFabricReviewStepPage() {
   const params = useParams<{ itemName: string }>();
   const rawParam = params.itemName || "";
   const navigate = useNavigate();
+  const { basePath } = useFabricRequestContext();
   const {
     fabricId,
     selectedImageUrl,
@@ -48,50 +49,52 @@ export function DashboardFabricReviewStepPage() {
     error: styleError,
   } = useDressStyle(selectedStyleId ? String(selectedStyleId) : "");
 
+  // For guest users, measurements might not be available - handle gracefully
+  // We can get gender from costData instead
   const {
     data: measurementsData,
     isLoading: isMeasurementsLoading,
-    isError: isMeasurementsError,
-    error: measurementsError,
   } = useMeasurements();
 
-  const measurementSets: MeasurementSet[] = useMemo(
-    () => measurementsData?.measurementSets ?? [],
-    [measurementsData]
+  // Fetch cost calculation from API
+  const {
+    data: costData,
+    isLoading: isCostLoading,
+    isError: isCostError,
+    error: costError,
+  } = useStyleCost(
+    selectedStyleId,
+    fabricId || "",
+    selectedMeasurementSetId
   );
 
-  const selectedMeasurementSet: MeasurementSet | null = useMemo(() => {
-    if (!selectedMeasurementSetId) return null;
-    if (selectedMeasurementSetId === "__base__") return null;
-    return (
-      measurementSets.find((s) => s.id === selectedMeasurementSetId) ?? null
-    );
-  }, [measurementSets, selectedMeasurementSetId]);
+  console.log("product", product);
+  console.log("style", style);
+  console.log("measurementsData", measurementsData);
+  console.log("costData", costData);
 
-  const assignedSize = selectedMeasurementSet?.assignedSize ?? null;
 
-  const matchedSizeConfig = useMemo(() => {
-    if (!style || !assignedSize?.entryId) return null;
-    return (
-      style.sizeChartEntries?.find(
-        (entry) => entry.sizeChartEntry.id === assignedSize.entryId
-      ) ?? null
-    );
-  }, [style, assignedSize]);
+  // Get cost data from API response (use first item if available)
+  const costItem = useMemo(() => {
+    if (!costData || costData.items.length === 0) return null;
+    return costData.items[0];
+  }, [costData]);
 
   const yardsNeeded = useMemo(() => {
-    if (!matchedSizeConfig) return null;
-    const n = Number(matchedSizeConfig.fabricYards);
-    if (!Number.isFinite(n) || n <= 0) return null;
-    return n.toFixed(0);
-  }, [matchedSizeConfig]);
+    if (!costItem) return null;
+    return costItem.fabricYards.toFixed(1);
+  }, [costItem]);
 
   const pricePerYard = useMemo(() => {
-    if (!product) return null;
-    const n = Number(product.pricePerYard ?? product.price ?? 0);
-    if (!Number.isFinite(n) || n <= 0) return null;
-    return n;
-  }, [product]);
+    if (!costItem) {
+      // Fallback to product price if no cost item
+      if (!product) return null;
+      const n = Number(product.pricePerYard ?? product.price ?? 0);
+      if (!Number.isFinite(n) || n <= 0) return null;
+      return n;
+    }
+    return costItem.pricePerYard;
+  }, [costItem, product]);
 
   const sewingPrice = useMemo(() => {
     if (!style) return null;
@@ -103,9 +106,13 @@ export function DashboardFabricReviewStepPage() {
   }, [style]);
 
   const fabricCost = useMemo(() => {
+    if (costItem) {
+      return costItem.fabricCost;
+    }
+    // Fallback calculation if no cost item
     if (!yardsNeeded || !pricePerYard) return null;
     return Number(yardsNeeded) * pricePerYard;
-  }, [yardsNeeded, pricePerYard]);
+  }, [costItem, yardsNeeded, pricePerYard]);
 
   const totalCost = useMemo(() => {
     const fabric = fabricCost ?? 0;
@@ -117,16 +124,18 @@ export function DashboardFabricReviewStepPage() {
 
   const [noteForTailor, setNoteForTailor] = useState("");
 
-  const isLoading = isProductLoading || isStyleLoading || isMeasurementsLoading;
+  const isLoading = isProductLoading || isStyleLoading || isMeasurementsLoading || isCostLoading;
 
-  const hasHardError = isProductError || isStyleError || isMeasurementsError;
+  // Only treat product/style/cost errors as fatal - measurements error is not critical
+  const hasHardError = isProductError || isStyleError || isCostError;
 
   useEffect(() => {
     if (
       !fabricId ||
       !selectedStyleId ||
       !selectedMeasurementSetId ||
-      !yardsNeeded
+      !yardsNeeded ||
+      hasSubmitted
     )
       return;
 
@@ -139,40 +148,43 @@ export function DashboardFabricReviewStepPage() {
       yardEstimate: yardsNeeded ? Number(yardsNeeded) : 0,
       noteForTailor: noteForTailor,
     });
-
-    if (requestReview.isSuccess) {
-      // console.log(requestReview.data.data.discountApplied);
-      setDiscount(requestReview.data.data.discountApplied);
-    }
   }, [
     fabricId,
     selectedMeasurementSetId,
     selectedStyleId,
     yardsNeeded,
     hasSubmitted,
+    noteForTailor,
+    requestReview,
   ]);
+
+  useEffect(() => {
+    if (requestReview.isSuccess && requestReview.data?.data?.discountApplied) {
+      setDiscount(requestReview.data.data.discountApplied);
+    }
+  }, [requestReview.isSuccess, requestReview.data, setDiscount]);
 
   // Guards: ensure previous steps completed
   if (!fabricId) {
     return (
-      <Navigate to={`/dashboard/shop/fabric/${rawParam}/request`} replace />
+      <Navigate to={`${basePath}/fabric/${rawParam}/request`} replace />
     );
   }
 
   if (!selectedStyleId) {
-    return <Navigate to={`/dashboard/shop/fabric/${rawParam}/style`} replace />;
+    return <Navigate to={`${basePath}/fabric/${rawParam}/style`} replace />;
   }
 
   if (!selectedMeasurementSetId) {
     return (
-      <Navigate to={`/dashboard/shop/fabric/${rawParam}/measurement`} replace />
+      <Navigate to={`${basePath}/fabric/${rawParam}/measurement`} replace />
     );
   }
 
   const handleContinue = () => {
     // Next: Checkout step
     navigate(
-      `/dashboard/shop/fabric/${rawParam}/checkout?fabricId=${fabricId}&selectedStyleId=${selectedStyleId}&selectedMeasurementSetId=${selectedMeasurementSetId}&yardsNeeded=${yardsNeeded}&gender=${measurementsData?.gender}&noteForTailor=${noteForTailor}&totalCost=${totalCost}`
+      `${basePath}/fabric/${rawParam}/checkout?fabricId=${fabricId}&selectedStyleId=${selectedStyleId}&selectedMeasurementSetId=${selectedMeasurementSetId}&yardsNeeded=${yardsNeeded}&gender=${costData?.gender || measurementsData?.gender || "female"}&noteForTailor=${noteForTailor}&totalCost=${totalCost}`
     );
   };
 
@@ -187,7 +199,7 @@ export function DashboardFabricReviewStepPage() {
             <button
               type="button"
               onClick={() =>
-                navigate(`/dashboard/shop/fabric/${rawParam}/measurement`)
+                navigate(`${basePath}/fabric/${rawParam}/measurement`)
               }
               className="inline-flex items-center justify-center w-9 h-9 rounded-md border border-neutral-200 text-neutral-700 hover:bg-neutral-50 transition-colors"
               title="Back button"
@@ -222,15 +234,15 @@ export function DashboardFabricReviewStepPage() {
                   ? productError.message
                   : styleError instanceof Error
                   ? styleError.message
-                  : measurementsError instanceof Error
-                  ? measurementsError.message
+                  : costError instanceof Error
+                  ? costError.message
                   : "Please go back and try again."}
               </p>
               <button
                 type="button"
                 className="px-4 py-2 rounded-md border border-neutral-200 text-sm text-neutral-700 hover:bg-neutral-50"
                 onClick={() =>
-                  navigate(`/dashboard/shop/fabric/${rawParam}/request`)
+                  navigate(`${basePath}/fabric/${rawParam}/request`)
                 }
               >
                 Back to start
@@ -336,7 +348,7 @@ export function DashboardFabricReviewStepPage() {
                       className="text-xs text-primary-600 hover:text-primary-700 underline"
                       onClick={() =>
                         navigate(
-                          `/dashboard/shop/fabric/${rawParam}/measurement`
+                          `${basePath}/fabric/${rawParam}/measurement`
                         )
                       }
                     >
@@ -344,18 +356,22 @@ export function DashboardFabricReviewStepPage() {
                     </button>
                   </div>
 
-                  {assignedSize ? (
+                  {costItem ? (
                     <p className="text-xs text-neutral-600">
                       Size for this request:{" "}
                       <span className="font-medium">
-                        {assignedSize.label} ({assignedSize.chartName})
+                        {costItem.sizeLabel} ({costItem.chartName})
                       </span>
+                    </p>
+                  ) : costData?.message ? (
+                    <p className="text-xs text-amber-600 flex items-center gap-1">
+                      <WarningCircleIcon size={14} />
+                      {costData.message}
                     </p>
                   ) : (
                     <p className="text-xs text-amber-600 flex items-center gap-1">
                       <WarningCircleIcon size={14} />
-                      This measurement set is not linked to a size entry yet, so
-                      we can&apos;t estimate fabric yards automatically.
+                      Unable to determine size and yardage for this measurement set.
                     </p>
                   )}
                 </div>
@@ -419,16 +435,15 @@ export function DashboardFabricReviewStepPage() {
                   </span>
                 </div>
 
-                {!yardsNeeded && (
+                {(!yardsNeeded || !costItem) && (
                   <p className="mt-1 text-[11px] text-amber-700 flex items-start gap-1">
                     <WarningCircleIcon
                       size={14}
                       className="mt-0.5 flex-shrink-0"
                     />
                     <span>
-                      We couldn&apos;t automatically map your measurement set to
-                      a size entry for this style. The yard estimate and fabric
-                      cost may need to be confirmed by an admin.
+                      {costData?.message ||
+                        "We couldn't automatically determine yardage and cost for this measurement set. Please contact support or try a different measurement set."}
                     </span>
                   </p>
                 )}

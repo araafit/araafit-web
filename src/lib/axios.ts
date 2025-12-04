@@ -270,10 +270,19 @@ apiClient.interceptors.response.use(
 
       // GUEST TOKEN LOGIC
       if (guestToken && !refreshToken) {
-        // console.log("Guest session expired");
+        // Don't redirect guest users if they're on shop routes - allow them to continue
+        // Only redirect if they're trying to access protected endpoints
+        const isShopRoute = currentPath.includes("/shop") || currentPath.startsWith("/shop");
+        if (!isShopRoute) {
+          // console.log("Guest session expired");
+          isRefreshing = false;
+          refreshAttempts = 0;
+          handleLogout("guest");
+          return Promise.reject(error);
+        }
+        // For shop routes, just reject the request without redirecting
         isRefreshing = false;
         refreshAttempts = 0;
-        handleLogout("guest");
         return Promise.reject(error);
       }
     }

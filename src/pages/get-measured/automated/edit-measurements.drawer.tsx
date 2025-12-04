@@ -134,11 +134,31 @@ export function EditMeasurementsDrawer({
       if (v === undefined || v === "") return true;
       const num = Number(v);
       return Number.isNaN(num) || num <= 0;
-    }) || updateMeasurements.isPending;
+    }) || (updateMeasurements.isPending && !onSave);
 
   const handleSubmit = async () => {
     if (isInvalid) return;
 
+    const updatedValues = {
+      bust: isMale ? undefined : Number(values.bust),
+      chest: isMale ? Number(values.chest) : undefined,
+      waist: Number(values.waist),
+      hips: isMale ? undefined : Number(values.hips),
+      height: Number(values.height),
+      skinTone: selectedSkinTone,
+      dressSize: !isMale && values.dressSize ? values.dressSize : undefined,
+      neck: values.neck ? Number(values.neck) : undefined,
+      shoulder: values.shoulder ? Number(values.shoulder) : undefined,
+    };
+
+    // If onSave callback is provided, use it (for guest users or local editing)
+    if (onSave) {
+      onSave(updatedValues);
+      setOpen(false);
+      return;
+    }
+
+    // Otherwise, update via API (for authenticated users)
     const payload: import("../../../services/measurements.service").UpdateMeasurementsRequest = {
       gender,
       waist: Number(values.waist),
@@ -165,20 +185,6 @@ export function EditMeasurementsDrawer({
 
     try {
       await updateMeasurements.mutateAsync(payload);
-      
-      // Call onSave callback with updated values
-      if (onSave) {
-        onSave({
-          bust: isMale ? undefined : Number(values.bust),
-          chest: isMale ? Number(values.chest) : undefined,
-          waist: Number(values.waist),
-          hips: isMale ? undefined : Number(values.hips),
-          height: Number(values.height),
-          skinTone: selectedSkinTone,
-          dressSize: !isMale && values.dressSize ? values.dressSize : undefined,
-        });
-      }
-      
       setOpen(false);
     } catch {
       // errors handled in hook
