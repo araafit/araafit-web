@@ -12,6 +12,8 @@ import type { CreateProductRequest } from "../../../services/admin-inventory.ser
 import AdminDashboardLayout from "../../../layouts/admin-dashboard/dashboard-layout";
 import Button from "../../../shared-components/button";
 import Spinner from "../../../shared-components/spinner";
+import showToast from "../../../utils/notification";
+import { notificationStyles } from "../../../style/custom";
 // import { TableButton } from "../../ui/button";
 import {
   Select,
@@ -142,7 +144,78 @@ export function AdminDashboardUploadInventory() {
     if (!e.target.files) return;
 
     const files = Array.from(e.target.files);
-    setContributorPhotos((prev) => [...prev, ...files]);
+    const maxFiles = 10;
+    const maxFileSize = 5 * 1024 * 1024; // 5MB per file
+    const allowedTypes = ["image/png", "image/jpg", "image/jpeg"];
+
+    // Check total file limit
+    const currentCount = contributorPhotos.length;
+    const availableSlots = maxFiles - currentCount;
+
+    if (availableSlots <= 0) {
+      showToast.error(`Maximum ${maxFiles} images allowed`, {
+        icon: null,
+        style: notificationStyles.alertError,
+      });
+      e.target.value = "";
+      return;
+    }
+
+    // Take only the files that fit within the limit
+    const filesToProcess = files.slice(0, availableSlots);
+
+    // Validate file types and sizes
+    const validFiles: File[] = [];
+    const rejectedFiles: string[] = [];
+
+    filesToProcess.forEach((file) => {
+      const isValidType = allowedTypes.includes(file.type);
+      const isValidSize = file.size <= maxFileSize;
+
+      if (!isValidType) {
+        rejectedFiles.push(`${file.name} (invalid file type)`);
+        return;
+      }
+
+      if (!isValidSize) {
+        rejectedFiles.push(
+          `${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB - max 5MB)`
+        );
+        return;
+      }
+
+      validFiles.push(file);
+    });
+
+    // Show warnings for rejected files
+    if (rejectedFiles.length > 0) {
+      showToast.error(
+        `${rejectedFiles.length} file(s) rejected: ${rejectedFiles.join(", ")}`,
+        {
+          icon: null,
+          style: notificationStyles.alertError,
+          duration: 5000,
+        }
+      );
+    }
+
+    // Warn if trying to add more files than available slots
+    if (files.length > availableSlots) {
+      showToast.error(
+        `Only ${availableSlots} file(s) can be added (limit: ${maxFiles} total)`,
+        {
+          icon: null,
+          style: notificationStyles.alertError,
+        }
+      );
+    }
+
+    if (validFiles.length > 0) {
+      setContributorPhotos((prev) => [...prev, ...validFiles]);
+    }
+
+    // Reset input value to allow re-uploading the same file if needed
+    e.target.value = "";
   };
 
   const handleDeleteImage = (index: number) => {
@@ -320,7 +393,7 @@ export function AdminDashboardUploadInventory() {
                     <span className="text-[#9A6C50]">Click to upload</span> or
                     drag and drop
                     <span className="block mt-2 text-[#888888] font-light text-sm">
-                      PNG, JPG (max. 800x400px)
+                      PNG, JPG, JPEG (max 5MB per file, up to 10 files)
                     </span>
                     {/* DividerWithText */}
                     <div className="flex items-center w-full my-7 gap-2">
