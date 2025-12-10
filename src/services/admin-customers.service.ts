@@ -28,10 +28,18 @@ export interface GetCustomersParams {
 }
 
 export interface GetCustomersResponse {
-  users: AdminCustomer[];
-  total: number;
-  page: number;
-  limit: number;
+  data: AdminCustomer[];
+  meta: {
+    itemsPerPage: number;
+    totalItems: number;
+    currentPage: number;
+    totalPages: number;
+    sortBy: string[];
+  };
+  links: {
+    current: string;
+    last: string;
+  };
 }
 
 export interface BlockCustomerRequest {
@@ -87,7 +95,9 @@ interface ApiResponse<T> {
 
 class AdminCustomersService {
   async getCustomerMetrics(): Promise<CustomerMetrics> {
-    const response = await apiClient.get<ApiResponse<CustomerMetrics>>("/customers/metrics");
+    const response = await apiClient.get<ApiResponse<CustomerMetrics>>(
+      "/customers/metrics"
+    );
     return response.data.data;
   }
 

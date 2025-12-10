@@ -96,8 +96,9 @@ export function DataTable() {
   } = useCustomers({ page: pagination.pageIndex + 1, limit: pagination.pageSize });
 
   const tableData = React.useMemo(() => {
+    console.log(customersData);
     return customersData
-      ? convertApiCustomersToTableFormat(customersData.users)
+      ? convertApiCustomersToTableFormat(customersData.data)
       : [];
   }, [customersData]);
 
@@ -116,10 +117,10 @@ export function DataTable() {
 
    // Update local state when prop changes
   React.useEffect(() => {
-   if (customersSuccess) {
-    setPageCount(customersData.total)
+   if (customersSuccess && customersData) {
+    setPageCount(customersData.meta.totalItems)
    }
-  }, [customersSuccess]);
+  }, [customersSuccess, customersData]);
 
   // React table
   const table = useReactTable({

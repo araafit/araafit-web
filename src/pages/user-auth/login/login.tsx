@@ -94,16 +94,6 @@ export default function Login({ userType }: LoginProps) {
             <input
               {...register("password", {
                 required: "password is required",
-                minLength: {
-                  value: 6,
-                  message: "Password must be at least 6 characters long",
-                },
-                pattern: {
-                  value:
-                    /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/,
-                  message:
-                    "Password must include letters, numbers, and special characters",
-                },
               })}
               type="password"
               className="p-4 border border-gray-300 rounded-[6px] focus:outline-none"

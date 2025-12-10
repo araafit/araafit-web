@@ -4,7 +4,7 @@ import {
   PlusIcon,
   TrashSimpleIcon,
 } from "@phosphor-icons/react";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Controller, useForm, type SubmitHandler } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { useCreateProduct } from "../../../hooks/admin-inventory.hooks";
@@ -84,6 +84,7 @@ export function AdminDashboardUploadInventory() {
     control,
     setValue,
     formState: { errors },
+    trigger,
   } = useForm<ProductFormData>({
     mode: "all",
     defaultValues: {
@@ -95,6 +96,47 @@ export function AdminDashboardUploadInventory() {
   });
 
   const category = watch("category");
+  const audience = watch("audience");
+  const name = watch("name");
+  const price = watch("price");
+  const pricePerYard = watch("pricePerYard");
+  const patternType = watch("patternType");
+  const totalSize = watch("totalSize");
+  
+  // Re-validate when category changes
+  useEffect(() => {
+    if (category === "dress") {
+      trigger(["price"]);
+    } else if (category === "fabric") {
+      trigger(["pricePerYard", "patternType", "totalSize"]);
+    }
+  }, [category, trigger]);
+  
+  // Validate form based on category using useMemo
+  const formIsValid = useMemo(() => {
+    // Basic required fields
+    const hasName = name?.trim().length >= 2;
+    const hasAudience = audience && audience.length > 0;
+    const hasFiles = contributorPhotos.length > 0;
+    
+    if (!hasName || !hasAudience || !hasFiles) {
+      return false;
+    }
+    
+    // Category-specific validation
+    if (category === "dress") {
+      const hasPrice = price !== undefined && price !== null && price > 0;
+      const hasSizeEntries = selectedSizeEntryIds.length > 0;
+      return hasPrice && hasSizeEntries;
+    } else if (category === "fabric") {
+      const hasPricePerYard = pricePerYard !== undefined && pricePerYard !== null && pricePerYard > 0;
+      const hasPatternType = patternType?.trim().length > 0;
+      const hasTotalSize = totalSize?.trim().length > 0;
+      return hasPricePerYard && hasPatternType && hasTotalSize;
+    }
+    
+    return false;
+  }, [name, audience, contributorPhotos.length, category, price, pricePerYard, patternType, totalSize, selectedSizeEntryIds.length]);
 
   const handlePhotosChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -207,9 +249,11 @@ export function AdminDashboardUploadInventory() {
                 <Button
                   icon={<PlusIcon className="size-[1.25rem] text-white" />}
                   variant="solid"
-                  disabled={createProductMutation.isPending}
+                  disabled={createProductMutation.isPending || !formIsValid}
                   onClick={handleSubmit(onSubmit)}
-                  className="text-white shadow-sm"
+                  className={`text-white shadow-sm ${
+                    !formIsValid ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                 >
                   <div className="w-full flex items-center justify-center gap-2">
                     <span>Add</span>
@@ -241,7 +285,14 @@ export function AdminDashboardUploadInventory() {
             {" "}
             <div className="w-full max-w-[448px] relative">
               {/* Upload Box */}
-              <div className="h-[298px] w-full px-6 flex flex-row justify-center items-center border border-dashed border-[#D0D5DD] rounded-[12px] bg-white">
+              <div className="mb-2">
+                <label className="block text-[#4F4F4F] font-light text-sm mb-2">
+                  Product Images <span className="text-red-500">*</span>
+                </label>
+              </div>
+              <div className={`h-[298px] w-full px-6 flex flex-row justify-center items-center border border-dashed rounded-[12px] bg-white ${
+                contributorPhotos.length === 0 ? "border-red-300" : "border-[#D0D5DD]"
+              }`}>
                 <input
                   type="file"
                   accept="image/png, image/jpg, image/jpeg"
@@ -288,6 +339,11 @@ export function AdminDashboardUploadInventory() {
                   </label>
                 )}
               </div>
+              {contributorPhotos.length === 0 && (
+                <p className="text-red-500 text-xs mt-1">
+                  At least one product image is required
+                </p>
+              )}
 
               {/* Previews */}
               {contributorPhotos.length > 0 && (
@@ -355,7 +411,7 @@ export function AdminDashboardUploadInventory() {
                 {/* Audience Selection */}
                 <div className="mb-4">
                   <label className="block text-[#4F4F4F] font-light text-sm mb-2">
-                    Audience
+                    Audience <span className="text-red-500">*</span>
                   </label>
                   <div className="flex items-center gap-12">
                     <GenderRadio
@@ -380,16 +436,21 @@ export function AdminDashboardUploadInventory() {
                       fieldWatch={watch}
                     />
                   </div>
+                  {(!audience || audience.length === 0) && (
+                    <p className="text-red-500 text-xs mt-1">
+                      Please select at least one audience
+                    </p>
+                  )}
                 </div>
 
                 {/* Product Name */}
                 <div className="mb-4">
-                  <label
-                    htmlFor="name"
-                    className="block text-[#4F4F4F] font-light text-sm mb-2"
-                  >
-                    Product Name
-                  </label>
+                    <label
+                      htmlFor="name"
+                      className="block text-[#4F4F4F] font-light text-sm mb-2"
+                    >
+                      Product Name <span className="text-red-500">*</span>
+                    </label>
                   <input
                     {...register("name", {
                       required: "Product name is required",
@@ -486,28 +547,58 @@ export function AdminDashboardUploadInventory() {
                         htmlFor="patternType"
                         className="block text-[#4F4F4F] font-light text-sm mb-2"
                       >
-                        Pattern Type
+                        Pattern Type <span className="text-red-500">*</span>
                       </label>
                       <input
-                        {...register("patternType")}
+                        {...register("patternType", {
+                          required: category === "fabric" ? "Pattern type is required" : false,
+                          validate: (value) => {
+                            if (category === "fabric" && (!value || value.trim().length === 0)) {
+                              return "Pattern type is required";
+                            }
+                            return true;
+                          },
+                        })}
                         type="text"
                         placeholder="e.g., Solid, Striped, Floral"
-                        className="h-14 w-full border border-[#D0D5DD] pl-2 rounded-lg outline-none focus:outline-none"
+                        className={`h-14 w-full border pl-2 rounded-lg outline-none focus:outline-none ${
+                          errors.patternType ? "border-red-300" : "border-[#D0D5DD]"
+                        }`}
                       />
+                      {errors.patternType && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {errors.patternType.message}
+                        </p>
+                      )}
                     </div>
                     <div className="flex-1">
                       <label
                         htmlFor="totalSize"
                         className="block text-[#4F4F4F] font-light text-sm mb-2"
                       >
-                        Total Size
+                        Total Size <span className="text-red-500">*</span>
                       </label>
                       <input
-                        {...register("totalSize")}
+                        {...register("totalSize", {
+                          required: category === "fabric" ? "Total size is required" : false,
+                          validate: (value) => {
+                            if (category === "fabric" && (!value || value.trim().length === 0)) {
+                              return "Total size is required";
+                            }
+                            return true;
+                          },
+                        })}
                         type="text"
                         placeholder="e.g., 5 yards, 10 meters"
-                        className="h-14 w-full border border-[#D0D5DD] pl-2 rounded-lg outline-none focus:outline-none"
+                        className={`h-14 w-full border pl-2 rounded-lg outline-none focus:outline-none ${
+                          errors.totalSize ? "border-red-300" : "border-[#D0D5DD]"
+                        }`}
                       />
+                      {errors.totalSize && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {errors.totalSize.message}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -534,10 +625,15 @@ export function AdminDashboardUploadInventory() {
               {/* Size Chart Entries - Only for Dresses */}
               {category === "dress" && (
                 <div className="bg-white rounded-[6px] py-6 px-4 mt-4">
-                  <h4 className="font-semibold">Size Chart Entries</h4>
+                  <h4 className="font-semibold">Size Chart Entries <span className="text-red-500">*</span></h4>
                   <p className="text-xs text-[#676767] mt-1">
                     Select multiple size charts and their entries that this dress supports.
                   </p>
+                  {selectedSizeEntryIds.length === 0 && (
+                    <p className="text-red-500 text-xs mt-1">
+                      At least one size chart entry is required
+                    </p>
+                  )}
 
                   <div className="flex gap-4 items-center mt-4">
                     <div className="w-[180px]">
@@ -722,14 +818,34 @@ export function AdminDashboardUploadInventory() {
                           htmlFor="price"
                           className="block text-[#4F4F4F] font-light text-sm mb-2"
                         >
-                          Price (₦)
+                          Price (₦) <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="number"
-                          {...register("price", { valueAsNumber: true })}
+                          {...register("price", {
+                            required: category === "dress" ? "Price is required" : false,
+                            valueAsNumber: true,
+                            min: {
+                              value: 0.01,
+                              message: "Price must be greater than 0",
+                            },
+                            validate: (value) => {
+                              if (category === "dress" && (value === undefined || value === null || value <= 0)) {
+                                return "Price is required and must be greater than 0";
+                              }
+                              return true;
+                            },
+                          })}
                           placeholder="Enter price"
-                          className="h-14 w-full font-light border border-[#D0D5DD] pl-2 rounded-lg outline-none focus:outline-none"
+                          className={`h-14 w-full font-light border pl-2 rounded-lg outline-none focus:outline-none ${
+                            errors.price ? "border-red-300" : "border-[#D0D5DD]"
+                          }`}
                         />
+                        {errors.price && (
+                          <p className="text-red-500 text-xs mt-1">
+                            {errors.price.message}
+                          </p>
+                        )}
                       </>
                     ) : (
                       <>
@@ -737,14 +853,34 @@ export function AdminDashboardUploadInventory() {
                           htmlFor="pricePerYard"
                           className="block text-[#4F4F4F] font-light text-sm mb-2"
                         >
-                          Price Per Yard (₦)
+                          Price Per Yard (₦) <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="number"
-                          {...register("pricePerYard", { valueAsNumber: true })}
+                          {...register("pricePerYard", {
+                            required: category === "fabric" ? "Price per yard is required" : false,
+                            valueAsNumber: true,
+                            min: {
+                              value: 0.01,
+                              message: "Price per yard must be greater than 0",
+                            },
+                            validate: (value) => {
+                              if (category === "fabric" && (value === undefined || value === null || value <= 0)) {
+                                return "Price per yard is required and must be greater than 0";
+                              }
+                              return true;
+                            },
+                          })}
                           placeholder="Enter price per yard"
-                          className="h-14 w-full font-light border border-[#D0D5DD] pl-2 rounded-lg outline-none focus:outline-none"
+                          className={`h-14 w-full font-light border pl-2 rounded-lg outline-none focus:outline-none ${
+                            errors.pricePerYard ? "border-red-300" : "border-[#D0D5DD]"
+                          }`}
                         />
+                        {errors.pricePerYard && (
+                          <p className="text-red-500 text-xs mt-1">
+                            {errors.pricePerYard.message}
+                          </p>
+                        )}
                       </>
                     )}
                   </div>

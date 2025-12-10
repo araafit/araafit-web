@@ -91,10 +91,6 @@ const AdminLogin = ({ userType }: LoginProps) => {
             <input
               {...register("password", {
                 required: "password is required",
-                minLength: {
-                  value: 6,
-                  message: "Password must be at least 6 characters long",
-                },
               })}
               type="password"
               className="p-4 border border-gray-300 rounded-[6px] focus:outline-none"

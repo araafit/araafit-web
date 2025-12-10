@@ -126,9 +126,26 @@ apiClient.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
+    const requestUrl = error.config?.url || "";
 
-    // Do not attempt refresh for auth endpoints
-    if (error.config?.url?.includes("/auth/")) {
+    // Do not attempt refresh for auth endpoints (both user and admin auth)
+    const isAuthEndpoint = 
+      requestUrl.includes("/auth/") || 
+      requestUrl.includes("/admin/login") ||
+      requestUrl.includes("/admin/forgot-password") ||
+      requestUrl.includes("/admin/reset-password");
+    
+    if (isAuthEndpoint) {
+      // For auth endpoints, reject immediately so mutation's onError can handle it
+      // But still show error toast if it's a 401
+      if (error.response?.status === 401 && !originalRequest._retry) {
+        const { data } = error.response;
+        showErrorOnce(data?.message || "Authentication failed", {
+          icon: null,
+          style: notificationStyles.alertError,
+          position: "top-right",
+        });
+      }
       return Promise.reject(error);
     }
 
@@ -299,6 +316,15 @@ apiClient.interceptors.response.use(
       switch (status) {
         case 400:
           showErrorOnce(data.message || "Invalid request", {
+            icon: null,
+            style: notificationStyles.alertError,
+            position: "top-right",
+          });
+          break;
+        case 401:
+          // 401 errors for non-auth endpoints (handled above for auth endpoints)
+          // This case handles 401s that weren't caught by token refresh logic
+          showErrorOnce(data?.message || "Unauthorized. Please login again.", {
             icon: null,
             style: notificationStyles.alertError,
             position: "top-right",
