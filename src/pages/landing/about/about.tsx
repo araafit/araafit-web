@@ -87,7 +87,7 @@ export default function About() {
                   <p>Thank you for trusting Araafit.</p>
 
                   <p>
-                    Feyisayo Faloye,
+                    Isi Atagamen,
                     <br /> Founder & CEO, Araafit
                   </p>
                 </div>
