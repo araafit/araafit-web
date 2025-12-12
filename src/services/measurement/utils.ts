@@ -244,9 +244,10 @@ export function calculateCircumference(width: number, depth: number): number {
 
 /**
  * Preprocess image for model input
+ * Note: Accepts Blob (including File) since browser-image-compression can return either
  */
 export async function preprocessImage(
-  image: File | HTMLImageElement | HTMLCanvasElement,
+  image: File | Blob | HTMLImageElement | HTMLCanvasElement,
   options: ImagePreprocessingOptions = DEFAULT_IMAGE_PREPROCESSING
 ): Promise<HTMLCanvasElement> {
   return new Promise((resolve, reject) => {
@@ -263,13 +264,17 @@ export async function preprocessImage(
 
       let sourceElement: HTMLImageElement | HTMLCanvasElement;
 
-      if (image instanceof File) {
+      // Check for Blob (which includes File since File extends Blob)
+      // This handles both File objects and Blob objects from image compression libraries
+      if (image instanceof Blob) {
         const img = new Image();
         img.onload = () => {
           processImageElement(img, canvas, ctx, options);
+          URL.revokeObjectURL(img.src); // Clean up the object URL
           resolve(canvas);
         };
         img.onerror = () => {
+          URL.revokeObjectURL(img.src); // Clean up the object URL
           reject(
             new MeasurementError(
               "Failed to load image file",
@@ -378,8 +383,8 @@ export function calculateAngle(
  * Validate input parameters
  */
 export function validateInput(
-  frontPhoto: File | HTMLImageElement | HTMLCanvasElement,
-  sidePhoto: File | HTMLImageElement | HTMLCanvasElement,
+  frontPhoto: File | Blob | HTMLImageElement | HTMLCanvasElement,
+  sidePhoto: File | Blob | HTMLImageElement | HTMLCanvasElement,
   heightInCm: number
 ): void {
   if (!frontPhoto || !sidePhoto) {

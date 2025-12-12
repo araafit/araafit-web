@@ -582,7 +582,7 @@ export function Confirmation() {
                 <p className="text-base md:text-lg font-medium text-neutral-700 mb-2">
                   {progress.stage}
                 </p>
-                <div className="w-full max-w-80 bg-neutral-200 rounded-full h-2">
+                <div className="w-full mx-auto max-w-80 bg-neutral-200 rounded-full h-2">
                   <div
                     className="bg-primary-500 h-2 rounded-full transition-all duration-300"
                     style={{ width: `${progress.progress * 100}%` }}
@@ -649,10 +649,10 @@ export function Confirmation() {
       <div className="w-full flex flex-col gap-5 items-center">
         <MeasurementStepperLines stepIndex={currentStep} />
 
-        <div className="w-full max-w-[51rem] flex flex-col gap-6 md:gap-8">
+        <div className="w-full max-w-[51rem] flex flex-col gap-6 md:gap-8 mx-auto">
           {/* Header */}
           <div className="text-center">
-            <h2 className="text-xl md:text-[2rem] text-[#1C1C1C] font-semibold mb-4">
+            <h2 className="text-xl md:text-[2rem] text-[#1C1C1C] font-semibold mb-4 mt-16">
               Measurement Summary
             </h2>
             <p className="text-neutral-500 font-inter text-sm md:text-lg">

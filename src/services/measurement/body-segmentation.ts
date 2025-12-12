@@ -130,7 +130,7 @@ export class BodySegmentationService {
    * Segment body in an image
    */
   async segmentBody(
-    image: File | HTMLImageElement | HTMLCanvasElement
+    image: File | Blob | HTMLImageElement | HTMLCanvasElement
   ): Promise<SegmentationResult> {
     if (!this.isInitialized || !this.segmenter) {
       throw new MeasurementError(
