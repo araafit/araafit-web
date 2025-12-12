@@ -61,6 +61,7 @@ import { DashboardFabricReviewStepPage } from "./user-dashboard/shop/fabric-revi
 import { DashboardFabricCheckoutStepPage } from "./user-dashboard/shop/fabric-checkout-step";
 import { OrderStatusProvider } from "./admin-dashboard/orders-management/table-status-context-provider";
 import GetMeasuredLayout from "../layouts/get-measured/get-measured-layout";
+import NotFound from "./not-found";
 
 /* -------------------------------------------------------------------------------------------------------- */
 
@@ -375,6 +376,10 @@ const pagesRoutes = createBrowserRouter([
         ],
       },
     ],
+  },
+  {
+    path: "*",
+    element: <NotFound />,
   },
 ]);
 
