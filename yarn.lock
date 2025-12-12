@@ -2194,6 +2194,13 @@ bresenham-zingl@^0.2.0:
   resolved "https://registry.npmjs.org/bresenham-zingl/-/bresenham-zingl-0.2.0.tgz"
   integrity sha512-vM4cFU/8LK1drpWRH71WDTNEfeMyRCPiwqOPOaH0Ji1gUDKgysN0HGU0juIszPv5JyACKR+eRYzaeUie9SZk9w==
 
+browser-image-compression@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/browser-image-compression/-/browser-image-compression-2.0.2.tgz#4d5ef8882e9e471d6d923715ceb9034499d14eaa"
+  integrity sha512-pBLlQyUf6yB8SmmngrcOw3EoS4RpQ1BcylI3T9Yqn7+4nrQTXJD4sJDe5ODnJdrvNMaio5OicFo75rDyJD2Ucw==
+  dependencies:
+    uzip "0.20201231.0"
+
 browserslist@^4.24.0, browserslist@^4.24.4:
   version "4.26.2"
   resolved "https://registry.npmjs.org/browserslist/-/browserslist-4.26.2.tgz"
