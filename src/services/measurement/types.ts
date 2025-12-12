@@ -12,9 +12,10 @@ export interface Landmark {
 }
 
 // Photo input for measurement analysis
+// Note: Accepts Blob (including File) since browser-image-compression can return either
 export interface PhotoInput {
-  frontPhoto: File | HTMLImageElement | HTMLCanvasElement;
-  sidePhoto: File | HTMLImageElement | HTMLCanvasElement;
+  frontPhoto: File | Blob | HTMLImageElement | HTMLCanvasElement;
+  sidePhoto: File | Blob | HTMLImageElement | HTMLCanvasElement;
   heightInCm: number;
 }
 
