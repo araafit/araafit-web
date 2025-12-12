@@ -3,11 +3,14 @@ import {
   CloudArrowUpIcon,
   XIcon,
   WarningIcon,
+  CameraIcon,
 } from "@phosphor-icons/react";
+import imageCompression from "browser-image-compression";
 import Button from "../../../shared-components/button";
 import { useGetMeasured } from "../context/get-measured-context";
 import { MeasurementStepperLines } from "../stepper-lines";
 import showToast from "../../../utils/notification";
+import { CameraModal } from "./camera-modal";
 
 /* ----------------------------------------------------------- */
 
@@ -27,30 +30,60 @@ export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
   const frontInputRef = useRef<HTMLInputElement>(null);
   const sideInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileSelect = (file: File, type: "front" | "side") => {
+  // Camera modal state
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [cameraType, setCameraType] = useState<"front" | "side">("front");
+
+  const handleFileSelect = async (file: File, type: "front" | "side") => {
     if (!file.type.startsWith("image/")) {
       alert("Please select an image file");
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      // 10MB limit
-      alert("File size must be less than 10MB");
+    if (file.size > 20 * 1024 * 1024) {
+      // 20MB limit for input files
+      alert("File size must be less than 20MB");
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const preview = e.target?.result as string;
-      if (type === "front") {
-        setFrontPhoto(file);
-        setFrontPreview(preview);
-      } else {
-        setSidePhoto(file);
-        setSidePreview(preview);
-      }
-    };
-    reader.readAsDataURL(file);
+    try {
+      // Compress image to max 4MB
+      const compressedFile = await imageCompression(file, {
+        maxSizeMB: 4,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+        fileType: "image/jpeg",
+      });
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const preview = e.target?.result as string;
+        if (type === "front") {
+          setFrontPhoto(compressedFile);
+          setFrontPreview(preview);
+        } else {
+          setSidePhoto(compressedFile);
+          setSidePreview(preview);
+        }
+      };
+      reader.readAsDataURL(compressedFile);
+    } catch (error) {
+      console.error("Image compression failed:", error);
+      alert("Failed to process image. Please try again.");
+    }
+  };
+
+  const openCamera = (type: "front" | "side") => {
+    setCameraType(type);
+    setIsCameraOpen(true);
+  };
+
+  const closeCamera = () => {
+    setIsCameraOpen(false);
+  };
+
+  const handleCameraCapture = (file: File) => {
+    handleFileSelect(file, cameraType);
   };
 
   const handleDrop = (e: React.DragEvent, type: "front" | "side") => {
@@ -136,7 +169,7 @@ export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
       </div>
 
       <div
-        className={`relative w-full h-[200px] md:h-[300px] border-2 border-dashed rounded-lg transition-all duration-200 ${
+        className={`relative w-full min-h-[300px] border-2 border-dashed rounded-lg transition-all duration-200 ${
           dragOver === type
             ? "border-primary-500 bg-primary-50"
             : photo
@@ -166,39 +199,48 @@ export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
             </div>
           </div>
         ) : (
-          <div
-            className="flex flex-col items-center justify-center h-full gap-3 md:gap-4 cursor-pointer p-4"
-            onClick={() =>
-              type === "front"
-                ? frontInputRef.current?.click()
-                : sideInputRef.current?.click()
-            }
-          >
-            <div className="flex items-center justify-center md:hidden size-[56px] bg-gray-100 rounded-full">
-              <CloudArrowUpIcon size={25} className="text-gray-600" />
-            </div>
-
-            <div className="hidden size-[56px] bg-gray-100 rounded-full md:flex items-center justify-center">
+          <div className="flex w-[300px] max-w-[90vw] flex-col items-center justify-center h-full gap-3 md:gap-4 p-4">
+            <div className="flex items-center justify-center size-[56px] bg-gray-100 rounded-full">
               <CloudArrowUpIcon size={25} className="text-gray-600" />
             </div>
 
             <div className="text-center">
               <p className="text-neutral-700 font-medium text-sm md:text-base">
-                Click to upload{" "}
-                <span className="text-[14px] font-light font-gray-600">
-                  or drag drop
-                </span>
+                Upload or take a photo
               </p>
+              <p className="text-xs text-gray-400 mt-1">PNG, JPG (max. 800x400px)</p>
+            </div>
 
-              {/* <p className="text-xs md:text-sm text-neutral-500 mt-1">
-                {description}
-              </p> */}
+            {/* Action buttons */}
+            <div className="flex flex-col items-center gap-3">
+              {/* Upload button */}
+              <button
+                type="button"
+                onClick={() =>
+                  type === "front"
+                    ? frontInputRef.current?.click()
+                    : sideInputRef.current?.click()
+                }
+                className="flex items-center gap-2 px-4 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-lg transition-colors text-sm font-medium"
+              >
+                <CloudArrowUpIcon size={18} />
+                <span>Upload</span>
+              </button>
 
-              <p className="text-xs text-gray-400">PNG, JPG (max. 800x400px)</p>
+              {/* Take photo button */}
+              <button
+                type="button"
+                onClick={() => openCamera(type)}
+                className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors text-sm font-medium"
+              >
+                <CameraIcon size={18} />
+                <span>Take Photo</span>
+              </button>
             </div>
           </div>
         )}
 
+        {/* Hidden file input for upload */}
         <input
           ref={type === "front" ? frontInputRef : sideInputRef}
           type="file"
@@ -313,6 +355,14 @@ export function PhotoUpload({ onPhotosUploaded }: PhotoUploadProps) {
           onClick={handleContinue}
         />
       </div>
+
+      {/* Camera Modal */}
+      <CameraModal
+        isOpen={isCameraOpen}
+        photoType={cameraType}
+        onCapture={handleCameraCapture}
+        onClose={closeCamera}
+      />
     </div>
   );
 }
