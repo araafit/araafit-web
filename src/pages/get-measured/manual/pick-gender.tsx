@@ -18,7 +18,7 @@ export function PickGender() {
 
   return (
     <section className="min-h-screen px-0 py-0 md:py-2 md:px-16 overflow-y-scroll relative">
-      <div className="w-full min-h-[809px] bg-white border rounded-md p-4 md:p-14 space-y-20">
+      <div className="w-full bg-white border rounded-md p-4 md:p-14 space-y-20">
         <div className="w-full flex items-center justify-center">
           <div>
             <h1 className="text-lg sm:text-[2rem] text-[#1C1C1C] font-semibold">

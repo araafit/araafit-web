@@ -166,7 +166,7 @@ export class PoseDetectorService {
    * Detect pose landmarks in an image
    */
   async detectPose(
-    image: File | HTMLImageElement | HTMLCanvasElement,
+    image: File | Blob | HTMLImageElement | HTMLCanvasElement,
     validateCriticalLandmarks = true
   ): Promise<{
     landmarks: Landmark[];
@@ -264,8 +264,8 @@ export class PoseDetectorService {
    * Detect poses in both front and side photos
    */
   async detectPosesInPhotos(
-    frontPhoto: File | HTMLImageElement | HTMLCanvasElement,
-    sidePhoto: File | HTMLImageElement | HTMLCanvasElement,
+    frontPhoto: File | Blob | HTMLImageElement | HTMLCanvasElement,
+    sidePhoto: File | Blob | HTMLImageElement | HTMLCanvasElement,
     progressCallback?: ProgressCallback
   ): Promise<{
     frontPose: {
