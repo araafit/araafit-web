@@ -169,7 +169,7 @@ export function DashboardCartCheckout() {
               onContinue={() => setCheckoutTab("payment-detail")}
             />
           ) : (
-            <CheckoutPaymentInfo redirectionLink={window.location.origin + "/dashboard/shop/all"} />
+            <CheckoutPaymentInfo redirectionLink={window.location.origin + "/dashboard/shop"} />
           )}
         </div>
       </div>
