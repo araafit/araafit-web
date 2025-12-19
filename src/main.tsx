@@ -8,6 +8,10 @@ import pagesRoutes from "./pages/routes";
 import "./style/index.css";
 import { Toaster } from "react-hot-toast";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { initGTM } from "./lib/gtm";
+
+// Initialize Google Tag Manager
+initGTM(import.meta.env.VITE_GTM_ID);
 
 /* ------------------------------------------------------------------------------------------ */
 
