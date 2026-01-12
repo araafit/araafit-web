@@ -8,6 +8,9 @@ import { useShopStore } from "../../shared-hooks/state-store";
 import SearchInput from "../../pages/user-dashboard/shop/components/search-input";
 import { useSearchParams } from "react-router-dom";
 
+// Import measurement set selector
+import MeasurementSetSelector from "../../pages/user-dashboard/shop/components/measurement-set-selector";
+
 /* ---------------------------------------------------------------------- */
 
 export interface TabShape {
@@ -155,6 +158,9 @@ const ShopTab = ({
 
         <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-6 w-full lg:w-auto">
           <SearchInput />
+          
+          {/* Measurement Set Selector */}
+          <MeasurementSetSelector />
 
           {/* <div className="flex items-center justify-between w-full lg:w-auto">
             <span className="text-neutral-500 whitespace-nowrap text-sm lg:text-base">

@@ -1,11 +1,11 @@
 import React from "react";
 import Button from "../../../../shared-components/button";
-import { PencilSimpleIcon } from "@phosphor-icons/react";
+import { CheckCircleIcon } from "@phosphor-icons/react";
 import araafitWatermark from "./araafit-watermark.png";
 import { useNavigate } from "react-router-dom";
 import { useMeasurements } from "../../../../hooks/measurements.hooks";
 import Spinner from "../../../../shared-components/spinner";
-import type { MeasurementMe } from "../../../../services/measurements.service";
+import type { MeasurementMe, MeasurementSet } from "../../../../services/measurements.service";
 import { NewMeasurementSetDrawer } from "./new-measurement-set.drawer";
 import { EditMeasurementSetDrawer } from "./edit-measurement-set.drawer";
 /* -------------------------------------------------------------- */
@@ -89,261 +89,228 @@ export default function Measurements() {
   const selectedSet =
     sets.find((set) => set.id === selectedSetId) || sets[0] || null;
 
-  const hasCompleteMeasurements =
-    !!base.bust &&
-    !!base.waist &&
-    !!base.hips &&
-    !!base.height &&
-    !!base.dressSize &&
-    !!base.skinTone;
+  // Format height helper
+  const formatHeight = (heightInches: number | null | undefined): string => {
+    if (!heightInches) return "--";
+    const feet = Math.floor(heightInches / 12);
+    const inches = heightInches % 12;
+    return `${feet}'${inches}"`;
+  };
 
-  // Format height from inches to feet and inches using the aggregated measurements
-  const feet = base.height ? Math.floor(base.height / 12) : 0;
-  const inches = base.height ? base.height % 12 : 0;
-  const formattedHeight = `${feet}'${inches}`;
+  // Get skintone from measurement set (if available) or base measurements
+  const getSetSkinTone = (set: MeasurementSet): string | null => {
+    return (set as any).skinTone || base.skinTone || null;
+  };
 
   return (
-    <div className="w-full bg-white py-6 px-6 lg:px-10 rounded-md flex flex-col items-center lg:items-start gap-6">
-      <div className="w-full max-w-5xl mx-auto">
-        <div className="flex flex-col items-center lg:items-start gap-2 lg:gap-3 mb-6">
+    <div className="w-full bg-white py-6 px-6 lg:px-10 rounded-md">
+      <div className="w-full max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
           <h5 className="text-[1.75rem] lg:text-[2rem] font-semibold">
-            Measurement Summary
+            Measurement Sets
           </h5>
-          {hasCompleteMeasurements ? (
-            <div className="w-full max-w-[30.125rem] flex justify-end bg-[#F6FEF9] text-[#15803c] text-[14px] border border-[#15803C] p-2 rounded-md mb-3">
-              <p>
-                We've successfully capture your measurement and detected your
-                skin tone.
-              </p>
-            </div>
-          ) : null}
-        </div>
-
-        {/* Aggregated (current) measurements summary */}
-        <div className="flex flex-col gap-4 lg:gap-5">
-          <div className="flex items justify-between">
-            <span className="font-medium text-[18px] text-neutral-950">
-              Current Measurements
-            </span>
-
-            <NewMeasurementSetDrawer
-              trigger={
-                <div className="flex items-center gap-2 font-light cursor-pointer">
-                  <PencilSimpleIcon />
-                  <span>Edit / Add set</span>
-                </div>
-              }
-            />
-          </div>
-
-          <div className="w-full flex flex-col gap-6" style={waterMarkStyle}>
-            <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
-              <span className="text-neutral-800 font-medium">Bust</span>
-              <span className="font-semibold text-neutral-950">
-                {base.bust ?? "--"}
-              </span>
-            </div>
-            <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
-              <span className="text-neutral-800 font-medium">Waist</span>
-              <span className="font-semibold text-neutral-950">
-                {base.waist ?? "--"}
-              </span>
-            </div>
-            <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
-              <span className="text-neutral-800 font-medium">Hips</span>
-              <span className="font-semibold text-neutral-950">
-                {base.hips ?? "--"}
-              </span>
-            </div>
-            <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
-              <span className="text-neutral-800 font-medium">Height</span>
-              <span className="font-semibold text-neutral-950">
-                {base.height ? formattedHeight : "--"}
-              </span>
-            </div>
-            <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
-              <span className="text-neutral-800 font-medium">Dress size</span>
-              <span className="font-semibold text-neutral-950">
-                {base.dressSize ?? "--"}
-              </span>
-            </div>
-            <div className="w-full flex items-center justify-between border-b-2 border-neutral-100 pb-2">
-              <span className="text-neutral-800 font-medium">Skin Tone</span>
-              <span
-                className="font-semibold text-neutral-950 capitalize size-[44px] rounded-md"
-                style={{
-                  backgroundColor:
-                    MANUAL_SKIN_TONES[base.skinTone || "deep"] || "#33251c",
-                }}
+          <NewMeasurementSetDrawer
+            trigger={
+              <Button
+                text="Add new set"
+                variant="solid"
+                className="text-sm bg-[#9A6C50] text-white hover:bg-[#7B523F]"
               />
-            </div>
-          </div>
+            }
+          />
         </div>
 
-        {/* Measurement sets list + selected set details */}
-        <div className="mt-8 flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <span className="font-medium text-[18px] text-neutral-950">
-              Measurement Sets
-            </span>
+        {sets.length === 0 ? (
+          <div className="text-center py-12 border border-neutral-200 rounded-lg">
+            <p className="text-sm text-neutral-500 mb-4">
+              You don&apos;t have any saved measurement sets yet.
+            </p>
             <NewMeasurementSetDrawer
               trigger={
                 <Button
-                  text="Add new set"
-                  variant="outline"
-                  className="text-sm"
+                  text="Create your first set"
+                  variant="solid"
+                  className="bg-[#9A6C50] text-white hover:bg-[#7B523F]"
                 />
               }
             />
           </div>
+        ) : (
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Left: Vertical Tabs List */}
+            <div className="w-full lg:w-80 flex-shrink-0">
+              <div className="space-y-2">
+                {sets.map((set) => {
+                  const isSelected = selectedSet?.id === set.id;
+                  
+                  return (
+                    <button
+                      key={set.id}
+                      type="button"
+                      onClick={() => setSelectedSetId(set.id)}
+                      className={`w-full text-left border-2 rounded-lg px-4 py-3 transition-all ${
+                        isSelected
+                          ? "border-[#9A6C50] bg-[#9A6C50]/10 shadow-sm"
+                          : "border-neutral-200 hover:border-[#9A6C50]/50 hover:bg-neutral-50"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className={`font-semibold ${
+                          isSelected ? "text-[#9A6C50]" : "text-neutral-900"
+                        }`}>
+                          {set.name || "Unnamed set"}
+                        </span>
+                        {isSelected && (
+                          <CheckCircleIcon
+                            size={16}
+                            weight="fill"
+                            className="text-[#9A6C50]"
+                          />
+                        )}
+                      </div>
+                      <p className="text-xs text-neutral-500">
+                        {set.gender?.toLowerCase() === "male" ? "Male" : "Female"}
+                        {" • "}
+                        {new Date(set.updatedAt).toLocaleDateString(undefined, {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
-          {sets.length === 0 ? (
-            <p className="text-sm text-neutral-500">
-              You don&apos;t have any saved measurement sets yet. Create one by
-              taking your measurements.
-            </p>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              {/* Selected set details - LEFT on desktop */}
-              <div className="lg:col-span-2 border border-neutral-100 rounded-md p-4 flex flex-col gap-4">
-                {!selectedSet ? (
+            {/* Right: Selected Set Details */}
+            <div className="flex-1">
+              {selectedSet ? (
+                <div
+                  className="border border-neutral-200 rounded-lg p-6"
+                  style={waterMarkStyle}
+                >
+                  <div className="flex items-start justify-between mb-6">
+                    <div>
+                      <h6 className="font-semibold text-xl text-neutral-900 mb-1">
+                        {selectedSet.name || "Unnamed set"}
+                      </h6>
+                      <p className="text-sm text-neutral-500">
+                        {selectedSet.gender?.toLowerCase() === "male"
+                          ? "Male"
+                          : "Female"}{" "}
+                        • Updated{" "}
+                        {new Date(selectedSet.updatedAt).toLocaleDateString(
+                          undefined,
+                          {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          }
+                        )}
+                      </p>
+                    </div>
+
+                    <EditMeasurementSetDrawer
+                      measurementSet={selectedSet}
+                      trigger={
+                        <Button
+                          text="Edit set"
+                          variant="outline"
+                          className="text-sm h-9 px-4"
+                        />
+                      }
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-sm text-neutral-600">Chest / Bust</span>
+                      <span className="font-semibold text-neutral-950 text-lg">
+                        {selectedSet.chest ?? "--"}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-sm text-neutral-600">Waist</span>
+                      <span className="font-semibold text-neutral-950 text-lg">
+                        {selectedSet.waist ?? "--"}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-sm text-neutral-600">Hips</span>
+                      <span className="font-semibold text-neutral-950 text-lg">
+                        {selectedSet.hips ?? "--"}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-sm text-neutral-600">Height</span>
+                      <span className="font-semibold text-neutral-950 text-lg">
+                        {formatHeight(selectedSet.height)}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-sm text-neutral-600">Shoulder</span>
+                      <span className="font-semibold text-neutral-950 text-lg">
+                        {selectedSet.shoulder ?? "--"}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-sm text-neutral-600">Neck</span>
+                      <span className="font-semibold text-neutral-950 text-lg">
+                        {selectedSet.neck ?? "--"}
+                      </span>
+                    </div>
+                    {getSetSkinTone(selectedSet) && (
+                      <div className="flex flex-col gap-1">
+                        <span className="text-sm text-neutral-600">Skin Tone</span>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="w-10 h-10 rounded-md border border-neutral-300"
+                            style={{
+                              backgroundColor:
+                                MANUAL_SKIN_TONES[getSetSkinTone(selectedSet) || "deep"] ||
+                                "#33251c",
+                            }}
+                            title={getSetSkinTone(selectedSet) || ""}
+                          />
+                          <span className="text-sm font-medium text-neutral-700 capitalize">
+                            {getSetSkinTone(selectedSet)}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {selectedSet.sizeAssignments &&
+                    selectedSet.sizeAssignments.length > 0 && (
+                      <div className="pt-6 border-t border-neutral-200">
+                        <p className="text-sm font-medium text-neutral-700 mb-3">
+                          Size Assignments
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedSet.sizeAssignments.map((assignment) => (
+                            <span
+                              key={assignment.id}
+                              className="inline-flex items-center rounded-full border border-neutral-300 px-3 py-1.5 text-sm text-neutral-700 bg-neutral-50"
+                            >
+                              {assignment.chartName}: {assignment.label}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                </div>
+              ) : (
+                <div className="border border-neutral-200 rounded-lg p-12 text-center">
                   <p className="text-sm text-neutral-500">
                     Select a measurement set to view its details.
                   </p>
-                ) : (
-                  <>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h6 className="font-semibold text-neutral-900">
-                          {selectedSet.name || "Unnamed set"}
-                        </h6>
-                        <p className="text-xs text-neutral-500">
-                          {selectedSet.gender?.toLowerCase() === "male"
-                            ? "Male"
-                            : "Female"}{" "}
-                          • Updated{" "}
-                          {new Date(selectedSet.updatedAt).toLocaleDateString(
-                            undefined,
-                            {
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
-                            }
-                          )}
-                        </p>
-                      </div>
-
-                      <EditMeasurementSetDrawer
-                        measurementSet={selectedSet}
-                        trigger={
-                          <Button
-                            text="Edit set"
-                            variant="outline"
-                            className="text-xs h-8 px-3"
-                          />
-                        }
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div className="flex items-center justify-between border-b border-neutral-100 pb-1">
-                        <span className="text-neutral-700">Chest / Bust</span>
-                        <span className="font-semibold text-neutral-950">
-                          {selectedSet.chest ?? "--"}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between border-b border-neutral-100 pb-1">
-                        <span className="text-neutral-700">Waist</span>
-                        <span className="font-semibold text-neutral-950">
-                          {selectedSet.waist ?? "--"}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between border-b border-neutral-100 pb-1">
-                        <span className="text-neutral-700">Hips</span>
-                        <span className="font-semibold text-neutral-950">
-                          {selectedSet.hips ?? "--"}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between border-b border-neutral-100 pb-1">
-                        <span className="text-neutral-700">Height</span>
-                        <span className="font-semibold text-neutral-950">
-                          {selectedSet.height ?? "--"}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between border-b border-neutral-100 pb-1">
-                        <span className="text-neutral-700">Shoulder</span>
-                        <span className="font-semibold text-neutral-950">
-                          {selectedSet.shoulder ?? "--"}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between border-b border-neutral-100 pb-1">
-                        <span className="text-neutral-700">Neck</span>
-                        <span className="font-semibold text-neutral-950">
-                          {selectedSet.neck ?? "--"}
-                        </span>
-                      </div>
-                    </div>
-
-                    {selectedSet.sizeAssignments &&
-                      selectedSet.sizeAssignments.length > 0 && (
-                        <div className="mt-2">
-                          <p className="text-xs font-medium text-neutral-700 mb-1">
-                            Size assignments
-                          </p>
-                          <div className="flex flex-wrap gap-2">
-                            {selectedSet.sizeAssignments.map((assignment) => (
-                              <span
-                                key={assignment.id}
-                                className="inline-flex items-center rounded-full border border-neutral-200 px-2 py-1 text-[11px] text-neutral-700 bg-neutral-50"
-                              >
-                                {assignment.chartName}: {assignment.label}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                  </>
-                )}
-              </div>
-
-              {/* Sets list - RIGHT on desktop (vertical tabs) */}
-              <div className="space-y-2 lg:pl-2 lg:border-l lg:border-neutral-100">
-                {sets.map((set) => (
-                  <button
-                    key={set.id}
-                    type="button"
-                    onClick={() => setSelectedSetId(set.id)}
-                    className={`w-full text-left border rounded-md px-3 py-2 text-sm flex flex-col gap-1 ${
-                      selectedSet && selectedSet.id === set.id
-                        ? "border-primary-900 bg-primary-50"
-                        : "border-[#E8E8E8] hover:border-neutral-400"
-                    }`}
-                  >
-                    <span className="font-medium text-neutral-900">
-                      {set.name || "Unnamed set"}
-                    </span>
-                    <span className="text-xs text-neutral-500">
-                      {set.gender?.toLowerCase() === "male" ? "Male" : "Female"}
-                      {" • "}
-                      Updated{" "}
-                      {new Date(set.updatedAt).toLocaleDateString(undefined, {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </span>
-                    {set.assignedSize && (
-                      <span className="text-xs text-neutral-600">
-                        Primary size: {set.assignedSize.label} (
-                        {set.assignedSize.chartName})
-                      </span>
-                    )}
-                  </button>
-                ))}
-              </div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

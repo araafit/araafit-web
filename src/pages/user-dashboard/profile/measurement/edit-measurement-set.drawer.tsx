@@ -14,6 +14,7 @@ import {
   useUpdateMeasurements,
   useMeasurements,
 } from "../../../../hooks/measurements.hooks";
+import { useSkinTonesList } from "../../../../hooks/admin-settings.hooks";
 import type {
   Gender,
   MeasurementSet,
@@ -36,9 +37,11 @@ export function EditMeasurementSetDrawer({
   );
   const [name, setName] = React.useState(measurementSet.name || "");
   const [values, setValues] = React.useState<Record<string, string>>({});
+  const [skinTone, setSkinTone] = React.useState<string>("");
 
   const updateMeasurements = useUpdateMeasurements();
   const { data: me } = useMeasurements();
+  const { data: skinTones } = useSkinTonesList();
 
   // Prefill when opened
   React.useEffect(() => {
@@ -76,6 +79,10 @@ export function EditMeasurementSetDrawer({
     setValues(initial);
     setGender(isMale ? "male" : "female");
     setName(measurementSet.name || "");
+    
+    // Initialize skintone from measurementSet (if available) or base measurements
+    const setSkinToneValue = (measurementSet as any).skinTone || me?.measurements?.skinTone || "";
+    setSkinTone(setSkinToneValue);
   }, [open, measurementSet, me]);
 
   const requiredFields =
@@ -141,6 +148,10 @@ export function EditMeasurementSetDrawer({
     }
     if (values.shoulder) {
       payload.shoulder = Number(values.shoulder);
+    }
+
+    if (skinTone.trim()) {
+      payload.skinTone = skinTone.trim();
     }
 
     try {
@@ -213,6 +224,27 @@ export function EditMeasurementSetDrawer({
                 >
                   {g}
                 </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Skin Tone */}
+          <div className="space-y-2">
+            <span className="text-sm text-[#676767]">Skin Tone</span>
+            <div className="grid grid-cols-3 gap-2">
+              {(skinTones ?? []).map((tone) => (
+                <button
+                  key={tone.name}
+                  type="button"
+                  onClick={() => setSkinTone(tone.name)}
+                  className={`h-10 rounded-md border transition-colors ${
+                    skinTone === tone.name
+                      ? "border-[#1C1C1C] ring-2 ring-neutral-700"
+                      : "border-[#D0D5DD] hover:border-neutral-500"
+                  }`}
+                  style={{ backgroundColor: tone.hex }}
+                  title={tone.name}
+                />
               ))}
             </div>
           </div>

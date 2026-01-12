@@ -1,5 +1,6 @@
 import { useProducts } from "../../hooks/user-dashboard.hooks";
 import { useSearch } from "../../pages/user-dashboard/shop/context/search-context";
+import { useShopFiltersSafe } from "../../pages/user-dashboard/shop/context/shop-filters-context";
 import Card from "../card";
 import type { Product } from "../../services/products.service";
 import LoaderView from "../../layouts/user-dashboard/loader";
@@ -15,6 +16,7 @@ export default function AllItems({
   userPage: "shop" | "dashboard";
 }) {
   const { debouncedSearchQuery } = useSearch();
+  const { selectedMeasurementSetId, selectedSkinTone } = useShopFiltersSafe();
   const {
     data: productsData,
     isLoading,
@@ -23,6 +25,8 @@ export default function AllItems({
   } = useProducts({
     limit: 20,
     search: debouncedSearchQuery || undefined,
+    measurementSetId: selectedMeasurementSetId || undefined,
+    skinTone: selectedSkinTone || undefined,
     // No category filter - show all products
   });
 

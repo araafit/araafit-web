@@ -1,5 +1,6 @@
 import { useProducts } from "../../../hooks/user-dashboard.hooks";
 import { useSearch } from "./context/search-context";
+import { useShopFilters } from "./context/shop-filters-context";
 import { type Product } from "../../../services/products.service";
 import LoaderView from "../../../layouts/user-dashboard/loader";
 import Card from "../../../shared-components/card";
@@ -8,6 +9,7 @@ import Card from "../../../shared-components/card";
 
 export function KidsShop() {
   const { debouncedSearchQuery } = useSearch();
+  const { selectedMeasurementSetId, selectedSkinTone } = useShopFilters();
   const {
     data: productsData,
     isLoading,
@@ -17,6 +19,8 @@ export function KidsShop() {
     limit: 20,
     search: debouncedSearchQuery || undefined,
     category: "dress",
+    measurementSetId: selectedMeasurementSetId || undefined,
+    skinTone: selectedSkinTone || undefined,
   });
 
   const products = productsData?.products || [];
