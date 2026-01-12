@@ -13,7 +13,7 @@ import Button from "../../../shared-components/button";
  */
 export default function About() {
   const navigate = useNavigate();
-  
+
   const handleGetMeasured = () => {
     navigate("/get-measured");
   };
@@ -51,7 +51,7 @@ export default function About() {
               <img
                 src={ceoImage}
                 alt="Araafit CEO"
-                className="w-full max-w-[300px] h-full scale-x-[-1]"
+                className="w-full max-w-[300px] h-full"
               />
 
               <figcaption>
