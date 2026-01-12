@@ -81,6 +81,8 @@ export interface ProductsQueryParams {
   limit?: number;
   audience?: Audience;
   search?: string;
+  measurementSetId?: string;
+  skinTone?: string;
 }
 
 export interface ApiResponse<T> {
@@ -117,6 +119,8 @@ export const productsService = {
       if (params.audience)
         queryString.append("audience", params.audience.toString());
       if (params.search) queryString.append("search", params.search);
+      if (params.measurementSetId) queryString.append("measurementSetId", params.measurementSetId);
+      if (params.skinTone) queryString.append("skinTone", params.skinTone);
 
       const url = `/products${
         queryString.toString() ? `?${queryString.toString()}` : ""
