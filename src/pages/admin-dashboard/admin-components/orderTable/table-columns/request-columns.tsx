@@ -14,10 +14,10 @@ export type RequestTablesType =
   | "approved"
   | "sewing"
   | "packaged"
-  | "out-for-delivery"
+  | "out_for_delivery"
   | "delivered"
   | "complete"
-  | "canceled";
+  | "cancelled";
 
 export const requestTableColumn: (
   tableLabel?: RequestTablesType
@@ -99,7 +99,7 @@ export const requestTableColumn: (
                 : "bg-gray-100 text-gray-600"
             }`}
           >
-            {status}
+            {style?.label || status}
           </div>
         );
       },

@@ -12,8 +12,8 @@ import {
   SewingTab,
   OutForDeliveryTab,
   DeliveredTab,
-  CompletedTab,
-  CanceledTab,
+  CompleteTab,
+  CancelledTab,
 } from "../admin-components/orderTable/requests-table-tabs";
 /* -------------------------------------------------------------------------------------------------------- */
 
@@ -66,7 +66,7 @@ const Requests = () => {
           </TabsContent>
 
           <TabsContent
-            value="out-for-delivery"
+            value="out_for_delivery"
             className="relative flex flex-col gap-4 overflow-auto"
           >
             <OutForDeliveryTab />
@@ -80,17 +80,17 @@ const Requests = () => {
           </TabsContent>
 
           <TabsContent
-            value="completed"
+            value="complete"
             className="relative flex flex-col gap-4 overflow-auto"
           >
-            <CompletedTab />
+            <CompleteTab />
           </TabsContent>
 
           <TabsContent
-            value="canceled"
+            value="cancelled"
             className="relative flex flex-col gap-4 overflow-auto"
           >
-            <CanceledTab />
+            <CancelledTab />
           </TabsContent>
         </Tabs>
       </div>

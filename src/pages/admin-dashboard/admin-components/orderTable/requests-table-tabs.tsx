@@ -106,10 +106,10 @@ export const DeliveredTab = () => (
   <RequestsStatusTab status="delivered" tableLabel="delivered" />
 );
 
-export const CompletedTab = () => (
-  <RequestsStatusTab status="completed" tableLabel="complete" />
+export const CompleteTab = () => (
+  <RequestsStatusTab status="complete" tableLabel="complete" />
 );
 
-export const CanceledTab = () => (
-  <RequestsStatusTab status="canceled" tableLabel="canceled" />
+export const CancelledTab = () => (
+  <RequestsStatusTab status="cancelled" tableLabel="cancelled" />
 );

@@ -34,6 +34,7 @@ export function DashboardOrderDetailPage() {
         case "packaging":
           return "bg-[#E0E7FF] text-[#3730A3]";
         case "out for delivery":
+        case "out_for_delivery":
           return "bg-[#EFF4FF] text-[#3B76F6]";
         case "delivered":
           return "bg-[#D1FAE5] text-[#065F46]";

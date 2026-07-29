@@ -85,6 +85,10 @@ export const getStatusColorClasses = (status: string) => {
       textColor: "text-[#2563EB]",
       bgColor: "bg-[#EFF4FF]",
     },
+    out_for_delivery: {
+      textColor: "text-[#2563EB]",
+      bgColor: "bg-[#EFF4FF]",
+    },
     delivered: {
       textColor: "text-[#059669]",
       bgColor: "bg-[#ECFDF8]",
@@ -93,7 +97,7 @@ export const getStatusColorClasses = (status: string) => {
       textColor: "text-[#475569]",
       bgColor: "bg-[#F1F5F9]",
     },
-    canceled: {
+    cancelled: {
       textColor: "text-[#DC2626]",
       bgColor: "bg-[#FEE2E2]",
     },

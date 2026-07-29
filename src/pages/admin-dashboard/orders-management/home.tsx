@@ -40,8 +40,8 @@ const ordersTableStatus = [
     style: "bg-[#E0F2FE] text-[#0EA5E9]",
   },
   {
-    label: "out-for-delivery",
-    value: "out for delivery",
+    label: "out for delivery",
+    value: "out_for_delivery",
     style: "bg-[#EFF4FF] text-[#2563EB]",
   },
   {
@@ -55,8 +55,8 @@ const ordersTableStatus = [
     style: "bg-[#F1F5F9] text-[#475569]",
   },
   {
-    label: "canceled",
-    value: "canceled",
+    label: "cancelled",
+    value: "cancelled",
     style: "bg-[#FEE2E2] text-[#991B1B]",
   },
   // {
@@ -80,8 +80,8 @@ const requestsTableStatus = [
   },
   { label: "sewing", value: "sewing", style: "bg-[#F0FAFF] text-[#0EA5E9]" },
   {
-    label: "out-for-delivery",
-    value: "out for delivery",
+    label: "out for delivery",
+    value: "out_for_delivery",
     style: "bg-[#EFF4FF] text-[#2563EB]",
   },
   {
@@ -95,8 +95,8 @@ const requestsTableStatus = [
     style: "bg-[#F1F5F9] text-[#475569]",
   },
   {
-    label: "canceled",
-    value: "canceled",
+    label: "cancelled",
+    value: "cancelled",
     style: "bg-[#FEE2E2] text-[#991B1B]",
   },
   // {

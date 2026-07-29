@@ -72,7 +72,7 @@ export const ActionCell: React.FC<{ row: Row<z.infer<typeof schema>> }> =
               });
             }}
           >
-            {status.status}
+            {status.label}
           </DropdownMenuItem>
         )),
       [isUpdating, row.original.orderId]
@@ -140,7 +140,7 @@ export const ActionCell: React.FC<{ row: Row<z.infer<typeof schema>> }> =
             }
 
             {row.original.status !== "Pending" &&
-              row.original.status !== "Canceled" && (
+              row.original.status.toLowerCase() !== "cancelled" && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild  onClick={(e) => e.stopPropagation()}>
                     <TableButton
@@ -223,8 +223,8 @@ export const ActionCell: React.FC<{ row: Row<z.infer<typeof schema>> }> =
           </div>
 
           {/* <DrawerFooter className="border-t border-[#E8E8E8] h-32"></DrawerFooter> */}
-          {row.original.status !== "Complete" &&
-            row.original.status !== "Canceled" && (
+          {row.original.status.toLowerCase() !== "complete" &&
+            row.original.status.toLowerCase() !== "cancelled" && (
               <div className="border-t border-[#E8E8E8] p-4 h-24 bg-white flex justify-center items-center gap-3 sticky bottom-0">
                 {row.original.status === "Pending" && (
                   <>

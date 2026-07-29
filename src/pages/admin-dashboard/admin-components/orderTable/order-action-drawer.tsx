@@ -69,7 +69,7 @@ export const ActionComponent: React.FC<{
             });
           }}
         >
-          {status.status}
+          {status.label}
         </DropdownMenuItem>
       )),
     [isUpdating, row.original.orderId]
@@ -190,7 +190,7 @@ export const ActionComponent: React.FC<{
           </div>
 
           {row.original.status !== "Pending" &&
-            row.original.status !== "Canceled" && (
+            row.original.status.toLowerCase() !== "cancelled" && (
               <DropdownMenu>
                 <DropdownMenuTrigger
                   asChild
@@ -231,8 +231,8 @@ export const ActionComponent: React.FC<{
         </div>
 
         {/* <DrawerFooter className="border-t border-[#E8E8E8] h-32"></DrawerFooter> */}
-        {row.original.status !== "Complete" &&
-          row.original.status !== "Canceled" && (
+        {row.original.status.toLowerCase() !== "complete" &&
+          row.original.status.toLowerCase() !== "cancelled" && (
             <div className="border-t border-[#E8E8E8] p-4 h-24 bg-white flex justify-center items-center gap-3 sticky bottom-0">
               {row.original.status === "Pending" && (
                 <>

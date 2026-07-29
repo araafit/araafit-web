@@ -89,6 +89,6 @@ export const OutForDeliveryTab = () =>  (<OrderStatusTab tableLabel="out-for-del
 
 export const DeliveredTab = () =>  (<OrderStatusTab tableLabel="delivered" status="delivered" />);
 
-export const CompleteTab = () =>  (<OrderStatusTab tableLabel="complete" status="completed" />);
+export const CompleteTab = () =>  (<OrderStatusTab tableLabel="complete" status="complete" />);
 
-export const CanceledTab = () =>  (<OrderStatusTab tableLabel="canceled" status="canceled" />);
+export const CancelledTab = () =>  (<OrderStatusTab tableLabel="cancelled" status="cancelled" />);

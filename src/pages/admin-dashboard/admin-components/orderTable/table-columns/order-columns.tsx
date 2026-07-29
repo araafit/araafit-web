@@ -16,10 +16,10 @@ export type OrderTablesType =
   | "pending"
   | "approved"
   | "packaged"
-  | "out-for-delivery"
+  | "out_for_delivery"
   | "delivered"
   | "complete"
-  | "canceled";
+  | "cancelled";
 
 export const orderTableColumn: (
   tableLabel?: OrderTablesType
@@ -105,7 +105,7 @@ export const orderTableColumn: (
                 : "bg-gray-100 text-gray-600"
             }`}
           >
-            {status}
+            {style?.label || status}
           </div>
         );
       },

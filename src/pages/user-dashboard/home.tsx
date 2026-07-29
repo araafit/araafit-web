@@ -72,7 +72,7 @@ export function DashboardHomePage() {
           ? "bg-[#F0FAFF] text-[#0EA5E9]"
           : status === "packaging"
           ? "bg-[#FFF7ED] text-[#EA580C]"
-          : status === "out for delivery"
+          : status === "out for delivery" || status === "out_for_delivery"
           ? "bg-[#EFF4FF] text-[#3B76F6]"
           : "bg-gray-100 text-gray-600"
       }`}

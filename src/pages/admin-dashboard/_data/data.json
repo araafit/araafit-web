@@ -48,7 +48,7 @@
     "id": 6,
     "header": "Capabilities",
     "type": "Narrative",
-    "status": "Complete",
+    "status": "complete",
     "target": "20",
     "limit": "8",
     "reviewer": "Jamik Tashpulatov"
@@ -56,8 +56,8 @@
   {
     "id": 7,
     "header": "Integration with existing systems",
-    "type": "Canceled",
-    "status": "Canceled",
+    "type": "Cancelled",
+    "status": "cancelled",
     "target": "19",
     "limit": "21",
     "reviewer": "Jamik Tashpulatov"
@@ -65,8 +65,8 @@
   {
     "id": 8,
     "header": "Innovation and Advantages",
-    "type": "Canceled",
-    "status": "Canceled",
+    "type": "Cancelled",
+    "status": "cancelled",
     "target": "25",
     "limit": "26",
     "reviewer": "Assign reviewer"
@@ -75,7 +75,7 @@
     "id": 9,
     "header": "Overview of EMR's Innovative Solutions",
     "type": "Technical content",
-    "status": "Complete",
+    "status": "complete",
     "target": "7",
     "limit": "23",
     "reviewer": "Assign reviewer"

@@ -13,7 +13,7 @@ import {
   OutForDeliveryTab,
   DeliveredTab,
   CompleteTab,
-  CanceledTab,
+  CancelledTab,
 } from "../admin-components/orderTable/order-table-tabs";
 
 /* --------------------------------------------------------------------------------------------- */
@@ -65,7 +65,7 @@ const Orders = () => {
           </TabsContent>
 
           <TabsContent
-            value="out-for-delivery"
+            value="out_for_delivery"
             className="relative flex flex-col gap-4 overflow-auto"
           >
             <OutForDeliveryTab />
@@ -86,10 +86,10 @@ const Orders = () => {
           </TabsContent>
 
           <TabsContent
-            value="canceled"
+            value="cancelled"
             className="relative flex flex-col gap-4 overflow-auto"
           >
-            <CanceledTab />
+            <CancelledTab />
           </TabsContent>
         </Tabs>
       </div>
