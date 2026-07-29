@@ -85,7 +85,7 @@ export const ApprovedTab = () =>  (<OrderStatusTab tableLabel="approved" status=
 
 export const PackagingTab = () =>  (<OrderStatusTab tableLabel="packaged" status="packaging" />);
 
-export const OutForDeliveryTab = () =>  (<OrderStatusTab tableLabel="out-for-delivery" status="out_for_delivery" />);
+export const OutForDeliveryTab = () =>  (<OrderStatusTab tableLabel="out_for_delivery" status="out_for_delivery" />);
 
 export const DeliveredTab = () =>  (<OrderStatusTab tableLabel="delivered" status="delivered" />);
 

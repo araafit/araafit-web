@@ -99,7 +99,7 @@ export const PackagingTab = () => (
 );
 
 export const OutForDeliveryTab = () => (
-  <RequestsStatusTab status="out_for_delivery" tableLabel="out-for-delivery" />
+  <RequestsStatusTab status="out_for_delivery" tableLabel="out_for_delivery" />
 );
 
 export const DeliveredTab = () => (
